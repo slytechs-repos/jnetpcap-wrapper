@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: org.jnetpcap.test.LibpcapApiTest
--------------------------------------------------------------------------------
-Tests run: 53, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0.391 s - in org.jnetpcap.test.LibpcapApiTest

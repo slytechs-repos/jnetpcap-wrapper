@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"m":"org.jnetpcap","l":"org.jnetpcap"},{"m":"org.jnetpcap","l":"org.jnetpcap.constant"},{"m":"org.jnetpcap","l":"org.jnetpcap.util"},{"m":"org.jnetpcap","l":"org.jnetpcap.windows"}];updateSearchResults();
