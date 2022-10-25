@@ -57,6 +57,7 @@ import org.jnetpcap.constant.PcapDirection;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapTStampPrecision;
 import org.jnetpcap.constant.PcapTstampType;
+import org.jnetpcap.util.NetIp4Address;
 import org.jnetpcap.util.PcapPacketRef;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -933,14 +934,10 @@ class LibpcapApiTest extends AbstractTestBase {
 	void testLookupNet() throws PcapException {
 		String firstDevice = Pcap.findAllDevs().get(0).name();
 
-		int[] networkIpAndMask = Pcap.lookupNet(firstDevice);
+		NetIp4Address ipAddress = Pcap.lookupNet(firstDevice);
 
-		final int RETURN_ARRAY_LENGTH = 2;
-
-		assertEquals(RETURN_ARRAY_LENGTH, networkIpAndMask.length, "invalid return array length");
-
-		final int IP4_ADDRESS = networkIpAndMask[0];
-		final int IP4_NETMAKS = networkIpAndMask[1];
+		final int IP4_ADDRESS = ipAddress.address();
+		final int IP4_NETMAKS = ipAddress.netmask();
 
 		assertTrue(IP4_ADDRESS > 0, "invalid ip address");
 		assertTrue(IP4_NETMAKS > 0, "invalid ip netmask");

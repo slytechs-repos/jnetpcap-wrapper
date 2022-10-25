@@ -43,6 +43,7 @@ import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.internal.PcapStatRecord;
+import org.jnetpcap.util.NetIp4Address;
 import org.jnetpcap.util.PcapPacketRef;
 import org.jnetpcap.util.PcapReceiver;
 
@@ -322,12 +323,11 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * bpf_u_int32 pointers.
 	 *
 	 * @param device the network device name
-	 * @return array containing network address (array index 0) and netmask (array
-	 *         index 1) as 32 bit integer
+	 * @return A netmasked IPv4 address
 	 * @throws PcapException any LibpcapApi errors
 	 * @since libpcap 0.4
 	 */
-	public static int[] lookupNet(String device) throws PcapException {
+	public static NetIp4Address lookupNet(String device) throws PcapException {
 		try (var scope = newScope()) {
 			MemorySegment pTop1 = scope.allocate(ADDRESS);
 			MemorySegment pTop2 = scope.allocate(ADDRESS);
@@ -337,12 +337,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			int code = pcap_lookupnet.invokeInt(dev, pTop1, pTop2, errbuf);
 			PcapException.throwIfNotOk(code, () -> errbuf.getUtf8String(0));
 
-			int[] result = new int[] {
-					pTop1.get(ValueLayout.JAVA_INT, 0),
-					pTop2.get(ValueLayout.JAVA_INT, 0),
-			};
+			int address = pTop1.get(ValueLayout.JAVA_INT, 0);
+			int netmask = pTop2.get(ValueLayout.JAVA_INT, 0);
 
-			return result;
+			return new NetIp4Address(address, netmask);
 		}
 
 	}
