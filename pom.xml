@@ -1,0 +1,132 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.jnetpcap</groupId>
+	<artifactId>jnetpcap</artifactId>
+	<version>2.0.0-preview.1</version>
+	<name>jNetPcap Binding</name>
+	<description>jNetPcap a libpcap java wrapper.</description>
+	<url>https://jnetpcap.com</url>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<id>markbe</id>
+			<name>Mark Bednarczyk</name>
+			<email>mark@slytechs.com</email>
+		</developer>
+	</developers>
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>3.10.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.5.2</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.junit.platform/junit-platform-suite-api -->
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-suite-api</artifactId>
+			<version>1.9.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.10.1</version>
+				<configuration>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+					<release>${jdk.version}</release>
+					<enablePreview>true</enablePreview>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.7.1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.4.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<source>${jdk.version}</source>
+							<additionalOptions>
+								${java.preview}
+							</additionalOptions>
+							<show>public</show>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Unit test the API -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M7</version>
+				<configuration>
+					<skipAfterFailureCount>1</skipAfterFailureCount>
+					<reuseForks>true</reuseForks>
+					<groups>${groups}</groups>
+					<excludedGroups>${excludeGroups}</excludedGroups>
+					<argLine>
+						${java.librarypath.libpcap} ${java.preview} ${java.native}
+					</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>3.0.0-M7</version>
+			</plugin>
+		</plugins>
+	</reporting>
+	<organization>
+		<name>Sly Technologies Inc</name>
+		<url>http://slytechs.com</url>
+	</organization>
+	<properties>
+		<jdk.version>19</jdk.version>
+		<java.librarypath.libpcap.linux64>-Djava.library.path=/usr/lib/x86_64-linux-gnu</java.librarypath.libpcap.linux64>
+
+		<java.preview>--enable-preview</java.preview>
+
+		<java.native>--enable-native-access=ALL-UNNAMED</java.native>
+		<java.librarypath.libpcap>${java.librarypath.libpcap.linux64}</java.librarypath.libpcap>
+		
+		<groups>user-permission</groups>
+		<excludeGroups>windows-api|unix-api|linux-api</excludeGroups>
+	</properties>
+</project>
