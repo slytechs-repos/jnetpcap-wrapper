@@ -25,7 +25,7 @@ For now, deployment and is done using Maven2 repositories
 <dependency>
     <groupId>org.jnetpcap</groupId>
     <artifactId>jnetpcap</artifactId>
-    <version>2.0.0-preview.1</version>
+    <version>2.0.0-alpha.1</version>
 </dependency>
 ```
 ## Related Modules
