@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="org.jnetpcap.test.LibpcapApiTest" time="0.391" tests="53" errors="0" skipped="1" failures="0">
+  <properties>
+    <property name="java.specification.version" value="19"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/home/mark/eclipse-workspace/jnet/jnetpcap/target/test-classes:/home/mark/eclipse-workspace/jnet/jnetpcap/target/classes:/home/mark/.m2/repository/org/apache/maven/plugins/maven-compiler-plugin/3.10.1/maven-compiler-plugin-3.10.1.jar:/home/mark/.m2/repository/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar:/home/mark/.m2/repository/commons-io/commons-io/2.6/commons-io-2.6.jar:/home/mark/.m2/repository/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-java/1.1.1/plexus-java-1.1.1.jar:/home/mark/.m2/repository/org/ow2/asm/asm/9.2/asm-9.2.jar:/home/mark/.m2/repository/com/thoughtworks/qdox/qdox/2.0.1/qdox-2.0.1.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-compiler-api/2.11.1/plexus-compiler-api-2.11.1.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-utils/3.4.1/plexus-utils-3.4.1.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-compiler-manager/2.11.1/plexus-compiler-manager-2.11.1.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-compiler-javac/2.11.1/plexus-compiler-javac-2.11.1.jar:/home/mark/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.5.2/junit-jupiter-api-5.5.2.jar:/home/mark/.m2/repository/org/apiguardian/apiguardian-api/1.1.0/apiguardian-api-1.1.0.jar:/home/mark/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/home/mark/.m2/repository/org/junit/platform/junit-platform-commons/1.5.2/junit-platform-commons-1.5.2.jar:/home/mark/.m2/repository/org/junit/platform/junit-platform-suite-api/1.9.1/junit-platform-suite-api-1.9.1.jar:"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="os.name" value="Linux"/>
+    <property name="java.vm.specification.version" value="19"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="/usr/lib/jvm/jdk-19/lib"/>
+    <property name="sun.java.command" value="/home/mark/eclipse-workspace/jnet/jnetpcap/target/surefire/surefirebooter-20221024191145074_3.jar /home/mark/eclipse-workspace/jnet/jnetpcap/target/surefire 2022-10-24T19-11-44_764-jvmRun1 surefire-20221024191145074_1tmp surefire_0-20221024191145074_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/home/mark/eclipse-workspace/jnet/jnetpcap/target/test-classes:/home/mark/eclipse-workspace/jnet/jnetpcap/target/classes:/home/mark/.m2/repository/org/apache/maven/plugins/maven-compiler-plugin/3.10.1/maven-compiler-plugin-3.10.1.jar:/home/mark/.m2/repository/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar:/home/mark/.m2/repository/commons-io/commons-io/2.6/commons-io-2.6.jar:/home/mark/.m2/repository/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-java/1.1.1/plexus-java-1.1.1.jar:/home/mark/.m2/repository/org/ow2/asm/asm/9.2/asm-9.2.jar:/home/mark/.m2/repository/com/thoughtworks/qdox/qdox/2.0.1/qdox-2.0.1.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-compiler-api/2.11.1/plexus-compiler-api-2.11.1.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-utils/3.4.1/plexus-utils-3.4.1.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-compiler-manager/2.11.1/plexus-compiler-manager-2.11.1.jar:/home/mark/.m2/repository/org/codehaus/plexus/plexus-compiler-javac/2.11.1/plexus-compiler-javac-2.11.1.jar:/home/mark/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.5.2/junit-jupiter-api-5.5.2.jar:/home/mark/.m2/repository/org/apiguardian/apiguardian-api/1.1.0/apiguardian-api-1.1.0.jar:/home/mark/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/home/mark/.m2/repository/org/junit/platform/junit-platform-commons/1.5.2/junit-platform-commons-1.5.2.jar:/home/mark/.m2/repository/org/junit/platform/junit-platform-suite-api/1.9.1/junit-platform-suite-api-1.9.1.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/home/mark"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2022-09-20"/>
+    <property name="java.home" value="/usr/lib/jvm/jdk-19"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/home/mark/eclipse-workspace/jnet/jnetpcap"/>
+    <property name="style.color" value="always"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="surefire.real.class.path" value="/home/mark/eclipse-workspace/jnet/jnetpcap/target/surefire/surefirebooter-20221024191145074_3.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="19+36-2238"/>
+    <property name="user.name" value="mark"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="5.15.0-50-generic"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="localRepository" value="/home/mark/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/tmp"/>
+    <property name="java.version" value="19"/>
+    <property name="user.dir" value="/home/mark/eclipse-workspace/jnet/jnetpcap"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/usr/lib/x86_64-linux-gnu"/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="19+36-2238"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="63.0"/>
+  </properties>
+  <testcase name="testClose_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.185"/>
+  <testcase name="testMajorVersion_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.005"/>
+  <testcase name="testDispatch_PcapDumper_OfflineHandle(TestInfo)" classname="org.jnetpcap.test.LibpcapApiTest" time="0.011"/>
+  <testcase name="testLoop_OfRawPacket_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testListTstampTypes" classname="org.jnetpcap.test.LibpcapApiTest" time="0.01"/>
+  <testcase name="testMinorVersion" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testStrerror" classname="org.jnetpcap.test.LibpcapApiTest" time="0.004"/>
+  <testcase name="testNextEx_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.005"/>
+  <testcase name="testIsSwapped_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.003"/>
+  <testcase name="testSetNonBlock" classname="org.jnetpcap.test.LibpcapApiTest" time="0.027"/>
+  <testcase name="testStatusToStr" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testDatalinkValToName" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testSetTstampType" classname="org.jnetpcap.test.LibpcapApiTest" time="0.005"/>
+  <testcase name="testOrder" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testInit" classname="org.jnetpcap.test.LibpcapApiTest" time="0.003"/>
+  <testcase name="testLoop_OfArray_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.004"/>
+  <testcase name="testFindAllDevs" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testLoadNativePcapLibrary" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testLibVersion" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testGetDefaultMissingSymbolsPolicy" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testDispatch_OfArray_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testLoop_PcapDumper_OfflineHandle(TestInfo)" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testSetBufferSize" classname="org.jnetpcap.test.LibpcapApiTest" time="0.003"/>
+  <testcase name="testNext_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testGeterr_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.004"/>
+  <testcase name="testSetSnaplen" classname="org.jnetpcap.test.LibpcapApiTest" time="0.003"/>
+  <testcase name="testOpenDead" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testDispatch_PacketSource_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testOfflineFilter" classname="org.jnetpcap.test.LibpcapApiTest" time="0.005"/>
+  <testcase name="testDumpOpen_OfflineHandle(TestInfo)" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testDispatch_OfRawPacket_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testClose_DeadHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testListDataLinks" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testDatalinkValToDescription" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testSetFilter" classname="org.jnetpcap.test.LibpcapApiTest" time="0.004"/>
+  <testcase name="testSetTimeout" classname="org.jnetpcap.test.LibpcapApiTest" time="0.003"/>
+  <testcase name="testFreeCode_PcapCompile_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testCompile_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testSetTstampPrecision" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testSetImmediateMode" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testLoop_PacketSource_OfflineHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testCompileNoPcap" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testDatalinkNameToVal" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testCompileWithNetmask_DeadHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testBreakloop_offlineCapture" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testCompile_DeadHandle" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testBreakloop_deadCapture" classname="org.jnetpcap.test.LibpcapApiTest" time="0">
+    <skipped message="void org.jnetpcap.test.LibpcapApiTest.testBreakloop_deadCapture() throws org.jnetpcap.PcapException is @Disabled"/>
+  </testcase>
+  <testcase name="testLookupDev" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testLookupNet" classname="org.jnetpcap.test.LibpcapApiTest" time="0.004"/>
+  <testcase name="testOpenOffline" classname="org.jnetpcap.test.LibpcapApiTest" time="0.001"/>
+  <testcase name="testOpenDeadWithTstampPrecision" classname="org.jnetpcap.test.LibpcapApiTest" time="0.002"/>
+  <testcase name="testSetPromisc" classname="org.jnetpcap.test.LibpcapApiTest" time="0.003"/>
+  <testcase name="testSetRfmon" classname="org.jnetpcap.test.LibpcapApiTest" time="0.003"/>
+</testsuite>
