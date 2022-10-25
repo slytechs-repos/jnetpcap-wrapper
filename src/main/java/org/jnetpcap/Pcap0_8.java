@@ -50,7 +50,7 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	protected static class Unix0_8 {
 
 		/**
-		 * @see {@full int pcap_get_selectable_fd(pcap_t *p);}
+		 * @see {@code int pcap_get_selectable_fd(pcap_t *p);}
 		 * @since libpcap 1.8 (Unix only)
 		 */
 		private static final PcapForeignDowncall pcap_get_selectable_fd;
@@ -62,30 +62,30 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 		}
 
 		/**
-		 * Checks if the {@full Pcap} subclass at a specific <em>libpcap API
+		 * Checks if the {@code Pcap} subclass at a specific <em>libpcap API
 		 * version</em> is natively supported. This is a safe method to use anytime on
 		 * any platform, weather native library is present or not.
 		 * 
 		 * <p>
-		 * For example, {@full Pcap1_0.isSupported()} will accurately ascertain if
+		 * For example, {@code Pcap1_0.isSupported()} will accurately ascertain if
 		 * libpcap API version 1.0 level calls are supported by the system runtime. Also
-		 * a call such as {@full WinPcap.isSupported()} will determine if WinPcap
+		 * a call such as {@code WinPcap.isSupported()} will determine if WinPcap
 		 * related calls, ie. native WinPcap 4.1.3 or less, are supported and by
 		 * extension if this is a Microsoft Windows platform.
 		 * </p>
 		 * <p>
 		 * Due to <em>libpcap API versioning</em>, it is safe to assume that if
-		 * {@full Pcap1_10.isSupported()} returns {@full true}, that at least
+		 * {@code Pcap1_10.isSupported()} returns {@code true}, that at least
 		 * <em>libpcap</em> API version 1.0 is installed on this platform, and that all
 		 * lower version calls such as libpcap 0.8 and 0.9 are available as well. The
 		 * subclass hierarchy of jNetPcap module reflects the versioning of libpcap and
 		 * its derivatives and the public releases of the native libraries. For example
-		 * {@full Npcap} class extends {@full WinPcap} class because <em>Npcap</em>
+		 * {@code Npcap} class extends {@code WinPcap} class because <em>Npcap</em>
 		 * project took over the support for <em>WinPcap</em> where it left off.
 		 * </p>
 		 * <p>
 		 * Implementation notes: The check is performed by verifying that certain,
-		 * subclass specific native symbols were linked with {@full Pcap} full which was
+		 * subclass specific native symbols were linked with {@code Pcap} full which was
 		 * introduced at a specific libpcap or related API levels.
 		 * </p>
 		 *
@@ -100,62 +100,62 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	}
 
 	/**
-	 * @see {@full void pcap_breakloop(pcap_t *p)}
+	 * @see {@code void pcap_breakloop(pcap_t *p)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_breakloop;
 
 	/**
-	 * @see {@full const char *pcap_datalink_val_to_name(int dlt)}
+	 * @see {@code const char *pcap_datalink_val_to_name(int dlt)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_datalink_val_to_name;
 
 	/**
-	 * @see {@full const char *pcap_datalink_val_to_description(int dlt)}
+	 * @see {@code const char *pcap_datalink_val_to_description(int dlt)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_datalink_val_to_description;
 
 	/**
-	 * @see {@full int pcap_next_ex (pcap_t *p, struct pcap_pkthdr **pkt_header,
+	 * @see {@code int pcap_next_ex (pcap_t *p, struct pcap_pkthdr **pkt_header,
 	 *      const u_char **pkt_data)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_next_ex;
 
 	/**
-	 * @see {@full int pcap_list_datalinks(pcap_t *p, int **dlt_buf)}
+	 * @see {@code int pcap_list_datalinks(pcap_t *p, int **dlt_buf)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_list_datalinks;
 
 	/**
-	 * @see {@full void pcap_free_datalinks(int *dlt_list)}
+	 * @see {@code void pcap_free_datalinks(int *dlt_list)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_free_datalinks;
 
 	/**
-	 * @see {@full int pcap_sendpacket(pcap_t *p, const u_char *buf, int size)}
+	 * @see {@code int pcap_sendpacket(pcap_t *p, const u_char *buf, int size)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_sendpacket;
 
 	/**
-	 * @see {@full int pcap_set_datalink(pcap_t *p, int dlt)}
+	 * @see {@code int pcap_set_datalink(pcap_t *p, int dlt)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_set_datalink;
 
 	/**
-	 * @see {@full int pcap_datalink_name_to_val(const char *name)}
+	 * @see {@code int pcap_datalink_name_to_val(const char *name)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_datalink_name_to_val;
 
 	/**
-	 * @see {@full const char *pcap_lib_version(void)}
+	 * @see {@code const char *pcap_lib_version(void)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_lib_version;
@@ -225,30 +225,30 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	}
 
 	/**
-	 * Checks if the {@full Pcap} subclass at a specific <em>libpcap API
+	 * Checks if the {@code Pcap} subclass at a specific <em>libpcap API
 	 * version</em> is natively supported. This is a safe method to use anytime on
 	 * any platform, weather native library is present or not.
 	 * 
 	 * <p>
-	 * For example, {@full Pcap1_0.isSupported()} will accurately ascertain if
+	 * For example, {@code Pcap1_0.isSupported()} will accurately ascertain if
 	 * libpcap API version 1.0 level calls are supported by the system runtime. Also
-	 * a call such as {@full WinPcap.isSupported()} will determine if WinPcap
+	 * a call such as {@code WinPcap.isSupported()} will determine if WinPcap
 	 * related calls, ie. native WinPcap 4.1.3 or less, are supported and by
 	 * extension if this is a Microsoft Windows platform.
 	 * </p>
 	 * <p>
 	 * Due to <em>libpcap API versioning</em>, it is safe to assume that if
-	 * {@full Pcap1_10.isSupported()} returns {@full true}, that at least
+	 * {@code Pcap1_10.isSupported()} returns {@code true}, that at least
 	 * <em>libpcap</em> API version 1.0 is installed on this platform, and that all
 	 * lower version calls such as libpcap 0.8 and 0.9 are available as well. The
 	 * subclass hierarchy of jNetPcap module reflects the versioning of libpcap and
 	 * its derivatives and the public releases of the native libraries. For example
-	 * {@full Npcap} class extends {@full WinPcap} class because <em>Npcap</em>
+	 * {@code Npcap} class extends {@code WinPcap} class because <em>Npcap</em>
 	 * project took over the support for <em>WinPcap</em> where it left off.
 	 * </p>
 	 * <p>
 	 * Implementation notes: The check is performed by verifying that certain,
-	 * subclass specific native symbols were linked with {@full Pcap} full which was
+	 * subclass specific native symbols were linked with {@code Pcap} full which was
 	 * introduced at a specific libpcap or related API levels.
 	 * </p>
 	 *
@@ -300,7 +300,7 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 * Open a device for capturing.
 	 * 
 	 * <p>
-	 * {@full openLive} is used to obtain a packet capture handle to look at packets
+	 * {@code openLive} is used to obtain a packet capture handle to look at packets
 	 * on the network. device is a string that specifies the network device to open;
 	 * on Linux systems with 2.2 or later kernels, a device argument of "any" or
 	 * NULL can be used to capture packets from all interfaces.
@@ -428,7 +428,7 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 *
 	 * @return the selectable fd
 	 * @throws PcapException the pcap exception
-	 * @see {@full int pcap_get_selectable_fd(pcap_t *p);}
+	 * @see {@code int pcap_get_selectable_fd(pcap_t *p);}
 	 * @since libpcap 1.8 (Unix only)
 	 */
 	protected int getSelectableFd() throws PcapException {

@@ -56,7 +56,7 @@ public interface PcapHandler {
 	}
 
 	/**
-	 * A safe {@full ByteBuffer} packet handler. This handler may receive packets
+	 * A safe {@code ByteBuffer} packet handler. This handler may receive packets
 	 * either by copy or scoped to a temporal existence.
 	 *
 	 * @param <U> the generic user type

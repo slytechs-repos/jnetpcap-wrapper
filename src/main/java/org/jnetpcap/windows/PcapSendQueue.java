@@ -32,7 +32,7 @@ import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 
 /**
- * A queue of raw packets that will be sent to the network with {@full transmit}
+ * A queue of raw packets that will be sent to the network with {@code transmit}
  * on Microsoft Windows platforms.
  * 
  * @author Sly Technologies Inc
@@ -67,26 +67,26 @@ public class PcapSendQueue implements AutoCloseable {
 	}
 
 	/**
-	 * @see {@full pcap_send_queue* pcap_sendqueue_alloc(u_int memsize)}
+	 * @see {@code pcap_send_queue* pcap_sendqueue_alloc(u_int memsize)}
 	 * @since WinPcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_sendqueue_alloc;
 
 	/**
-	 * @see {@full void pcap_sendqueue_destroy(pcap_send_queue* queue)}
+	 * @see {@code void pcap_sendqueue_destroy(pcap_send_queue* queue)}
 	 * @since WinPcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_sendqueue_destroy;
 
 	/**
-	 * @see {@full int pcap_sendqueue_queue(pcap_send_queue* queue, const struct
+	 * @see {@code int pcap_sendqueue_queue(pcap_send_queue* queue, const struct
 	 *      pcap_pkthdr *pkt_header, const u_char *pkt_data)}
 	 * @since WinPcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_sendqueue_queue;
 
 	/**
-	 * @see {@full u_int pcap_sendqueue_transmit(pcap_t *p, pcap_send_queue* queue,
+	 * @see {@code u_int pcap_sendqueue_transmit(pcap_t *p, pcap_send_queue* queue,
 	 *      int sync)}
 	 * @since WinPcap 1.0
 	 */

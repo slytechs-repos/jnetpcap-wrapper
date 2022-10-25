@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jnetpcap</groupId>
 	<artifactId>jnetpcap</artifactId>
-	<version>2.0.0-preview.1</version>
+	<version>2.0.0-alpha.1</version>
 	<name>jNetPcap Binding</name>
 	<description>jNetPcap a libpcap java wrapper.</description>
 	<url>https://jnetpcap.com</url>
@@ -54,7 +54,6 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
 				<configuration>
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>
@@ -65,12 +64,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.7.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.4.1</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -91,7 +88,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M7</version>
 				<configuration>
 					<skipAfterFailureCount>1</skipAfterFailureCount>
 					<reuseForks>true</reuseForks>
@@ -129,4 +125,13 @@
 		<groups>user-permission</groups>
 		<excludeGroups>windows-api|unix-api|linux-api</excludeGroups>
 	</properties>
+	<issueManagement>
+	  <system>Github Issue Tracking</system>
+	  <url>https://github.com/slytechs-repos/jnetpcap/issues</url>
+	</issueManagement>
+	<parent>
+	  <groupId>org.apache</groupId>
+	  <artifactId>apache</artifactId>
+	  <version>23</version>
+	</parent>
 </project>

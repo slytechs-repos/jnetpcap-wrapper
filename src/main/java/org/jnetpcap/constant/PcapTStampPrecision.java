@@ -71,7 +71,7 @@ public enum PcapTStampPrecision implements IntSupplier {
 
 	/**
 	 * Converts second and fraction components, as read from pcap header, to milli
-	 * seconds in epoch time suitable for use with java {@full Date} class.
+	 * seconds in epoch time suitable for use with java {@code Date} class.
 	 *
 	 * @param epochSeconds     the epoch seconds
 	 * @param fractionOfSecond the fraction of second

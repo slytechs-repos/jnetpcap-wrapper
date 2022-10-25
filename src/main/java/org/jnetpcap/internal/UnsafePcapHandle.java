@@ -72,7 +72,7 @@ public final class UnsafePcapHandle extends Pcap1_10 {
 	/**
 	 * Create a live capture handle.
 	 * 
-	 * {@full create} is used to create a packet capture handle to look at packets
+	 * {@code create} is used to create a packet capture handle to look at packets
 	 * on the network. source is a string that specifies the network device to open;
 	 * on Linux systems with 2.2 or later kernels, a source argument of "any" or
 	 * NULL can be used to capture packets from all interfaces. The returned handle

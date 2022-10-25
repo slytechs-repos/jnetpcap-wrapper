@@ -229,7 +229,7 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 
 	/**
 	 * Create ForeignDowncall from given signature. Function name must be part of
-	 * the signature. For example given this signature {@full "getpid()I;"} where
+	 * the signature. For example given this signature {@code "getpid()I;"} where
 	 * 'getpid' is the function name and will be used as a symbol to lookup the
 	 * native function.
 	 *

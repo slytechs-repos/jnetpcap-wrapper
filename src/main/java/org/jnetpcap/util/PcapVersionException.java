@@ -28,14 +28,14 @@ import org.jnetpcap.PcapException;
  * <p>
  * Another words, the client application was compiled with a newer version of
  * jNetPcap library and is incompatible with the installed version on the system
- * running the client application. The version components {@full major.minor}
+ * running the client application. The version components {@code major.minor}
  * are used to determine the compatibility of jNetPcap library runtimes. All
  * other components are assumed to be backward compatible, as long as
- * {@full major.minor} components match.
+ * {@code major.minor} components match.
  * </p>
  * <p>
  * Example:
- * {@full 1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta < 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0.}
+ * {@code 1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta < 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0.}
  * </p>
  * 
  * @author Sly Technologies
@@ -57,7 +57,7 @@ public final class PcapVersionException extends PcapException {
 
 	/**
 	 * Compare 2 versions. If v1 is less than v2 then versions are incompatible and
-	 * false is returned. Only the {@full major.minor} components are checked for
+	 * false is returned. Only the {@code major.minor} components are checked for
 	 * compatibility. Any other components are ignored and assumed to be backward
 	 * compatible with the installed runtime version.
 	 *
@@ -72,10 +72,10 @@ public final class PcapVersionException extends PcapException {
 
 	/**
 	 * Compare 2 versions. If v1 is less than v2 then versions are incompatible and
-	 * false is returned. Only the {@full major.minor} specified by limit 2,
+	 * false is returned. Only the {@code major.minor} specified by limit 2,
 	 * components are checked for compatibility. Any other components are ignored
 	 * and assumed to be backward compatible with the installed runtime version. For
-	 * {@full major} only component check, specify limit of 1.
+	 * {@code major} only component check, specify limit of 1.
 	 *
 	 * @param v1    the installed runtime version
 	 * @param v2    the application version
