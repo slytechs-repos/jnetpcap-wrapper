@@ -47,6 +47,7 @@ import org.jnetpcap.constant.PcapSrc;
 import org.jnetpcap.constant.PcapTStampPrecision;
 import org.jnetpcap.constant.PcapTstampType;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.util.NetIp4Address;
 import org.jnetpcap.util.PcapPacketRef;
 import org.jnetpcap.util.PcapVersionException;
 
@@ -203,7 +204,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		/**
 		 * Create a live capture handle.
 		 * 
-		 * {@full create} is used to create a packet capture handle to look at packets
+		 * {@code create} is used to create a packet capture handle to look at packets
 		 * on the network. source is a string that specifies the network device to open;
 		 * on Linux systems with 2.2 or later kernels, a source argument of "any" or
 		 * NULL can be used to capture packets from all interfaces. The returned handle
@@ -225,30 +226,30 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		}
 
 		/**
-		 * Checks if the {@full Pcap} subclass at a specific <em>libpcap API
+		 * Checks if the {@code Pcap} subclass at a specific <em>libpcap API
 		 * version</em> is natively supported. This is a safe method to use anytime on
 		 * any platform, weather native library is present or not.
 		 * 
 		 * <p>
-		 * For example, {@full Pcap1_0.isSupported()} will accurately ascertain if
+		 * For example, {@code Pcap1_0.isSupported()} will accurately ascertain if
 		 * libpcap API version 1.0 level calls are supported by the system runtime. Also
-		 * a call such as {@full WinPcap.isSupported()} will determine if WinPcap
+		 * a call such as {@code WinPcap.isSupported()} will determine if WinPcap
 		 * related calls, ie. native WinPcap 4.1.3 or less, are supported and by
 		 * extension if this is a Microsoft Windows platform.
 		 * </p>
 		 * <p>
 		 * Due to <em>libpcap API versioning</em>, it is safe to assume that if
-		 * {@full Pcap1_10.isSupported()} returns {@full true}, that at least
+		 * {@code Pcap1_10.isSupported()} returns {@code true}, that at least
 		 * <em>libpcap</em> API version 1.0 is installed on this platform, and that all
 		 * lower version calls such as libpcap 0.8 and 0.9 are available as well. The
 		 * subclass hierarchy of jNetPcap module reflects the versioning of libpcap and
 		 * its derivatives and the public releases of the native libraries. For example
-		 * {@full Npcap} class extends {@full WinPcap} class because <em>Npcap</em>
+		 * {@code Npcap} class extends {@code WinPcap} class because <em>Npcap</em>
 		 * project took over the support for <em>WinPcap</em> where it left off.
 		 * </p>
 		 * <p>
 		 * Implementation notes: The check is performed by verifying that certain,
-		 * subclass specific native symbols were linked with {@full Pcap} full which was
+		 * subclass specific native symbols were linked with {@code Pcap} full which was
 		 * introduced at a specific libpcap or related API levels.
 		 * </p>
 		 *
@@ -329,7 +330,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * Open a device for capturing.
 		 * 
 		 * <p>
-		 * {@full openLive} is used to obtain a packet capture handle to look at packets
+		 * {@code openLive} is used to obtain a packet capture handle to look at packets
 		 * on the network. device is a string that specifies the network device to open;
 		 * on Linux systems with 2.2 or later kernels, a device argument of "any" or
 		 * NULL can be used to capture packets from all interfaces.
@@ -390,7 +391,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * On network interface devices on Linux, pcap_set_protocol_linux() sets the
 		 * protocol to be used in the socket(2) call to create a capture socket when the
 		 * handle is activated. The argument is a link-layer protocol value, such as the
-		 * values in the {@full <linux/if_ether.h>} header file, specified in host byte
+		 * values in the {@code <linux/if_ether.h>} header file, specified in host byte
 		 * order. If protocol is non-zero, packets of that protocol will be captured
 		 * when the handle is activated, otherwise, all packets will be captured. This
 		 * function is only provided on Linux, and, if it is used on any device other
@@ -410,7 +411,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * @param protocol the protocol
 		 * @return the int
 		 * @throws PcapException the pcap exception
-		 * @see {@full int pcap_set_protocol_linux(pcap_t *, int)}
+		 * @see {@code int pcap_set_protocol_linux(pcap_t *, int)}
 		 * @since libpcap 0.9 (Linux only)
 		 */
 		@Override
@@ -427,7 +428,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		/**
 		 * Create a live capture handle.
 		 * 
-		 * {@full create} is used to create a packet capture handle to look at packets
+		 * {@code create} is used to create a packet capture handle to look at packets
 		 * on the network. source is a string that specifies the network device to open;
 		 * on Linux systems with 2.2 or later kernels, a source argument of "any" or
 		 * NULL can be used to capture packets from all interfaces. The returned handle
@@ -449,30 +450,30 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		}
 
 		/**
-		 * Checks if the {@full Pcap} subclass at a specific <em>libpcap API
+		 * Checks if the {@code Pcap} subclass at a specific <em>libpcap API
 		 * version</em> is natively supported. This is a safe method to use anytime on
 		 * any platform, weather native library is present or not.
 		 * 
 		 * <p>
-		 * For example, {@full Pcap1_0.isSupported()} will accurately ascertain if
+		 * For example, {@code Pcap1_0.isSupported()} will accurately ascertain if
 		 * libpcap API version 1.0 level calls are supported by the system runtime. Also
-		 * a call such as {@full WinPcap.isSupported()} will determine if WinPcap
+		 * a call such as {@code WinPcap.isSupported()} will determine if WinPcap
 		 * related calls, ie. native WinPcap 4.1.3 or less, are supported and by
 		 * extension if this is a Microsoft Windows platform.
 		 * </p>
 		 * <p>
 		 * Due to <em>libpcap API versioning</em>, it is safe to assume that if
-		 * {@full Pcap1_10.isSupported()} returns {@full true}, that at least
+		 * {@code Pcap1_10.isSupported()} returns {@code true}, that at least
 		 * <em>libpcap</em> API version 1.0 is installed on this platform, and that all
 		 * lower version calls such as libpcap 0.8 and 0.9 are available as well. The
 		 * subclass hierarchy of jNetPcap module reflects the versioning of libpcap and
 		 * its derivatives and the public releases of the native libraries. For example
-		 * {@full Npcap} class extends {@full WinPcap} class because <em>Npcap</em>
+		 * {@code Npcap} class extends {@code WinPcap} class because <em>Npcap</em>
 		 * project took over the support for <em>WinPcap</em> where it left off.
 		 * </p>
 		 * <p>
 		 * Implementation notes: The check is performed by verifying that certain,
-		 * subclass specific native symbols were linked with {@full Pcap} full which was
+		 * subclass specific native symbols were linked with {@code Pcap} full which was
 		 * introduced at a specific libpcap or related API levels.
 		 * </p>
 		 *
@@ -553,7 +554,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * Open a device for capturing.
 		 * 
 		 * <p>
-		 * {@full openLive} is used to obtain a packet capture handle to look at packets
+		 * {@code openLive} is used to obtain a packet capture handle to look at packets
 		 * on the network. device is a string that specifies the network device to open;
 		 * on Linux systems with 2.2 or later kernels, a device argument of "any" or
 		 * NULL can be used to capture packets from all interfaces.
@@ -626,9 +627,9 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	/**
 	 * Checks runtime version against application version of the java jNetPcap APIs.
 	 * <p>
-	 * For example {@full Pcap.checkPcapVersion(Pcap.VERSION)} when compiled, the
-	 * {@full Pcap.VERSION} will be stored in the application full as a constant and
-	 * then compared to the runtime {@full Pcap.VERSION}, also a constant. Both
+	 * For example {@code Pcap.checkPcapVersion(Pcap.VERSION)} when compiled, the
+	 * {@code Pcap.VERSION} will be stored in the application full as a constant and
+	 * then compared to the runtime {@code Pcap.VERSION}, also a constant. Both
 	 * runtime and application constants will be different as they are compiled at
 	 * different times and against, possibly, different versions of the pcap
 	 * libarary.
@@ -640,7 +641,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <p>
 	 * To check for compatibility with specific native library versions, you can
 	 * either use {@link Pcap#libVersion()} and do a compare, or try specific
-	 * {@full PcapX_Y.isSupported()} calls to get a boolean weather a particular
+	 * {@code PcapX_Y.isSupported()} calls to get a boolean weather a particular
 	 * subclass is supported. Support in version specific classes is done by
 	 * checking if a very specific to the version, native library symbol is found. A
 	 * missing symbol indicates that the native library is of lower version, which
@@ -656,7 +657,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 
 	/**
 	 * Compile a filter expression against a dead handle opened using
-	 * {@full openDead}.
+	 * {@code openDead}.
 	 * <p>
 	 * pcap_compile() is used to compile the string str into a filter program. See
 	 * pcap-filter(7) for the syntax of that string. fp is a pointer to a
@@ -707,7 +708,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	/**
 	 * Create a live capture handle.
 	 * 
-	 * {@full create} is used to create a packet capture handle to look at packets
+	 * {@code create} is used to create a packet capture handle to look at packets
 	 * on the network. source is a string that specifies the network device to open;
 	 * on Linux systems with 2.2 or later kernels, a source argument of "any" or
 	 * NULL can be used to capture packets from all interfaces. The returned handle
@@ -730,7 +731,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	/**
 	 * Create a live capture handle.
 	 * 
-	 * {@full create} is used to create a packet capture handle to look at packets
+	 * {@code create} is used to create a packet capture handle to look at packets
 	 * on the network. source is a string that specifies the network device to open;
 	 * on Linux systems with 2.2 or later kernels, a source argument of "any" or
 	 * NULL can be used to capture packets from all interfaces. The returned handle
@@ -900,7 +901,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	}
 
 	/**
-	 * Create a list of network devices that can be opened with {@full Pcap#open}.
+	 * Create a list of network devices that can be opened with {@code Pcap#open}.
 	 * <p>
 	 * This routine can scan a directory for savefiles, list local capture devices,
 	 * or list capture devices on a remote machine running an RPCAP server.
@@ -982,7 +983,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * to check whether the string passed as an argument is a UTF-16LE string - note
 	 * that this attempt is unsafe, as it may run past the end of the string - to
 	 * handle pcap_lookupdev() returning a UTF-16LE string. Programs that don't call
-	 * {@link #init(int)} should, on Windows, call native {@full pcap_wsockinit()}
+	 * {@link #init(int)} should, on Windows, call native {@code pcap_wsockinit()}
 	 * to initialize Winsock; this is not necessary if {@link #init} is called, as
 	 * {@link #init} will initialize Winsock itself on Windows.
 	 * </p>
@@ -1027,7 +1028,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * to check whether the string passed as an argument is a UTF-16LE string - note
 	 * that this attempt is unsafe, as it may run past the end of the string - to
 	 * handle pcap_lookupdev() returning a UTF-16LE string. Programs that don't call
-	 * {@link #init(int)} should, on Windows, call native {@full pcap_wsockinit()}
+	 * {@link #init(int)} should, on Windows, call native {@code pcap_wsockinit()}
 	 * to initialize Winsock; this is not necessary if {@link #init} is called, as
 	 * {@link #init} will initialize Winsock itself on Windows.
 	 * </p>
@@ -1041,30 +1042,30 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	}
 
 	/**
-	 * Checks if the {@full Pcap} subclass at a specific <em>libpcap API
+	 * Checks if the {@code Pcap} subclass at a specific <em>libpcap API
 	 * version</em> is natively supported. This is a safe method to use anytime on
 	 * any platform, weather native library is present or not.
 	 * 
 	 * <p>
-	 * For example, {@full Pcap1_0.isSupported()} will accurately ascertain if
+	 * For example, {@code Pcap1_0.isSupported()} will accurately ascertain if
 	 * libpcap API version 1.0 level calls are supported by the system runtime. Also
-	 * a call such as {@full WinPcap.isSupported()} will determine if WinPcap
+	 * a call such as {@code WinPcap.isSupported()} will determine if WinPcap
 	 * related calls, ie. native WinPcap 4.1.3 or less, are supported and by
 	 * extension if this is a Microsoft Windows platform.
 	 * </p>
 	 * <p>
 	 * Due to <em>libpcap API versioning</em>, it is safe to assume that if
-	 * {@full Pcap1_10.isSupported()} returns {@full true}, that at least
+	 * {@code Pcap1_10.isSupported()} returns {@code true}, that at least
 	 * <em>libpcap</em> API version 1.0 is installed on this platform, and that all
 	 * lower version calls such as libpcap 0.8 and 0.9 are available as well. The
 	 * subclass hierarchy of jNetPcap module reflects the versioning of libpcap and
 	 * its derivatives and the public releases of the native libraries. For example
-	 * {@full Npcap} class extends {@full WinPcap} class because <em>Npcap</em>
+	 * {@code Npcap} class extends {@code WinPcap} class because <em>Npcap</em>
 	 * project took over the support for <em>WinPcap</em> where it left off.
 	 * </p>
 	 * <p>
 	 * Implementation notes: The check is performed by verifying that certain,
-	 * subclass specific native symbols were linked with {@full Pcap} full which was
+	 * subclass specific native symbols were linked with {@code Pcap} full which was
 	 * introduced at a specific libpcap or related API levels.
 	 * </p>
 	 *
@@ -1100,7 +1101,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	/**
 	 * Checks if native libpcap library is loaded, and if its not,it will attempt to
 	 * load it. If library loading fails, no error messages are reported but
-	 * {@full false} will be returned.
+	 * {@code false} will be returned.
 	 *
 	 * @return true, if is native library was successfully loaded, otherwise false
 	 * @see PcapForeignInitializer#loadNativePcapLibrary(boolean)
@@ -1152,12 +1153,11 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * bpf_u_int32 pointers.
 	 *
 	 * @param device the network device name
-	 * @return array containing network address (array index 0) and netmask (array
-	 *         index 1) as 32 bit integer
+	 * @return A netmasked IPv4 address
 	 * @throws PcapException any LibpcapApi errors
 	 * @since libpcap 0.4
 	 */
-	public static int[] lookupNet(PcapIf device) throws PcapException {
+	public static NetIp4Address lookupNet(PcapIf device) throws PcapException {
 		return Pcap0_4.lookupNet(device.name());
 	}
 
@@ -1169,12 +1169,11 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * bpf_u_int32 pointers.
 	 *
 	 * @param device the network device name
-	 * @return array containing network address (array index 0) and netmask (array
-	 *         index 1) as 32 bit integer
+	 * @return A netmasked IPv4 address
 	 * @throws PcapException any LibpcapApi errors
 	 * @since libpcap 0.4
 	 */
-	public static int[] lookupNet(String device) throws PcapException {
+	public static NetIp4Address lookupNet(String device) throws PcapException {
 		return Pcap0_4.lookupNet(device);
 	}
 
@@ -1280,7 +1279,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * Open a device for capturing.
 	 * 
 	 * <p>
-	 * {@full openLive} is used to obtain a packet capture handle to look at packets
+	 * {@code openLive} is used to obtain a packet capture handle to look at packets
 	 * on the network. device is a string that specifies the network device to open;
 	 * on Linux systems with 2.2 or later kernels, a device argument of "any" or
 	 * NULL can be used to capture packets from all interfaces.
@@ -1310,7 +1309,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * Open a device for capturing.
 	 * 
 	 * <p>
-	 * {@full openLive} is used to obtain a packet capture handle to look at packets
+	 * {@code openLive} is used to obtain a packet capture handle to look at packets
 	 * on the network. device is a string that specifies the network device to open;
 	 * on Linux systems with 2.2 or later kernels, a device argument of "any" or
 	 * NULL can be used to capture packets from all interfaces.
@@ -1478,10 +1477,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	}
 
 	/**
-	 * Force a {@full dispatch} or {@full loop} call to return.
+	 * Force a {@code dispatch} or {@code loop} call to return.
 	 * 
 	 * <p>
-	 * Sets a flag that will force {@full dispatch} or {@full loop} to return rather
+	 * Sets a flag that will force {@code dispatch} or {@code loop} to return rather
 	 * than looping; they will return the number of packets that have been processed
 	 * so far, or {@link PcapConstants#PCAP_ERROR_BREAK} if no packets have been
 	 * processed so far.
@@ -1497,18 +1496,18 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * will not necessarily terminate those loops - as well as in loops processing a
 	 * set of packets returned by the OS. Note that if you are catching signals on
 	 * UNIX systems that support restarting system calls after a signal, and calling
-	 * {@full breakloop} in the signal handler, you must specify, when catching
+	 * {@code breakloop} in the signal handler, you must specify, when catching
 	 * those signals, that system calls should NOT be restarted by that signal.
 	 * Otherwise, if the signal interrupted a call reading packets in a live
-	 * capture, when your signal handler returns after calling {@full breakloop},
+	 * capture, when your signal handler returns after calling {@code breakloop},
 	 * the call will be restarted, and the loop will not terminate until more
 	 * packets arrive and the call completes.
 	 * </p>
 	 * 
 	 * <p>
 	 * Note also that, in a multi-threaded application, if one thread is blocked in
-	 * {@full dispatch}, {@full loop}, pcap_next(3PCAP), or {@full nextEx}, a call
-	 * to {@full breakloop} in a different thread will not unblock that thread. You
+	 * {@code dispatch}, {@code loop}, pcap_next(3PCAP), or {@code nextEx}, a call
+	 * to {@code breakloop} in a different thread will not unblock that thread. You
 	 * will need to use whatever mechanism the OS provides for breaking a thread out
 	 * of blocking calls in order to unblock the thread, such as thread cancellation
 	 * or thread signalling in systems that support POSIX threads, or SetEvent() on
@@ -1518,21 +1517,21 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * </p>
 	 * 
 	 * <p>
-	 * Note that {@full next} and {@full nextEx} will, on some platforms, loop
+	 * Note that {@code next} and {@code nextEx} will, on some platforms, loop
 	 * reading packets from the OS; that loop will not necessarily be terminated by
-	 * a signal, so {@full breakloop} should be used to terminate packet processing
-	 * even if {@full next} or {@full nextEx} is being used.
+	 * a signal, so {@code breakloop} should be used to terminate packet processing
+	 * even if {@code next} or {@code nextEx} is being used.
 	 * </p>
 	 * 
 	 * <p>
-	 * {@full breakloop} does not guarantee that no further packets will be
-	 * processed by {@full dispatch} or {@full loop} after it is called; at most one
+	 * {@code breakloop} does not guarantee that no further packets will be
+	 * processed by {@code dispatch} or {@code loop} after it is called; at most one
 	 * more packet might be processed.
 	 * </p>
 	 * 
 	 * <p>
-	 * If {@link PcapConstants#PCAP_ERROR_BREAK} is returned from {@full dispatch}
-	 * or {@full loop}, the flag is cleared, so a subsequent call will resume
+	 * If {@link PcapConstants#PCAP_ERROR_BREAK} is returned from {@code dispatch}
+	 * or {@code loop}, the flag is cleared, so a subsequent call will resume
 	 * reading packets. If a positive number is returned, the flag is not cleared,
 	 * so a subsequent call will return {@link PcapConstants#PCAP_ERROR_BREAK} and
 	 * clear the flag.
@@ -2501,14 +2500,14 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	/**
 	 * Get the version number of a savefile.
 	 * <p>
-	 * If p refers to a ``savefile'', {@full majorVersion} returns the major number
+	 * If p refers to a ``savefile'', {@code majorVersion} returns the major number
 	 * of the file format of the ``savefile''. The version number is stored in the
 	 * ``savefile''; note that the meaning of its values depends on the type of
 	 * ``savefile'' (for example, pcap or pcapng).
 	 * </p>
 	 * <p>
 	 * If pcap handle refers to a live capture, the values returned by
-	 * {@full majorVersion} and pcap_minor_version() are not meaningful.
+	 * {@code majorVersion} and pcap_minor_version() are not meaningful.
 	 * </p>
 	 *
 	 * @return the major number of the file format of the ``savefile''
@@ -2521,14 +2520,14 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	/**
 	 * Get the version number of a savefile.
 	 * <p>
-	 * If p refers to a ``savefile'', {@full minorVersion} returns the minor number
+	 * If p refers to a ``savefile'', {@code minorVersion} returns the minor number
 	 * of the file format of the ``savefile''. The version number is stored in the
 	 * ``savefile''; note that the meaning of its values depends on the type of
 	 * ``savefile'' (for example, pcap or pcapng).
 	 * </p>
 	 * <p>
 	 * If pcap handle refers to a live capture, the values returned by
-	 * {@full majorVersion} and pcap_minor_version() are not meaningful.
+	 * {@code majorVersion} and pcap_minor_version() are not meaningful.
 	 * </p>
 	 *
 	 * @return the minor number of the file format of the ``savefile''
@@ -2553,14 +2552,14 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <p>
 	 * The bytes of data from the packet begin with a link-layer header. The format
 	 * of the link-layer header is indicated by the return value of the
-	 * {@full datalink} routine when handed the pcap_t value also passed to
-	 * {@full loop} or {@full dispatch}. https://www.tcpdump.org/linktypes.html
-	 * lists the values {@full datalink} can return and describes the packet formats
+	 * {@code datalink} routine when handed the pcap_t value also passed to
+	 * {@code loop} or {@code dispatch}. https://www.tcpdump.org/linktypes.html
+	 * lists the values {@code datalink} can return and describes the packet formats
 	 * that correspond to those values. The value it returns will be valid for all
-	 * packets received unless and until {@full setDatalink} is called; after a
-	 * successful call to {@full setDatalink}, all subsequent packets will have a
+	 * packets received unless and until {@code setDatalink} is called; after a
+	 * successful call to {@code setDatalink}, all subsequent packets will have a
 	 * link-layer header of the type specified by the link-layer header type value
-	 * passed to {@full setDatalink}.
+	 * passed to {@code setDatalink}.
 	 * </p>
 	 * 
 	 * <p>
@@ -2605,14 +2604,14 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <p>
 	 * The bytes of data from the packet begin with a link-layer header. The format
 	 * of the link-layer header is indicated by the return value of the
-	 * {@full datalink} routine when handed the pcap_t value also passed to
-	 * {@full loop} or {@full dispatch}. https://www.tcpdump.org/linktypes.html
-	 * lists the values {@full datalink} can return and describes the packet formats
+	 * {@code datalink} routine when handed the pcap_t value also passed to
+	 * {@code loop} or {@code dispatch}. https://www.tcpdump.org/linktypes.html
+	 * lists the values {@code datalink} can return and describes the packet formats
 	 * that correspond to those values. The value it returns will be valid for all
-	 * packets received unless and until {@full setDatalink} is called; after a
-	 * successful call to {@full setDatalink}, all subsequent packets will have a
+	 * packets received unless and until {@code setDatalink} is called; after a
+	 * successful call to {@code setDatalink}, all subsequent packets will have a
 	 * link-layer header of the type specified by the link-layer header type value
-	 * passed to {@full setDatalink}.
+	 * passed to {@code setDatalink}.
 	 * </p>
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
@@ -3005,7 +3004,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * 
 	 * <p>
 	 * Sets whether monitor mode should be set on a capture handle when the handle
-	 * is activated. If rfmon is {@full true}, monitor mode will be set, otherwise
+	 * is activated. If rfmon is {@code true}, monitor mode will be set, otherwise
 	 * it will not be set.
 	 * </p>
 	 *
@@ -3103,7 +3102,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * Get the snapshot length.
 	 * 
 	 * <p>
-	 * {@full snapshot} returns the snapshot length specified when
+	 * {@code snapshot} returns the snapshot length specified when
 	 * {@link #setSnaplen(int)} or
 	 * {@link #openLive(String, int, boolean, long, TimeUnit)} was called, for a
 	 * live capture, or the snapshot length from the capture file, for a
