@@ -21,9 +21,13 @@ jNetPcap is a *libpcap* java binding. This is version 2 release of popular **jNe
 ## Installation
 For now, deployment and is done using Maven2 repositories
 ## Maven installation
-* **groupid:** org.jnetpcap
-* **artifactId:** jnetpcap
-* **version:** 2.0.0-preview.1
+```
+<dependency>
+    <groupId>org.jnetpcap</groupId>
+    <artifactId>jnetpcap</artifactId>
+    <version>2.0.0-preview.1</version>
+</dependency>
+```
 ## Related Modules
 Previously embeded functionality into **jNetPcap** version 1, has be refactored into a separate modules. 
 ### Module: org.jnetpcap.packet
