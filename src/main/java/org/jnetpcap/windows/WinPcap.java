@@ -73,78 +73,78 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	public static final int WINPCAP_MODE_MON = 2;
 
 	/**
-	 * @see {@full int pcap_wsockinit(void)}
+	 * @see {@code int pcap_wsockinit(void)}
 	 * @since libpcap 0.4 (Windows only)
 	 */
 	private static final PcapForeignDowncall pcap_wsockinit;
 
 	/**
-	 * @see {@full struct pcap_stat* pcap_stats_ex(pcap_t * p, int *pcap_stat_size)}
+	 * @see {@code struct pcap_stat* pcap_stats_ex(pcap_t * p, int *pcap_stat_size)}
 	 * @since libpcap 0.4 (Windows only)
 	 */
 	private static final PcapForeignDowncall pcap_stat_ex;
 
 	/**
-	 * @see {@full int pcap_live_dump (pcap_t *p, char *filename, int maxsize, int
+	 * @see {@code int pcap_live_dump (pcap_t *p, char *filename, int maxsize, int
 	 *      maxpacks)}
 	 * @since Microsoft Windows only
 	 */
 	private static final PcapForeignDowncall pcap_live_dump;
 
 	/**
-	 * @see {@full int pcap_live_dump (pcap_t *p, char *filename, int maxsize, int
+	 * @see {@code int pcap_live_dump (pcap_t *p, char *filename, int maxsize, int
 	 *      maxpacks)}
 	 * @since Microsoft Windows only
 	 */
 	private static final PcapForeignDowncall pcap_live_dump_ended;
 
 	/**
-	 * @see {@full int pcap_setbuff (pcap_t *p, int dim)}
+	 * @see {@code int pcap_setbuff (pcap_t *p, int dim)}
 	 * @since Microsoft Windows only
 	 */
 	private static final PcapForeignDowncall pcap_setbuff;
 
 	/**
-	 * @see {@full int pcap_setmode(pcap_t *p, int mode)}
+	 * @see {@code int pcap_setmode(pcap_t *p, int mode)}
 	 * @since Microsoft Windows only
 	 */
 	private static final PcapForeignDowncall pcap_setmode;
 
 	/**
-	 * @see {@full int pcap_setmode(pcap_t *p, int mode)}
+	 * @see {@code int pcap_setmode(pcap_t *p, int mode)}
 	 * @since Microsoft Windows only
 	 */
 	private static final PcapForeignDowncall pcap_setmintocopy;
 
 	/**
-	 * @see {@full HANDLE pcap_getevent(pcap_t *p)}
+	 * @see {@code HANDLE pcap_getevent(pcap_t *p)}
 	 * @since Microsoft Windows only
 	 */
 	private static final PcapForeignDowncall pcap_getevent;
 
 	/**
-	 * @see {@full int pcap_findalldevs_ex(const char *source, struct pcap_rmtauth
+	 * @see {@code int pcap_findalldevs_ex(const char *source, struct pcap_rmtauth
 	 *      *auth, pcap_if_t **alldevs, char *errbuf)}
 	 * @since libpcap 1.9
 	 */
 	private static final PcapForeignDowncall pcap_findalldevs_ex;
 
 	/**
-	 * @see {@full int pcap_createsrcstr(char *source, int type, const char *host,
+	 * @see {@code int pcap_createsrcstr(char *source, int type, const char *host,
 	 *      const char *port, const char *name, char *errbuf)}
 	 * @since libpcap 1.9
 	 */
 	private static final PcapForeignDowncall pcap_createsrcstr;
 
 	/**
-	 * @see {@full int pcap_parsesrcstr(const char *source, int *type, char *host,
+	 * @see {@code int pcap_parsesrcstr(const char *source, int *type, char *host,
 	 *      char *port, char *name, char *errbuf}
 	 * @since libpcap 1.9
 	 */
 	private static final PcapForeignDowncall pcap_parsesrcstr;
 
 	/**
-	 * @see {@full SOCKET pcap_remoteact_accept_ex(const char *address, const char
+	 * @see {@code SOCKET pcap_remoteact_accept_ex(const char *address, const char
 	 *      *port, const char *hostlist, char *connectinghost, struct pcap_rmtauth
 	 *      *auth, int uses_ssl, char *errbuf)}
 	 * @since libpcap 1.10
@@ -175,7 +175,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	/**
 	 * Create a live capture handle.
 	 * 
-	 * {@full create} is used to create a packet capture handle to look at packets
+	 * {@code create} is used to create a packet capture handle to look at packets
 	 * on the network. source is a string that specifies the network device to open;
 	 * on Linux systems with 2.2 or later kernels, a source argument of "any" or
 	 * NULL can be used to capture packets from all interfaces. The returned handle
@@ -240,7 +240,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	}
 
 	/**
-	 * Create a list of network devices that can be opened with {@full Pcap#open}.
+	 * Create a list of network devices that can be opened with {@code Pcap#open}.
 	 * <p>
 	 * This routine can scan a directory for savefiles, list local capture devices,
 	 * or list capture devices on a remote machine running an RPCAP server.
@@ -306,30 +306,30 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	}
 
 	/**
-	 * Checks if the {@full Pcap} subclass at a specific <em>libpcap API
+	 * Checks if the {@code Pcap} subclass at a specific <em>libpcap API
 	 * version</em> is natively supported. This is a safe method to use anytime on
 	 * any platform, weather native library is present or not.
 	 * 
 	 * <p>
-	 * For example, {@full Pcap1_0.isSupported()} will accurately ascertain if
+	 * For example, {@code Pcap1_0.isSupported()} will accurately ascertain if
 	 * libpcap API version 1.0 level calls are supported by the system runtime. Also
-	 * a call such as {@full WinPcap.isSupported()} will determine if WinPcap
+	 * a call such as {@code WinPcap.isSupported()} will determine if WinPcap
 	 * related calls, ie. native WinPcap 4.1.3 or less, are supported and by
 	 * extension if this is a Microsoft Windows platform.
 	 * </p>
 	 * <p>
 	 * Due to <em>libpcap API versioning</em>, it is safe to assume that if
-	 * {@full Pcap1_10.isSupported()} returns {@full true}, that at least
+	 * {@code Pcap1_10.isSupported()} returns {@code true}, that at least
 	 * <em>libpcap</em> API version 1.0 is installed on this platform, and that all
 	 * lower version calls such as libpcap 0.8 and 0.9 are available as well. The
 	 * subclass hierarchy of jNetPcap module reflects the versioning of libpcap and
 	 * its derivatives and the public releases of the native libraries. For example
-	 * {@full Npcap} class extends {@full WinPcap} class because <em>Npcap</em>
+	 * {@code Npcap} class extends {@code WinPcap} class because <em>Npcap</em>
 	 * project took over the support for <em>WinPcap</em> where it left off.
 	 * </p>
 	 * <p>
 	 * Implementation notes: The check is performed by verifying that certain,
-	 * subclass specific native symbols were linked with {@full Pcap} full which was
+	 * subclass specific native symbols were linked with {@code Pcap} full which was
 	 * introduced at a specific libpcap or related API levels.
 	 * </p>
 	 *
@@ -479,7 +479,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	}
 
 	/**
-	 * Return the handle of the event associated with the interface {@full Pcap}.
+	 * Return the handle of the event associated with the interface {@code Pcap}.
 	 * <p>
 	 * This event can be passed to functions like WaitForSingleObject() or
 	 * WaitForMultipleObjects() to wait until the driver's buffer contains some data

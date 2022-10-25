@@ -36,25 +36,25 @@ import org.jnetpcap.internal.PcapForeignInitializer;
 public class PcapDumper implements AutoCloseable, Flushable {
 
 	/**
-	 * @see {@full void	pcap_dump_close(pcap_dumper_t *p)}
+	 * @see {@code void	pcap_dump_close(pcap_dumper_t *p)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_dump_close;
 
 	/**
-	 * @see {@full void	pcap_dump(u_char *, const struct pcap_pkthdr *, const u_char *)}
+	 * @see {@code void	pcap_dump(u_char *, const struct pcap_pkthdr *, const u_char *)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_dump;
 
 	/**
-	 * @see {@full FILE *pcap_dump_file(pcap_dumper_t *p)}
+	 * @see {@code FILE *pcap_dump_file(pcap_dumper_t *p)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_dump_file;
 
 	/**
-	 * @see {@full int pcap_dump_flush(pcap_dumper_t *p)}
+	 * @see {@code int pcap_dump_flush(pcap_dumper_t *p)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_dump_flush;

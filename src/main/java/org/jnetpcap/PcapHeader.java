@@ -189,8 +189,8 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 
 	/**
 	 * Wraps a header instance around the provided memory object. If addressable is
-	 * a {@full MemorySegment} it will be wrapped directly. If the addressible is a
-	 * {@full MemoryAddress}, a new {@full MemorySegment} will be created and
+	 * a {@code MemorySegment} it will be wrapped directly. If the addressible is a
+	 * {@code MemoryAddress}, a new {@code MemorySegment} will be created and
 	 * wrapped around the address.
 	 *
 	 * @param addressable native memory address or segment at the start of the pcap
@@ -203,7 +203,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 
 	/**
 	 * Creates a no-copy, Pcap header that wraps around the byte array. The integer
-	 * byte ordering is assumed to be {@full ByteOrder.nativeOrder()}.
+	 * byte ordering is assumed to be {@code ByteOrder.nativeOrder()}.
 	 *
 	 * @param array the byte array containing header structure
 	 * @return the new pcap header
@@ -214,7 +214,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 
 	/**
 	 * Creates a no-copy, Pcap header that wraps around the byte array. The integer
-	 * byte ordering is assumed to be {@full ByteOrder.nativeOrder()}.
+	 * byte ordering is assumed to be {@code ByteOrder.nativeOrder()}.
 	 *
 	 * @param arr    the byte array containing the header data at a specific offset
 	 * @param offset the offset in to arr where the header start
@@ -230,10 +230,10 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	}
 
 	/**
-	 * Reads the {@full captureLength} field value from the memory object.
+	 * Reads the {@code captureLength} field value from the memory object.
 	 *
-	 * @param addr the native memory object, can be either {@full MemoryAddress} or
-	 *             {@full MemorySegment}
+	 * @param addr the native memory object, can be either {@code MemoryAddress} or
+	 *             {@code MemorySegment}
 	 * @return number of bytes captured, possibly truncated
 	 */
 	static int readCaptureLength(Addressable memory) {
@@ -241,10 +241,10 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	}
 
 	/**
-	 * Reads the {@full tvSec} field value from the memory object.
+	 * Reads the {@code tvSec} field value from the memory object.
 	 *
-	 * @param addr the native memory object, can be either {@full MemoryAddress} or
-	 *             {@full MemorySegment}
+	 * @param addr the native memory object, can be either {@code MemoryAddress} or
+	 *             {@code MemorySegment}
 	 * @return number of seconds from the start of epoch time, Jan 1st 1970 12:00am.
 	 */
 	static long readTvSec(Addressable memory) {
@@ -252,10 +252,10 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	}
 
 	/**
-	 * Reads the {@full tvUsec} field value from the memory object.
+	 * Reads the {@code tvUsec} field value from the memory object.
 	 *
-	 * @param addr the native memory object, can be either {@full MemoryAddress} or
-	 *             {@full MemorySegment}
+	 * @param addr the native memory object, can be either {@code MemoryAddress} or
+	 *             {@code MemorySegment}
 	 * @return faction of a second either in nanos or micros depending the capture
 	 *         source
 	 */
@@ -264,10 +264,10 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	}
 
 	/**
-	 * Reads the {@full wireLength} field value from the memory object.
+	 * Reads the {@code wireLength} field value from the memory object.
 	 *
-	 * @param addr the native memory object, can be either {@full MemoryAddress} or
-	 *             {@full MemorySegment}
+	 * @param addr the native memory object, can be either {@code MemoryAddress} or
+	 *             {@code MemorySegment}
 	 * @return number of bytes in the original packet seen on the wire
 	 */
 	static int readWireLength(Addressable memory) {
@@ -465,8 +465,8 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 
 	/**
 	 * Converts the {@link #tvSec()} and {@link #tvUsec()} values into a epoch
-	 * millisecond value, compatible with java {@full Date} class and
-	 * {@full java.time} package. The method uses the default
+	 * millisecond value, compatible with java {@code Date} class and
+	 * {@code java.time} package. The method uses the default
 	 * {@link PcapTStampPrecision#TSTAMP_PRECISION_MICRO} precision value for
 	 * {@link #tvUsec()} field.
 	 *

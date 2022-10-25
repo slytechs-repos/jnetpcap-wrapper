@@ -26,7 +26,7 @@ import org.jnetpcap.PcapException;
 import org.jnetpcap.PcapMessages;
 
 /**
- * Pcap specific {@full ForeignInitializer} used to facilitate loading native
+ * Pcap specific {@code ForeignInitializer} used to facilitate loading native
  * libary symbols and making of 'downcall' and 'upcall' function calls.
  * 
  * @author Sly Technologies Inc
@@ -93,7 +93,7 @@ public class PcapForeignInitializer extends ForeignInitializer<PcapForeignDownca
 	/**
 	 * Load native pcap library, or one of its dirivatives.
 	 *
-	 * @param ignoreErrors if true, no errors will be thrown but a {@full false}
+	 * @param ignoreErrors if true, no errors will be thrown but a {@code false}
 	 *                     flag will be returned
 	 * @return true, if pcap library is loaded otherwise false
 	 * @throws ExceptionInInitializerError the exception in initializer error
@@ -123,7 +123,7 @@ public class PcapForeignInitializer extends ForeignInitializer<PcapForeignDownca
 	 * Missing symbols policy is executed during early/static initialization phase
 	 * of Pcap library. The policy object receives a list of symbols both for
 	 * 'downcall' and 'upcall' symbols which were not found during loading of the
-	 * native pcap libarary. The {@full ForeignInitializer} creates stubs for each
+	 * native pcap libarary. The {@code ForeignInitializer} creates stubs for each
 	 * missing symbol, that when called at runtime will throw a safe exception. A
 	 * missing symbols policy can intercept missing symbols during initialization
 	 * phase and if so desired can throw an appropriate exception, halting any
@@ -140,7 +140,7 @@ public class PcapForeignInitializer extends ForeignInitializer<PcapForeignDownca
 
 	/**
 	 * Sets the logging output produced by the default missing symbols policy
-	 * receiver. By default the output is sent to {@full PrintWriter.nullWriter()}
+	 * receiver. By default the output is sent to {@code PrintWriter.nullWriter()}
 	 * which discards all output. You can set another output consumer or override
 	 * the policy using {@link #setPolicy(LibraryPolicy)}.
 	 *

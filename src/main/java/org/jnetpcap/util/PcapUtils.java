@@ -79,7 +79,7 @@ public final class PcapUtils {
 	 * 
 	 * <p>
 	 * For example this is the formatted string of an array
-	 * <samp>{00:26:62:2f:47:87}</samp> using a {@full toHexCurleyString(array, 0,
+	 * <samp>{00:26:62:2f:47:87}</samp> using a {@code toHexCurleyString(array, 0,
 	 * 6)}.
 	 * </p>
 	 *
@@ -100,7 +100,7 @@ public final class PcapUtils {
 	 * 
 	 * <p>
 	 * For example this is the formatted string of 6 bytes out of the an array
-	 * <samp>{00:26:62:2f:47:87}</samp> using a {@full toHexCurleyString(array, 0,
+	 * <samp>{00:26:62:2f:47:87}</samp> using a {@code toHexCurleyString(array, 0,
 	 * 6)}.
 	 * </p>
 	 *
@@ -117,11 +117,11 @@ public final class PcapUtils {
 
 	/**
 	 * Formats individual bytes in a ByteBuffer to 2 digit hex values, each
-	 * separated by ':' character enclosed within square brackets {@full []}.
+	 * separated by ':' character enclosed within square brackets {@code []}.
 	 * 
 	 * <p>
 	 * For example this is the formatted string of an ByteBuffer
-	 * <samp>{00:26:62:2f:47:87}</samp> using a {@full toHexCurleyString(buf)}.
+	 * <samp>{00:26:62:2f:47:87}</samp> using a {@code toHexCurleyString(buf)}.
 	 * </p>
 	 *
 	 * @param buf the source ByteBuffer for bytes
@@ -138,11 +138,11 @@ public final class PcapUtils {
 
 	/**
 	 * Formats individual bytes in an array to 2 digit hex values, each separated by
-	 * ':' character enclosed within square brackets {@full []}.
+	 * ':' character enclosed within square brackets {@code []}.
 	 * 
 	 * <p>
 	 * For example this is the formatted string of an ByteBuffer
-	 * <samp>[00:26:62:2f:47:87]</samp> using a {@full toHexSquareString(array)}.
+	 * <samp>[00:26:62:2f:47:87]</samp> using a {@code toHexSquareString(array)}.
 	 * </p>
 	 *
 	 * @param array the source array for bytes
@@ -155,11 +155,11 @@ public final class PcapUtils {
 
 	/**
 	 * Formats individual bytes in an array to 2 digit hex values, each separated by
-	 * ':' character enclosed within square brackets {@full []}.
+	 * ':' character enclosed within square brackets {@code []}.
 	 * 
 	 * <p>
 	 * For example this is the formatted string of 6 bytes out of the an array
-	 * <samp>[00:26:62:2f:47:87]</samp> using a {@full toHexSquareString(array, 0,
+	 * <samp>[00:26:62:2f:47:87]</samp> using a {@code toHexSquareString(array, 0,
 	 * 6)}.
 	 * </p>
 	 *
@@ -175,11 +175,11 @@ public final class PcapUtils {
 
 	/**
 	 * Formats individual bytes in a ByteBuffer to 2 digit hex values, each
-	 * separated by ':' character enclosed within square brackets {@full []}.
+	 * separated by ':' character enclosed within square brackets {@code []}.
 	 * 
 	 * <p>
 	 * For example this is the formatted string of an ByteBuffer
-	 * <samp>[00:26:62:2f:47:87]</samp> using a {@full toHexSquareString(buf)}.
+	 * <samp>[00:26:62:2f:47:87]</samp> using a {@code toHexSquareString(buf)}.
 	 * </p>
 	 *
 	 * @param buf the source ByteBuffer for bytes
@@ -200,7 +200,7 @@ public final class PcapUtils {
 	 * 
 	 * <p>
 	 * For example this is the formatted string of 6 bytes out of the an array
-	 * <samp>00:26:62:2f:47:87</samp> using a {@full toHexString(array)}.
+	 * <samp>00:26:62:2f:47:87</samp> using a {@code toHexString(array)}.
 	 * </p>
 	 *
 	 * @param array the source array for bytes
@@ -218,7 +218,7 @@ public final class PcapUtils {
 	 * 
 	 * <p>
 	 * For example this is the formatted string of 6 bytes out of the an array
-	 * <samp>00:26:62:2f:47:87</samp> using a {@full toHexString(array, 0, 6)}.
+	 * <samp>00:26:62:2f:47:87</samp> using a {@code toHexString(array, 0, 6)}.
 	 * </p>
 	 *
 	 * @param array  the source array for bytes
@@ -237,12 +237,12 @@ public final class PcapUtils {
 
 	/**
 	 * Formats individual bytes in an array to 2 digit hex values, each separated by
-	 * ':' character. Additionally a {@full prefix} and {@full postfix} are used to
+	 * ':' character. Additionally a {@code prefix} and {@code postfix} are used to
 	 * enclose the resultant hex string.
 	 * 
 	 * <p>
 	 * For example this is the formatted string of 6 bytes out of the an array
-	 * <samp>&lt;00:26:62:2f:47:87&gt;</samp> using a {@full toHexString(array, 0,
+	 * <samp>&lt;00:26:62:2f:47:87&gt;</samp> using a {@code toHexString(array, 0,
 	 * 6, "<", ">")}.
 	 * </p>
 	 *
@@ -266,12 +266,12 @@ public final class PcapUtils {
 
 	/**
 	 * Formats individual bytes in an array to 2 digit hex values, each separated by
-	 * ':' character. Additionally a {@full prefix} and {@full postfix} are used to
+	 * ':' character. Additionally a {@code prefix} and {@code postfix} are used to
 	 * enclose the resultant hex string.
 	 * 
 	 * <p>
 	 * For example this is the formatted string an array
-	 * <samp>&lt;00:26:62:2f:47:87&gt;</samp> using a {@full toHexString(array, "<",
+	 * <samp>&lt;00:26:62:2f:47:87&gt;</samp> using a {@code toHexString(array, "<",
 	 * ">")}.
 	 * </p>
 	 *
@@ -294,7 +294,7 @@ public final class PcapUtils {
 	 * 
 	 * <p>
 	 * For example this is the formatted string a ByteBuffer
-	 * <samp>00:26:62:2f:47:87</samp> using a {@full toHexString(buf)}.
+	 * <samp>00:26:62:2f:47:87</samp> using a {@code toHexString(buf)}.
 	 * </p>
 	 *
 	 * @param buf the source ByteBuffer for bytes
