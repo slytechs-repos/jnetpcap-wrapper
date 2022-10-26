@@ -133,6 +133,6 @@ Please see [wiki home page][wiki] for details.
 [libpcap]: <https://www.tcpdump.org/> "This is the home web site of tcpdump, a powerful command-line packet analyzer; and libpcap, a portable C/C++ library for network traffic capture"
 [npcap]: <https://npcap.com/> "Npcap is the Nmap Project's packet capture (and sending) library for Microsoft Windows"
 [winpcap]: <https://www.winpcap.org/> "WinPcap is a library for link-layer network access in Windows environments"
-[wireshark]: <https://wireshark.com> "Wireshark is the world’s foremost and widely-used network protocol analyzer"
+[wireshark]: <https://wireshark.org> "Wireshark is the world’s foremost and widely-used network protocol analyzer"
 [sf.net]: <https://sourceforge.net/projects/jnetpcap/> "jNetPcap version 1 hosted on SourceForge.net"
 
