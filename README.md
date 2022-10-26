@@ -1,5 +1,5 @@
 # jNetPcap version 2
-jNetPcap is a *libpcap* java binding. This is version 2 release of popular **jNetPcap** library, previously hosted on SourceForge.net.
+jNetPcap is a [*libpcap*][libpcap] java binding. This is version 2 release of popular **jNetPcap** library, previously hosted on [SourceForge.net][sf.net].
 
 ## Overview
 **jNetPcap** provides out of the box [*libpcap* library][libpcap] bindings in *Java*. By using *Foreign Function* features of *Java 19* or above, **jNetPcap** can bind directly to the native *libpcap* library. All native *libpcap* functions are accessible through easy to use *java* API. In addition, the latest [*Npcap*][npcap] and legacy [*WinPcap*][winpcap] tools and their API extensions on *Microsoft Windows* platforms are supported as well. 
@@ -86,12 +86,12 @@ See the [wiki] pages. Project's [unit tests][unit_test] are also a great source 
 * No java dependencies except for standard java modules and the *Foreign Function* feature, currently in java *preview*, but one which is expected to be a permanent feature, in the near future.
 
 ### Native libbrary depdencies
-* The only native dependency is the native [*libpcap* library][libpcap] itself, which has to be installed prior to **jNetPcap** module initializing. All versions of *libpcap* API are supported, from *libpcap* version 0.4 to the current latest version 1.5. This also includes the latest [*WinPcap*][winpcap] and [*Npcap*][npcap] derivatives on *Microsfot Windows* platforms.
+* The only native dependency is the native [*libpcap* library][libpcap] itself, which has to be installed prior to **jNetPcap** module initializing. All versions of *libpcap* API are supported, from *libpcap* version 0.4 to the current and latest version 1.5. This also includes [*WinPcap*][winpcap] and [*Npcap*][npcap] derivatives on *Microsfot Windows* platforms.
 
 ## Installation
-There are several methods for installing the the software
+Here are several methods for installing **jNetPcap** software.
 
-### Maven installation
+### Maven Dependency
 ```
 <dependency>
     <groupId>org.jnetpcap</groupId>
@@ -101,15 +101,15 @@ There are several methods for installing the the software
 
 ```
 ### Download Release Package
-> TODO - add link to release
+> TODO - add a link to the release
 
 ### Compile From Source
 You will find instructions on how to compile from source on our [Wiki Pages][wiki].
 
-## Related Modules
-Previously embeded functionality into **jNetPcap** version 1, has be refactored into a separate modules. 
-### Module: `org.jnetpcap.packet`
-Provides high level packet dissecting and decoding functionality. It requires `org.jnetpcap` module, and has several other depdencies (listed in the `jnetpcap-packet` repo.)
+## Related Java Modules
+Previously embeded, non-binding related functionality, which was part of **jNetPcap** version 1 API, has be refactored into separate java modules. 
+### Java Module: `org.jnetpcap.packet`
+Provides a high level packet dissecting and decoding functionality. It requires `org.jnetpcap` module, and has several other depdencies (listed in the `jnetpcap-packet` repo.)
 > TODO - add link to `jnetpcap-packet` module
 
 ## Usage
@@ -126,4 +126,5 @@ Please see [wiki home page][wiki] for details.
 [npcap]: <https://npcap.com/> "Npcap is the Nmap Project's packet capture (and sending) library for Microsoft Windows"
 [winpcap]: <https://www.winpcap.org/> "WinPcap is a library for link-layer network access in Windows environments"
 [wireshark]: <https://wireshark.com> "Wireshark is the world’s foremost and widely-used network protocol analyzer"
+[sf.net]: <https://sourceforge.net/projects/jnetpcap/> "jNetPcap version 1 hosted on SourceForge.net"
 
