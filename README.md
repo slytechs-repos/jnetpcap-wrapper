@@ -44,6 +44,29 @@ Which produces the following output:
 Hello World
 Packet [timestamp=2011-03-01T20:45:13.266Z, wirelen=74   caplen=74   {00:26:62:2f:47:87}]
 ```
+### Transmit a Packet
+This example demonstrates how to transmit a raw packet on a live network:
+```java
+void main() throws PcapException {
+
+	/* raw bytes of our packet */
+	final String ETHERNET = "0026622f4787001d60b301840800";
+	final String IPv4 = "4500003ccb5b4000400628e4 c0a8FD05 c0a8FD06";
+	final String TCP = "e14e00508e50190100000000a00216d08f470000020405b40402080a0021d25a0000000001030307";
+	final byte[] packetBytes = PcapUtils.parseHexString(ETHERNET + IPv4 + TCP);
+
+	List<PcapIf> devices = Pcap.findAllDevs();
+
+	try (Pcap pcap = Pcap.create(devices.get(0))) {
+		pcap.activate();
+
+		/* Transmit our packet */
+		pcap.sendPacket(packetBytes);
+	}
+}
+```
+Note that **Pcap.inject** can also be used to transmit packets. This example produces no output, but if you monitor the network, you will see our non-routable packet being sent from the example host.
+
 ### For more examples
 See the [wiki] pages. Project's [unit tests][unit_test] are also a great source for usage examples of every single function in the module.
 
