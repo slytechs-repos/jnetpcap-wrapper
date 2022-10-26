@@ -1,21 +1,18 @@
 # jNetPcap version 2
 jNetPcap is a *libpcap* java binding. This is version 2 release of popular **jNetPcap** library, previously hosted on SourceForge.net.
 
-### Compatibility with jNetPcap version 1
-[Version 1  of **jNetPcap**][jnetpcap_v1_page] was released some 10 years ago. Version 2 has numerous backward incompatiblities with version 1, but overall version 1 based application can be easily upgraded to version 2.
-
-The license changed from LGPL to a less ristrictive Apache v2 license.
-
-Lastly, version 1  of **jNetPcap**, had a lot of functionality bundled in that did not belong at the *libpcap* binding level. In version 2 all extraneous functinality has been factored out into separate modules. This allows greater flexibility and less impact on the main **jNetPcap** module stability.
-
 ## Overview
-**jNetPcap** provides out of the box *libpcap* library bindings from *Java JRE*. By using *Foreign Function* features of *Java JRE*, **jNetPcap** can bind directly to all the native *libpcap* library functions and provides full functionality of underlying native *libpcap* library. All native *libpcap* functions, including legalcy *WinPcap* and latest *Npcap* libraries as well, on *Microsoft Windows* platforms. 
+**jNetPcap** provides out of the box [*libpcap* library][libpcap] bindings in *Java*. By using *Foreign Function* features of *Java 19* or above, **jNetPcap** can bind directly to the native *libpcap* library. All native *libpcap* functions are accessible through easy to use *java* API. In addition, the latest [*Npcap*][npcap] and legacy [*WinPcap*][winpcap] tools and their API extensions on *Microsoft Windows* platforms are supported as well. 
 
 ## Examples
-Capturing packets is straight forward and easy out of the box:
+To get started lets take a look at a couple of examples.
 
-### Live Packet Capture
-This quick example demonstrates how to capture 1 or more packets from a live network.
+Capturing and transmitting packets is straight forward and easy out of the box. 
+
+> **Note** **jNetPcap** also provides many useful utilities to help in working with the data received, such as byte arrays to hex string, and hex string to byte array, and much more. More advanced utility packet handlers such as no-copy on capture, are provides as well and discussed in the [Wiki pages][wiki]. 
+
+### Capture a Live Packet
+This quick example demonstrates how to **capture** 1 or more packets from a live network.
 ```java
 void main() throws PcapException {
 	int PACKET_COUNT = 1;
@@ -44,8 +41,18 @@ Which produces the following output:
 Hello World
 Packet [timestamp=2011-03-01T20:45:13.266Z, wirelen=74   caplen=74   {00:26:62:2f:47:87}]
 ```
-### Transmit a Packet
-This example demonstrates how to transmit a raw packet on a live network:
+### Transmit a Packet With Data-Link Header
+This example demonstrates how to **transmit** a raw packet on a live network.
+
+The packet we will transmit looks like this:
+```
+Frame 1: 74 bytes on wire (592 bits), 74 bytes captured (592 bits)
+Ethernet II, Src: ASUSTekC_b3:01:84 (00:1d:60:b3:01:84), Dst: Actionte_2f:47:87 (00:26:62:2f:47:87)
+Internet Protocol Version 4, Src: 192.168.253.5, Dst: 192.168.253.6
+Transmission Control Protocol, Src Port: 57678 (57678), Dst Port: http (80), Seq: 0, Len: 0
+```
+We use [Wireshark][wireshark] to convert a previously captured packet to a hex string (right click packet -> copy -> "... as a Hex Stream") and then **jNetPcap's** utility method `PcapUtils.parseHexString()` to further convert into a java byte array, which we send as a raw packet:
+
 ```java
 void main() throws PcapException {
 
@@ -65,19 +72,21 @@ void main() throws PcapException {
 	}
 }
 ```
-Note that **Pcap.inject** can also be used to transmit packets. This example produces no output, but if you monitor the network, you will see our non-routable packet being sent from the example host.
+This example produces no output, but if you monitor the network, you will see our non-routable packet being sent from the example host.
+
+> **Note** `Pcap.inject()` can also be used to transmit packets. We can also transmit data in `ByteBuffer` object, and a foreign native `MemorySegment`, all covered under advanced topics in [wiki].
 
 ### For more examples
 See the [wiki] pages. Project's [unit tests][unit_test] are also a great source for usage examples of every single function in the module.
 
 ## Dependencies
-**jNetPcap** binding has been designed to be extremely light and not have very few depdencies.
+**jNetPcap** binding has no external java dependencies except for modules provided by the java runtime.
 
-### Java Dependencies for Module: org.jnetpcap
+### Java Dependencies for Module: `org.jnetpcap`
 * No java dependencies except for standard java modules and the *Foreign Function* feature, currently in java *preview*, but one which is expected to be a permanent feature, in the near future.
 
 ### Native libbrary depdencies
-* The only native dependency is the native *libpcap* library itself, which has to be installed prior to **jNetPcap** module initializing. All versions of *libpcap* API are supported, from *libpcap* version 0.4 to the current latest version 1.5. This also includes the latest *WinPcap* and *Npcap* derivatives on *Microsfot Windows* platforms.
+* The only native dependency is the native [*libpcap* library][libpcap] itself, which has to be installed prior to **jNetPcap** module initializing. All versions of *libpcap* API are supported, from *libpcap* version 0.4 to the current latest version 1.5. This also includes the latest [*WinPcap*][winpcap] and [*Npcap*][npcap] derivatives on *Microsfot Windows* platforms.
 
 ## Installation
 There are several methods for installing the the software
@@ -92,22 +101,29 @@ There are several methods for installing the the software
 
 ```
 ### Download Release Package
-* TODO: add link to release
+> TODO - add link to release
 
 ### Compile From Source
-You will find instructions how to compile from source on our [Wiki Pages][wiki].
+You will find instructions on how to compile from source on our [Wiki Pages][wiki].
 
 ## Related Modules
 Previously embeded functionality into **jNetPcap** version 1, has be refactored into a separate modules. 
-### Module: org.jnetpcap.packet
-Provides high level packet dissecting and decoding functionality. It requires 'org.jnetpcap' module, and has several other depdencies (listed in the 'jnetpcap-packet' repo.)
-**Todo:** add link to jnetpcap-packet module
+### Module: `org.jnetpcap.packet`
+Provides high level packet dissecting and decoding functionality. It requires `org.jnetpcap` module, and has several other depdencies (listed in the `jnetpcap-packet` repo.)
+> TODO - add link to `jnetpcap-packet` module
 
 ## Usage
 See [Wiki pages][wiki]
 
+## Compatibility with jNetPcap version 1
+There are API and license changes between version 1 and 2 of jNetPcap.
+Please see [wiki home page][wiki] for details.
 
 [jnetpcap_v1_page]: <https://sourceforge.net/projects/jnetpcap> "Legacy jNetPcap Version 1 Project Page"
 [wiki]: <https://github.com/slytechs-repos/jnetpcap/wiki> "jNetPcap Project Wiki Pages"
 [unit_test]: <https://github.com/slytechs-repos/jnetpcap/blob/main/src/test/java/org/jnetpcap/test/LibpcapApiTest.java> "jUnit Test of Main Libpcap API bindings"
+[libpcap]: <https://www.tcpdump.org/> "This is the home web site of tcpdump, a powerful command-line packet analyzer; and libpcap, a portable C/C++ library for network traffic capture"
+[npcap]: <https://npcap.com/> "Npcap is the Nmap Project's packet capture (and sending) library for Microsoft Windows"
+[winpcap]: <https://www.winpcap.org/> "WinPcap is a library for link-layer network access in Windows environments"
+[wireshark]: <https://wireshark.com> "Wireshark is the world’s foremost and widely-used network protocol analyzer"
 
