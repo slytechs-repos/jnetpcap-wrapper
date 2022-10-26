@@ -25,10 +25,10 @@ import java.util.function.IntSupplier;
  * requested when reading a savefile.
  *
  * <pre>
- * <full>
+ * <code>
 #define PCAP_TSTAMP_PRECISION_MICRO	0	// use timestamps with microsecond precision, default
 #define PCAP_TSTAMP_PRECISION_NANO	1	// use timestamps with nanosecond precision
- * </full>
+ * </code>
  * </pre>
  * 
  * @author mark
@@ -36,25 +36,34 @@ import java.util.function.IntSupplier;
  */
 public enum PcapTStampPrecision implements IntSupplier {
 
-	/** use timestamps with microsecond precision, default */
+	/** use timestamps with microsecond precision, default. */
 	TSTAMP_PRECISION_MICRO(1000_000),
 
-	/** use timestamps with nanosecond precision */
+	/** use timestamps with nanosecond precision. */
 	TSTAMP_PRECISION_NANO(1000_000_000),;
 
-	/** use timestamps with microsecond precision, default */
+	/** use timestamps with microsecond precision, default. */
 	public static final int PCAP_TSTAMP_PRECISION_MICRO = 0;
 
-	/** use timestamps with nanosecond precision */
+	/** use timestamps with nanosecond precision. */
 	public static final int PCAP_TSTAMP_PRECISION_NANO = 1;
 
+	/**
+	 * Value of.
+	 *
+	 * @param value the value
+	 * @return the pcap T stamp precision
+	 */
 	public static PcapTStampPrecision valueOf(int value) {
 		return values()[value];
 	}
 
+	/** The scale. */
 	private final long scale;
 
 	/**
+	 * Instantiates a new pcap T stamp precision.
+	 *
 	 * @param scale the scale of the fractional unit
 	 */
 	PcapTStampPrecision(long scale) {
@@ -62,6 +71,9 @@ public enum PcapTStampPrecision implements IntSupplier {
 	}
 
 	/**
+	 * Gets the as int.
+	 *
+	 * @return the as int
 	 * @see java.util.function.IntSupplier#getAsInt()
 	 */
 	@Override
@@ -110,7 +122,7 @@ public enum PcapTStampPrecision implements IntSupplier {
 	}
 
 	/**
-	 * Computes a fraction of a second from epoch time provided
+	 * Computes a fraction of a second from epoch time provided.
 	 *
 	 * @param epochTime the epoch time
 	 * @return fraction of a second in this precision

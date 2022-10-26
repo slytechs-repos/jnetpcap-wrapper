@@ -20,6 +20,9 @@ package org.jnetpcap.util;
 /**
  * A Network IPv4 Address with a netmask.
  * 
+ * @param address IPv4 32-bit address
+ * @param netmask IPv4 32-bit netmask that is used to select network routing
+ *                bits from the IP address
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  * @author mark

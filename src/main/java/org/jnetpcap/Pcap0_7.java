@@ -92,7 +92,7 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 * 
 	 * <p>
 	 * Each element of the list is of type pcap_if_t, and has the following members:
-	 * 
+	 * </p>
 	 * <dl>
 	 * <dt>next</dt>
 	 * <dd>if not NULL, a pointer to the next element in the list; NULL for the last
@@ -106,9 +106,10 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 * <dt>addresses</dt>
 	 * <dd>a pointer to the first element of a list of network addresses for the
 	 * device, or NULL if the device has no addresses</dd>
+	 * </dl>
+	 * <dl>
 	 * <dt>flags</dt>
 	 * <dd>device flags:
-	 * <dl>
 	 * <dt>PCAP_IF_LOOPBACK</dt>
 	 * <dd>set if the device is a loopback interface</dd>
 	 * <dt>PCAP_IF_UP</dt>
@@ -119,10 +120,11 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 * <dd>set if the device is a wireless interface; this includes IrDA as well as
 	 * radio-based networks such as IEEE 802.15.4 and IEEE 802.11, so it doesn't
 	 * just mean Wi-Fi</dd>
+	 * </dl>
+	 * <dl>
 	 * <dt>PCAP_IF_CONNECTION_STATUS</dt>
 	 * <dd>a bitmask for an indication of whether the adapter is connected or not;
 	 * for wireless interfaces, "connected" means "associated with a network"
-	 * <dl>
 	 * <dt>PCAP_IF_CONNECTION_STATUS_UNKNOWN</dt>
 	 * <dd>it's unknown whether the adapter is connected or not</dd>
 	 * <dt>PCAP_IF_CONNECTION_STATUS_CONNECTED</dt>
@@ -133,14 +135,11 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 * <dd>the notion of "connected" and "disconnected" don't apply to this
 	 * interface; for example, it doesn't apply to a loopback device</dd>
 	 * </dl>
-	 * </dd></dd>
-	 * </dl>
-	 * </p>
 	 * 
 	 * <p>
 	 * Each element of the list of addresses is of type pcap_addr_t, and has the
 	 * following members:
-	 * </dl>
+	 * </p>
 	 * <dl>
 	 * <dt>next</dt>
 	 * <dd>if not NULL, a pointer to the next element in the list; NULL for the last
@@ -159,7 +158,6 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 * address corresponding to the address pointed to by addr; may be null if the
 	 * device isn't a point-to-point interface</dd>
 	 * </dl>
-	 * </p>
 	 * <p>
 	 * Note that the addresses in the list of addresses might be IPv4 addresses,
 	 * IPv6 addresses, or some other type of addresses, so you must check the
@@ -173,6 +171,13 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 * interpreted as if it pointed to a struct sockaddr_in; for IPv6 addresses, it
 	 * can be interpreted as if it pointed to a struct sockaddr_in6.
 	 * </p>
+	 * <p>
+	 * <b>For example</b>
+	 * </p>
+	 * 
+	 * <pre>{@snippet : 
+	 * 	List<PcapIf> list = Pcap.findAllDevs()
+	 * }</pre>
 	 *
 	 * @return list of network devices
 	 * @throws PcapException any pcap errors
@@ -229,9 +234,8 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 *
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
-	 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
-	 */
-	public static boolean isSupported() {
+	 * @see LibraryPolicy#setDefault(LibraryPolicy)
+	 */	public static boolean isSupported() {
 		return pcap_findalldevs.isNativeSymbolResolved();
 	}
 

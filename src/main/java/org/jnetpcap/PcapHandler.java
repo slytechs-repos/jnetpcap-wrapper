@@ -38,6 +38,15 @@ public interface PcapHandler {
 	 */
 	@FunctionalInterface
 	public interface OfArray<U> extends PcapHandler {
+
+		/**
+		 * Packet handler method. This method get called to handle or consume a pcap
+		 * packet.
+		 *
+		 * @param user   the user
+		 * @param header the header
+		 * @param packet the packet
+		 */
 		void handleArray(U user, PcapHeader header, byte[] packet);
 	}
 
@@ -52,6 +61,17 @@ public interface PcapHandler {
 	 */
 	@FunctionalInterface
 	public interface OfArrayAtOffset<U> extends PcapHandler {
+
+		/**
+		 * Packet handler method. This method get called to handle or consume a pcap
+		 * packet.
+		 *
+		 * @param user   the user
+		 * @param header the header
+		 * @param packet the packet
+		 * @param offset the offset
+		 * @param caplen the caplen
+		 */
 		void handleArray(U user, PcapHeader header, byte[] packet, int offset, int caplen);
 	}
 
@@ -63,6 +83,15 @@ public interface PcapHandler {
 	 */
 	@FunctionalInterface
 	public interface OfByteBuffer<U> extends PcapHandler {
+
+		/**
+		 * Packet handler method. This method get called to handle or consume a pcap
+		 * packet.
+		 *
+		 * @param user   the user
+		 * @param header the header
+		 * @param packet the packet
+		 */
 		void handleByteBuffer(U user, PcapHeader header, ByteBuffer packet);
 	}
 
@@ -77,6 +106,15 @@ public interface PcapHandler {
 	 */
 	@FunctionalInterface
 	public interface OfMemoryAddress<U> extends PcapHandler {
+
+		/**
+		 * Packet handler method. This method get called to handle or consume a pcap
+		 * packet.
+		 *
+		 * @param user   the user
+		 * @param header the header
+		 * @param packet the packet
+		 */
 		void handleAddress(U user, MemoryAddress header, MemoryAddress packet);
 	}
 
@@ -91,6 +129,16 @@ public interface PcapHandler {
 	 */
 	@FunctionalInterface
 	public interface OfMemorySegment<U> extends PcapHandler {
+
+		/**
+		 * Packet handler method. This method get called to handle or consume a pcap
+		 * packet.
+		 *
+		 * @param user   the user
+		 * @param header the header
+		 * @param Packet the packet
+		 * @param scope  the scope
+		 */
 		void handleMemorySegment(U user, MemorySegment header, MemorySegment Packet, MemorySession scope);
 	}
 
@@ -99,6 +147,14 @@ public interface PcapHandler {
 	 */
 	@FunctionalInterface
 	public interface OfRawPacket extends PcapHandler {
+
+		/**
+		 * Packet handler method. This method get called to handle or consume a pcap
+		 * packet.
+		 *
+		 * @param headerAddress the header address
+		 * @param packetAddress the packet address
+		 */
 		void handleRawPacket(Addressable headerAddress, Addressable packetAddress);
 	}
 
@@ -116,6 +172,13 @@ public interface PcapHandler {
 		@FunctionalInterface
 		public interface PcapPacketSink extends PacketSink {
 
+			/**
+			 * Sink a packet.
+			 *
+			 * @param packet the packet
+			 * @param length the length
+			 * @throws PcapException the pcap exception
+			 */
 			void sinkPacket(Addressable packet, int length) throws PcapException;
 		}
 	}
@@ -134,6 +197,13 @@ public interface PcapHandler {
 		@FunctionalInterface
 		public interface PcapPacketSource extends PacketSource {
 
+			/**
+			 * Source packets from a source.
+			 *
+			 * @param count   the count
+			 * @param handler the handler
+			 * @return the int
+			 */
 			int sourcePackets(int count, OfRawPacket handler);
 		}
 	}

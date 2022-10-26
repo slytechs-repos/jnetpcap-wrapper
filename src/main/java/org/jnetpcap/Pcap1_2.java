@@ -83,7 +83,6 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 	 * it; options for the capture, such as promiscu' ous mode, can be set on the
 	 * handle before activating it.
 	 *
-	 * @author Sly Technologies, Inc.
 	 * @param device a string that specifies the network device to open; on Linux
 	 *               systems with 2.2 or later kernels, a source argument of "any"
 	 *               or NULL can be used to capture packets from all interfaces.
@@ -126,9 +125,8 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 	 *
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
-	 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
-	 */
-	public static boolean isSupported() {
+	 * @see LibraryPolicy#setDefault(LibraryPolicy)
+	 */	public static boolean isSupported() {
 		return pcap_free_tstamp_types.isNativeSymbolResolved();
 	}
 

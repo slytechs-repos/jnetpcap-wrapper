@@ -59,14 +59,14 @@ import java.util.function.IntSupplier;
  * due to batching of interrupts for packet arrival, queueing delays, etc..
  * 
  * <pre>
- * <full>
+ * <code>
 #define PCAP_TSTAMP_HOST			        0	// host-provided, unknown characteristics
 #define PCAP_TSTAMP_HOST_LOWPREC		    1	// host-provided, low precision, synced with the system clock
 #define PCAP_TSTAMP_HOST_HIPREC			    2	// host-provided, high precision, synced with the system clock
 #define PCAP_TSTAMP_ADAPTER			        3	// device-provided, synced with the system clock
 #define PCAP_TSTAMP_ADAPTER_UNSYNCED		4	// device-provided, not synced with the system clock
 #define PCAP_TSTAMP_HOST_HIPREC_UNSYNCED	5	// host-provided, high precision, not synced with the system clock 
- * </full>
+ * </code>
  * </pre>
  * 
  * @author mark
@@ -74,47 +74,56 @@ import java.util.function.IntSupplier;
  */
 public enum PcapTstampType implements IntSupplier {
 
-	/** host-provided, unknown characteristics */
+	/** host-provided, unknown characteristics. */
 	TSTAMP_TYPE_HOST,
 
-	/** host-provided, low precision, synced with the system clock */
+	/** host-provided, low precision, synced with the system clock. */
 	TSTAMP_TYPE_HOST_LOWPREC,
 
-	/** host-provided, high precision, synced with the system clock */
+	/** host-provided, high precision, synced with the system clock. */
 	TSTAMP_TYPE_HOST_HIPREC,
 
-	/** device-provided, synced with the system clock */
+	/** device-provided, synced with the system clock. */
 	TSTAMP_TYPE_ADAPTER,
 
-	/** device-provided, not synced with the system clock */
+	/** device-provided, not synced with the system clock. */
 	TSTAMP_TYPE_ADAPTER_UNSYNCED,
 
-	/** host-provided, high precision, not synced with the system clock */
+	/** host-provided, high precision, not synced with the system clock. */
 	TSTAMP_TYPE_HOST_HIPREC_UNSYNCED;
 
-	/** host-provided, unknown characteristics */
+	/** host-provided, unknown characteristics. */
 	public static final int PCAP_TSTAMP_HOST = 0;
 
-	/** host-provided, low precision, synced with the system clock */
+	/** host-provided, low precision, synced with the system clock. */
 	public static final int PCAP_TSTAMP_HOST_LOWPREC = 1;
 
-	/** host-provided, high precision, synced with the system clock */
+	/** host-provided, high precision, synced with the system clock. */
 	public static final int PCAP_TSTAMP_HOST_HIPREC = 2;
 
-	/** device-provided, synced with the system clock */
+	/** device-provided, synced with the system clock. */
 	public static final int PCAP_TSTAMP_ADAPTER = 3;
 
-	/** device-provided, not synced with the system clock */
+	/** device-provided, not synced with the system clock. */
 	public static final int PCAP_TSTAMP_ADAPTER_UNSYNCED = 4;
 
-	/** host-provided, high precision, not synced with the system clock */
+	/** host-provided, high precision, not synced with the system clock. */
 	public static final int PCAP_TSTAMP_HOST_HIPREC_UNSYNCED = 5;
 
+	/**
+	 * Value of.
+	 *
+	 * @param type the type
+	 * @return the pcap tstamp type
+	 */
 	public static PcapTstampType valueOf(int type) {
 		return values()[type];
 	}
 
 	/**
+	 * Gets the as int.
+	 *
+	 * @return the as int
 	 * @see java.util.function.IntSupplier#getAsInt()
 	 */
 	@Override

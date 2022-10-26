@@ -29,22 +29,38 @@ import org.jnetpcap.Pcap;
  */
 public enum PcapCode implements IntSupplier {
 
+	/** ok */
 	OK(PcapCode.PCAP_OK, "Ok"),
+	/** generic error full */
 	ERROR(PcapCode.PCAP_ERROR),
+	/** loop terminated by pcap_breakloop */
 	ERROR_BREAK(PcapCode.PCAP_ERROR_BREAK),
+	/** the capture needs to be activated */
 	ERROR_NOT_ACTIVATED(PcapCode.PCAP_ERROR_NOT_ACTIVATED),
+	/** the operation can't be performed on already activated captures */
 	ERROR_ACTIVATED(PcapCode.PCAP_ERROR_ACTIVATED),
+	/** no such device exists */
 	ERROR_NO_SUCH_DEVICE(PcapCode.PCAP_ERROR_NO_SUCH_DEVICE),
+	/** this device doesn't support rfmon (monitor) mode */
 	ERROR_RFMON_NOTSUP(PcapCode.PCAP_ERROR_RFMON_NOTSUP),
+	/** operation supported only in monitor mode */
 	ERROR_NOT_RFMON(PcapCode.PCAP_ERROR_NOT_RFMON),
+	/** no permission to open the device */
 	ERROR_PERM_DENIED(PcapCode.PCAP_ERROR_PERM_DENIED),
+	/** interface isn't up */
 	ERROR_IFACE_NOT_UP(PcapCode.PCAP_ERROR_IFACE_NOT_UP),
+	/** this device doesn't support setting the time stamp type */
 	ERROR_CANTSET_TSTAMP_TYPE(PcapCode.PCAP_ERROR_CANTSET_TSTAMP_TYPE),
+	/** you don't have permission to capture in promiscuous mode */
 	ERROR_PROMISC_PERM_DENIED(PcapCode.PCAP_ERROR_PROMISC_PERM_DENIED),
+	/** the requested time stamp precision is not supported */
 	ERROR_TSTAMP_PRECISION_NOTSUP(PcapCode.PCAP_ERROR_TSTAMP_PRECISION_NOTSUP),
 
-	WARNING(PcapCode.PCAP_WARNING, "generic warning full"),
+	/** generic warning */
+	WARNING(PcapCode.PCAP_WARNING, "generic warning"),
+	/** this device doesn't support promiscuous mode */
 	WARNING_PROMISC_NOTSUP(PcapCode.PCAP_WARNING_PROMISC_NOTSUP, "this device doesn't support promiscuous mode"),
+	/** the requested time stamp type is not supported */
 	WARNING_TSTAMP_TYPE_NOTSUP(PcapCode.PCAP_WARNING_TSTAMP_TYPE_NOTSUP,
 			"the requested time stamp type is not supported"),
 
@@ -89,7 +105,7 @@ public enum PcapCode implements IntSupplier {
 	/** the requested time stamp precision is not supported */
 	public final static int PCAP_ERROR_TSTAMP_PRECISION_NOTSUP = -12;
 
-	/** generic warning full */
+	/** generic warning */
 	public final static int PCAP_WARNING = 1;
 
 	/** this device doesn't support promiscuous mode */
@@ -98,6 +114,12 @@ public enum PcapCode implements IntSupplier {
 	/** the requested time stamp type is not supported */
 	public final static int PCAP_WARNING_TSTAMP_TYPE_NOTSUP = 3;
 
+	/**
+	 * Converts an integer Pcap error code to a string.
+	 *
+	 * @param code the code
+	 * @return the error code string or description
+	 */
 	public static String toString(int code) {
 		if (code < 0)
 			return Pcap.statusToStr(valueOf(code));
@@ -112,16 +134,18 @@ public enum PcapCode implements IntSupplier {
 
 	}
 
-	public static String toString(Pcap activePcap) {
-		return activePcap.geterr();
-	}
-
-	public static PcapCode valueOf(int intValue) {
+	/**
+	 * Converts an integer Pcap error code to a constant.
+	 *
+	 * @param code pcap error code
+	 * @return the matching constant or null if not found
+	 */
+	public static PcapCode valueOf(int code) {
 		PcapCode[] constants = values();
 		int len = constants.length;
 
 		for (int i = 0; i < len; i++)
-			if (constants[i].code == intValue)
+			if (constants[i].code == code)
 				return constants[i];
 
 		return null;
@@ -149,27 +173,49 @@ public enum PcapCode implements IntSupplier {
 		return code;
 	}
 
+	/**
+	 * Gets the message associated with this error code.
+	 *
+	 * @return the error code message
+	 */
 	public String getMessage() {
 		return message;
 	}
 
+	/**
+	 * Looks up the error message for a give code
+	 *
+	 * @param code the pcap code to lookup
+	 * @return the error code message
+	 */
 	public static String getMessage(int code) {
 		PcapCode pc = PcapCode.valueOf(code);
 		return (pc == null) ? "code: " + code : pc.getMessage();
 	}
 
-	public int intValue() {
-		return code;
-	}
-
+	/**
+	 * Checks if this code is an pcap error. For example, {@code code < 0}
+	 *
+	 * @return true, if is error
+	 */
 	public boolean isError() {
 		return (code < 0) && (code != PCAP_ERROR_BREAK); // Break is not really an error
 	}
 
+	/**
+	 * Checks if this code is pcap status OK. For example, {@code code == 0}
+	 *
+	 * @return true, if is ok
+	 */
 	public boolean isOk() {
 		return code == 0;
 	}
 
+	/**
+	 * Checks if this code is pcap status warning. For example, {@code code > 0}
+	 *
+	 * @return true, if it is a wraning
+	 */
 	public boolean isWarning() {
 		return (code > 0);
 	}

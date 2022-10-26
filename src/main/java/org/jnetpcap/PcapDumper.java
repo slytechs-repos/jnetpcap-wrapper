@@ -142,6 +142,7 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	 *
 	 * @param header the header
 	 * @param packet the packet
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 * @since libpcap 0.4
 	 */
 	public void dump(MemoryAddress header, MemoryAddress packet) throws IOException {

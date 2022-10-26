@@ -19,7 +19,7 @@
 /**
  * Native <em>Pcap</em> wrapper API and implementation on *Unix and Microsoft
  * Windows platforms.
- * <h1>Description</h1>
+ * <h2>Description</h2>
  * <p>
  * The Packet Capture library provides a high level interface to packet capture
  * systems. All packets on the network, even those destined for other hosts, are
@@ -27,7 +27,7 @@
  * to a ``savefile'', and reading packets from a ``savefile''.
  * </p>
  * 
- * <h1>Opening a capture handle for reading</h1>
+ * <h2>Opening a capture handle for reading</h2>
  * <p>
  * To open a handle for a live capture, given the name of the network or other
  * interface on which the capture should be done, call
@@ -149,7 +149,7 @@
  * adapter can be put into monitor mode.
  * </p>
  * </dd>
- * <dt></dt>
+ * <dt>In monitor mode</dt>
  * <dd>
  * <p>
  * If, when capturing, packets are delivered as soon as they arrive, the
@@ -232,7 +232,6 @@
  * </p>
  * </dd>
  * </dl>
- * </p>
  * 
  * @author Mark Bednarczyk
  * @author Sly Technologies Inc.

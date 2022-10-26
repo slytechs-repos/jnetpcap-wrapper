@@ -15,27 +15,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jnetpcap.windows;
+package org.jnetpcap.constant;
 
 import java.util.function.IntSupplier;
 
 /**
+ * WinPcap setmode values.
+ * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  * @author mark
  *
  */
-public enum Mode implements IntSupplier {
+public enum WinPcapMode implements IntSupplier {
 
+	/** The CAPTURE mode constant. */
 	CAPT,
+
+	/** The STATISTICS mode constant. */
 	STAT,
+
+	/** The MONITOR mode constant. */
 	MON;
 
+	/** The Constant MODE_CAPT. */
 	public static final int MODE_CAPT = 0;
+
+	/** The Constant MODE_STAT. */
 	public static final int MODE_STAT = 1;
+
+	/** The Constant MODE_MON. */
 	public static final int MODE_MON = 2;
 
 	/**
+	 * Gets the as int.
+	 *
+	 * @return the as int
 	 * @see java.util.function.IntSupplier#getAsInt()
 	 */
 	@Override

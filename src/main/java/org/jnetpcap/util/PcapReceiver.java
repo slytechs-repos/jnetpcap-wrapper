@@ -40,12 +40,14 @@ import org.jnetpcap.internal.ArrayAllocator;
  * packet capture. Also provides extensive set of additional, more advanced,
  * packet callbacks, including no-copy ones. The handler interfaces are purposes
  * functional, to be implemented by user full to receive packets from Pcap.
+ * 
  * <p>
  * Here is an example which uses PcapHandler and several of its functional
  * packet handler interfaces.
+ * </p>
  * 
  * <pre>
- * <full>
+ * <code>
 try (Pcap pcap = Pcap.openOffline(PCAP_FILE)) {
 
 	BpFilter filter = pcap.compile("tcp", true);
@@ -80,7 +82,7 @@ private static void nextDefault(String message, PcapHeader header, byte[] packet
 			header.captureLength(),
 			PcapUtils.toHexCurleyString(packet, 0, 6));
 }
- * </full>
+ * </code>
  * </pre>
  * 
  * Output:
@@ -95,7 +97,6 @@ Packet [timestamp=2011-03-01T20:45:13.313Z, wirelen=66   caplen=66   {00:26:62:2
 Hello, this is no-copy, direct ByteBuffer dispatch
 Packet [timestamp=2011-03-01T20:45:13.313Z, wirelen=200  caplen=200  {00:26:62:2f:47:87}]
  * </pre>
- * </p>
  * 
  * @author Sly Technologies
  * @author repos@slytechs.com
@@ -104,6 +105,13 @@ public final class PcapReceiver implements PcapPacketSource {
 
 	/**
 	 * Common array-handler, shared between PcapReceiver and Pcap0_4 implementation.
+	 *
+	 * @param <U>          the generic type
+	 * @param packetSource the packet source
+	 * @param count        the count
+	 * @param handler      the handler
+	 * @param user         the user
+	 * @return the int
 	 */
 	public static <U> int commonArrayHandler(PcapPacketSource packetSource, int count,
 			PcapHandler.OfArray<U> handler, U user) {
@@ -124,6 +132,11 @@ public final class PcapReceiver implements PcapPacketSource {
 		});
 	}
 
+	/**
+	 * New scope.
+	 *
+	 * @return the memory session
+	 */
 	private static final MemorySession newScope() {
 		return MemorySession.openShared();
 	}
@@ -147,7 +160,7 @@ public final class PcapReceiver implements PcapPacketSource {
 
 	/**
 	 * Todo: array allocator needs a better design, or does it even makes sense? -
-	 * mark
+	 * mark.
 	 *
 	 * @param <U>            the generic type
 	 * @param count          the count
@@ -287,6 +300,11 @@ public final class PcapReceiver implements PcapPacketSource {
 	}
 
 	/**
+	 * Source packets.
+	 *
+	 * @param count   the count
+	 * @param handler the handler
+	 * @return the int
 	 * @see org.jnetpcap.PcapHandler.PacketSource.PcapPacketSource#sourcePackets(int,
 	 *      org.jnetpcap.PcapHandler.OfRawPacket)
 	 */

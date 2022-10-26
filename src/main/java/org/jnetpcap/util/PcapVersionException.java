@@ -38,16 +38,29 @@ import org.jnetpcap.PcapException;
  * {@code 1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta < 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0.}
  * </p>
  * 
+ * For detailed specification please see http://semver.org
+ * 
  * @author Sly Technologies
  * @author repos@slytechs.com
- * @see http://semver.org - Semantic Versioning 2.0.0
  */
 public final class PcapVersionException extends PcapException {
 
+	/** The Constant VERSION_COMPONENT_CHECK_LIMIT. */
 	private static final int VERSION_COMPONENT_CHECK_LIMIT = 2; // Limit to major.minor components
+
+	/** The Constant VERSION_COMPONENT_SEPARATOR_REGEX. */
 	private static final String VERSION_COMPONENT_SEPARATOR_REGEX = "[\\.\\+-]";
+
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = -7076460432578326479L;
 
+	/**
+	 * Builds the message.
+	 *
+	 * @param runtimeVersion     the runtime version
+	 * @param applicationVersion the application version
+	 * @return the string
+	 */
 	private static String buildMessage(String runtimeVersion, String applicationVersion) {
 		return "Installed runtime %s.Pcap version %s and application version %s are incompatible"
 				.formatted(PcapVersionException.class.getPackageName(),
@@ -76,7 +89,12 @@ public final class PcapVersionException extends PcapException {
 	 * components are checked for compatibility. Any other components are ignored
 	 * and assumed to be backward compatible with the installed runtime version. For
 	 * {@code major} only component check, specify limit of 1.
-	 *
+	 * 
+	 * <p>
+	 * For detailed information see https://semver.org - Semantic Versioning
+	 * Specification used by jNetPcap
+	 * </p>
+	 * 
 	 * @param v1    the installed runtime version
 	 * @param v2    the application version
 	 * @param limit Number of version components to check up to a maximum of 3. Use
@@ -87,7 +105,6 @@ public final class PcapVersionException extends PcapException {
 	 *              provide a check against a specific bug fix.
 	 * @return true, if runtime version is compatible with application version,
 	 *         otherwise false when incompatible
-	 * @see https://semver.org - Semantic Versioning Specification used by jNetPcap
 	 */
 	public static boolean compareVersions(String v1, String v2, int limit) {
 
@@ -111,21 +128,49 @@ public final class PcapVersionException extends PcapException {
 		}
 	}
 
+	/**
+	 * Equals.
+	 *
+	 * @param v1 the v 1
+	 * @param v2 the v 2
+	 * @return true, if successful
+	 */
 	public static boolean equals(String v1, String v2) {
 		return v1.trim().equalsIgnoreCase(v2.trim());
 	}
 
+	/**
+	 * Parses the version.
+	 *
+	 * @param version the version
+	 * @return the int[]
+	 */
 	private static int[] parseVersion(String version) {
 		return Arrays.stream(version.split(VERSION_COMPONENT_SEPARATOR_REGEX))
 				.mapToInt(Integer::parseInt)
 				.toArray();
 	}
 
+	/**
+	 * Throw if version mismatch.
+	 *
+	 * @param runtimeVersion     the runtime version
+	 * @param applicationVersion the application version
+	 * @throws PcapVersionException the pcap version exception
+	 */
 	public static void throwIfVersionMismatch(String runtimeVersion, String applicationVersion)
 			throws PcapVersionException {
 		throwIfVersionMismatch(runtimeVersion, applicationVersion, VERSION_COMPONENT_CHECK_LIMIT);
 	}
 
+	/**
+	 * Throw if version mismatch.
+	 *
+	 * @param runtimeVersion     the runtime version
+	 * @param applicationVersion the application version
+	 * @param limit              the limit
+	 * @throws PcapVersionException the pcap version exception
+	 */
 	public static void throwIfVersionMismatch(String runtimeVersion, String applicationVersion, int limit)
 			throws PcapVersionException {
 
@@ -134,9 +179,10 @@ public final class PcapVersionException extends PcapException {
 	}
 
 	/**
-	 * Private
-	 * 
-	 * @param message
+	 * Private.
+	 *
+	 * @param runtimeVersion     the runtime version
+	 * @param applicationVersion the application version
 	 */
 	private PcapVersionException(String runtimeVersion, String applicationVersion) {
 		super(buildMessage(runtimeVersion, applicationVersion));

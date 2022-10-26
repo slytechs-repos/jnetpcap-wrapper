@@ -83,9 +83,7 @@ public final class PcapUtils {
 	 * 6)}.
 	 * </p>
 	 *
-	 * @param array  the source array for bytes
-	 * @param offset the offset into the array to start
-	 * @param length the number of bytes to format
+	 * @param array the source array for bytes
 	 * @return the formatted string
 	 */
 	public static String toHexCurleyString(byte[] array) {
@@ -325,6 +323,9 @@ public final class PcapUtils {
 				.collect(Collectors.joining("."));
 	}
 
+	/**
+	 * Instantiates a new pcap utils.
+	 */
 	private PcapUtils() {
 		// Empty
 	}

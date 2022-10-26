@@ -24,7 +24,9 @@ import org.jnetpcap.Pcap0_4;
 import org.jnetpcap.Pcap0_6;
 import org.jnetpcap.Pcap1_0;
 import org.jnetpcap.Pcap1_5;
+import org.jnetpcap.PcapDumper;
 import org.jnetpcap.PcapException;
+import org.jnetpcap.PcapIf;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapTStampPrecision;
 import org.jnetpcap.internal.PcapForeignDowncall;
@@ -67,7 +69,28 @@ public final class Npcap extends WinPcap {
 	 * it; options for the capture, such as promiscu' ous mode, can be set on the
 	 * handle before activating it.
 	 *
-	 * @author Sly Technologies, Inc.
+	 * @param device pcap network interface that specifies the network device to
+	 *               open.
+	 * @return a new pcap object that needs to be activated using
+	 *         {@link #activate()} call
+	 * @throws PcapException the pcap exception
+	 * @since libpcap 1.0
+	 */
+	public static Npcap create(PcapIf device) throws PcapException {
+		return Pcap1_0.create(Npcap::new, device.name());
+	}
+
+	/**
+	 * Create a live capture handle.
+	 * 
+	 * {@code create} is used to create a packet capture handle to look at packets
+	 * on the network. source is a string that specifies the network device to open;
+	 * on Linux systems with 2.2 or later kernels, a source argument of "any" or
+	 * NULL can be used to capture packets from all interfaces. The returned handle
+	 * must be activated with pcap_activate() before pack' ets can be captured with
+	 * it; options for the capture, such as promiscu' ous mode, can be set on the
+	 * handle before activating it.
+	 *
 	 * @param device a string that specifies the network device to open; on Linux
 	 *               systems with 2.2 or later kernels, a source argument of "any"
 	 *               or NULL can be used to capture packets from all interfaces.
@@ -150,28 +173,32 @@ public final class Npcap extends WinPcap {
 
 	/**
 	 * Open a fake pcap_t for compiling filters or opening a capture for output.
-	 *
+	 * 
 	 * <p>
-	 * {@link #openDead} and pcap_open_dead_with_tstamp_precision() are used for
-	 * creating a pcap_t structure to use when calling the other functions in
-	 * libpcap. It is typically used when just using libpcap for compiling BPF full;
-	 * it can also be used if using pcap_dump_open(3PCAP), pcap_dump(3PCAP), and
-	 * pcap_dump_close(3PCAP) to write a savefile if there is no pcap_t that
+	 * {@link #openDead(PcapDlt, int)} and
+	 * {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)} are
+	 * used for creating a pcap_t structure to use when calling the other functions
+	 * in libpcap. It is typically used when just using libpcap for compiling BPF
+	 * full; it can also be used if using {@code #dumpOpen(String)},
+	 * {@link PcapDumper#dump(MemoryAddress, MemoryAddress)}, and
+	 * {@link PcapDumper#close()} to write a savefile if there is no pcap_t that
 	 * supplies the packets to be written.
 	 * </p>
 	 * 
 	 * <p>
-	 * When pcap_open_dead_with_tstamp_precision(), is used to create a pcap_t for
-	 * use with pcap_dump_open(), precision specifies the time stamp precision for
+	 * When {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)},
+	 * is used to create a {@code Pcap} handle for use with
+	 * {@link #dumpOpen(String)}, precision specifies the time stamp precision for
 	 * packets; PCAP_TSTAMP_PRECISION_MICRO should be specified if the packets to be
 	 * written have time stamps in seconds and microseconds, and
 	 * PCAP_TSTAMP_PRECISION_NANO should be specified if the packets to be written
 	 * have time stamps in seconds and nanoseconds. Its value does not affect
 	 * pcap_compile(3PCAP).
 	 * </p>
-	 * 
-	 * @param linktype specifies the link-layer type for the pcap handle
-	 * @param snaplen  specifies the snapshot length for the pcap handle
+	 *
+	 * @param linktype  specifies the link-layer type for the pcap handle
+	 * @param snaplen   specifies the snapshot length for the pcap handle
+	 * @param precision the requested timestamp precision
 	 * @return A dead pcap handle
 	 * @throws PcapException any errors
 	 * @since libpcap 1.5.1

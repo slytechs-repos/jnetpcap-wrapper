@@ -291,7 +291,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 *
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
-	 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
+	 * @see LibraryPolicy#setDefault(LibraryPolicy)
 	 */
 	public static boolean isSupported() {
 		return pcap_open_live.isNativeSymbolResolved();
@@ -486,7 +486,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	/**
 	 * Convert an error full value to a string.
 	 *
-	 * @param full pcap error full
+	 * @param code the code
 	 * @return the error string for the given full
 	 */
 	public static String strerror(int code) {
@@ -631,10 +631,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * {@link Pcap#openLive(String, int, boolean, long, TimeUnit)}. Note that the
 	 * Packet Capture library is usually built with large file support, so the
 	 * standard I/O stream of the ``savefile'' might refer to a file larger than 2
-	 * gigabytes; applications that use {@link Pcap#file()} should, if possible, use
-	 * calls that support large files on the return value of {@link Pcap#file()} or
-	 * the value returned by {@link Pcap#fileno()} when passed the return value of
-	 * {@link Pcap#fileno()}.
+	 * gigabytes; applications that use {@link Pcap0_4#file()} should, if possible, use
+	 * calls that support large files on the return value of {@link Pcap0_4#file()} or
+	 * the value returned by {@link Pcap0_4#file()} when passed the return value of
+	 * {@link Pcap0_4#file()}.
 	 * </p>
 	 *
 	 * @return the OS standard I/O stream, only suitable with OS calls
@@ -741,7 +741,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			.allocate(PCAP_HEADER_PADDED_LENGTH);
 
 	/**
-	 * @see org.jnetpcap.Pcap#next(java.util.function.Consumer)
+	 * @see org.jnetpcap.Pcap#next()
 	 */
 	@Override
 	public final PcapPacketRef next() throws PcapException {

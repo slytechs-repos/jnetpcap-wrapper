@@ -18,22 +18,43 @@
 package org.jnetpcap.constant;
 
 /**
+ * Pcap live capture mode flags.
  * 
  * @author Sly Technologies
  * @author repos@slytechs.com
  */
 public enum PcapMode {
-
+	/**
+	 * Flag used with <code>openLive</code> to specify that the interface should be
+	 * put into non-promisuous mode.
+	 */
+	NON_PROMISCOUS,
+	/**
+	 * Flag used with <code>openLive</code> to specify that the interface should be
+	 * put into promisuous mode.
+	 */
 	PROMISCUOUS,
 
 	;
 
 	/**
-	 * Flag used with <full>openLive</full> to specify that the interface should be
+	 * Flag used with <code>openLive</code> to specify that the interface should be
+	 * put into non-promisuous mode.
+	 */
+	public static final int PCAP_MODE_NON_PROMISCUOUS = 0;
+
+	/**
+	 * Flag used with <code>openLive</code> to specify that the interface should be
 	 * put into promisuous mode.
 	 */
 	public static final int PCAP_MODE_PROMISCUOUS = 1;
 
+	/**
+	 * Value of.
+	 *
+	 * @param intValue the int value
+	 * @return the pcap mode
+	 */
 	public static PcapMode valueOf(int intValue) {
 		if (intValue < 0 || intValue >= values().length)
 			throw new IllegalArgumentException("" + intValue);

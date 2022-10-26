@@ -20,22 +20,36 @@ package org.jnetpcap.constant;
 import java.util.function.IntSupplier;
 
 /**
+ * Specifies the packet direction on a live capture, relative to the network
+ * interface.
  * 
  * @author Sly Technologies
  * @author repos@slytechs.com
  */
 public enum PcapDirection implements IntSupplier {
 
+	/** Packet's direction is in either direction. */
 	DIRECTION_INOUT,
+	/** Packet's direction is being received. */
 	DIRECTION_IN,
+	/** Packet's direction is being transmitted. */
 	DIRECTION_OUT,
 
 	;
 
+	/** Packet's direction is in either direction. */
 	public static final int PCAP_DIRECTION_INOUT = 0;
+	/** Packet's direction is being received. */
 	public static final int PCAP_DIRECTION_IN = 1;
+	/** Packet's direction is being transmitted. */
 	public static final int PCAP_DIRECTION_OUT = 2;
 
+	/**
+	 * Converts integer pcap direction value to a constant.
+	 *
+	 * @param intValue the int value
+	 * @return the pcap direction
+	 */
 	public static PcapDirection valueOf(int intValue) {
 		if (intValue < 0 || intValue >= values().length)
 			throw new IllegalArgumentException("" + intValue);

@@ -78,7 +78,7 @@ public sealed class Pcap0_5 extends Pcap0_4 permits Pcap0_6 {
 	 * </p>
 	 *
 	 * @param snaplen  the snaplen
-	 * @param pcapDlt      the dlt
+	 * @param pcapDlt  the dlt
 	 * @param str      filter expression to be compiled
 	 * @param optimize controls whether optimization on the resulting full is
 	 *                 performed
@@ -108,7 +108,8 @@ public sealed class Pcap0_5 extends Pcap0_4 permits Pcap0_6 {
 
 			MemorySegment c_filter = ForeignUtils.toUtf8String(str, scope);
 
-			int code = pcap_compile_nopcap.invokeInt(snaplen, pcapDlt.getAsInt(), bpFilter.address(), c_filter, opt, netmask);
+			int code = pcap_compile_nopcap.invokeInt(snaplen, pcapDlt.getAsInt(), bpFilter.address(), c_filter, opt,
+					netmask);
 			PcapException.throwIfNotOk(code);
 
 			return bpFilter;
@@ -145,7 +146,7 @@ public sealed class Pcap0_5 extends Pcap0_4 permits Pcap0_6 {
 	 *
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
-	 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
+	 * @see LibraryPolicy#setDefault(LibraryPolicy)
 	 */
 	public static boolean isSupported() {
 		return pcap_compile_nopcap.isNativeSymbolResolved();
