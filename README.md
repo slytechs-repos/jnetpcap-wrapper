@@ -76,6 +76,14 @@ This example produces no output, but if you monitor the network, you will see ou
 
 > **Note** `Pcap.inject()` can also be used to transmit packets. We can also transmit data in `ByteBuffer` object, and a foreign native `MemorySegment`, all covered under advanced topics in [wiki].
 
+### How To Run The Examples
+To run these exmamples the following command line arguments need to be added:
+<dl><dt>On Linux platforms</dt><dd>-Djava.library.path=/usr/lib/x86_64-linux-gnu --enable-native-access=org.jnetpcap --enable-preview</dd>
+<dl><dt>On Windows platforms</dt><dd>-Djava.library.path=C:\Windows\SysWOW64 --enable-native-access=org.jnetpcap --enable-preview</dd>
+<dl><dt>On MacOS platforms</dt><dd>-Djava.library.path=/usr/local/Cellar/libpcap/1.10.1/lib --enable-native-access=org.jnetpcap --enable-preview</dd>
+	
+> **Note** that the `--enable-preview` command line option is only required until *Foreign Function* feature become permanent, possibly in Java 20 or Java 21 LTS.
+	
 ### For more examples
 See the [wiki] pages. Project's [unit tests][unit_test] are also a great source for usage examples of every single function in the module.
 
@@ -83,10 +91,10 @@ See the [wiki] pages. Project's [unit tests][unit_test] are also a great source 
 **jNetPcap** binding has no external java dependencies except for modules provided by the java runtime.
 
 ### Java Dependencies for Module: `org.jnetpcap`
-* No java dependencies except for standard java modules and the *Foreign Function* feature, currently in java *preview*, but one which is expected to be a permanent feature, in the near future.
+* No java dependencies except for standard java modules and the *Foreign Function* feature, currently in java *preview* (enabled with `--enable-preview` VM args option), but one which is expected to be a permanent feature, in the near future.
 
 ### Native libbrary depdencies
-* The only native dependency is the native [*libpcap* library][libpcap] itself, which has to be installed prior to **jNetPcap** module initializing. All versions of *libpcap* API are supported, from *libpcap* version 0.4 to the current and latest version 1.5. This also includes [*WinPcap*][winpcap] and [*Npcap*][npcap] derivatives on *Microsfot Windows* platforms.
+* The only native dependency is the native [*libpcap* library][libpcap] itself, which has to be installed prior to **jNetPcap** module initializing. On *Microsoft Windows* platforms, install [*WinPcap*][winpcap] or [*Npcap*][npcap] tools instead.
 
 ## Installation
 Here are several methods for installing **jNetPcap** software.
