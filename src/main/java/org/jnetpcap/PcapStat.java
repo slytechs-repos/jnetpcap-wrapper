@@ -25,6 +25,7 @@ import org.jnetpcap.windows.PcapStatEx;
  * 
  * <p>
  * A struct pcap_stat has the following members:
+ * </p>
  * <dl>
  * <dt>ps_recv</dt>
  * <dd>number of packets received;</dd>
@@ -35,7 +36,6 @@ import org.jnetpcap.windows.PcapStatEx;
  * <dt>ps_ifdrop</dt>
  * <dd>number of packets dropped by the network interface or its driver.</dd>
  * </dl>
- * </p>
  * <p>
  * The statistics do not behave the same way on all platforms. ps_recv might
  * count packets whether they passed any filter set with pcap_setfilter(3PCAP)

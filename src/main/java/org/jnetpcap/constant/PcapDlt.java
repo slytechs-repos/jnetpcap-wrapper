@@ -32,9 +32,9 @@ import org.jnetpcap.Pcap0_8;
  * </p>
  * <p>
  * There are 2 tables within PcapDLT enum structure. First is the full table of
- * enum constants, and then there is a duplicate table containing <full>public
- * final static int</full> of contants, prefixed with <full>DLT_</full>. Also
- * the enum constant's field <full>value</full> is public which means that
+ * enum constants, and then there is a duplicate table containing <code>public
+ * final static int</code> of contants, prefixed with <code>DLT_</code>. Also
+ * the enum constant's field <code>value</code> is public which means that
  * integer DLT constant can also be access using the field directly.
  * </p>
  * Here are 4 examples of how you can use DLT constants in various ways.
@@ -88,10 +88,10 @@ public enum PcapDlt implements IntSupplier {
 	/** The NULL. */
 	NULL(0),
 
-	/** The E n10 mb. */
+	/** Ethernet link-type. */
 	EN10MB(1),
 
-	/** The E n3 mb. */
+	/** Lagacy 3MB ethernet link-type. */
 	EN3MB(2),
 
 	/** The A x25. */
@@ -651,6 +651,11 @@ public enum PcapDlt implements IntSupplier {
 	 */
 	public String description;
 
+	/**
+	 * Instantiates a new pcap dlt.
+	 *
+	 * @param pcapDlt the pcap dlt
+	 */
 	private PcapDlt(int pcapDlt) {
 		this.intDlt = pcapDlt;
 	}
@@ -677,17 +682,12 @@ public enum PcapDlt implements IntSupplier {
 		return this.intDlt;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.jnetpcap.DataLinkType#getDescription()
-	 */
 	/**
 	 * Gets the description of the dlt retrieved by quering the native pcap library.
 	 * 
 	 * @return the description of the dlt retrieved by quering the native pcap
 	 *         library
-	 * @see org.jnetpcap.DataLinkType#getDescription()
+	 * @see PcapDlt#getDescription()
 	 */
 	public String getDescription() {
 		if (description == null && Pcap0_8.isSupported()) {

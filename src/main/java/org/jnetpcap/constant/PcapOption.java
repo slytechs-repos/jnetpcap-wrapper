@@ -20,13 +20,7 @@ package org.jnetpcap.constant;
 import java.util.function.IntSupplier;
 
 /**
- * Options usable with {@code Pcap.init(PcapOption option)) call.
- * 
- * @author Sly Technologies Inc
- * 
- * @author repos@slytechs.com
- * @author mark
- *
+ * Options usable with {@code Pcap.init(PcapOption)} call.
  */
 public enum PcapOption implements IntSupplier {
 	/** strings are in the local character encoding */

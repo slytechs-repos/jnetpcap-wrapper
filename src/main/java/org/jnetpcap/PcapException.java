@@ -29,43 +29,91 @@ import org.jnetpcap.constant.PcapCode;
  */
 public class PcapException extends Exception {
 
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = -9051453447740494192L;
 
+	/**
+	 * Throw if not ok.
+	 *
+	 * @param code the code
+	 * @throws PcapException the pcap exception
+	 */
 	public static void throwIfNotOk(int code) throws PcapException {
 		PcapCode status = PcapCode.valueOf(code);
 		throwIfNotOk(status, status::getMessage);
 	}
 
+	/**
+	 * Throw if not ok.
+	 *
+	 * @param code    the code
+	 * @param message the message
+	 * @throws PcapException the pcap exception
+	 */
 	public static void throwIfNotOk(int code, Supplier<String> message) throws PcapException {
 		throwIfNotOk(PcapCode.valueOf(code), message);
 	}
 
+	/**
+	 * Throw if not ok.
+	 *
+	 * @param code    the code
+	 * @param message the message
+	 * @throws PcapException the pcap exception
+	 */
 	public static void throwIfNotOk(PcapCode code, Supplier<String> message) throws PcapException {
 		if (code.isError()) {
 			String msg = message.get();
-			throw new PcapException(code.intValue(), msg.isBlank() ? code.getMessage() : msg);
+			throw new PcapException(code.getAsInt(), msg.isBlank() ? code.getMessage() : msg);
 		}
 	}
 
+	/** The pcap error code. */
 	private final int pcapErrorCode;
 
+	/**
+	 * Instantiates a new pcap exception.
+	 *
+	 * @param pcapErrorCode the pcap error code
+	 */
 	public PcapException(int pcapErrorCode) {
 		this(PcapCode.valueOf(pcapErrorCode));
 	}
 
+	/**
+	 * Instantiates a new pcap exception.
+	 *
+	 * @param pcapErrorCode the pcap error code
+	 * @param message       the message
+	 */
 	public PcapException(int pcapErrorCode, String message) {
 		super(message);
 		this.pcapErrorCode = pcapErrorCode;
 	}
 
+	/**
+	 * Instantiates a new pcap exception.
+	 *
+	 * @param pcapErrorCode the pcap error code
+	 */
 	public PcapException(PcapCode pcapErrorCode) {
-		this(pcapErrorCode.intValue(), pcapErrorCode.getMessage());
+		this(pcapErrorCode.getAsInt(), pcapErrorCode.getMessage());
 	}
 
+	/**
+	 * Instantiates a new pcap exception.
+	 *
+	 * @param message the message
+	 */
 	public PcapException(String message) {
-		this(PcapCode.ERROR.intValue(), message);
+		this(PcapCode.ERROR.getAsInt(), message);
 	}
 
+	/**
+	 * Gets the code.
+	 *
+	 * @return the code
+	 */
 	public int getCode() {
 		return pcapErrorCode;
 	}

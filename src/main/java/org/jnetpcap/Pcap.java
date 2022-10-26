@@ -212,7 +212,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * it; options for the capture, such as promiscu' ous mode, can be set on the
 		 * handle before activating it.
 		 *
-		 * @author Sly Technologies, Inc.
 		 * @param device a string that specifies the network device to open; on Linux
 		 *               systems with 2.2 or later kernels, a source argument of "any"
 		 *               or NULL can be used to capture packets from all interfaces.
@@ -255,7 +254,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 *
 		 * @return true, if pcap is supported up to this specific version level,
 		 *         otherwise false
-		 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
+		 * @see LibraryPolicy#setDefault(LibraryPolicy)
 		 */
 		public static boolean isSupported() {
 			return Linux0_9.isSupported();
@@ -295,28 +294,32 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 
 		/**
 		 * Open a fake pcap_t for compiling filters or opening a capture for output.
-		 *
+		 * 
 		 * <p>
-		 * {@link #openDead} and pcap_open_dead_with_tstamp_precision() are used for
-		 * creating a pcap_t structure to use when calling the other functions in
-		 * libpcap. It is typically used when just using libpcap for compiling BPF full;
-		 * it can also be used if using pcap_dump_open(3PCAP), pcap_dump(3PCAP), and
-		 * pcap_dump_close(3PCAP) to write a savefile if there is no pcap_t that
+		 * {@link #openDead(PcapDlt, int)} and
+		 * {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)} are
+		 * used for creating a pcap_t structure to use when calling the other functions
+		 * in libpcap. It is typically used when just using libpcap for compiling BPF
+		 * full; it can also be used if using {@code #dumpOpen(String)},
+		 * {@link PcapDumper#dump(MemoryAddress, MemoryAddress)}, and
+		 * {@link PcapDumper#close()} to write a savefile if there is no pcap_t that
 		 * supplies the packets to be written.
 		 * </p>
 		 * 
 		 * <p>
-		 * When pcap_open_dead_with_tstamp_precision(), is used to create a pcap_t for
-		 * use with pcap_dump_open(), precision specifies the time stamp precision for
+		 * When {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)},
+		 * is used to create a {@code Pcap} handle for use with
+		 * {@link #dumpOpen(String)}, precision specifies the time stamp precision for
 		 * packets; PCAP_TSTAMP_PRECISION_MICRO should be specified if the packets to be
 		 * written have time stamps in seconds and microseconds, and
 		 * PCAP_TSTAMP_PRECISION_NANO should be specified if the packets to be written
 		 * have time stamps in seconds and nanoseconds. Its value does not affect
 		 * pcap_compile(3PCAP).
 		 * </p>
-		 * 
-		 * @param linktype specifies the link-layer type for the pcap handle
-		 * @param snaplen  specifies the snapshot length for the pcap handle
+		 *
+		 * @param linktype  specifies the link-layer type for the pcap handle
+		 * @param snaplen   specifies the snapshot length for the pcap handle
+		 * @param precision the requested timestamp precision
 		 * @return A dead pcap handle
 		 * @throws PcapException any errors
 		 * @since libpcap 1.5.1
@@ -411,7 +414,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * @param protocol the protocol
 		 * @return the int
 		 * @throws PcapException the pcap exception
-		 * @see {@code int pcap_set_protocol_linux(pcap_t *, int)}
 		 * @since libpcap 0.9 (Linux only)
 		 */
 		@Override
@@ -436,7 +438,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * it; options for the capture, such as promiscu' ous mode, can be set on the
 		 * handle before activating it.
 		 *
-		 * @author Sly Technologies, Inc.
 		 * @param device a string that specifies the network device to open; on Linux
 		 *               systems with 2.2 or later kernels, a source argument of "any"
 		 *               or NULL can be used to capture packets from all interfaces.
@@ -479,7 +480,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 *
 		 * @return true, if pcap is supported up to this specific version level,
 		 *         otherwise false
-		 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
+		 * @see LibraryPolicy#setDefault(LibraryPolicy)
 		 */
 		public static boolean isSupported() {
 			return Unix0_8.isSupported();
@@ -517,34 +518,38 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 			return Pcap0_6.openDead(Unix::new, linktype, snaplen);
 		}
 
-		/**
-		 * Open a fake pcap_t for compiling filters or opening a capture for output.
-		 *
-		 * <p>
-		 * {@link #openDead} and pcap_open_dead_with_tstamp_precision() are used for
-		 * creating a pcap_t structure to use when calling the other functions in
-		 * libpcap. It is typically used when just using libpcap for compiling BPF full;
-		 * it can also be used if using pcap_dump_open(3PCAP), pcap_dump(3PCAP), and
-		 * pcap_dump_close(3PCAP) to write a savefile if there is no pcap_t that
-		 * supplies the packets to be written.
-		 * </p>
-		 * 
-		 * <p>
-		 * When pcap_open_dead_with_tstamp_precision(), is used to create a pcap_t for
-		 * use with pcap_dump_open(), precision specifies the time stamp precision for
-		 * packets; PCAP_TSTAMP_PRECISION_MICRO should be specified if the packets to be
-		 * written have time stamps in seconds and microseconds, and
-		 * PCAP_TSTAMP_PRECISION_NANO should be specified if the packets to be written
-		 * have time stamps in seconds and nanoseconds. Its value does not affect
-		 * pcap_compile(3PCAP).
-		 * </p>
-		 * 
-		 * @param linktype specifies the link-layer type for the pcap handle
-		 * @param snaplen  specifies the snapshot length for the pcap handle
-		 * @return A dead pcap handle
-		 * @throws PcapException any errors
-		 * @since libpcap 1.5.1
-		 */
+	/**
+	 * Open a fake pcap_t for compiling filters or opening a capture for output.
+	 * 
+	 * <p>
+	 * {@link #openDead(PcapDlt, int)} and
+	 * {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)} are
+	 * used for creating a pcap_t structure to use when calling the other functions
+	 * in libpcap. It is typically used when just using libpcap for compiling BPF
+	 * full; it can also be used if using {@code #dumpOpen(String)},
+	 * {@link PcapDumper#dump(MemoryAddress, MemoryAddress)}, and
+	 * {@link PcapDumper#close()} to write a savefile if there is no pcap_t that
+	 * supplies the packets to be written.
+	 * </p>
+	 * 
+	 * <p>
+	 * When {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)},
+	 * is used to create a {@code Pcap} handle for use with
+	 * {@link #dumpOpen(String)}, precision specifies the time stamp precision for
+	 * packets; PCAP_TSTAMP_PRECISION_MICRO should be specified if the packets to be
+	 * written have time stamps in seconds and microseconds, and
+	 * PCAP_TSTAMP_PRECISION_NANO should be specified if the packets to be written
+	 * have time stamps in seconds and nanoseconds. Its value does not affect
+	 * pcap_compile(3PCAP).
+	 * </p>
+	 *
+	 * @param linktype  specifies the link-layer type for the pcap handle
+	 * @param snaplen   specifies the snapshot length for the pcap handle
+	 * @param precision the requested timestamp precision
+	 * @return A dead pcap handle
+	 * @throws PcapException any errors
+	 * @since libpcap 1.5.1
+	 */
 		public static Unix openDeadWithTstampPrecision(PcapDlt linktype, int snaplen, PcapTStampPrecision precision)
 				throws PcapException {
 			return Pcap1_5.openDeadWithTstampPrecision(Unix::new, linktype, snaplen, precision);
@@ -716,7 +721,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * it; options for the capture, such as promiscu' ous mode, can be set on the
 	 * handle before activating it.
 	 *
-	 * @author Sly Technologies, Inc.
 	 * @param device pcap network interface that specifies the network device to
 	 *               open.
 	 * @return a new pcap object that needs to be activated using
@@ -739,7 +743,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * it; options for the capture, such as promiscu' ous mode, can be set on the
 	 * handle before activating it.
 	 *
-	 * @author Sly Technologies, Inc.
 	 * @param device a string that specifies the network device to open; on Linux
 	 *               systems with 2.2 or later kernels, a source argument of "any"
 	 *               or NULL can be used to capture packets from all interfaces.
@@ -803,7 +806,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * 
 	 * <p>
 	 * Each element of the list is of type pcap_if_t, and has the following members:
-	 * 
+	 * </p>
 	 * <dl>
 	 * <dt>next</dt>
 	 * <dd>if not NULL, a pointer to the next element in the list; NULL for the last
@@ -817,9 +820,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <dt>addresses</dt>
 	 * <dd>a pointer to the first element of a list of network addresses for the
 	 * device, or NULL if the device has no addresses</dd>
+	 * </dl>
+	 * <dl>
 	 * <dt>flags</dt>
 	 * <dd>device flags:
-	 * <dl>
 	 * <dt>PCAP_IF_LOOPBACK</dt>
 	 * <dd>set if the device is a loopback interface</dd>
 	 * <dt>PCAP_IF_UP</dt>
@@ -830,10 +834,11 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <dd>set if the device is a wireless interface; this includes IrDA as well as
 	 * radio-based networks such as IEEE 802.15.4 and IEEE 802.11, so it doesn't
 	 * just mean Wi-Fi</dd>
+	 * </dl>
+	 * <dl>
 	 * <dt>PCAP_IF_CONNECTION_STATUS</dt>
 	 * <dd>a bitmask for an indication of whether the adapter is connected or not;
 	 * for wireless interfaces, "connected" means "associated with a network"
-	 * <dl>
 	 * <dt>PCAP_IF_CONNECTION_STATUS_UNKNOWN</dt>
 	 * <dd>it's unknown whether the adapter is connected or not</dd>
 	 * <dt>PCAP_IF_CONNECTION_STATUS_CONNECTED</dt>
@@ -844,14 +849,11 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <dd>the notion of "connected" and "disconnected" don't apply to this
 	 * interface; for example, it doesn't apply to a loopback device</dd>
 	 * </dl>
-	 * </dd></dd>
-	 * </dl>
-	 * </p>
 	 * 
 	 * <p>
 	 * Each element of the list of addresses is of type pcap_addr_t, and has the
 	 * following members:
-	 * </dl>
+	 * </p>
 	 * <dl>
 	 * <dt>next</dt>
 	 * <dd>if not NULL, a pointer to the next element in the list; NULL for the last
@@ -870,7 +872,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * address corresponding to the address pointed to by addr; may be null if the
 	 * device isn't a point-to-point interface</dd>
 	 * </dl>
-	 * </p>
 	 * <p>
 	 * Note that the addresses in the list of addresses might be IPv4 addresses,
 	 * IPv6 addresses, or some other type of addresses, so you must check the
@@ -886,11 +887,11 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * </p>
 	 * <p>
 	 * <b>For example</b>
+	 * </p>
 	 * 
 	 * <pre>{@snippet : 
 	 * 	List<PcapIf> list = Pcap.findAllDevs()
 	 * }</pre>
-	 * </p>
 	 *
 	 * @return list of network devices
 	 * @throws PcapException any pcap errors
@@ -924,13 +925,14 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * only API available.
 	 * </p>
 	 * 
-	 * <h3>Warning:</h3>
-	 * <dl>
-	 * <dd>There may be network devices that cannot be opened with pcap_open() by
-	 * the process calling pcap_findalldevs(), because, for example, that process
-	 * might not have sufficient privileges to open them for capturing; if so, those
-	 * devices will not appear on the list.</dd>
-	 * </dl>
+	 * <p>
+	 * <em>Warning:</em>
+	 * </p>
+	 * 
+	 * <blockquote>There may be network devices that cannot be opened with
+	 * pcap_open() by the process calling pcap_findalldevs(), because, for example,
+	 * that process might not have sufficient privileges to open them for capturing;
+	 * if so, those devices will not appear on the list.</blockquote>
 	 * 
 	 * @param source   This source will be examined looking for adapters (local or
 	 *                 remote) (e.g. source can be 'rpcap://' for local adapters or
@@ -957,6 +959,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <p>
 	 * Used to initialize the Packet Capture library. opts specifies options for the
 	 * library; currently, the options are:
+	 * </p>
 	 * <dl>
 	 * <dt>{@link PcapConstants#PCAP_CHAR_ENC_LOCAL}</dt>
 	 * <dd>Treat all strings supplied as arguments, and return all strings to the
@@ -965,7 +968,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <dd>Treat all strings supplied as arguments, and return all strings to the
 	 * caller, as being in UTF-8.</dd>
 	 * </dl>
-	 * </p>
 	 * 
 	 * <p>
 	 * On UNIX-like systems, the local character encoding is assumed to be UTF-8, so
@@ -1002,6 +1004,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <p>
 	 * Used to initialize the Packet Capture library. opts specifies options for the
 	 * library; currently, the options are:
+	 * </p>
+	 * 
 	 * <dl>
 	 * <dt>{@link PcapConstants#PCAP_CHAR_ENC_LOCAL}</dt>
 	 * <dd>Treat all strings supplied as arguments, and return all strings to the
@@ -1010,7 +1014,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <dd>Treat all strings supplied as arguments, and return all strings to the
 	 * caller, as being in UTF-8.</dd>
 	 * </dl>
-	 * </p>
 	 * 
 	 * <p>
 	 * On UNIX-like systems, the local character encoding is assumed to be UTF-8, so
@@ -1071,7 +1074,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 *
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
-	 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
+	 * @see LibraryPolicy#setDefault(LibraryPolicy)
 	 */
 	public static boolean isSupported() {
 		return Pcap0_4.isSupported();
@@ -1244,28 +1247,32 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 
 	/**
 	 * Open a fake pcap_t for compiling filters or opening a capture for output.
-	 *
+	 * 
 	 * <p>
-	 * {@link #openDead} and pcap_open_dead_with_tstamp_precision() are used for
-	 * creating a pcap_t structure to use when calling the other functions in
-	 * libpcap. It is typically used when just using libpcap for compiling BPF full;
-	 * it can also be used if using pcap_dump_open(3PCAP), pcap_dump(3PCAP), and
-	 * pcap_dump_close(3PCAP) to write a savefile if there is no pcap_t that
+	 * {@link #openDead(PcapDlt, int)} and
+	 * {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)} are
+	 * used for creating a pcap_t structure to use when calling the other functions
+	 * in libpcap. It is typically used when just using libpcap for compiling BPF
+	 * full; it can also be used if using {@code #dumpOpen(String)},
+	 * {@link PcapDumper#dump(MemoryAddress, MemoryAddress)}, and
+	 * {@link PcapDumper#close()} to write a savefile if there is no pcap_t that
 	 * supplies the packets to be written.
 	 * </p>
 	 * 
 	 * <p>
-	 * When pcap_open_dead_with_tstamp_precision(), is used to create a pcap_t for
-	 * use with pcap_dump_open(), precision specifies the time stamp precision for
+	 * When {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)},
+	 * is used to create a {@code Pcap} handle for use with
+	 * {@link #dumpOpen(String)}, precision specifies the time stamp precision for
 	 * packets; PCAP_TSTAMP_PRECISION_MICRO should be specified if the packets to be
 	 * written have time stamps in seconds and microseconds, and
 	 * PCAP_TSTAMP_PRECISION_NANO should be specified if the packets to be written
 	 * have time stamps in seconds and nanoseconds. Its value does not affect
 	 * pcap_compile(3PCAP).
 	 * </p>
-	 * 
-	 * @param linktype specifies the link-layer type for the pcap handle
-	 * @param snaplen  specifies the snapshot length for the pcap handle
+	 *
+	 * @param linktype  specifies the link-layer type for the pcap handle
+	 * @param snaplen   specifies the snapshot length for the pcap handle
+	 * @param precision the requested timestamp precision
 	 * @return A dead pcap handle
 	 * @throws PcapException any errors
 	 * @since libpcap 1.5.1
@@ -1343,11 +1350,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * to open a ``savefile'' for reading.
 	 * </p>
 	 *
-	 * @param fname specifies the file to open. The file can have the pcap file
-	 *              format as described in pcap-savefile(5), which is the file
-	 *              format used by, among other programs, tcpdump(1) and
-	 *              tcpslice(1), or can have the pcapng file format, although not
-	 *              all pcapng files can be read
+	 * @param file the offline capture file
 	 * @return the pcap handle
 	 * @throws PcapException any errors
 	 * @since libpcap 0.4
@@ -1404,7 +1407,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * not pcap related as libpcap simply passes the errornum as a system call see
 	 * <em>https://linux.die.net/man/3/strerror</em>.
 	 *
-	 * @param error the error full to convert to a string
+	 * @param code the code
 	 * @return the error string for the given full
 	 * @since libpcap 0.4
 	 */
@@ -1553,18 +1556,22 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 *
 	 * @return true, if rfmon is supported otherwise false
 	 * @throws PcapException The possible error values are:
-	 *                       <dl>
-	 *                       <dt>PCAP_ERROR_NO_SUCH_DEVICE</dt>
-	 *                       <dd>The capture source specified when the handle was
-	 *                       created doesn't exist</dd>
-	 *                       <dt>PCAP_ERROR_PERM_DENIED</dt>
-	 *                       <dd>The process doesn't have permission to check
-	 *                       whether monitor mode could be supported</dd>
-	 *                       <dt>PCAP_ERROR_ACTIVATED</dt>
-	 *                       <dd>The capture handle has already been activated</dd>
-	 *                       <dt>PCAP_ERROR</dt>
-	 *                       <dd>Another error occurred</dd>
-	 *                       <dl>
+	 *                       <p>
+	 *                       PCAP_ERROR_NO_SUCH_DEVICE - The capture source
+	 *                       specified when the handle was created doesn't exist
+	 *                       </p>
+	 *                       <p>
+	 *                       PCAP_ERROR_PERM_DENIED - The process doesn't have
+	 *                       permission to check whether monitor mode could be
+	 *                       supported
+	 *                       </p>
+	 *                       <p>
+	 *                       PCAP_ERROR_ACTIVATED - The capture handle has already
+	 *                       been activated
+	 *                       </p>
+	 *                       <p>
+	 *                       PCAP_ERROR - Another error occurred
+	 *                       </p>
 	 * @since libpcap 1.0
 	 */
 	public boolean canSetRfmon() throws PcapException {
@@ -2066,6 +2073,12 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		throw new UnsupportedOperationException(minApi("Pcap1_5", "1.5")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	/**
+	 * Returns a compatible packet sink which sends the packets to whatever sink the
+	 * Pcap handle is opened to.
+	 *
+	 * @return a packet sink that uses {@code Pcap::inject} method to sink packets
+	 */
 	public PacketSink inject() {
 		PcapPacketSink sink = this::inject;
 
@@ -2107,6 +2120,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @param length the packet length
 	 * @return number of bytes written
 	 * @throws PcapException the pcap exception
+	 * @since libpcap 0.9
 	 */
 	protected int inject(Addressable packet, int length) throws PcapException {
 		throw new UnsupportedOperationException(minApi("Pcap0_9", "0.9"));
@@ -2667,7 +2681,14 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		throw new UnsupportedOperationException(minApi("Pcap0_X", "0.X")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	public PcapPacketSink sendPacket() {
+	/**
+	 * Returns a compatible packet sink which sends the packets to whatever sink the
+	 * Pcap handle is opened to.
+	 *
+	 * @return a packet sink that uses
+	 *         {@code Pcap::sendPacket} method to sink packets
+	 */
+	public PacketSink sendPacket() {
 		PcapPacketSink sink = this::sendPacket;
 
 		return sink;
@@ -2938,7 +2959,9 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * be set, otherwise it will not be set.
 	 * </p>
 	 *
+	 * @param enable if true, enable immediate mode, otherwise disable
 	 * @return this pcap handle
+	 * @throws PcapException the pcap exception
 	 * @since libpcap 1.5
 	 */
 	public Pcap setImmediateMode(boolean enable) throws PcapException {
@@ -3130,6 +3153,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * </p>
 	 * <p>
 	 * A struct pcap_stat has the following members:
+	 * </p>
 	 * <dl>
 	 * <dt>ps_recv</dt>
 	 * <dd>number of packets received;</dd>
@@ -3140,7 +3164,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <dt>ps_ifdrop</dt>
 	 * <dd>number of packets dropped by the network interface or its driver.</dd>
 	 * </dl>
-	 * </p>
 	 * <p>
 	 * The statistics do not behave the same way on all platforms. ps_recv might
 	 * count packets whether they passed any filter set with pcap_setfilter(3PCAP)

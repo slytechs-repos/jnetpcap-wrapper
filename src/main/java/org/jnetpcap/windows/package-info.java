@@ -20,6 +20,7 @@
  * Provides support for <em>Pcap</em> on Microsoft Windows platforms.
  * <p>
  * Two java wrapper implementations are provided by this package.
+ * </p>
  * <dl>
  * <dt>WinPcap</dt>
  * <dd><em>WinPcap</em> is the legacy <em>Pcap</em> implementation on Microsoft
@@ -30,6 +31,5 @@
  * capture (and sending) library for Microsoft Windows that builds on legacy
  * <em>WinPcap</em> implementation.</dd>
  * </dl>
- * </p>
  */
 package org.jnetpcap.windows;

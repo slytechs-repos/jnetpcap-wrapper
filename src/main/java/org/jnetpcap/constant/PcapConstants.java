@@ -18,11 +18,13 @@
 package org.jnetpcap.constant;
 
 /**
+ * Pcap API constants. These constants are natively defined in C header file
+ * 'pcap.h'.
  * 
  * @author Sly Technologies
  * @author repos@slytechs.com
  */
-public class PcapConstants {
+public final class PcapConstants {
 
 	/** Maximum snaplen size of 64K. */
 	public static final int MAX_SNAPLEN = 64 * 1024;
@@ -54,7 +56,7 @@ public class PcapConstants {
 	/** loop terminated by pcap_breakloop */
 	public static final int PCAP_ERROR_BREAK = -2;
 
-	/* # generic warning full */
+	/** generic warning full */
 	public static final int PCAP_WARNING = 1;
 
 	/** this device doesn't support promiscuous mode */
@@ -108,4 +110,6 @@ public class PcapConstants {
 	 */
 	public static final int PCAP_NEXT_EX_TIMEOUT = 0;
 
+	private PcapConstants() {
+	}
 }

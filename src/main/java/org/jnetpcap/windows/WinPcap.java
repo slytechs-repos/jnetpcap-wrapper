@@ -40,6 +40,7 @@ import org.jnetpcap.PcapException;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapSrc;
+import org.jnetpcap.constant.WinPcapMode;
 import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
@@ -47,14 +48,14 @@ import org.jnetpcap.internal.PcapStatExRecord;
 
 /**
  * WinPcap is a wrapper around, windows packet capture library.
- * <h3>News - 15 September 2018</h3>
- * <p>
+ * 
+ * <h2>News - 15 September 2018</h2>
+ * 
  * <blockquote> Native WinPcap, though still available for download (v4.1.3),
  * has not seen an upgrade in many years and there are no road map/future plans
  * to update the technology. While community support may persist, technical
  * oversight by Riverbed staff, responses to questions posed by Riverbed
  * resources, and bug reporting are no longer available. </blockquote>
- * </p>
  * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
@@ -73,18 +74,24 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	public static final int WINPCAP_MODE_MON = 2;
 
 	/**
+	 * The Constant pcap_wsockinit.
+	 *
 	 * @see {@code int pcap_wsockinit(void)}
 	 * @since libpcap 0.4 (Windows only)
 	 */
 	private static final PcapForeignDowncall pcap_wsockinit;
 
 	/**
+	 * The Constant pcap_stat_ex.
+	 *
 	 * @see {@code struct pcap_stat* pcap_stats_ex(pcap_t * p, int *pcap_stat_size)}
 	 * @since libpcap 0.4 (Windows only)
 	 */
 	private static final PcapForeignDowncall pcap_stat_ex;
 
 	/**
+	 * The Constant pcap_live_dump.
+	 *
 	 * @see {@code int pcap_live_dump (pcap_t *p, char *filename, int maxsize, int
 	 *      maxpacks)}
 	 * @since Microsoft Windows only
@@ -92,6 +99,8 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	private static final PcapForeignDowncall pcap_live_dump;
 
 	/**
+	 * The Constant pcap_live_dump_ended.
+	 *
 	 * @see {@code int pcap_live_dump (pcap_t *p, char *filename, int maxsize, int
 	 *      maxpacks)}
 	 * @since Microsoft Windows only
@@ -99,30 +108,40 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	private static final PcapForeignDowncall pcap_live_dump_ended;
 
 	/**
+	 * The Constant pcap_setbuff.
+	 *
 	 * @see {@code int pcap_setbuff (pcap_t *p, int dim)}
 	 * @since Microsoft Windows only
 	 */
 	private static final PcapForeignDowncall pcap_setbuff;
 
 	/**
+	 * The Constant pcap_setmode.
+	 *
 	 * @see {@code int pcap_setmode(pcap_t *p, int mode)}
 	 * @since Microsoft Windows only
 	 */
 	private static final PcapForeignDowncall pcap_setmode;
 
 	/**
+	 * The Constant pcap_setmintocopy.
+	 *
 	 * @see {@code int pcap_setmode(pcap_t *p, int mode)}
 	 * @since Microsoft Windows only
 	 */
 	private static final PcapForeignDowncall pcap_setmintocopy;
 
 	/**
+	 * The Constant pcap_getevent.
+	 *
 	 * @see {@code HANDLE pcap_getevent(pcap_t *p)}
 	 * @since Microsoft Windows only
 	 */
 	private static final PcapForeignDowncall pcap_getevent;
 
 	/**
+	 * The Constant pcap_findalldevs_ex.
+	 *
 	 * @see {@code int pcap_findalldevs_ex(const char *source, struct pcap_rmtauth
 	 *      *auth, pcap_if_t **alldevs, char *errbuf)}
 	 * @since libpcap 1.9
@@ -130,6 +149,8 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	private static final PcapForeignDowncall pcap_findalldevs_ex;
 
 	/**
+	 * The Constant pcap_createsrcstr.
+	 *
 	 * @see {@code int pcap_createsrcstr(char *source, int type, const char *host,
 	 *      const char *port, const char *name, char *errbuf)}
 	 * @since libpcap 1.9
@@ -137,6 +158,8 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	private static final PcapForeignDowncall pcap_createsrcstr;
 
 	/**
+	 * The Constant pcap_parsesrcstr.
+	 *
 	 * @see {@code int pcap_parsesrcstr(const char *source, int *type, char *host,
 	 *      char *port, char *name, char *errbuf}
 	 * @since libpcap 1.9
@@ -144,6 +167,8 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	private static final PcapForeignDowncall pcap_parsesrcstr;
 
 	/**
+	 * The Constant pcap_remoteact_accept_ex.
+	 *
 	 * @see {@code SOCKET pcap_remoteact_accept_ex(const char *address, const char
 	 *      *port, const char *hostlist, char *connectinghost, struct pcap_rmtauth
 	 *      *auth, int uses_ssl, char *errbuf)}
@@ -183,7 +208,6 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * it; options for the capture, such as promiscu' ous mode, can be set on the
 	 * handle before activating it.
 	 *
-	 * @author Sly Technologies, Inc.
 	 * @param device a string that specifies the network device to open; on Linux
 	 *               systems with 2.2 or later kernels, a source argument of "any"
 	 *               or NULL can be used to capture packets from all interfaces.
@@ -240,7 +264,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	}
 
 	/**
-	 * Create a list of network devices that can be opened with {@code Pcap#open}.
+	 * Create a list of network devices that can be opened with {@code #openopen}.
 	 * <p>
 	 * This routine can scan a directory for savefiles, list local capture devices,
 	 * or list capture devices on a remote machine running an RPCAP server.
@@ -263,8 +287,8 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * only API available.
 	 * </p>
 	 * 
-	 * <h3>Warning:</h3>
 	 * <dl>
+	 * <dt>Warning!</dt>
 	 * <dd>There may be network devices that cannot be opened with pcap_open() by
 	 * the process calling pcap_findalldevs(), because, for example, that process
 	 * might not have sufficient privileges to open them for capturing; if so, those
@@ -411,7 +435,6 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * null-terminated string and it returns the parameters related to the source.
 	 * This includes:
 	 * </p>
-	 * <p>
 	 * <ul>
 	 * <li>the type of the source (file, winpcap on a remote adapter, winpcap on
 	 * local adapter), which is determined by the source prefix (PCAP_SRC_IF_STRING
@@ -423,7 +446,6 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * not include the type of the source itself (i.e. the string returned does not
 	 * include "file://" or rpcap:// or such).</li>
 	 * </ul>
-	 * </p>
 	 * 
 	 * @param source This source in the format (local or remote) (e.g. source can be
 	 *               'rpcap://' for local adapters or 'rpcap://host:port' for
@@ -474,6 +496,12 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 		return pcap_wsockinit.invokeInt();
 	}
 
+	/**
+	 * Instantiates a new win pcap.
+	 *
+	 * @param pcapHandle the pcap handle
+	 * @param name       the name
+	 */
 	WinPcap(MemoryAddress pcapHandle, String name) {
 		super(pcapHandle, name);
 	}
@@ -548,8 +576,8 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * If sync is nonzero, the function blocks until the dump is finished, otherwise
 	 * Return immediately.
 	 * 
-	 * <h3>Warning:</h3>
 	 * <dl>
+	 * <dt>Warning!</dt>
 	 * <dd>if the dump process has no limits (i.e. if the maxsize and maxpacks
 	 * arguments of pcap_live_dump() were both 0), the dump process will never stop,
 	 * therefore setting sync to TRUE will block the application on this call
@@ -662,11 +690,11 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * (statistical mode).
 	 * </p>
 	 * 
-	 * @param mode the new mode
+	 * @param winPcapMode the new mode
 	 * @throws PcapException the pcap exception
 	 */
-	public void setMode(Mode mode) throws PcapException {
-		setMode(mode.getAsInt());
+	public void setMode(WinPcapMode winPcapMode) throws PcapException {
+		setMode(winPcapMode.getAsInt());
 	}
 
 	/**

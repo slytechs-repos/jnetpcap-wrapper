@@ -21,9 +21,8 @@
  * systems. All packets on the network, even those destined for other hosts, are
  * accessible through this mechanism. It also supports saving captured packets
  * to a ``savefile'', and reading packets from a ``savefile''.
- * </p>
  * 
- * <h1>Opening a capture handle for reading</h1>
+ * <h2>Opening a capture handle for reading</h2>
  * <p>
  * To open a handle for a live capture, given the name of the network or other
  * interface on which the capture should be done, call pcap_create(), set the
@@ -59,12 +58,14 @@
  * stream or the ``savefile'', and for finding out information about the capture
  * stream or ``savefile''. To close a handle, use pcap_close().
  * </p>
+ * 
  * <p>
  * Here is an example which uses PcapReceiver and several of its functional
  * packet handler interfaces.
+ * </p>
  * 
  * <pre>
- * <full>
+ * <code>
 try (Pcap pcap = Pcap.openOffline(PCAP_FILE)) {
 
 	BpFilter filter = pcap.compile("tcp", true);
@@ -99,7 +100,7 @@ private static void nextDefault(String message, PcapHeader header, byte[] packet
 			header.captureLength(),
 			PcapUtils.toHexCurleyString(packet, 0, 6));
 }
- * </full>
+ * </code>
  * </pre>
  * 
  * Output:
@@ -114,14 +115,14 @@ Packet [timestamp=2011-03-01T20:45:13.313Z, wirelen=66   caplen=66   {00:26:62:2
 Hello, this is no-copy, direct ByteBuffer dispatch
 Packet [timestamp=2011-03-01T20:45:13.313Z, wirelen=200  caplen=200  {00:26:62:2f:47:87}]
  * </pre>
- * </p>
+ * 
  * <p>
  * First the {@link Pcap#loop(int, org.jnetpcap.PcapHandler.OfArray, Object)} is
  * used to dispatch 1 packet. A single simple dispatcher type is provided
  * directly with Pcap class, as it is per native loop/dispatch calls available
- * from libpcap. Then a {@link org.jnetpcap.util.PcapReceiver} is setup with additional
- * capabilities and more advanced dispatch methods. Notice that both copy and
- * no-copy of packet data handlers are available through
+ * from libpcap. Then a {@link org.jnetpcap.util.PcapReceiver} is setup with
+ * additional capabilities and more advanced dispatch methods. Notice that both
+ * copy and no-copy of packet data handlers are available through
  * {@link org.jnetpcap.util.PcapReceiver}.
  * </p>
  * 

@@ -22,51 +22,77 @@ import java.util.Set;
 import java.util.function.IntSupplier;
 
 /**
+ * Network interface status flags.
+ * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  * @author mark
  *
  */
 public enum PcapIfFlag implements IntSupplier {
+	
+	/** interface is loopback. */
 	IF_LOOPBACK(0x00000001),
+	
+	/** interface is up. */
 	IF_UP(0x00000002),
+	
+	/** interface is running. */
 	IF_RUNNING(0x00000004),
+	
+	/** interface is wireless (*NOT* necessarily Wi-Fi!). */
 	IF_WIRELESS(0x00000008),
+	
+	/** connection status:. */
 	IF_CONNECTION_STATUS(0x00000030),
+	
+	/** unknown. */
 	IF_CONNECTION_STATUS_UNKNOWN(0x00000000),
+	
+	/** connected. */
 	IF_CONNECTION_STATUS_CONNECTED(0x00000010),
+	
+	/** disconnected. */
 	IF_CONNECTION_STATUS_DISCONNECTED(0x00000020),
+	
+	/** not applicable. */
 	IF_CONNECTION_STATUS_NOT_APPLICABLE(0x00000030);
 
-	/** interface is loopback */
+	/** interface is loopback. */
 	public static final int PCAP_IF_LOOPBACK = 0x00000001;
 
-	/** interface is up */
+	/** interface is up. */
 	public static final int PCAP_IF_UP = 0x00000002;
 
-	/** interface is running */
+	/** interface is running. */
 	public static final int PCAP_IF_RUNNING = 0x00000004;
 
-	/** interface is wireless (*NOT* necessarily Wi-Fi!) */
+	/** interface is wireless (*NOT* necessarily Wi-Fi!). */
 	public static final int PCAP_IF_WIRELESS = 0x00000008;
 
-	/** connection status: */
+	/** connection status:. */
 	public static final int PCAP_IF_CONNECTION_STATUS = 0x00000030;
 
-	/** unknown */
+	/** unknown. */
 	public static final int PCAP_IF_CONNECTION_STATUS_UNKNOWN = 0x00000000;
 
-	/** connected */
+	/** connected. */
 	public static final int PCAP_IF_CONNECTION_STATUS_CONNECTED = 0x00000010;
 
-	/** disconnected */
+	/** disconnected. */
 	public static final int PCAP_IF_CONNECTION_STATUS_DISCONNECTED = 0x00000020;
 
-	/** not applicable */
+	/** not applicable. */
 	public static final int PCAP_IF_CONNECTION_STATUS_NOT_APPLICABLE = 0x00000030;
 
+	/** The flags. */
 	private final int flags;
 
+	/**
+	 * Instantiates a new pcap if flag.
+	 *
+	 * @param flags the flags
+	 */
 	PcapIfFlag(int flags) {
 		this.flags = flags;
 	}
@@ -89,6 +115,9 @@ public enum PcapIfFlag implements IntSupplier {
 	}
 
 	/**
+	 * Gets the as int.
+	 *
+	 * @return the as int
 	 * @see java.util.function.IntSupplier#getAsInt()
 	 */
 	@Override

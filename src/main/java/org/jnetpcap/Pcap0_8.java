@@ -254,12 +254,18 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 *
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
-	 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
+	 * @see LibraryPolicy#setDefault(LibraryPolicy)
 	 */
 	public static boolean isSupported() {
 		return pcap_breakloop.isNativeSymbolResolved();
 	}
 
+	/**
+	 * Returns a string identifying the <em>libpcap</em> library, implementation
+	 * information and version.
+	 *
+	 * @return a descriptive library string
+	 */
 	public static String libVersion() {
 		return pcap_lib_version.invokeString();
 	}

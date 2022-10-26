@@ -38,6 +38,7 @@ import java.util.Objects;
  * <p>
  * Each 64-bit instruction is the long int representation of the following bpf
  * structure found in C header file "pcap/bpf.h":
+ * </p>
  * 
  * <pre>
  * struct bpf_insn {
@@ -47,7 +48,6 @@ import java.util.Objects;
  *		bpf_u_int32 k;
  * };
  * </pre>
- * </p>
  * 
  * @author Sly Technologies
  * @author repos@slytechs.com
@@ -114,6 +114,11 @@ public final class BpFilter implements AutoCloseable {
 	private final StructBpfProgram program;
 	private final MemorySession scope;
 
+	/**
+	 * Instantiates a new Berkley Packet filter with the given filter string.
+	 *
+	 * @param filterString the filter string that makes up this BP filter program
+	 */
 	public BpFilter(String filterString) {
 		this.filterString = Objects.requireNonNull(filterString, "filterString");
 		this.scope = MemorySession.openShared();
@@ -143,7 +148,11 @@ public final class BpFilter implements AutoCloseable {
 		scope.close();
 	}
 
-	/** number of 64-bit long instructions */
+	/**
+	 * number of 64-bit long instructions.
+	 *
+	 * @return number count of instructions
+	 */
 	public int length() {
 		return program.bf_len();
 	}
@@ -158,7 +167,7 @@ public final class BpFilter implements AutoCloseable {
 	 *
 	 * @param bpFilter the bpf
 	 * @since libpcap 0.6
-	 * @see #compile(String, boolean)
+	 * @see Pcap#compile(String, boolean, int)
 	 * @see <a href=
 	 *      "https://man7.org/linux/man-pages/man3/pcap_freecode.3pcap.html">pcap_freecode</a>
 	 */

@@ -61,6 +61,11 @@ public final class PcapTransmitter implements PcapPacketSink {
 	}
 
 	/**
+	 * Sink packet.
+	 *
+	 * @param packet the packet
+	 * @param length the length
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink#sinkPacket(java.lang.foreign.Addressable,
 	 *      int)
 	 */

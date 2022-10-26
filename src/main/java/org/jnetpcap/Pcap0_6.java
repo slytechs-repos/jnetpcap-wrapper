@@ -101,7 +101,7 @@ public sealed class Pcap0_6 extends Pcap0_5 permits Pcap0_7 {
 	 *
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
-	 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
+	 * @see LibraryPolicy#setDefault(LibraryPolicy)
 	 */
 	public static boolean isSupported() {
 		return pcap_open_dead.isNativeSymbolResolved();

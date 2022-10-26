@@ -40,7 +40,6 @@ import org.jnetpcap.util.PcapUtils;
 /**
  * Native Type pcap_if_t has the following members:
  * 
- * <p>
  * <dl>
  * <dt>next</dt>
  * <dd>if not NULL, a pointer to the next element in the list; NULL for the last
@@ -54,9 +53,11 @@ import org.jnetpcap.util.PcapUtils;
  * <dt>addresses</dt>
  * <dd>a pointer to the first element of a list of network addresses for the
  * device, or NULL if the device has no addresses</dd>
+ * </dl>
+ * 
+ * <dl>
  * <dt>flags</dt>
  * <dd>device flags:
- * <dl>
  * <dt>PCAP_IF_LOOPBACK</dt>
  * <dd>set if the device is a loopback interface</dd>
  * <dt>PCAP_IF_UP</dt>
@@ -67,10 +68,12 @@ import org.jnetpcap.util.PcapUtils;
  * <dd>set if the device is a wireless interface; this includes IrDA as well as
  * radio-based networks such as IEEE 802.15.4 and IEEE 802.11, so it doesn't
  * just mean Wi-Fi</dd>
+ * </dl>
+ * 
+ * <dl>
  * <dt>PCAP_IF_CONNECTION_STATUS</dt>
  * <dd>a bitmask for an indication of whether the adapter is connected or not;
  * for wireless interfaces, "connected" means "associated with a network"
- * <dl>
  * <dt>PCAP_IF_CONNECTION_STATUS_UNKNOWN</dt>
  * <dd>it's unknown whether the adapter is connected or not</dd>
  * <dt>PCAP_IF_CONNECTION_STATUS_CONNECTED</dt>
@@ -81,14 +84,12 @@ import org.jnetpcap.util.PcapUtils;
  * <dd>the notion of "connected" and "disconnected" don't apply to this
  * interface; for example, it doesn't apply to a loopback device</dd>
  * </dl>
- * </dd></dd>
- * </dl>
- * </p>
  * 
  * <p>
  * Each element of the list of addresses is of type pcap_addr_t, and has the
  * following members:
- * </dl>
+ * </p>
+ * 
  * <dl>
  * <dt>next</dt>
  * <dd>if not NULL, a pointer to the next element in the list; NULL for the last
@@ -107,7 +108,7 @@ import org.jnetpcap.util.PcapUtils;
  * address corresponding to the address pointed to by addr; may be null if the
  * device isn't a point-to-point interface</dd>
  * </dl>
- * </p>
+ * 
  * <p>
  * Note that the addresses in the list of addresses might be IPv4 addresses,
  * IPv6 addresses, or some other type of addresses, so you must check the
@@ -123,8 +124,7 @@ import org.jnetpcap.util.PcapUtils;
  * </p>
  * 
  * @author Sly Technologies
- * @author repos@slytechs.com
- * @apiNote libpcap 0.7
+ * @author repos@slytechs.com since libpcap 0.7
  */
 public class PcapIf {
 
@@ -133,6 +133,8 @@ public class PcapIf {
 	 * addresses.
 	 */
 	public static class PcapAddr {
+		
+		/** The Constant LAYOUT. */
 		private static final MemoryLayout LAYOUT = MemoryLayout.structLayout(
 				ValueLayout.ADDRESS.withName("next"),
 				ValueLayout.ADDRESS.withName("addr"),
@@ -140,12 +142,28 @@ public class PcapIf {
 				ValueLayout.ADDRESS.withName("broadaddr"),
 				ValueLayout.ADDRESS.withName("dstaddr"));
 
+		/** The Constant nextHandle. */
 		private static final VarHandle nextHandle = LAYOUT.varHandle(groupElement("next"));
+		
+		/** The Constant addrHandle. */
 		private static final VarHandle addrHandle = LAYOUT.varHandle(groupElement("addr"));
+		
+		/** The Constant netmaskHandle. */
 		private static final VarHandle netmaskHandle = LAYOUT.varHandle(groupElement("netmask"));
+		
+		/** The Constant broadaddrHandle. */
 		private static final VarHandle broadaddrHandle = LAYOUT.varHandle(groupElement("broadaddr"));
+		
+		/** The Constant dstaddrHandle. */
 		private static final VarHandle dstaddrHandle = LAYOUT.varHandle(groupElement("dstaddr"));
 
+		/**
+		 * List all.
+		 *
+		 * @param next  the next
+		 * @param scope the scope
+		 * @return the list
+		 */
 		private static List<PcapAddr> listAll(MemoryAddress next, MemorySession scope) {
 			List<PcapAddr> list = new ArrayList<>();
 
@@ -158,11 +176,24 @@ public class PcapIf {
 			return list;
 		}
 
+		/** The addr. */
 		private final SockAddr addr;
+		
+		/** The netmask. */
 		private final SockAddr netmask;
+		
+		/** The broadaddr. */
 		private final SockAddr broadaddr;
+		
+		/** The dstaddr. */
 		private final SockAddr dstaddr;
 
+		/**
+		 * Instantiates a new pcap addr.
+		 *
+		 * @param mseg  the mseg
+		 * @param scope the scope
+		 */
 		PcapAddr(MemorySegment mseg, MemorySession scope) {
 			addr = SockAddr.newInstance(addrHandle.get(mseg), scope);
 			netmask = SockAddr.newInstance(netmaskHandle.get(mseg), scope);
@@ -170,6 +201,9 @@ public class PcapIf {
 			dstaddr = SockAddr.newInstance(dstaddrHandle.get(mseg), scope);
 		}
 
+		/**
+		 * @see java.lang.Object#toString()
+		 */
 		@Override
 		public String toString() {
 			return "PcapAddr ["
@@ -187,15 +221,28 @@ public class PcapIf {
 	 */
 	public static class SockAddr {
 
+		/** The Constant LAYOUT. */
 		private static final MemoryLayout LAYOUT = MemoryLayout.structLayout(
 				JAVA_SHORT.withName("family"),
 				JAVA_SHORT.withName("port"),
 				MemoryLayout.sequenceLayout(32, JAVA_BYTE).withName("addr"));
 
+		/** The Constant familyHandle. */
 		private static final VarHandle familyHandle = LAYOUT.varHandle(groupElement("family"));
+		
+		/** The Constant portHandle. */
 		private static final VarHandle portHandle = LAYOUT.varHandle(groupElement("port"));
+		
+		/** The Constant addrHandle. */
 		private static final VarHandle addrHandle = LAYOUT.varHandle(groupElement("addr"), sequenceElement());
 
+		/**
+		 * New instance.
+		 *
+		 * @param value the value
+		 * @param scope the scope
+		 * @return the sock addr
+		 */
 		static SockAddr newInstance(Object value, MemorySession scope) {
 			MemoryAddress addr = (MemoryAddress) value;
 			if (addr == null || addr == NULL)
@@ -204,10 +251,21 @@ public class PcapIf {
 			return new SockAddr(addr, scope);
 		}
 
+		/** The family. */
 		private final int family;
+		
+		/** The port. */
 		private final int port;
+		
+		/** The addr. */
 		private final byte[] addr;
 
+		/**
+		 * Instantiates a new sock addr.
+		 *
+		 * @param addr  the addr
+		 * @param scope the scope
+		 */
 		SockAddr(MemoryAddress addr, MemorySession scope) {
 			MemorySegment mseg = ofAddress(addr, LAYOUT.byteSize(), scope);
 
@@ -224,18 +282,36 @@ public class PcapIf {
 				this.addr[i] = (byte) addrHandle.get(mseg, i);
 		}
 
+		/**
+		 * Addr.
+		 *
+		 * @return the byte[]
+		 */
 		protected byte[] addr() {
 			return addr;
 		}
 
+		/**
+		 * Family.
+		 *
+		 * @return the int
+		 */
 		protected int family() {
 			return family;
 		}
 
+		/**
+		 * Port.
+		 *
+		 * @return the int
+		 */
 		protected int port() {
 			return port;
 		}
 
+		/**
+		 * @see java.lang.Object#toString()
+		 */
 		@Override
 		public String toString() {
 //			if (family != SockAddrFamily.INET.ordinal() && family != SockAddrFamily.INET6.ordinal())
@@ -249,6 +325,7 @@ public class PcapIf {
 		}
 	}
 
+	/** The Constant LAYOUT. */
 	private static final MemoryLayout LAYOUT = MemoryLayout.structLayout(
 			ValueLayout.ADDRESS.withName("next"),
 			ValueLayout.ADDRESS.withName("name"),
@@ -256,19 +333,37 @@ public class PcapIf {
 			ValueLayout.ADDRESS.withName("addresses"),
 			ValueLayout.JAVA_INT.withName("flags"));
 
+	/** The Constant nextHandle. */
 	private static final VarHandle nextHandle = LAYOUT.varHandle(groupElement("next"));
+	
+	/** The Constant nameHandle. */
 	private static final VarHandle nameHandle = LAYOUT.varHandle(groupElement("name"));
+	
+	/** The Constant descHandle. */
 	private static final VarHandle descHandle = LAYOUT.varHandle(groupElement("description"));
+	
+	/** The Constant addrsHandle. */
 	private static final VarHandle addrsHandle = LAYOUT.varHandle(groupElement("addresses"));
+	
+	/** The Constant flagsHandle. */
 	private static final VarHandle flagsHandle = LAYOUT.varHandle(groupElement("flags"));
 
-	/** interface is loopback */
+	/** interface is loopback. */
 	public final static int PCAP_IF_LOOPBACK = 0x00000001;
-	/** interface is up */
+	
+	/** interface is up. */
 	public final static int PCAP_IF_UP = 0x00000002;
-	/** interface is running */
+	
+	/** interface is running. */
 	public final static int PCAP_IF_RUNNING = 0x00000004;
 
+	/**
+	 * List all.
+	 *
+	 * @param next  the next
+	 * @param scope the scope
+	 * @return the list
+	 */
 	static List<PcapIf> listAll(MemoryAddress next, MemorySession scope) {
 		List<PcapIf> list = new ArrayList<>();
 
@@ -282,14 +377,24 @@ public class PcapIf {
 		return list;
 	}
 
+	/** The name. */
 	private final String name;
 
+	/** The description. */
 	private final String description;
 
+	/** The flags. */
 	private final int flags;
 
+	/** The addresses. */
 	private final List<PcapAddr> addresses;
 
+	/**
+	 * Instantiates a new pcap if.
+	 *
+	 * @param mseg  the mseg
+	 * @param scope the scope
+	 */
 	PcapIf(MemorySegment mseg, MemorySession scope) {
 		MemoryAddress addrs = (MemoryAddress) addrsHandle.get(mseg);
 
@@ -300,22 +405,45 @@ public class PcapIf {
 		addresses = PcapAddr.listAll(addrs, scope);
 	}
 
+	/**
+	 * Addresses.
+	 *
+	 * @return the list
+	 */
 	public List<PcapAddr> addresses() {
 		return addresses;
 	}
 
+	/**
+	 * Description.
+	 *
+	 * @return the string
+	 */
 	protected String description() {
 		return description;
 	}
 
+	/**
+	 * Flags.
+	 *
+	 * @return the int
+	 */
 	protected int flags() {
 		return flags;
 	}
 
+	/**
+	 * Name.
+	 *
+	 * @return the string
+	 */
 	public String name() {
 		return name;
 	}
 
+	/**
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		return "PcapIf ["

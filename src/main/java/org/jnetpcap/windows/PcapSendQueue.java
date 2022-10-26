@@ -54,6 +54,8 @@ public class PcapSendQueue implements AutoCloseable {
 	 */
 	@SuppressWarnings("unused")
 	private static class Struct {
+		
+		/** The Constant LAYOUT. */
 		private static final MemoryLayout LAYOUT = MemoryLayout.structLayout(
 				ValueLayout.JAVA_INT.withName("maxlen"), /*
 															 * Maximum size of the queue, in bytes. This variable
@@ -62,23 +64,32 @@ public class PcapSendQueue implements AutoCloseable {
 				ValueLayout.JAVA_INT.withName("len"), /* Current size of the queue, in bytes. */
 				ValueLayout.ADDRESS.withName("buffer")); /* Buffer containing the packets to be sent. */
 
+		/** The Constant MAXLEN. */
 		private static final VarHandle MAXLEN = LAYOUT.varHandle(PathElement.groupElement("maxlen"));
+		
+		/** The Constant LEN. */
 		private static final VarHandle LEN = LAYOUT.varHandle(PathElement.groupElement("len"));
 	}
 
 	/**
+	 * The Constant pcap_sendqueue_alloc.
+	 *
 	 * @see {@code pcap_send_queue* pcap_sendqueue_alloc(u_int memsize)}
 	 * @since WinPcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_sendqueue_alloc;
 
 	/**
+	 * The Constant pcap_sendqueue_destroy.
+	 *
 	 * @see {@code void pcap_sendqueue_destroy(pcap_send_queue* queue)}
 	 * @since WinPcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_sendqueue_destroy;
 
 	/**
+	 * The Constant pcap_sendqueue_queue.
+	 *
 	 * @see {@code int pcap_sendqueue_queue(pcap_send_queue* queue, const struct
 	 *      pcap_pkthdr *pkt_header, const u_char *pkt_data)}
 	 * @since WinPcap 1.0
@@ -86,6 +97,8 @@ public class PcapSendQueue implements AutoCloseable {
 	private static final PcapForeignDowncall pcap_sendqueue_queue;
 
 	/**
+	 * The Constant pcap_sendqueue_transmit.
+	 *
 	 * @see {@code u_int pcap_sendqueue_transmit(pcap_t *p, pcap_send_queue* queue,
 	 *      int sync)}
 	 * @since WinPcap 1.0
@@ -126,7 +139,10 @@ public class PcapSendQueue implements AutoCloseable {
 		return pcap_sendqueue_alloc.invokeObj(capacity);
 	}
 
+	/** The queue ptr. */
 	private final MemoryAddress queue_ptr;
+	
+	/** The scope. */
 	private final MemorySession scope;
 
 	/**
@@ -154,6 +170,7 @@ public class PcapSendQueue implements AutoCloseable {
 	 * <p>
 	 * Deletes a send queue and frees all the memory associated with it
 	 * </p>
+	 * .
 	 */
 	private void destroy() {
 		if (!scope.isAlive())
@@ -212,6 +229,7 @@ public class PcapSendQueue implements AutoCloseable {
 	 *
 	 * @param header the header
 	 * @param packet the packet
+	 * @param offset the offset
 	 * @return the int
 	 */
 	public int queue(PcapHeader header, byte[] packet, int offset) {
@@ -253,10 +271,10 @@ public class PcapSendQueue implements AutoCloseable {
 	 * the performance counter of the machine). Such a precision cannot be reached
 	 * sending the packets with pcap_sendpacket().
 	 * </p>
-	 * 
-	 * @param pcap the pcap device to send the packets
-	 * @param sync if true, the packets are synchronized in the kernel with a high
-	 *             precision timestamp
+	 *
+	 * @param pcap_t the pcap t
+	 * @param sync   if true, the packets are synchronized in the kernel with a high
+	 *               precision timestamp
 	 * @return number of packets transmitted
 	 */
 	int transmit(MemoryAddress pcap_t, boolean sync) {

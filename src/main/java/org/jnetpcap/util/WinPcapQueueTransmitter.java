@@ -22,9 +22,9 @@ import java.lang.foreign.MemorySession;
 
 import org.jnetpcap.PcapException;
 import org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink;
+import org.jnetpcap.PcapHeader;
 import org.jnetpcap.windows.PcapSendQueue;
 import org.jnetpcap.windows.WinPcap;
-import org.jnetpcap.PcapHeader;
 
 /**
  * Transmitter which uses the PcapSendQueue as a sink for packets. Each packet
@@ -38,16 +38,33 @@ import org.jnetpcap.PcapHeader;
  */
 public class WinPcapQueueTransmitter implements PcapPacketSink, AutoCloseable {
 
+	/** The scope. */
 	private final MemorySession scope;
+	
+	/** The header. */
 	private final PcapHeader header;
+	
+	/** The capacity. */
 	private final int capacity;
+	
+	/** The send queue. */
 	private final PcapSendQueue sendQueue;
+	
+	/** The pcap. */
 	private final WinPcap pcap;
+	
+	/** The sync. */
 	private final boolean sync;
+	
+	/** The size. */
 	private int size;
 
 	/**
-	 * 
+	 * Instantiates a new win pcap queue transmitter.
+	 *
+	 * @param sendQueue the send queue
+	 * @param pcap      the pcap
+	 * @param sync      the sync
 	 */
 	public WinPcapQueueTransmitter(PcapSendQueue sendQueue, WinPcap pcap, boolean sync) {
 		this.sendQueue = sendQueue;
@@ -61,6 +78,11 @@ public class WinPcapQueueTransmitter implements PcapPacketSink, AutoCloseable {
 	}
 
 	/**
+	 * Sink packet.
+	 *
+	 * @param packet the packet
+	 * @param length the length
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink#sinkPacket(java.lang.foreign.Addressable,
 	 *      int)
 	 */
@@ -86,7 +108,9 @@ public class WinPcapQueueTransmitter implements PcapPacketSink, AutoCloseable {
 	}
 
 	/**
-	 * @throws PcapException
+	 * Close.
+	 *
+	 * @throws PcapException the pcap exception
 	 * @see java.lang.AutoCloseable#close()
 	 */
 	@Override

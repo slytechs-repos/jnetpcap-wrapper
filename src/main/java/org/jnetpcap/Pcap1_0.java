@@ -167,7 +167,6 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * it; options for the capture, such as promiscu' ous mode, can be set on the
 	 * handle before activating it.
 	 *
-	 * @author Sly Technologies, Inc.
 	 * @param device a string that specifies the network device to open; on Linux
 	 *               systems with 2.2 or later kernels, a source argument of "any"
 	 *               or NULL can be used to capture packets from all interfaces.
@@ -186,6 +185,7 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * <p>
 	 * Used to initialize the Packet Capture library. opts specifies options for the
 	 * library; currently, the options are:
+	 * </p>
 	 * <dl>
 	 * <dt>{@link PcapConstants#PCAP_CHAR_ENC_LOCAL}</dt>
 	 * <dd>Treat all strings supplied as arguments, and return all strings to the
@@ -194,7 +194,6 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * <dd>Treat all strings supplied as arguments, and return all strings to the
 	 * caller, as being in UTF-8.</dd>
 	 * </dl>
-	 * </p>
 	 * 
 	 * <p>
 	 * On UNIX-like systems, the local character encoding is assumed to be UTF-8, so
@@ -217,17 +216,17 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * {@link #init} will initialize Winsock itself on Windows.
 	 * </p>
 	 *
-	 * @param opts the opts
+	 * @param opts Pcap initialization option flags
 	 * @throws PcapException the pcap exception
 	 * @since libpcap 1.9
 	 */
-	public static void init(int flags) throws PcapException {
+	public static void init(int opts) throws PcapException {
 		try (var scope = newScope()) {
 			MemorySegment errbuf = MemorySegment.allocateNative(PcapConstants.PCAP_ERRBUF_SIZE, scope);
 
-			int result = pcap_init.invokeInt(flags, errbuf.address());
+			int result = pcap_init.invokeInt(opts, errbuf.address());
 			if (result != PcapCode.PCAP_OK)
-				PcapException.throwIfNotOk(flags, () -> errbuf.getUtf8String(0));
+				PcapException.throwIfNotOk(opts, () -> errbuf.getUtf8String(0));
 		}
 	}
 
@@ -261,7 +260,7 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 *
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
-	 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
+	 * @see LibraryPolicy#setDefault(LibraryPolicy)
 	 */
 	public static boolean isSupported() {
 		return pcap_create.isNativeSymbolResolved();
@@ -324,6 +323,27 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 		return Pcap0_6.openDead(Pcap1_0::new, linktype, snaplen);
 	}
 
+	/**
+	 * Open a device for capturing.
+	 * 
+	 * <p>
+	 * {@code openLive} is used to obtain a packet capture handle to look at packets
+	 * on the network. device is a string that specifies the network device to open;
+	 * on Linux systems with 2.2 or later kernels, a device argument of "any" or
+	 * NULL can be used to capture packets from all interfaces.
+	 * </p>
+	 *
+	 * @param device  the device name
+	 * @param snaplen specifies the snapshot length to be set on the handle
+	 * @param promisc specifies whether the interface is to be put into promiscuous
+	 *                mode. If promisc is non-zero, promiscuous mode will be set,
+	 *                otherwise it will not be set
+	 * @param timeout the packet buffer timeout, as a non-negative value, in units
+	 * @param unit    time timeout unit
+	 * @return the pcap handle
+	 * @throws PcapException any errors
+	 * @since libpcap 0.4
+	 */
 	public static Pcap1_0 openLive(String device,
 			int snaplen,
 			boolean promisc,
@@ -357,9 +377,9 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	/**
 	 * Convert an error full value to a string.
 	 *
-	 * @param full pcap error full
+	 * @param error the error
 	 * @return the error string for the given full
-	 * @see libpcap 1.0
+	 * @since libpcap 1.0
 	 */
 	public static String statusToStr(int error) {
 		return pcap_statustostr.invokeString(error);
@@ -421,7 +441,7 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * will be set, otherwise it will not be set.
 	 * </p>
 	 *
-	 * @param b if true enable promiscous mode, otherwise disable it
+	 * @param enable if true enable promiscous mode, otherwise disable it
 	 * @return this pcap handle
 	 * @throws PcapException the pcap exception
 	 * @since libpcap 1.0

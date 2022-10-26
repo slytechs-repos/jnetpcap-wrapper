@@ -83,9 +83,8 @@ public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafeP
 	 *
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
-	 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
-	 */
-	public static boolean isSupported() {
+	 * @see LibraryPolicy#setDefault(LibraryPolicy)
+	 */	public static boolean isSupported() {
 		return pcap_datalink_val_to_description_or_dlt.isNativeSymbolResolved();
 	}
 
@@ -123,14 +122,15 @@ public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafeP
 
 	/**
 	 * Open a fake pcap_t for compiling filters or opening a capture for output.
-	 *
+	 * 
 	 * <p>
-	 * {@link #openDead} and pcap_open_dead_with_tstamp_precision() are used for
-	 * creating a pcap_t structure to use when calling the other functions in
-	 * libpcap. It is typically used when just using libpcap for compiling BPF full;
-	 * it can also be used if using pcap_dump_open(3PCAP), pcap_dump(3PCAP), and
-	 * pcap_dump_close(3PCAP) to write a savefile if there is no pcap_t that
-	 * supplies the packets to be written.
+	 * {@link Pcap#openDead(PcapDlt, int)} and
+	 * {@link Pcap#openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)}
+	 * are used for creating a pcap_t structure to use when calling the other
+	 * functions in libpcap. It is typically used when just using libpcap for
+	 * compiling BPF full; it can also be used if using pcap_dump_open(3PCAP),
+	 * pcap_dump(3PCAP), and pcap_dump_close(3PCAP) to write a savefile if there is
+	 * no pcap_t that supplies the packets to be written.
 	 * </p>
 	 * 
 	 * <p>
@@ -142,9 +142,10 @@ public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafeP
 	 * have time stamps in seconds and nanoseconds. Its value does not affect
 	 * pcap_compile(3PCAP).
 	 * </p>
-	 * 
-	 * @param linktype specifies the link-layer type for the pcap handle
-	 * @param snaplen  specifies the snapshot length for the pcap handle
+	 *
+	 * @param linktype  specifies the link-layer type for the pcap handle
+	 * @param snaplen   specifies the snapshot length for the pcap handle
+	 * @param precision the timestamp precision requested
 	 * @return A dead pcap handle
 	 * @throws PcapException any errors
 	 * @since libpcap 1.5.1

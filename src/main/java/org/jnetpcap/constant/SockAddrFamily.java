@@ -25,58 +25,157 @@ import java.util.function.IntSupplier;
  * essential to decoding those addresses correctly.
  */
 public enum SockAddrFamily implements IntSupplier {
+	
+	/** The unspec. */
 	UNSPEC,
+	
+	/** The local. */
 	LOCAL,
+	
+	/** The inet. */
 	INET,
+	
+	/** The ax25. */
 	AX25,
+	
+	/** The ipx. */
 	IPX,
+	
+	/** The appletalk. */
 	APPLETALK,
+	
+	/** The netrom. */
 	NETROM,
+	
+	/** The bridge. */
 	BRIDGE,
+	
+	/** The atmpvc. */
 	ATMPVC,
+	
+	/** The x25. */
 	X25,
+	
+	/** The inet6. */
 	INET6,
+	
+	/** The rose. */
 	ROSE,
+	
+	/** The decnet. */
 	DECNET,
+	
+	/** The netbeui. */
 	NETBEUI,
+	
+	/** The security. */
 	SECURITY,
+	
+	/** The key. */
 	KEY,
+	
+	/** The netlink. */
 	NETLINK,
+	
+	/** The packet. */
 	PACKET,
+	
+	/** The ash. */
 	ASH,
+	
+	/** The connet. */
 	CONNET,
+	
+	/** The atmsvc. */
 	ATMSVC,
+	
+	/** The rds. */
 	RDS,
+	
+	/** The sna. */
 	SNA,
+	
+	/** The irda. */
 	IRDA,
+	
+	/** The pppox. */
 	PPPOX,
+	
+	/** The wanpipe. */
 	WANPIPE,
+	
+	/** The llc. */
 	LLC,
+	
+	/** The ib. */
 	IB,
+	
+	/** The mpls. */
 	MPLS,
+	
+	/** The can. */
 	CAN,
+	
+	/** The tipc. */
 	TIPC,
+	
+	/** The bluetooth. */
 	BLUETOOTH,
+	
+	/** The iucv. */
 	IUCV,
+	
+	/** The rxrpc. */
 	RXRPC,
+	
+	/** The isdn. */
 	ISDN,
+	
+	/** The phonet. */
 	PHONET,
+	
+	/** The ieee802154. */
 	IEEE802154,
+	
+	/** The caif. */
 	CAIF,
+	
+	/** The alg. */
 	ALG,
+	
+	/** The nfc. */
 	NFC,
+	
+	/** The vsock. */
 	VSOCK,
+	
+	/** The kcm. */
 	KCM,
+	
+	/** The qipcrtr. */
 	QIPCRTR,
+	
+	/** The smc. */
 	SMC,
+	
+	/** The max. */
 	MAX,
 	;
 
+	/**
+	 * Value of.
+	 *
+	 * @param family the family
+	 * @return the sock addr family
+	 */
 	public static SockAddrFamily valueOf(int family) {
 		return values()[family];
 	}
 
 	/**
+	 * Gets the as int.
+	 *
+	 * @return the as int
 	 * @see java.util.function.IntSupplier#getAsInt()
 	 */
 	@Override

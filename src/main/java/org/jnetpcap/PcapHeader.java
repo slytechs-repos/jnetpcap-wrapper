@@ -82,13 +82,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * are copied from the memory into this header. Byte ordering defaults to native
 	 * byte order.
 	 *
-	 * @param tvSec   the tv sec epoch time in seconds since Jan 1st, 1970 12:00am
-	 * @param tvUsec  the tv usec micro or nano second fraction of a second
-	 * @param caplen  the caplen how much data was captured
-	 * @param wirelen the wirelen actual packet length as seen on the wire
-	 * @param dst     dst could be a memory address or a memory segment, either of
-	 *                which is acceptable
-	 * @param order   byte ordering
+	 * @param src the src
 	 * @return new pcap header
 	 */
 	static PcapHeader newInstance(Addressable src) {
@@ -100,13 +94,8 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * are copied from the memory into this header. Byte ordering defaults to native
 	 * byte order.
 	 *
-	 * @param tvSec   the tv sec epoch time in seconds since Jan 1st, 1970 12:00am
-	 * @param tvUsec  the tv usec micro or nano second fraction of a second
-	 * @param caplen  the caplen how much data was captured
-	 * @param wirelen the wirelen actual packet length as seen on the wire
-	 * @param dst     dst could be a memory address or a memory segment, either of
-	 *                which is acceptable
-	 * @param order   byte ordering
+	 * @param src   the src
+	 * @param order byte ordering
 	 * @return new pcap header
 	 */
 	static PcapHeader newInstance(Addressable src, ByteOrder order) {
@@ -135,8 +124,6 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param tvUsec  the tv usec micro or nano second fraction of a second
 	 * @param caplen  the caplen how much data was captured
 	 * @param wirelen the wirelen actual packet length as seen on the wire
-	 * @param dst     dst could be a memory address or a memory segment, either of
-	 *                which is acceptable
 	 * @param order   byte ordering
 	 * @return new pcap header
 	 */
@@ -178,8 +165,6 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param tvUsec  the tv usec micro or nano second fraction of a second
 	 * @param caplen  the caplen how much data was captured
 	 * @param wirelen the wirelen actual packet length as seen on the wire
-	 * @param dst     dst could be a memory address or a memory segment, either of
-	 *                which is acceptable
 	 * @param order   byte ordering
 	 * @return new pcap header
 	 */
@@ -205,7 +190,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * Creates a no-copy, Pcap header that wraps around the byte array. The integer
 	 * byte ordering is assumed to be {@code ByteOrder.nativeOrder()}.
 	 *
-	 * @param array the byte array containing header structure
+	 * @param arr the arr
 	 * @return the new pcap header
 	 */
 	static PcapHeader ofArray(byte[] arr) {
@@ -225,6 +210,12 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 		return new PcapHeaderBuffer(buf);
 	}
 
+	/**
+	 * Of buffer.
+	 *
+	 * @param buffer the buffer
+	 * @return the pcap header
+	 */
 	static PcapHeader ofBuffer(ByteBuffer buffer) {
 		return new PcapHeaderBuffer(buffer);
 	}
@@ -232,8 +223,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	/**
 	 * Reads the {@code captureLength} field value from the memory object.
 	 *
-	 * @param addr the native memory object, can be either {@code MemoryAddress} or
-	 *             {@code MemorySegment}
+	 * @param memory the memory
 	 * @return number of bytes captured, possibly truncated
 	 */
 	static int readCaptureLength(Addressable memory) {
@@ -243,8 +233,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	/**
 	 * Reads the {@code tvSec} field value from the memory object.
 	 *
-	 * @param addr the native memory object, can be either {@code MemoryAddress} or
-	 *             {@code MemorySegment}
+	 * @param memory the memory
 	 * @return number of seconds from the start of epoch time, Jan 1st 1970 12:00am.
 	 */
 	static long readTvSec(Addressable memory) {
@@ -254,8 +243,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	/**
 	 * Reads the {@code tvUsec} field value from the memory object.
 	 *
-	 * @param addr the native memory object, can be either {@code MemoryAddress} or
-	 *             {@code MemorySegment}
+	 * @param memory the memory
 	 * @return faction of a second either in nanos or micros depending the capture
 	 *         source
 	 */
@@ -266,8 +254,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	/**
 	 * Reads the {@code wireLength} field value from the memory object.
 	 *
-	 * @param addr the native memory object, can be either {@code MemoryAddress} or
-	 *             {@code MemorySegment}
+	 * @param memory the memory
 	 * @return number of bytes in the original packet seen on the wire
 	 */
 	static int readWireLength(Addressable memory) {
@@ -284,13 +271,14 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param dst     dst could be a memory address or a memory segment, either of
 	 *                which is acceptable
 	 * @param order   the endianness of the values to be written
+	 * @return the int
 	 */
 	static int write(long tvSec, long tvUsec, int caplen, int wirelen, Addressable dst, ByteOrder order) {
 		return PcapHeaderMemory.write(tvSec, tvUsec, caplen, wirelen, dst, order);
 	}
 
 	/**
-	 * Writes values directly into the destination byte array at specified offset
+	 * Writes values directly into the destination byte array at specified offset.
 	 *
 	 * @param tvSec   the tv sec epoch time in seconds since Jan 1st, 1970 12:00am
 	 * @param tvUsec  the tv usec micro or nano second fraction of a second
@@ -299,6 +287,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param dst     the byte array to write to
 	 * @param offset  the offset in to dst array
 	 * @param order   the endianness of the values to be written
+	 * @return the int
 	 */
 	static int write(long tvSec, long tvUsec, int caplen, int wirelen, byte[] dst, int offset, ByteOrder order) {
 		return PcapHeaderBuffer.write(tvSec, tvUsec, caplen, wirelen, dst, offset, order);
@@ -312,6 +301,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param caplen  the caplen how much data was captured
 	 * @param wirelen the wirelen actual packet length as seen on the wire
 	 * @param dst     the byte array to write to at current buffers position
+	 * @return the int
 	 */
 	static int write(long tvSec, long tvUsec, int caplen, int wirelen, ByteBuffer dst) {
 		return PcapHeaderBuffer.write(tvSec, tvUsec, caplen, wirelen, dst);
@@ -385,8 +375,8 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 *
 	 * @param dst the destination memory segment
 	 * @return the number of byte written to memory, on certain systems (i.e.
-	 *         64-bit) the number may reflected padding as well and shold be the
-	 *         same value as {@value #PCAP_HEADER_PADDED_LENGTH}.
+	 *         64-bit) the number may reflected padding as well and should be the
+	 *         same value as {@code 24}.
 	 */
 	int copyTo(MemorySegment dst);
 
