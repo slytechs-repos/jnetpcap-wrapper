@@ -93,13 +93,13 @@ See the [wiki] pages. Project's [unit tests][unit_test] are also a great source 
 ### Java Dependencies for Module: `org.jnetpcap`
 * No java dependencies except for standard java modules and the *Foreign Function* feature, currently in java *preview* (enabled with `--enable-preview` VM args option), but one which is expected to be a permanent feature, in the near future.
 
-### Native libbrary depdencies
+### Native Library Dependencies
 * The only native dependency is the native [*libpcap* library][libpcap] itself, which has to be installed prior to **jNetPcap** module initializing. On *Microsoft Windows* platforms, install [*WinPcap*][winpcap] or [*Npcap*][npcap] tools instead.
 
 ## Installation
 Here are several methods for installing **jNetPcap** software.
 
-### Maven Dependency
+### Maven Artifact Config
 ```
 <dependency>
     <groupId>org.jnetpcap</groupId>
@@ -124,7 +124,7 @@ Provides a high level packet dissecting and decoding functionality. It requires 
 See [Wiki pages][wiki]
 
 ## Compatibility with jNetPcap version 1
-There are API and license changes between version 1 and 2 of jNetPcap.
+There are API and license changes between version 1 and 2 of **jNetPcap**.
 Please see [wiki home page][wiki] for details.
 
 [jnetpcap_v1_page]: <https://sourceforge.net/projects/jnetpcap> "Legacy jNetPcap Version 1 Project Page"
