@@ -449,7 +449,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 *
 	 * @return Number of microseconds since epoch start, Jan 1st, 1970 12:00am.
 	 */
-	default long toEpochMicros() {
+	default long toEpochMicro() {
 		return toEpochTime(PcapTStampPrecision.TSTAMP_PRECISION_MICRO);
 	}
 
@@ -462,8 +462,8 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 *
 	 * @return Number of milliseconds since epoch start, Jan 1st, 1970 12:00am.
 	 */
-	default long toEpochMillis() {
-		return PcapTStampPrecision.TSTAMP_PRECISION_MICRO.toEpochMillis(tvSec(), tvUsec());
+	default long toEpochMilli() {
+		return PcapTStampPrecision.TSTAMP_PRECISION_MICRO.toEpochMilli(tvSec(), tvUsec());
 	}
 
 	/**
