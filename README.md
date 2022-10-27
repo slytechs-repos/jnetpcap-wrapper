@@ -76,6 +76,37 @@ This example produces no output, but if you monitor the network, you will see ou
 
 > **Note** `Pcap.inject()` can also be used to transmit packets. We can also transmit data in `ByteBuffer` object, and a foreign native `MemorySegment`, all covered under advanced topics in [wiki].
 
+### Statistics Snapshots
+Our last example shows how to take statistic snapshots using `Pcap` API. The native *libpcap* library is able to capture statistics, even when our main thread is a sleep and only wakes up to take a snapshot of the current counters, store them in a `PcapStat` record and return them to our main thread. Then we simply print out the statistics structure values, sleep for 1 second and loop once again. For a total of 5 seconds or 5 loops.
+
+```java
+void main() throws PcapException, InterruptedException {
+	List<PcapIf> devices = Pcap.findAllDevs();
+
+	try (Pcap pcap = Pcap.create(devices.get(0))) {
+		pcap.activate();
+
+		long secondsRemaining = 5;
+
+		while (secondsRemaining-- > 0) {
+			PcapStat stats = pcap.stats();
+
+			System.out.println(stats);
+
+			TimeUnit.SECONDS.sleep(1);
+		}
+	}
+}
+```
+Produces the following output:
+```
+PcapStatRecord[recv=0, drop=0, ifdrop=0, capt=0, sent=0, netdrop=0]
+PcapStatRecord[recv=137, drop=0, ifdrop=0, capt=0, sent=0, netdrop=0]
+PcapStatRecord[recv=340, drop=0, ifdrop=0, capt=0, sent=0, netdrop=0]
+PcapStatRecord[recv=477, drop=0, ifdrop=0, capt=0, sent=0, netdrop=0]
+PcapStatRecord[recv=677, drop=0, ifdrop=0, capt=0, sent=0, netdrop=0]
+```
+
 ### How To Run The Examples
 To run these exmamples the following command line arguments need to be added:
 <dl><dt>On Linux platforms</dt><dd>-Djava.library.path=/usr/lib/x86_64-linux-gnu --enable-native-access=org.jnetpcap --enable-preview</dd>
