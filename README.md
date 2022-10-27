@@ -12,7 +12,7 @@ Capturing and transmitting packets is straight forward and easy out of the box.
 > **Note** **jNetPcap** also provides many useful utilities to help in working with the data received, such as byte arrays to hex string, and hex string to byte array, and much more. More advanced utility packet handlers such as no-copy on capture, are provides as well and discussed in the [Wiki pages][wiki]. 
 
 ### Capture a Live Packet
-This quick example demonstrates how to **capture** one or more packets from a live network.
+This quick example demonstrates how to **capture one or more packets** from a live network.
 ```java
 void main() throws PcapException {
 	int PACKET_COUNT = 1;
@@ -42,7 +42,7 @@ Hello World
 Packet [timestamp=2011-03-01T20:45:13.266Z, wirelen=74   caplen=74   {00:26:62:2f:47:87}]
 ```
 ### Transmit a Packet With Data-Link Header
-This example demonstrates how to **transmit** a raw packet on a live network.
+This example demonstrates how to **transmit a raw packet** on a live network.
 
 The packet we will transmit looks like this:
 ```
@@ -77,7 +77,7 @@ This example produces no output, but if you monitor the network, you will see ou
 > **Note** `Pcap.inject()` can also be used to transmit packets. We can also transmit data in `ByteBuffer` object, and a foreign native `MemorySegment`, all covered under advanced topics in [wiki].
 
 ### Statistics Snapshots
-Our last example shows how to take statistic snapshots using `Pcap` API. The native *libpcap* library is able to capture statistics, even when our main thread is a sleep and only wakes up to take a snapshot of the current counters, store them in a `PcapStat` record and return them to our main thread. Then we simply print out the statistics structure values, sleep for 1 second and loop once again. For a total of 5 seconds or 5 loops.
+Our last example shows how to **take statistic snapshots** using `Pcap` API. The native *libpcap* library is able to capture statistics, even when our main thread is a sleep and only wakes up to take a snapshot of the current counters, store them in a `PcapStat` record and return them to our main thread. Then we simply print out the statistics structure values, sleep for 1 second and loop once again. For a total of 5 seconds or 5 loops.
 
 ```java
 void main() throws PcapException, InterruptedException {
