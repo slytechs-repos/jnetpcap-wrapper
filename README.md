@@ -25,7 +25,7 @@ void main() throws PcapException {
 
 			System.out.println(msg);
 			System.out.printf("Packet [timestamp=%s, wirelen=%-4d caplen=%-4d %s]%n",
-					Instant.ofEpochMilli(header.toEpochMillis()),
+					Instant.ofEpochMilli(header.toEpochMilli()),
 					header.wireLength(),
 					header.captureLength(),
 					PcapUtils.toHexCurleyString(packet, 0, 6));
