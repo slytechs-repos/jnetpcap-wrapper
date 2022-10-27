@@ -89,7 +89,7 @@ public enum PcapTStampPrecision implements IntSupplier {
 	 * @param fractionOfSecond the fraction of second
 	 * @return number of millis since start of epoch time
 	 */
-	public long toEpochMillis(long epochSeconds, long fractionOfSecond) {
+	public long toEpochMilli(long epochSeconds, long fractionOfSecond) {
 		long scaleToMillis = (scale / 1000);
 
 		return toEpochTime(epochSeconds, fractionOfSecond) / scaleToMillis;
@@ -102,7 +102,7 @@ public enum PcapTStampPrecision implements IntSupplier {
 	 *                  start of epoch Jan 1st, 1970 12:00am
 	 * @return number of seconds in epoch time
 	 */
-	public long toEpochSeconds(long epochTime) {
+	public long toEpochSecond(long epochTime) {
 		return (epochTime / scale);
 	}
 
