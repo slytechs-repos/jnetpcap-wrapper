@@ -145,12 +145,6 @@ Here are several methods for installing **jNetPcap** software.
 ### Compile From Source
 You will find instructions on how to compile from source on our [Wiki Pages][wiki].
 
-## Related Java Modules
-Previously embeded, non-binding related functionality, which was part of **jNetPcap** version 1 API, has be refactored into separate java modules. 
-### Java Module: `org.jnetpcap.packet`
-Provides a high level packet dissecting and decoding functionality. It requires `org.jnetpcap` module, and has several other depdencies (listed in the `jnetpcap-packet` repo.)
-> TODO - add link to `jnetpcap-packet` module
-
 ## Usage
 See [Wiki pages][wiki]
 
