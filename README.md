@@ -12,7 +12,7 @@ Capturing and transmitting packets is straight forward and easy out of the box.
 > **Note** **jNetPcap** also provides many useful utilities to help in working with the data received, such as byte arrays to hex string, and hex string to byte array, and much more. More advanced utility packet handlers such as no-copy on capture, are provides as well and discussed in the [Wiki pages][wiki]. 
 
 ### Capture a Live Packet
-This quick example demonstrates how to **capture** 1 or more packets from a live network.
+This quick example demonstrates how to **capture** one or more packets from a live network.
 ```java
 void main() throws PcapException {
 	int PACKET_COUNT = 1;
@@ -51,7 +51,7 @@ Ethernet II, Src: ASUSTekC_b3:01:84 (00:1d:60:b3:01:84), Dst: Actionte_2f:47:87 
 Internet Protocol Version 4, Src: 192.168.253.5, Dst: 192.168.253.6
 Transmission Control Protocol, Src Port: 57678 (57678), Dst Port: http (80), Seq: 0, Len: 0
 ```
-We use [Wireshark][wireshark] to convert a previously captured packet to a hex string (right click packet -> copy -> "... as a Hex Stream") and then **jNetPcap's** utility method `PcapUtils.parseHexString()` to further convert into a java byte array, which we send as a raw packet:
+We use [Wireshark][wireshark] to convert a previously captured packet to a hex string (*`right click packet -> copy -> "... as a Hex Stream"`*) and then **jNetPcap's** utility method `PcapUtils.parseHexString()` to further convert into a java byte array, which we send as a raw packet:
 
 ```java
 void main() throws PcapException {
