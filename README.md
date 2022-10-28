@@ -150,7 +150,7 @@ See [Wiki pages][wiki]
 
 ## Contact
 * `sales@slytechs.com` for commercial and licensing issues
-* jNetPcap Issue Tracker
+* [jNetPcap Issue Tracker][bugs]
 
 ## Compatibility with jNetPcap version 1
 There are API and license changes between version 1 and 2 of **jNetPcap**.
