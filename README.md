@@ -145,8 +145,12 @@ Here are several methods for installing **jNetPcap** software.
 ### Compile From Source
 You will find instructions on how to compile from source on our [Wiki Pages][wiki].
 
-## Usage
+## Documentation
 See [Wiki pages][wiki]
+
+## Contact
+* `sales@slytechs.com` for commercial and licensing issues
+* jNetPcap Issue Tracker
 
 ## Compatibility with jNetPcap version 1
 There are API and license changes between version 1 and 2 of **jNetPcap**.
@@ -160,4 +164,5 @@ Please see [wiki home page][wiki] for details.
 [winpcap]: <https://www.winpcap.org/> "WinPcap is a library for link-layer network access in Windows environments"
 [wireshark]: <https://wireshark.org> "Wireshark is the world’s foremost and widely-used network protocol analyzer"
 [sf.net]: <https://sourceforge.net/projects/jnetpcap/> "jNetPcap version 1 hosted on SourceForge.net"
+[bugs]: <https://github.com/slytechs-repos/jnetpcap/issues> "jnetPcap bug reports on Github"
 
