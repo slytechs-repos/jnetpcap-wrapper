@@ -17,9 +17,6 @@
  */
 package org.jnetpcap;
 
-import static java.lang.foreign.ValueLayout.ADDRESS;
-import static java.lang.foreign.ValueLayout.JAVA_INT;
-
 import java.lang.foreign.Addressable;
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
@@ -35,6 +32,8 @@ import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.util.PcapPacketRef;
+
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * Provides Pcap API method calls for up to libpcap version 0.8
@@ -462,6 +461,7 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 			// Convert to Integer[] from int[] and collect as List<Integer>
 			var list = IntStream.of(dlts)
 					.mapToObj(PcapDlt::valueOf)
+					.filter(d -> d != null)
 					.toList();
 
 			return Collections.unmodifiableList(list);
@@ -495,7 +495,7 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 * @see org.jnetpcap.Pcap#sendPacket(java.lang.foreign.Addressable, int)
 	 */
 	@Override
-	protected void sendPacket(Addressable packet, int length) throws PcapException {
+	public void sendPacket(Addressable packet, int length) throws PcapException {
 		pcap_sendpacket.invokeInt(this::getErrorString, getPcapHandle(), packet, length);
 	}
 

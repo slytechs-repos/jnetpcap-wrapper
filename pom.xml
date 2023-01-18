@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.jnetpcap</groupId>
+	<groupId>com.slytechs.libraries</groupId>
 	<artifactId>jnetpcap</artifactId>
 	<version>2.0.0-alpha.1</version>
-	<name>jNetPcap Binding</name>
-	<description>jNetPcap a libpcap java wrapper.</description>
-	<url>https://jnetpcap.com</url>
+	<name>jNetpcap</name>
+	<description>A native Libpcap library Java wrapper</description>
+	<url>https://www.jnetpcap.org</url>
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
@@ -14,9 +14,11 @@
 	</licenses>
 	<developers>
 		<developer>
-			<id>markbe</id>
+			<id>markb</id>
 			<name>Mark Bednarczyk</name>
 			<email>mark@slytechs.com</email>
+			<organization>Sly Technlogies Inc</organization>
+			<organizationUrl>http://slytechs.com</organizationUrl>
 		</developer>
 	</developers>
 	<dependencies>
@@ -26,7 +28,6 @@
 			<artifactId>maven-compiler-plugin</artifactId>
 			<version>3.10.1</version>
 		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -51,6 +52,13 @@
 				</excludes>
 			</resource>
 		</resources>
+		<extensions>
+			<extension>
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>1.7.0</version>
+			</extension>
+		</extensions>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -94,13 +102,14 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.0.0-M7</version>
 				<configuration>
+					<trimStackTrace>true</trimStackTrace>
 					<encoding>${java.encoding}</encoding>
 					<skipAfterFailureCount>1</skipAfterFailureCount>
 					<reuseForks>true</reuseForks>
 					<groups>${groups}</groups>
 					<excludedGroups>${excludeGroups}</excludedGroups>
 					<argLine>
-						${java.librarypath.libpcap} ${java.preview} ${java.native}
+						${java.library.path.libpcap} ${java.preview} ${java.native}
 					</argLine>
 				</configuration>
 			</plugin>
@@ -119,17 +128,127 @@
 		<name>Sly Technologies Inc</name>
 		<url>http://slytechs.com</url>
 	</organization>
+	<profiles>
+		<profile>
+			<id>osx-homebrew</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+				<file>
+					<exists>/usr/local/Cellar/libpcap/${libpcap.version}</exists>
+				</file>
+			</activation>
+			<build>
+			</build>
+			<properties>
+				<java.library.path.libpcap.osx>-Djava.library.path=/usr/local/Cellar/libpcap/${libpcap.version}/lib</java.library.path.libpcap.osx>
+				<java.library.path.libpcap>${java.library.path.libpcap.osx}</java.library.path.libpcap>
+				<excludeGroups>windows-api|linux-api</excludeGroups>
+			</properties>
+		</profile>
+		<profile>
+			<id>osx-macports</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+				<file>
+					<exists>/opt/local/lib/libpcap.dylib</exists>
+				</file>
+			</activation>
+			<properties>
+				<java.library.path.libpcap.osx>-Djava.library.path=/opt/local/lib</java.library.path.libpcap.osx>
+				<java.library.path.libpcap>${java.library.path.libpcap.osx}</java.library.path.libpcap>
+				<excludeGroups>windows-api|linux-api</excludeGroups>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux-x86</id>
+			<activation>
+				<os>
+					<name>Linux</name>
+					<arch>x86</arch>
+				</os>
+			</activation>
+			<properties>
+				<java.library.path.libpcap.linux>-Djava.library.path=/usr/lib/x86-linux-gnu</java.library.path.libpcap.linux>
+				<java.library.path.libpcap>${java.library.path.libpcap.linux}</java.library.path.libpcap>
+				<excludeGroups>windows-api</excludeGroups>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux-amd64</id>
+			<activation>
+				<os>
+					<name>Linux</name>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<java.library.path.libpcap.linux64>-Djava.library.path=/usr/lib/x86_64-linux-gnu</java.library.path.libpcap.linux64>
+				<java.library.path.libpcap>${java.library.path.libpcap.linux64}</java.library.path.libpcap>
+				<excludeGroups>windows-api</excludeGroups>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux-x86_64</id>
+			<activation>
+				<os>
+					<name>Linux</name>
+					<arch>x86_64</arch>
+				</os>
+			</activation>
+			<properties>
+				<java.library.path.libpcap.linux64>-Djava.library.path=/usr/lib/x86_64-linux-gnu</java.library.path.libpcap.linux64>
+				<java.library.path.libpcap>${java.library.path.libpcap.linux64}</java.library.path.libpcap>
+				<excludeGroups>windows-api</excludeGroups>
+			</properties>
+		</profile>
+		<profile>
+			<id>windows-x86_64</id>
+			<activation>
+				<os>
+					<family>Windows</family>
+					<arch>x86_64</arch>
+				</os>
+			</activation>
+			<properties>
+				<java.library.path.libpcap.windows64>-Djava.library.path="C:\\Windows\\SysWOW64"</java.library.path.libpcap.windows64>
+				<java.library.path.libpcap>${java.library.path.libpcap.windows64}</java.library.path.libpcap>
+				<excludeGroups>unix-api|linux-api</excludeGroups>
+			</properties>
+		</profile>
+		<profile>
+			<id>windows-x86</id>
+			<activation>
+				<os>
+					<family>Windows</family>
+					<arch>x86</arch>
+				</os>
+			</activation>
+			<properties>
+				<java.library.path.libpcap.windows>-Djava.library.path="C:\\Windows\\Program Files"</java.library.path.libpcap.windows>
+				<java.library.path.libpcap>${java.library.path.libpcap.windows}</java.library.path.libpcap>
+				<excludeGroups>unix-api|linux-api</excludeGroups>
+			</properties>
+		</profile>
+	</profiles>
 	<properties>
 		<jdk.version>19</jdk.version>
-		<java.librarypath.libpcap.linux64>-Djava.library.path=/usr/lib/x86_64-linux-gnu</java.librarypath.libpcap.linux64>
-
 		<java.preview>--enable-preview</java.preview>
 		<java.encoding>UTF-8</java.encoding>
-
 		<java.native>--enable-native-access=ALL-UNNAMED</java.native>
-		<java.librarypath.libpcap>${java.librarypath.libpcap.linux64}</java.librarypath.libpcap>
-
 		<groups>user-permission</groups>
 		<excludeGroups>windows-api|unix-api|linux-api</excludeGroups>
 	</properties>
+	<issueManagement>
+		<system>Github Issue Tracking</system>
+		<url>https://github.com/slytechs-repos/jnetpcap/issues</url>
+	</issueManagement>
+	<scm>
+		<connection>scm:git:git://github.com/slytechs-repos/jnetpcap.git</connection>
+		<developerConnection>scm:git:ssh:git://github.com/slytechs-repos/jnetpcap.git</developerConnection>
+		<url>https://github.com/slytechs-repos/jnetpcap</url>
+	</scm>
 </project>
