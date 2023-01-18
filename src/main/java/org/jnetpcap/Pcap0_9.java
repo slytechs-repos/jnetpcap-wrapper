@@ -152,7 +152,8 @@ public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
 	 * @see LibraryPolicy#setDefault(LibraryPolicy)
-	 */	public static boolean isSupported() {
+	 */
+	public static boolean isSupported() {
 		return pcap_inject.isNativeSymbolResolved();
 	}
 
@@ -231,7 +232,7 @@ public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 	 * @see org.jnetpcap.Pcap#inject(java.lang.foreign.Addressable, int)
 	 */
 	@Override
-	protected int inject(Addressable packet, int length) throws PcapException {
+	public int inject(Addressable packet, int length) throws PcapException {
 		return pcap_inject.invokeInt(this::getErrorString, getPcapHandle(), packet, (long) length);
 	}
 

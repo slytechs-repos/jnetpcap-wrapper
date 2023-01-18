@@ -19,6 +19,7 @@ package org.jnetpcap.internal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.jnetpcap.Pcap.LibraryPolicy;
@@ -91,25 +92,144 @@ public class PcapForeignInitializer extends ForeignInitializer<PcapForeignDownca
 	}
 
 	/**
-	 * Load native pcap library, or one of its dirivatives.
+	 * Load native pcap library, or one of its derivatives. The defaults for the
+	 * native library loading procedure, define a list of possible pcap library
+	 * undecorated names such as 'wpcap,npcap,pcap' and utilize the relative
+	 * {@link System#loadLibrary(String)} to search for the shared object/native
+	 * library.
+	 * <p>
+	 * By specifying various system properties on the java command line, you can
+	 * redefine how, where and what to look for when loading the native library.
+	 * </p>
+	 * The following properties are used in a search in the following order:
+	 * <dl>
+	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH}:</dt>
+	 * <dd>Defines directories where the native library will searched for.</dd>
+	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILE}:</dt>
+	 * <dd>Defines an absolute directory and decorated filename path to load the
+	 * native library using {@link System.#load(String)} system call.</dd>
+	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILENAME}:</dt>
+	 * <dd>Defines a decorated filename only of the native library. The decorated
+	 * filename will be appended to the
+	 * {@value LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH} and an absolute
+	 * library load call will be attempted {@link System#load(String)}.</dd>
+	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_NAMES}:</dt>
+	 * <dd>A comma separated list of undecorated library names. Each of the
+	 * undecorated names in the list will be attempted to load using
+	 * {@link System#loadLibrary(String)} combined with the
+	 * {@value LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH} property value.</dd>
+	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_SO_EXTENSIONS}:</dt>
+	 * <dd>Lastly, as a long-shot attempt, a list of absolute files will be built by
+	 * combining all the property values given, with fully decorated filenames which
+	 * utilize the provided extensions, to try and locate the native library on the
+	 * platform. The default extension list are defined as "so,dylib". Each one will
+	 * be tried in turn.
+	 * </dl>
 	 *
 	 * @param ignoreErrors if true, no errors will be thrown but a {@code false}
 	 *                     flag will be returned
 	 * @return true, if pcap library is loaded otherwise false
 	 * @throws ExceptionInInitializerError the exception in initializer error
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILE
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILENAME
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_NAMES
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_SO_EXTENSIONS
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_SO_IGNORE_LOAD_ERRORS
 	 */
 	public static boolean loadNativePcapLibrary(boolean ignoreErrors) throws ExceptionInInitializerError {
-		boolean npcap = false, wpcap = false, pcap = false;
 
-		// @formatter:off
-		try { System.loadLibrary("npcap"); npcap = true; } catch(Throwable e) {}
-		try { System.loadLibrary("wpcap"); wpcap = true; } catch(Throwable e) {}
-		try { System.loadLibrary("pcap");   pcap = true; } catch(Throwable e) {}
-		// @formatter:on
+		final String DECORATED_FORMAT = "lib%s.%s";
+		String javaLibraryPath = System.getProperty(LibraryPolicy.SYSTEM_PROPERTY_JAVA_LIBRARY_PATH);
+		String libpcapFile = System.getProperty(LibraryPolicy.SYSTEM_PROPERTY_LIBPCAP_FILE);
+		String libpcapFilename = System.getProperty(LibraryPolicy.SYSTEM_PROPERTY_LIBPCAP_FILENAME);
+		String libpcapNames = System.getProperty(LibraryPolicy.SYSTEM_PROPERTY_LIBPCAP_NAMES,
+				"npcap,wpcap,pcap");
+		String soExtensions = System.getProperty(LibraryPolicy.SYSTEM_PROPERTY_SO_EXTENSIONS,
+				"so,dylib");
 
-		boolean isLoaded = pcap || npcap || wpcap;
+		boolean isLoaded = false;
+		StringBuilder errorBuilder = new StringBuilder();
+
+		/* Try absolute file path first, highest priority */
+		if (!isLoaded && (libpcapFile != null)) {
+			try {
+				System.load(libpcapFile);
+				isLoaded = true;
+			} catch (Throwable e) {}
+
+			if (!isLoaded)
+				errorBuilder.append("Failed to load absolue file [%s]. "
+						.formatted(libpcapFile));
+		}
+
+		/* Try building an absolute path, 2nd priority */
+		if (!isLoaded && (libpcapFilename != null)) {
+			if (javaLibraryPath != null) {
+				Path path = Path.of(javaLibraryPath, libpcapFilename);
+				try {
+					System.load(path.toString());
+					isLoaded = true;
+				} catch (Throwable e) {}
+
+				if (!isLoaded)
+					errorBuilder.append("Failed to load absolute path file [%s] using property '%s'. "
+							.formatted(path.toString(), LibraryPolicy.SYSTEM_PROPERTY_LIBPCAP_FILENAME));
+			}
+
+			if (javaLibraryPath == null)
+				errorBuilder.append("WARNING! 'java.library.path' is not set for use with propery '%s'. "
+						.formatted(LibraryPolicy.SYSTEM_PROPERTY_LIBPCAP_FILENAME));
+		}
+
+		/* Try relative to java.library.path load per each name in the names */
+		if (!isLoaded && (libpcapNames != null)) {
+			for (String name : libpcapNames.split("\\s*,\\s*")) {
+				if (!isLoaded) {
+					try {
+						System.loadLibrary(name);
+						isLoaded = true;
+					} catch (Throwable e) {}
+				}
+			}
+
+			if (!isLoaded)
+				errorBuilder.append("Failed to relative load [%s] using property '%s'. "
+						.formatted(libpcapNames, LibraryPolicy.SYSTEM_PROPERTY_LIBPCAP_NAMES));
+
+			if (javaLibraryPath == null)
+				errorBuilder.append("WARNING! 'java.library.path' is not set for use with propery '%s'. "
+						.formatted(LibraryPolicy.SYSTEM_PROPERTY_LIBPCAP_NAMES));
+		}
+
+		/* Last attempt, is to use the lib names and attempt to load absolute paths */
+		if (!isLoaded && (libpcapNames != null) && (soExtensions != null)) {
+			String[] exts = soExtensions.split("\\s*,\\s*");
+			String dir = (javaLibraryPath == null)
+					? "."
+					: javaLibraryPath;
+
+			LONG_SHOT_LOOP: for (String name : libpcapNames.split("\\s*,\\s*")) {
+				for (String ext : exts) {
+					Path path = Path.of(dir, DECORATED_FORMAT.formatted(name, ext));
+
+					try {
+						System.load(path.toString());
+						isLoaded = true;
+						break LONG_SHOT_LOOP;
+					} catch (Throwable e) {}
+				}
+			}
+
+			/* This was a long shot, so we do not report any errors here */
+		}
 
 		if (!isLoaded && !ignoreErrors) {
+			if (errorBuilder.length() > 0)
+				throw new ExceptionInInitializerError(
+						"Unable to load native 'pcap' library! %s"
+								.formatted(errorBuilder.toString()));
+
 			throw new ExceptionInInitializerError(
 					"Unable to load native 'pcap' library! Tried 'pcap', 'wpcap' and 'npcap'");
 		}

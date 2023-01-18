@@ -17,10 +17,7 @@
  */
 package org.jnetpcap;
 
-import static java.lang.foreign.MemorySegment.allocateNative;
-import static java.lang.foreign.MemorySession.openImplicit;
-import static java.lang.foreign.ValueLayout.ADDRESS;
-import static java.util.Objects.requireNonNull;
+import static java.util.Objects.*;
 
 import java.io.File;
 import java.lang.foreign.Addressable;
@@ -31,6 +28,7 @@ import java.lang.foreign.ValueLayout;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
@@ -51,6 +49,10 @@ import org.jnetpcap.util.NetIp4Address;
 import org.jnetpcap.util.PcapPacketRef;
 import org.jnetpcap.util.PcapVersionException;
 
+import static java.lang.foreign.MemorySegment.*;
+import static java.lang.foreign.MemorySession.*;
+import static java.lang.foreign.ValueLayout.*;
+
 /**
  * Entry point and base class for all Pcap API methods provided by jNetPcap
  * library.
@@ -66,6 +68,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * process are captured and reported to this policy which may log, report, or
 	 * even halt the initialization process from continuing.
 	 * 
+	 * <h3>Logging and handling errors on missing native symbols</h3>
 	 * <p>
 	 * A policy also defines a logger output destination, a {@code Appendable},
 	 * where logs by the default policy on initialization errors are sent. By
@@ -97,9 +100,107 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * calls on the default library initializer, which is a private instance of
 	 * {@code ForeignInitializer} class.
 	 * </p>
+	 * <h3>Native Library Loading</h3>
+	 * <p>
+	 * You can define several system properties which control the behavior of how
+	 * the native pcap library, or one of its derivatives are loaded. These
+	 * properties, allow changing of the procedure how the library is located and
+	 * how is actually loaded. The defaults for the native library loading
+	 * procedure, define a list of possible pcap library undecorated names such as
+	 * 'wpcap,npcap,pcap' and utilize the relative
+	 * {@link System#loadLibrary(String)} to search for the shared object/native
+	 * library.
+	 * </p>
+	 * <p>
+	 * By specifying various system properties on the java command line, you can
+	 * redefine how, where and what to look for when loading the native library.
+	 * </p>
+	 * The following properties are used in a search, in the following order:
+	 * <dl>
+	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH}:</dt>
+	 * <dd>Defines directories where the native library will searched for.</dd>
+	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILE}:</dt>
+	 * <dd>Defines an absolute directory and decorated filename path to load the
+	 * native library using {@link System.#load(String)} system call.</dd>
+	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILENAME}:</dt>
+	 * <dd>Defines a decorated filename only of the native library. The decorated
+	 * filename will be appended to the
+	 * {@value LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH} and an absolute
+	 * library load call will be attempted {@link System#load(String)}.</dd>
+	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_NAMES}:</dt>
+	 * <dd>A comma separated list of undecorated library names. Each of the
+	 * undecorated names in the list will be attempted to load using
+	 * {@link System#loadLibrary(String)} combined with the
+	 * {@value LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH} property value.</dd>
+	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_SO_EXTENSIONS}:</dt>
+	 * <dd>Lastly, as a long-shot attempt, a list of absolute files will be built by
+	 * combining all the property values given, with fully decorated filenames which
+	 * utilize the provided extensions, to try and locate the native library on the
+	 * platform. The default extension list are defined as "so,dylib". Each one will
+	 * be tried in turn.
+	 * </dl>
+	 *
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILE
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILENAME
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_NAMES
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_SO_EXTENSIONS
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_SO_IGNORE_LOAD_ERRORS
 	 */
 	@FunctionalInterface
 	public interface LibraryPolicy {
+
+		/** System property used to search for native libraries. */
+		String SYSTEM_PROPERTY_JAVA_LIBRARY_PATH = "java.library.path";
+
+		/**
+		 * System property containing the absolute native file path to the pcap library.
+		 * For example
+		 * <code>-Dorg.jnetpcap.libpcap.file="/usr/lib/x86_64-linux-gnu/libpcap.so"</code>
+		 */
+		String SYSTEM_PROPERTY_LIBPCAP_FILE = "org.jnetpcap.libpcap.file";
+
+		/**
+		 * System property containing full native library filename, but no directory
+		 * path. The value of the 'java.library.path' is prepended to the filename and
+		 * an attempt to load the library is made. For example:
+		 * <code>-Dorg.jnetpcap.libpcap.names="libpcap.so"</code>
+		 */
+		String SYSTEM_PROPERTY_LIBPCAP_FILENAME = "org.jnetpcap.libpcap.filename";
+
+		/**
+		 * A list of comma separated, undecorated library names. The default is to
+		 * search for <code>npcap,wpcap,pcap</code> in the directories specified by
+		 * 'java.library.path'
+		 */
+		String SYSTEM_PROPERTY_LIBPCAP_NAMES = "org.jnetpcap.libpcap.names";
+
+		/**
+		 * Platform dependent list of shared-object extensions to use while attempting
+		 * to load the native library. This property, combined with the
+		 * 'org.jnetpcap.libpcap.names' property and 'java.library.path' propeties are
+		 * used to try and load native library by building absolute file path to each
+		 * named library. The default is <code>so,dylib</code> extensions.
+		 */
+		String SYSTEM_PROPERTY_SO_EXTENSIONS = "org.jnetpcap.so.extensions";
+
+		/**
+		 * The system property which is used to define if load error messages should be
+		 * ignored or not. If ignored, when shared library is not found, it will be
+		 * silently ignored and no errors reported. If set to 'false', when native
+		 * shared object is not found, and exception will be thrown by the default
+		 * LibraryPolicy currently set. Default is 'true' or ignore errors and be
+		 * silent.
+		 * <p>
+		 * Note: errors are always detectible by using the method
+		 * {@link Pcap#isSupported()} call, which will return false if the pcap library
+		 * was not loaded. Also invoking any of the native methods, will throw an
+		 * <code>IllegalStateException</code>. This propery applies to the act of native
+		 * library loading itself, and does not silence
+		 * <code>IllegalStateExceptions</code> when native methods are invoked and
+		 * corresponding native library has not been loaded at runtime.
+		 */
+		String SYSTEM_PROPERTY_SO_IGNORE_LOAD_ERRORS = "org.jnetpcap.so.ignoreLoadErrors";
 
 		/**
 		 * The Constant which defines the default logging output which discards all of
@@ -518,38 +619,38 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 			return Pcap0_6.openDead(Unix::new, linktype, snaplen);
 		}
 
-	/**
-	 * Open a fake pcap_t for compiling filters or opening a capture for output.
-	 * 
-	 * <p>
-	 * {@link #openDead(PcapDlt, int)} and
-	 * {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)} are
-	 * used for creating a pcap_t structure to use when calling the other functions
-	 * in libpcap. It is typically used when just using libpcap for compiling BPF
-	 * full; it can also be used if using {@code #dumpOpen(String)},
-	 * {@link PcapDumper#dump(MemoryAddress, MemoryAddress)}, and
-	 * {@link PcapDumper#close()} to write a savefile if there is no pcap_t that
-	 * supplies the packets to be written.
-	 * </p>
-	 * 
-	 * <p>
-	 * When {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)},
-	 * is used to create a {@code Pcap} handle for use with
-	 * {@link #dumpOpen(String)}, precision specifies the time stamp precision for
-	 * packets; PCAP_TSTAMP_PRECISION_MICRO should be specified if the packets to be
-	 * written have time stamps in seconds and microseconds, and
-	 * PCAP_TSTAMP_PRECISION_NANO should be specified if the packets to be written
-	 * have time stamps in seconds and nanoseconds. Its value does not affect
-	 * pcap_compile(3PCAP).
-	 * </p>
-	 *
-	 * @param linktype  specifies the link-layer type for the pcap handle
-	 * @param snaplen   specifies the snapshot length for the pcap handle
-	 * @param precision the requested timestamp precision
-	 * @return A dead pcap handle
-	 * @throws PcapException any errors
-	 * @since libpcap 1.5.1
-	 */
+		/**
+		 * Open a fake pcap_t for compiling filters or opening a capture for output.
+		 * 
+		 * <p>
+		 * {@link #openDead(PcapDlt, int)} and
+		 * {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)} are
+		 * used for creating a pcap_t structure to use when calling the other functions
+		 * in libpcap. It is typically used when just using libpcap for compiling BPF
+		 * full; it can also be used if using {@code #dumpOpen(String)},
+		 * {@link PcapDumper#dump(MemoryAddress, MemoryAddress)}, and
+		 * {@link PcapDumper#close()} to write a savefile if there is no pcap_t that
+		 * supplies the packets to be written.
+		 * </p>
+		 * 
+		 * <p>
+		 * When {@link #openDeadWithTstampPrecision(PcapDlt, int, PcapTStampPrecision)},
+		 * is used to create a {@code Pcap} handle for use with
+		 * {@link #dumpOpen(String)}, precision specifies the time stamp precision for
+		 * packets; PCAP_TSTAMP_PRECISION_MICRO should be specified if the packets to be
+		 * written have time stamps in seconds and microseconds, and
+		 * PCAP_TSTAMP_PRECISION_NANO should be specified if the packets to be written
+		 * have time stamps in seconds and nanoseconds. Its value does not affect
+		 * pcap_compile(3PCAP).
+		 * </p>
+		 *
+		 * @param linktype  specifies the link-layer type for the pcap handle
+		 * @param snaplen   specifies the snapshot length for the pcap handle
+		 * @param precision the requested timestamp precision
+		 * @return A dead pcap handle
+		 * @throws PcapException any errors
+		 * @since libpcap 1.5.1
+		 */
 		public static Unix openDeadWithTstampPrecision(PcapDlt linktype, int snaplen, PcapTStampPrecision precision)
 				throws PcapException {
 			return Pcap1_5.openDeadWithTstampPrecision(Unix::new, linktype, snaplen, precision);
@@ -626,7 +727,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	static {
 		LibraryPolicy policy = LibraryPolicy.getDefault();
 
-		policy.loadNativePcapLibrary(true);
+		boolean ignoreErrors = Boolean.parseBoolean(System.getProperty(
+				LibraryPolicy.SYSTEM_PROPERTY_SO_IGNORE_LOAD_ERRORS, "true"));
+
+		policy.loadNativePcapLibrary(ignoreErrors);
 	}
 
 	/**
@@ -2122,7 +2226,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @throws PcapException the pcap exception
 	 * @since libpcap 0.9
 	 */
-	protected int inject(Addressable packet, int length) throws PcapException {
+	public int inject(Addressable packet, int length) throws PcapException {
 		throw new UnsupportedOperationException(minApi("Pcap0_9", "0.9"));
 	}
 
@@ -2685,8 +2789,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * Returns a compatible packet sink which sends the packets to whatever sink the
 	 * Pcap handle is opened to.
 	 *
-	 * @return a packet sink that uses
-	 *         {@code Pcap::sendPacket} method to sink packets
+	 * @return a packet sink that uses {@code Pcap::sendPacket} method to sink
+	 *         packets
 	 */
 	public PacketSink sendPacket() {
 		PcapPacketSink sink = this::sendPacket;
@@ -2724,7 +2828,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @throws PcapException the pcap exception
 	 * @since libpcap 0.8
 	 */
-	protected void sendPacket(Addressable packet, int length) throws PcapException {
+	public void sendPacket(Addressable packet, int length) throws PcapException {
 		throw new UnsupportedOperationException(minApi("Pcap0_8", "0.8")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -2880,6 +2984,21 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @throws PcapException the pcap exception
 	 * @since libpcap 0.8
 	 */
+	public Pcap setDatalink(Optional<PcapDlt> dlt) throws PcapException {
+		if (dlt.isEmpty())
+			return this;
+
+		return setDatalink(dlt.get().getAsInt());
+	}
+
+	/**
+	 * Set the link-layer header type to be used by a capture device .
+	 *
+	 * @param dlt link-layer header type
+	 * @return this pcap handle
+	 * @throws PcapException the pcap exception
+	 * @since libpcap 0.8
+	 */
 	public Pcap setDatalink(PcapDlt dlt) throws PcapException {
 		return setDatalink(dlt.getAsInt());
 	}
@@ -2929,6 +3048,34 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @throws PcapException the pcap exception
 	 * @since libpcap 0.9
 	 */
+	public Pcap setDirection(Optional<PcapDirection> dir) throws PcapException {
+		if (dir.isEmpty())
+			return this;
+
+		return setDirection(dir.get().getAsInt());
+	}
+
+	/**
+	 * Set the direction for which packets will be captured.
+	 * <p>
+	 * pcap_setdirection() is used to specify a direction that packets will be
+	 * captured. d is one of the constants PCAP_D_IN, PCAP_D_OUT or PCAP_D_INOUT.
+	 * PCAP_D_IN will only capture packets received by the device, PCAP_D_OUT will
+	 * only capture packets sent by the device and PCAP_D_INOUT will capture packets
+	 * received by or sent by the device. PCAP_D_INOUT is the default setting if
+	 * this function is not called. pcap_setdirection() isn't necessarily fully
+	 * supported on all platforms; some platforms might return an error for all
+	 * values, and some other platforms might not support PCAP_D_OUT.
+	 * </p>
+	 * <p>
+	 * This operation is not supported if a ``savefile'' is being read.
+	 * </p>
+	 * 
+	 * @param dir one of the constants PCAP_D_IN, PCAP_D_OUT or PCAP_D_INOUT
+	 * @return this pcap handle
+	 * @throws PcapException the pcap exception
+	 * @since libpcap 0.9
+	 */
 	public Pcap setDirection(PcapDirection dir) throws PcapException {
 		return setDirection(dir.getAsInt());
 	}
@@ -2946,6 +3093,22 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @since libpcap 0.4
 	 */
 	public Pcap setFilter(BpFilter bpfProgram) throws PcapException {
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/**
+	 * set the filter.
+	 * <p>
+	 * is used to specify a filter program.
+	 * </p>
+	 *
+	 * @param bpfProgram bpf_program struct, usually the result of a call to
+	 *                   pcap_compile
+	 * @return this pcap handle
+	 * @throws PcapException the pcap exception
+	 * @since libpcap 0.4
+	 */
+	public Pcap setFilter(Optional<BpFilter> bpfProgram) throws PcapException {
 		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 

@@ -37,7 +37,7 @@ import org.jnetpcap.Pcap0_8;
  * the enum constant's field <code>value</code> is public which means that
  * integer DLT constant can also be access using the field directly.
  * </p>
- * Here are 4 examples of how you can use DLT constants in various ways.
+ * Here are 4 basic of how you can use DLT constants in various ways.
  * 
  * <h2>Accessing the int DLT value using an enum constant</h2>
  * 
