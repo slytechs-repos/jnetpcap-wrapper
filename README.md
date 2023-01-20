@@ -133,7 +133,7 @@ Here are several methods for installing **jNetPcap** software.
 ### Maven Artifact Config
 ```
 <dependency>
-    <groupId>org.jnetpcap</groupId>
+    <groupId>com.slytechs.libraries</groupId>
     <artifactId>jnetpcap</artifactId>
     <version>2.0.0-alpha.1</version>
 </dependency>
