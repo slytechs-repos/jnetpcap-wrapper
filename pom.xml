@@ -6,6 +6,17 @@
 	<name>jNetpcap</name>
 	<description>A native Libpcap library Java wrapper</description>
 	<url>https://www.jnetpcap.org</url>
+	<properties>
+		<jdk.version>19</jdk.version>
+		<project.build.sourceEncoding>${java.encoding}</project.build.sourceEncoding>
+		<maven.compiler.source>${jdk.version}</maven.compiler.source>
+		<maven.compiler.target>${jdk.version}</maven.compiler.target>
+		<java.preview>--enable-preview</java.preview>
+		<java.encoding>UTF-8</java.encoding>
+		<java.native>--enable-native-access=ALL-UNNAMED</java.native>
+		<groups>user-permission</groups>
+		<excludeGroups>windows-api|unix-api|linux-api</excludeGroups>
+	</properties>
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
@@ -75,27 +86,6 @@
 				<artifactId>maven-site-plugin</artifactId>
 				<version>3.7.1</version>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.4.1</version>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-							<encoding>${java.encoding}</encoding>
-							<source>${jdk.version}</source>
-							<additionalOptions>
-								${java.preview}
-							</additionalOptions>
-							<show>public</show>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<!-- Unit test the API -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -122,6 +112,21 @@
 				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>3.0.0-M7</version>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.4.1</version>
+				<configuration>
+					<doctitle>My API for ${project.name} ${project.version}</doctitle>
+					<windowtitle>My API for ${project.name} ${project.version}</windowtitle>
+					<encoding>${java.encoding}</encoding>
+					<source>${jdk.version}</source>
+					<additionalOptions>
+								${java.preview}
+							</additionalOptions>
+					<show>public</show>
+				</configuration>
+			</plugin>
 		</plugins>
 	</reporting>
 	<organization>
@@ -139,8 +144,7 @@
 					<exists>/usr/local/Cellar/libpcap/${libpcap.version}</exists>
 				</file>
 			</activation>
-			<build>
-			</build>
+			<build></build>
 			<properties>
 				<java.library.path.libpcap.osx>-Djava.library.path=/usr/local/Cellar/libpcap/${libpcap.version}/lib</java.library.path.libpcap.osx>
 				<java.library.path.libpcap>${java.library.path.libpcap.osx}</java.library.path.libpcap>
@@ -155,6 +159,7 @@
 				</os>
 				<file>
 					<exists>/opt/local/lib/libpcap.dylib</exists>
+					<missing>/usr/local/Cellar/libpcap/${libpcap.version}/lib</missing>
 				</file>
 			</activation>
 			<properties>
@@ -234,14 +239,6 @@
 			</properties>
 		</profile>
 	</profiles>
-	<properties>
-		<jdk.version>19</jdk.version>
-		<java.preview>--enable-preview</java.preview>
-		<java.encoding>UTF-8</java.encoding>
-		<java.native>--enable-native-access=ALL-UNNAMED</java.native>
-		<groups>user-permission</groups>
-		<excludeGroups>windows-api|unix-api|linux-api</excludeGroups>
-	</properties>
 	<issueManagement>
 		<system>Github Issue Tracking</system>
 		<url>https://github.com/slytechs-repos/jnetpcap/issues</url>
