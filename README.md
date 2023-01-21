@@ -111,7 +111,8 @@ PcapStatRecord[recv=677, drop=0, ifdrop=0, capt=0, sent=0, netdrop=0]
 To run these exmamples the following command line arguments need to be added:
 <dl><dt>On Linux platforms</dt><dd>-Djava.library.path=/usr/lib/x86_64-linux-gnu --enable-native-access=org.jnetpcap --enable-preview</dd>
 <dl><dt>On Windows platforms</dt><dd>-Djava.library.path=C:\Windows\SysWOW64 --enable-native-access=org.jnetpcap --enable-preview</dd>
-<dl><dt>On MacOS platforms</dt><dd>-Djava.library.path=/usr/local/Cellar/libpcap/${VERSION}/lib --enable-native-access=org.jnetpcap --enable-preview</dd>
+<dl><dt>On MacOS platforms (Homebrew)</dt><dd>-Djava.library.path=/usr/local/Cellar/libpcap/${VERSION}/lib --enable-native-access=org.jnetpcap --enable-preview</dd>
+<dl><dt>On MacOS platforms (Mac Ports)</dt><dd>-Djava.library.path=/opt/local/lib --enable-native-access=org.jnetpcap --enable-preview</dd>
 	
 > **Note** that the `--enable-preview` command line option is only required until *Foreign Function* feature becomes permanent, possibly in Java 20 or Java 21 LTS.
 	
