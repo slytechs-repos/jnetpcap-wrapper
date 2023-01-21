@@ -109,8 +109,8 @@ PcapStatRecord[recv=677, drop=0, ifdrop=0, capt=0, sent=0, netdrop=0]
 
 ### How To Run The Examples
 To run these exmamples the following command line arguments need to be added:
-<dl><dt>On Linux platforms</dt><dd>-Djava.library.path=/usr/lib/x86_64-linux-gnu --enable-native-access=org.jnetpcap --enable-preview</dd>
-<dl><dt>On Windows platforms</dt><dd>-Djava.library.path=C:\Windows\SysWOW64 --enable-native-access=org.jnetpcap --enable-preview</dd>
+<dl><dt>On Linux platforms (<a href="https://installati.one/install-libpcap-dev-ubuntu-22-04/">How to install libpcap on Linux</a>)</dt><dd>-Djava.library.path=/usr/lib/x86_64-linux-gnu --enable-native-access=org.jnetpcap --enable-preview</dd>
+	<dl><dt>On Windows platforms(<a href="https://npcap.com/#download">How to install Npcap on Windows</a>)</dt><dd>-Djava.library.path=C:\Windows\SysWOW64 --enable-native-access=org.jnetpcap --enable-preview</dd>
 <dl><dt>On MacOS platforms (native libpcap installed via <a href="https://formulae.brew.sh/formula/libpcap">Homebrew</a>)</dt><dd>-Djava.library.path=/usr/local/Cellar/libpcap/${VERSION}/lib --enable-native-access=org.jnetpcap --enable-preview</dd>
 <dl><dt>On MacOS platforms (native libpcap installed via <a href="https://ports.macports.org/port/libpcap/">Mac Ports</a>)</dt><dd>-Djava.library.path=/opt/local/lib --enable-native-access=org.jnetpcap --enable-preview</dd>
 	
