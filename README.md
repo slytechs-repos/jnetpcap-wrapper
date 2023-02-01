@@ -1,8 +1,8 @@
 # jNetPcap version 2
-jNetPcap is a [*libpcap*][libpcap] java binding. This is version 2 release of popular **jNetPcap** library, previously hosted on [SourceForge.net][sf.net].
+jNetPcap is a [*libpcap*][libpcap] java library. This is version 2 release of popular **jNetPcap** library, previously hosted on [SourceForge.net][sf.net].
 
 ## Overview
-**jNetPcap** provides out of the box [*libpcap* library][libpcap] bindings in *Java*. By using *Foreign Function* features of *Java 19* or above, **jNetPcap** can bind directly to the native *libpcap* library. All native *libpcap* functions are accessible through easy to use *java* API. In addition, the latest [*Npcap*][npcap] and legacy [*WinPcap*][winpcap] tools and their API extensions on *Microsoft Windows* platforms are supported as well. 
+**jNetPcap** provides out of the box [*libpcap* library][libpcap] library in *Java*. By using *Foreign Function* features of *Java 19* or above, **jNetPcap** can bind directly to the native *libpcap* library. All native *libpcap* functions are accessible through easy to use *java* API. In addition, the latest [*Npcap*][npcap] and legacy [*WinPcap*][winpcap] tools and their API extensions on *Microsoft Windows* platforms are supported as well. 
 
 ## Examples
 To get started lets take a look at a couple of examples.
@@ -120,7 +120,7 @@ To run these exmamples the following command line arguments need to be added:
 See the [wiki] pages. Project's [unit tests][unit_test] are also a great source for usage examples of every single function in the module.
 
 ## Dependencies
-**jNetPcap** binding has no external java dependencies except for modules provided by the java runtime.
+**jNetPcap** library has no external java dependencies except for modules provided by the java runtime.
 
 ### Java Dependencies for Module: `org.jnetpcap`
 * No java dependencies except for standard java modules and the *Foreign Function* feature, currently in java *preview* (enabled with `--enable-preview` VM args option), but one which is expected to be a permanent feature, in the near future.
@@ -161,7 +161,7 @@ Please see [wiki home page][wiki] for details.
 
 [jnetpcap_v1_page]: <https://sourceforge.net/projects/jnetpcap> "Legacy jNetPcap Version 1 Project Page"
 [wiki]: <https://github.com/slytechs-repos/jnetpcap/wiki> "jNetPcap Project Wiki Pages"
-[unit_test]: <https://github.com/slytechs-repos/jnetpcap/blob/main/src/test/java/org/jnetpcap/test/LibpcapApiTest.java> "jUnit Test of Main Libpcap API bindings"
+[unit_test]: <https://github.com/slytechs-repos/jnetpcap/blob/main/src/test/java/org/jnetpcap/test/LibpcapApiTest.java> "jUnit Test of Main Libpcap API library"
 [libpcap]: <https://www.tcpdump.org/> "This is the home web site of tcpdump, a powerful command-line packet analyzer; and libpcap, a portable C/C++ library for network traffic capture"
 [npcap]: <https://npcap.com/> "Npcap is the Nmap Project's packet capture (and sending) library for Microsoft Windows"
 [winpcap]: <https://www.winpcap.org/> "WinPcap is a library for link-layer network access in Windows environments"
