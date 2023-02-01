@@ -174,7 +174,7 @@ public final class UnsafePcapHandle extends Pcap1_10 {
 	 *         available in a ``savefile.''
 	 * @since libpcap 0.4
 	 */
-	public int dispatchWithAccessToRawPacket(int count, PcapHandler.OfRawPacket handler) {
+	public int dispatchWithAccessToRawPacket(int count, PcapHandler handler) {
 		return super.dispatch(count, handler);
 	}
 
@@ -248,7 +248,7 @@ public final class UnsafePcapHandle extends Pcap1_10 {
 	 *         available in a ``savefile.''
 	 * @since libpcap 0.4
 	 */
-	public int loopWithAccessToRawPacket(int count, PcapHandler.OfRawPacket handler) {
+	public int loopWithAccessToRawPacket(int count, PcapHandler handler) {
 		return super.loop(count, handler);
 	}
 

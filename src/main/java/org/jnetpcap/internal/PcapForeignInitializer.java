@@ -19,6 +19,7 @@ package org.jnetpcap.internal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -272,7 +273,11 @@ public class PcapForeignInitializer extends ForeignInitializer<PcapForeignDownca
 	}
 
 	public PcapForeignInitializer(Class<?> initializerClass) {
-		super(initializerClass.toString(), PcapForeignDowncall::new, PcapForeignDowncall::new);
+		super(
+				initializerClass.toString(),
+				PcapForeignDowncall::new,
+				PcapForeignDowncall::new,
+				MethodHandles.lookup());
 
 		makeAccessible(true);
 		setMissingSymbolsPolicy(currentMissingSymbolsPolicy::onMissingSymbols);

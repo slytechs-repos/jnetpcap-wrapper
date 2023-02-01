@@ -22,6 +22,7 @@ import java.lang.foreign.MemorySegment;
 
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapException;
+import org.jnetpcap.PcapHandler.PacketSink;
 import org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink;
 
 /**
@@ -30,8 +31,8 @@ import org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink;
  * functionality on top of Pcap API.
  * 
  * <p>
- * The PcapTransmitter class also provides many more transmit methods for different
- * storage options for packet data.
+ * The PcapTransmitter class also provides many more transmit methods for
+ * different storage options for packet data.
  * </p>
  * 
  * @author Sly Technologies Inc

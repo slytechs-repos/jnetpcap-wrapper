@@ -17,13 +17,10 @@
  */
 package org.jnetpcap;
 
-import static java.lang.foreign.MemorySegment.allocateNative;
-import static java.lang.foreign.ValueLayout.ADDRESS;
-import static java.util.Objects.requireNonNull;
-import static org.jnetpcap.PcapHeader.PCAP_HEADER_PADDED_LENGTH;
-import static org.jnetpcap.constant.PcapConstants.PCAP_ERRBUF_SIZE;
-import static org.jnetpcap.internal.UnsafePcapHandle.makeLiveHandleName;
-import static org.jnetpcap.internal.UnsafePcapHandle.makeOfflineHandleName;
+import static java.util.Objects.*;
+import static org.jnetpcap.PcapHeader.*;
+import static org.jnetpcap.constant.PcapConstants.*;
+import static org.jnetpcap.internal.UnsafePcapHandle.*;
 
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
@@ -33,11 +30,9 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
-import org.jnetpcap.PcapHandler.OfRawPacket;
 import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDlt;
-import org.jnetpcap.internal.ForeignReference;
 import org.jnetpcap.internal.ForeignUpcall;
 import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
@@ -47,6 +42,10 @@ import org.jnetpcap.util.NetIp4Address;
 import org.jnetpcap.util.PcapPacketRef;
 import org.jnetpcap.util.PcapReceiver;
 
+import static java.lang.foreign.MemoryAddress.*;
+import static java.lang.foreign.MemorySegment.*;
+import static java.lang.foreign.ValueLayout.*;
+
 /**
  * Provides Pcap API method calls for up to libpcap version 0.4
  * 
@@ -54,6 +53,46 @@ import org.jnetpcap.util.PcapReceiver;
  * @author repos@slytechs.com
  */
 public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
+
+	/**
+	 * A proxy PcapHandler, which receives packets from native pcap handle and
+	 * forwards all packets to the sink java PcapHandler.
+	 */
+	private static final class ProxyPcapHandler implements PcapHandler {
+
+		/** loop and dispatch packets are forwared to this sink */
+		private PcapHandler sink;
+
+		/** MethodHandle to the virtual/dynamic method suitable for use as upcalls */
+		private final MemorySegment pcapHandlerStub;
+
+		private ProxyPcapHandler() {
+			this.pcapHandlerStub = pcap_handler.virtualStubPointer(this);
+		}
+
+		/**
+		 * @see org.jnetpcap.PcapHandler#callback(java.lang.foreign.MemoryAddress,
+		 *      java.lang.foreign.MemoryAddress, java.lang.foreign.MemoryAddress)
+		 */
+		@Override
+		public void callback(MemoryAddress user, MemoryAddress header, MemoryAddress packet) {
+			this.sink.callback(user, header, packet);
+		}
+
+		/**
+		 * Sets for java PcapHandler that all packets received from native handle will
+		 * be forwarded to and returns a FF Upcall Stub address/segment suitable for
+		 * passing as native to java upcall stub.
+		 *
+		 * @param sink the sink to forward packets to
+		 * @return the FF upcall memory segment stub
+		 */
+		public synchronized MemorySegment proxyTo(PcapHandler sink) {
+			this.sink = sink;
+
+			return pcapHandlerStub;
+		}
+	}
 
 	/**
 	 * @see {@code pcap_t *pcap_open_live (const char *device, int snaplen, int
@@ -197,25 +236,14 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	private static final PcapForeignDowncall pcap_strerror;
 
 	/**
-	 * This upcall foreign reference is a static callback method that is called to
-	 * java from pcap_loop and pcap_dispatch calls. Then the callback method calls
-	 * actual sink objects (OfRawPacket type) with actual data.
-	 * 
-	 * <p>
-	 * Both pcap_loop and pcap_dispatch store the sink object (OfRawPacket type) as
-	 * user object during the native call. Our java callback handler, when its
-	 * called back by pcap, takes the user object or the original sink object and
-	 * passes on the received packet data.
-	 * </p>
+	 * This upcall foreign reference is a callback method that is called to java
+	 * from pcap_loop and pcap_dispatch calls.
 	 * 
 	 * @see {@code typedef void (*pcap_handler)(u_char *user, const struct
 	 *      pcap_pkthdr *h, const u_char *bytes);}
 	 * @since libpcap 0.4
 	 */
-	private static final ForeignUpcall<OfRawPacket> nativeCallbackPcapHandler;
-
-	/** Foreign reference conversion between java Object and MemoryAddress. */
-	private static final ForeignReference<OfRawPacket> nativeSinkReferences;
+	private static final ForeignUpcall<PcapHandler> pcap_handler;
 
 	static {
 
@@ -244,10 +272,9 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			pcap_dump_open     = foreign.downcall("pcap_dump_open(AA)A"); //$NON-NLS-1$
 			pcap_lookupdev     = foreign.downcall("pcap_lookupdev(A)A"); //$NON-NLS-1$
 			pcap_strerror      = foreign.downcall("pcap_strerror(I)A"); //$NON-NLS-1$
+			pcap_handler       = foreign.upcall  ("callback(AAA)V", PcapHandler.class);
 			// @formatter:on
 
-			nativeCallbackPcapHandler = foreign.upcall(Pcap0_4.class, "nativeCallbackPcapHandler(AAA)V"); //$NON-NLS-1$
-			nativeSinkReferences = new ForeignReference<>(); // for java Object to MemoryAddress conversion
 		}
 
 	}
@@ -346,20 +373,6 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
-	 * Native callback pcap handler referenced natively, so ignore 'unused' warning.
-	 *
-	 * @param user  the user
-	 * @param h     the h
-	 * @param bytes the bytes
-	 */
-	@SuppressWarnings("unused")
-	private static void nativeCallbackPcapHandler(MemoryAddress user, MemoryAddress h, MemoryAddress bytes) {
-		OfRawPacket sink = nativeSinkReferences.dereference(user);
-
-		sink.handleRawPacket(h, bytes);
-	}
-
-	/**
 	 * Open live.
 	 *
 	 * @param <T>          the generic type
@@ -388,7 +401,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			MemoryAddress pcapPointer = pcap_open_live.invokeObj(c_device, c_snaplen, c_promisc, c_to_ms,
 					errbuf);
 
-			if (pcapPointer == MemoryAddress.NULL)
+			if (pcapPointer == NULL)
 				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getUtf8String(0));
 
 			return pcapSupplier.apply(pcapPointer, makeLiveHandleName(device));
@@ -455,7 +468,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 			MemoryAddress pcapPointer = pcap_open_offline.invokeObj(c_fname, errbuf);
 
-			if (pcapPointer == MemoryAddress.NULL)
+			if (pcapPointer == NULL)
 				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getUtf8String(0));
 
 			return pcapSupplier.apply(pcapPointer, makeOfflineHandleName(fname));
@@ -496,6 +509,15 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * The pcap header buffer for use with next() call. Header and packet references
+	 * are valid only from call to call and then out of pcap scope.
+	 */
+	private final MemorySegment PCAP0_4_HEADER_BUFFER = MemorySession.openImplicit()
+			.allocate(PCAP_HEADER_PADDED_LENGTH);
+
+	private final ProxyPcapHandler proxyHandler;
+
+	/**
 	 * Instantiates a new pcap 0 4.
 	 *
 	 * @param pcapHandle the pcap handle
@@ -503,6 +525,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 */
 	protected Pcap0_4(MemoryAddress pcapHandle, String name) {
 		super(pcapHandle, name);
+		this.proxyHandler = new ProxyPcapHandler();
 	}
 
 	/**
@@ -585,25 +608,24 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * @see org.jnetpcap.Pcap#dispatch(int, org.jnetpcap.PcapHandler.OfRawPacket)
+	 */
+	@Override
+	public final int dispatch(int count, PcapHandler sink) {
+		return pcap_dispatch.invokeInt(
+				getPcapHandle(),
+				count,
+				proxyHandler.proxyTo(sink),
+				NULL);
+	}
+
+	/**
 	 * @see org.jnetpcap.Pcap#dispatch(int, org.jnetpcap.PcapHandler.OfArray,
 	 *      java.lang.Object)
 	 */
 	@Override
 	public final <U> int dispatch(int count, PcapHandler.OfArray<U> handler, U user) {
 		return PcapReceiver.commonArrayHandler(this::dispatch, count, handler, user);
-	}
-
-	/**
-	 * @see org.jnetpcap.Pcap#dispatch(int, org.jnetpcap.PcapHandler.OfRawPacket)
-	 */
-	@Override
-	public final int dispatch(int count, PcapHandler.OfRawPacket sink) {
-		try (var scope = newScope()) {
-			MemoryAddress upcall = nativeCallbackPcapHandler.address();
-			MemoryAddress user = nativeSinkReferences.reference(sink, scope);
-
-			return pcap_dispatch.invokeInt(getPcapHandle(), count, upcall, user);
-		}
 	}
 
 	/**
@@ -631,10 +653,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * {@link Pcap#openLive(String, int, boolean, long, TimeUnit)}. Note that the
 	 * Packet Capture library is usually built with large file support, so the
 	 * standard I/O stream of the ``savefile'' might refer to a file larger than 2
-	 * gigabytes; applications that use {@link Pcap0_4#file()} should, if possible, use
-	 * calls that support large files on the return value of {@link Pcap0_4#file()} or
-	 * the value returned by {@link Pcap0_4#file()} when passed the return value of
-	 * {@link Pcap0_4#file()}.
+	 * gigabytes; applications that use {@link Pcap0_4#file()} should, if possible,
+	 * use calls that support large files on the return value of
+	 * {@link Pcap0_4#file()} or the value returned by {@link Pcap0_4#file()} when
+	 * passed the return value of {@link Pcap0_4#file()}.
 	 * </p>
 	 *
 	 * @return the OS standard I/O stream, only suitable with OS calls
@@ -696,25 +718,24 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.OfRawPacket)
+	 */
+	@Override
+	protected final int loop(int count, PcapHandler sink) {
+		return pcap_loop.invokeInt(
+				getPcapHandle(),
+				count,
+				proxyHandler.proxyTo(sink),
+				NULL);
+	}
+
+	/**
 	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.OfArray,
 	 *      java.lang.Object)
 	 */
 	@Override
 	public <U> int loop(int count, PcapHandler.OfArray<U> handler, U user) {
 		return PcapReceiver.commonArrayHandler(this::loop, count, handler, user);
-	}
-
-	/**
-	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.OfRawPacket)
-	 */
-	@Override
-	protected final int loop(int count, PcapHandler.OfRawPacket sink) {
-		try (var scope = newScope()) {
-			MemoryAddress upcall = nativeCallbackPcapHandler.address();
-			MemoryAddress user = nativeSinkReferences.reference(sink, scope);
-
-			return pcap_loop.invokeInt(getPcapHandle(), count, upcall, user);
-		}
 	}
 
 	/**
@@ -734,13 +755,6 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
-	 * The pcap header buffer for use with next() call. Header and packet references
-	 * are valid only from call to call and then out of pcap scope.
-	 */
-	private final MemorySegment PCAP0_4_HEADER_BUFFER = MemorySession.openImplicit()
-			.allocate(PCAP_HEADER_PADDED_LENGTH);
-
-	/**
 	 * @see org.jnetpcap.Pcap#next()
 	 */
 	@Override
@@ -749,7 +763,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 		MemorySegment hdr = PCAP0_4_HEADER_BUFFER;
 		MemoryAddress pkt = pcap_next.invokeObj(this::geterr, getPcapHandle(), hdr);
 
-		return (pkt == null) || (pkt == MemoryAddress.NULL)
+		return (pkt == null) || (pkt == NULL)
 				? null
 				: new PcapPacketRef(hdr, pkt);
 	}
