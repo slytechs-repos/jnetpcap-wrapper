@@ -169,7 +169,7 @@ public interface PcapHandler {
 
 	/**
 	 * A marker interface implemented by all packet sources. A packet source
-	 * provides raw packets {@link OfRawPacket} to a consumer or a sink.
+	 * provides raw packets {@link PcapHandler} to a consumer or a sink.
 	 */
 	interface PacketSource {
 

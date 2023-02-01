@@ -105,7 +105,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.4.1 </version>
 				<configuration>
 					<doctitle>Public API for ${project.name} ${project.version}</doctitle>
 					<windowtitle>Public API for ${project.name} ${project.version}</windowtitle>
@@ -142,7 +142,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.4.1</version>
 				<configuration>
 					<doctitle>Public API for ${project.name} ${project.version}</doctitle>
 					<windowtitle>Public API for ${project.name} ${project.version}</windowtitle>

@@ -17,9 +17,7 @@
  */
 package org.jnetpcap;
 
-import static java.lang.foreign.MemorySegment.allocateNative;
-import static java.lang.foreign.ValueLayout.ADDRESS;
-import static org.jnetpcap.constant.PcapConstants.PCAP_ERRBUF_SIZE;
+import static org.jnetpcap.constant.PcapConstants.*;
 
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
@@ -33,8 +31,11 @@ import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 
+import static java.lang.foreign.MemorySegment.*;
+import static java.lang.foreign.ValueLayout.*;
+
 /**
- * Provides Pcap API method calls for up to libpcap version 0.8
+ * Provides Pcap API method calls for up to libpcap version 0.7
  * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
@@ -235,7 +236,8 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
 	 * @see LibraryPolicy#setDefault(LibraryPolicy)
-	 */	public static boolean isSupported() {
+	 */
+	public static boolean isSupported() {
 		return pcap_findalldevs.isNativeSymbolResolved();
 	}
 
@@ -326,6 +328,7 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 * Instantiates a new pcap 080.
 	 *
 	 * @param pcapHandle the pcap handle
+	 * @param name       the handle name
 	 */
 	protected Pcap0_7(MemoryAddress pcapHandle, String name) {
 		super(pcapHandle, name);

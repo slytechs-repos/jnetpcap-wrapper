@@ -28,7 +28,7 @@ import org.jnetpcap.internal.UnsafePcapHandle;
 import org.jnetpcap.windows.WinPcap;
 
 /**
- * Provides Pcap API method calls for up to libpcap version 1.9
+ * Provides Pcap API method calls for up to libpcap version 1.10
  * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
@@ -84,7 +84,8 @@ public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafeP
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
 	 * @see LibraryPolicy#setDefault(LibraryPolicy)
-	 */	public static boolean isSupported() {
+	 */
+	public static boolean isSupported() {
 		return pcap_datalink_val_to_description_or_dlt.isNativeSymbolResolved();
 	}
 
@@ -207,8 +208,10 @@ public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafeP
 	}
 
 	/**
-	 * @param pcapHandle
-	 * @throws PcapException
+	 * Instantiates a new pcap 1 10.
+	 *
+	 * @param pcapHandle the pcap handle
+	 * @param name       the handle name
 	 */
 	protected Pcap1_10(MemoryAddress pcapHandle, String name) {
 		super(pcapHandle, name);

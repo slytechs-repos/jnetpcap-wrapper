@@ -26,7 +26,7 @@ import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 
 /**
- * Provides Pcap API method calls for up to libpcap version 0.8
+ * Provides Pcap API method calls for up to libpcap version 0.9
  * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
@@ -80,7 +80,6 @@ public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 		 *
 		 * @return true, if pcap is supported up to this specific version level,
 		 *         otherwise false
-		 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
 		 */
 		public static boolean isSupported() {
 			return pcap_set_protocol_linux.isNativeSymbolResolved();
@@ -223,6 +222,7 @@ public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 	 * Instantiates a new pcap 0 9.
 	 *
 	 * @param pcapHandle the pcap handle
+	 * @param name       the handle name
 	 */
 	protected Pcap0_9(MemoryAddress pcapHandle, String name) {
 		super(pcapHandle, name);
@@ -243,12 +243,13 @@ public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 	 * On network interface devices on Linux, pcap_set_protocol_linux() sets the
 	 * protocol to be used in the socket(2) call to create a capture socket when the
 	 * handle is activated. The argument is a link-layer protocol value, such as the
-	 * values in the <linux/if_ether.h> header file, specified in host byte order.
-	 * If protocol is non-zero, packets of that protocol will be captured when the
-	 * handle is activated, otherwise, all packets will be captured. This function
-	 * is only provided on Linux, and, if it is used on any device other than a
-	 * network interface, it will have no effect. It should not be used in portable
-	 * full; instead, a filter should be specified with pcap_setfilter(3PCAP).
+	 * values in the {@code <linux/if_ether.h>} header file, specified in host byte
+	 * order. If protocol is non-zero, packets of that protocol will be captured
+	 * when the handle is activated, otherwise, all packets will be captured. This
+	 * function is only provided on Linux, and, if it is used on any device other
+	 * than a network interface, it will have no effect. It should not be used in
+	 * portable full; instead, a filter should be specified with
+	 * pcap_setfilter(3PCAP).
 	 * </p>
 	 * <p>
 	 * If a given network interface provides a standard link-layer header, with a
@@ -262,7 +263,6 @@ public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 	 * @param protocol the protocol
 	 * @return the int
 	 * @throws PcapException the pcap exception
-	 * @see {@code int pcap_set_protocol_linux(pcap_t *, int)}
 	 * @since libpcap 0.9 (Linux only)
 	 */
 	protected int setProtocolLinux(int protocol) throws PcapException {

@@ -1201,6 +1201,13 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		return Pcap0_8.libVersion();
 	}
 
+	/**
+	 * List all pcap if.
+	 *
+	 * @param next  the next
+	 * @param scope the scope
+	 * @return the list
+	 */
 	protected static List<PcapIf> listAllPcapIf(MemoryAddress next, MemorySession scope) {
 		return PcapIf.listAll(next, scope);
 	}
@@ -1540,6 +1547,12 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	/** The name of this pcap handle. */
 	private final String name;
 
+	/**
+	 * Instantiates a new pcap.
+	 *
+	 * @param pcapHandle the pcap handle or pcap_t * address.
+	 * @param name       the name of this pcap handle.
+	 */
 	protected Pcap(MemoryAddress pcapHandle, String name) {
 		this.name = name;
 		this.pcapHandle = requireNonNull(pcapHandle, "pcapHandle"); //$NON-NLS-1$
@@ -2598,17 +2611,14 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * for Ethernet.
 	 * </p>
 	 * 
-	 * @param <U>     the generic user data type
 	 * @param count   A value of -1 or 0 for count is equivalent to infinity, so
 	 *                that packets are processed until another ending condition
 	 *                occurs
 	 * @param handler array handler which will receive packets
-	 * @param user    user opaque data to be returned with the callback
 	 * @return returns 0 if count is exhausted or if, when reading from a
 	 *         ``savefile'', no more packets are available. It returns
 	 *         PCAP_ERROR_BREAK if the loop terminated due to a call to
 	 *         pcap_breakloop() before any packets were processed
-	 * @throws PcapException any pcap errors
 	 * @since libpcap 0.4
 	 */
 	protected int loop(int count, PcapHandler handler) {

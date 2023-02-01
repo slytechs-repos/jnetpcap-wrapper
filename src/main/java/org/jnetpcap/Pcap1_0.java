@@ -133,7 +133,16 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 		}
 	}
 
-	protected static <T extends Pcap> T create(BiFunction<MemoryAddress, String, T> pcapSupplier, String device)
+	/**
+	 * Creates the.
+	 *
+	 * @param <T>     the generic type
+	 * @param factory the pcap supplier
+	 * @param device  the device
+	 * @return the version specific Pcap instance
+	 * @throws PcapException the pcap exception
+	 */
+	protected static <T extends Pcap> T create(BiFunction<MemoryAddress, String, T> factory, String device)
 			throws PcapException {
 		try (var scope = newScope()) {
 			MemorySegment c_errbuf = MemorySegment.allocateNative(PcapConstants.PCAP_ERRBUF_SIZE, scope);
@@ -147,7 +156,7 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 			if (pcapPointer == MemoryAddress.NULL)
 				throw new PcapException(PcapCode.PCAP_ERROR, c_errbuf.getUtf8String(0));
 
-			return pcapSupplier.apply(pcapPointer, device);
+			return factory.apply(pcapPointer, device);
 
 		} catch (PcapException e) {
 			throw e;
@@ -389,6 +398,7 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * Instantiates a new pcap 100.
 	 *
 	 * @param pcapHandle the pcap handle
+	 * @param name       the handle name
 	 */
 	protected Pcap1_0(MemoryAddress pcapHandle, String name) {
 		super(pcapHandle, name);
