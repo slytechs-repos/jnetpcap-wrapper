@@ -17,9 +17,6 @@
  */
 package org.jnetpcap;
 
-import static java.lang.foreign.ValueLayout.ADDRESS;
-import static java.lang.foreign.ValueLayout.JAVA_INT;
-
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.util.Collections;
@@ -31,6 +28,8 @@ import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapTstampType;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * Provides Pcap API method calls for up to libpcap version 1.2
@@ -126,7 +125,8 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 	 * @return true, if pcap is supported up to this specific version level,
 	 *         otherwise false
 	 * @see LibraryPolicy#setDefault(LibraryPolicy)
-	 */	public static boolean isSupported() {
+	 */
+	public static boolean isSupported() {
 		return pcap_free_tstamp_types.isNativeSymbolResolved();
 	}
 
@@ -214,13 +214,18 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 	}
 
 	/**
-	 * @param pcapHandle
-	 * @throws PcapException
+	 * Instantiates a new pcap 1 2.
+	 *
+	 * @param pcapHandle the pcap handle
+	 * @param name       the handle name
 	 */
 	protected Pcap1_2(MemoryAddress pcapHandle, String name) {
 		super(pcapHandle, name);
 	}
 
+	/**
+	 * @see org.jnetpcap.Pcap#listTstampTypes()
+	 */
 	@Override
 	public final List<PcapTstampType> listTstampTypes() throws PcapException {
 

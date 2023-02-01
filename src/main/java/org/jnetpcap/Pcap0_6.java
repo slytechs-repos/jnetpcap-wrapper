@@ -109,7 +109,7 @@ public sealed class Pcap0_6 extends Pcap0_5 permits Pcap0_7 {
 
 	/**
 	 * Open a fake pcap_t for compiling filters or opening a capture for output.
-	 *
+	 * 
 	 * <p>
 	 * {@link #openDead} and pcap_open_dead_with_tstamp_precision() are used for
 	 * creating a pcap_t structure to use when calling the other functions in
@@ -128,19 +128,21 @@ public sealed class Pcap0_6 extends Pcap0_5 permits Pcap0_7 {
 	 * have time stamps in seconds and nanoseconds. Its value does not affect
 	 * pcap_compile(3PCAP).
 	 * </p>
-	 * 
+	 *
+	 * @param <T>      the generic pcap to instantiate and return
+	 * @param factory  the pcap supplier
 	 * @param linktype specifies the link-layer type for the pcap handle
 	 * @param snaplen  specifies the snapshot length for the pcap handle
 	 * @return A dead pcap handle
 	 * @throws PcapException any errors
 	 * @since libpcap 0.6
 	 */
-	protected static <T extends Pcap> T openDead(BiFunction<MemoryAddress, String, T> pcapSupplier, PcapDlt linktype,
+	protected static <T extends Pcap> T openDead(BiFunction<MemoryAddress, String, T> factory, PcapDlt linktype,
 			int snaplen)
 			throws PcapException {
 		MemoryAddress pcapPointer = pcap_open_dead.invokeObj(linktype.getAsInt(), snaplen);
 
-		return pcapSupplier.apply(pcapPointer, "dead:dlt=%s".formatted(linktype));
+		return factory.apply(pcapPointer, "dead:dlt=%s".formatted(linktype));
 	}
 
 	/**

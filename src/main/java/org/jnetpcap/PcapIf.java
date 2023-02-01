@@ -17,13 +17,7 @@
  */
 package org.jnetpcap;
 
-import static java.lang.foreign.MemoryAddress.NULL;
-import static java.lang.foreign.MemoryLayout.PathElement.groupElement;
-import static java.lang.foreign.MemoryLayout.PathElement.sequenceElement;
-import static java.lang.foreign.MemorySegment.ofAddress;
-import static java.lang.foreign.ValueLayout.JAVA_BYTE;
-import static java.lang.foreign.ValueLayout.JAVA_SHORT;
-import static org.jnetpcap.internal.ForeignUtils.toJavaString;
+import static org.jnetpcap.internal.ForeignUtils.*;
 
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemoryLayout;
@@ -37,8 +31,13 @@ import java.util.List;
 import org.jnetpcap.constant.SockAddrFamily;
 import org.jnetpcap.util.PcapUtils;
 
+import static java.lang.foreign.MemoryAddress.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.MemorySegment.*;
+import static java.lang.foreign.ValueLayout.*;
+
 /**
- * Native Type pcap_if_t has the following members:
+ * Native Type pcap_if_t has the following members.
  * 
  * <dl>
  * <dt>next</dt>

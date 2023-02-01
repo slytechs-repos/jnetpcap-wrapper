@@ -61,6 +61,13 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 		}
 
 		/**
+		 * Instantiates a new unix specifc Pcap version 0.8 implementation.
+		 */
+		private Unix0_8() {
+
+		}
+
+		/**
 		 * Checks if the {@code Pcap} subclass at a specific <em>libpcap API
 		 * version</em> is natively supported. This is a safe method to use anytime on
 		 * any platform, weather native library is present or not.
@@ -90,7 +97,6 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 		 *
 		 * @return true, if pcap is supported up to this specific version level,
 		 *         otherwise false
-		 * @see Pcap#setDefaultPolicy(PcapMissingSymbolsPolicy)
 		 */
 		public static boolean isSupported() {
 			return pcap_get_selectable_fd.isNativeSymbolResolved();
@@ -356,6 +362,7 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 * Instantiates a new pcap 080.
 	 *
 	 * @param pcapHandle the pcap handle
+	 * @param name       the handle name
 	 */
 	protected Pcap0_8(MemoryAddress pcapHandle, String name) {
 		super(pcapHandle, name);
@@ -394,7 +401,6 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 * platforms, not have any packets to read if the packet buffer timeout has
 	 * expired. A call to pcap_dispatch(3PCAP) or pcap_next_ex(3PCAP) will return 0
 	 * in this case, but will not block.
-	 * <p>
 	 * <dl>
 	 * <dt>Note that in:</dt>
 	 * 
@@ -403,7 +409,6 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 * <dd>OpenBSD prior to OpenBSD 2.4;</dd>
 	 * <dd>Mac OS X prior to Mac OS X 10.7;</dd>
 	 * </dl>
-	 * </p>
 	 * <p>
 	 * select(), poll(), and kevent() do not work correctly on BPF devices;
 	 * pcap_get_selectable_fd() will return a file descriptor on most of those
@@ -433,7 +438,6 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 *
 	 * @return the selectable fd
 	 * @throws PcapException the pcap exception
-	 * @see {@code int pcap_get_selectable_fd(pcap_t *p);}
 	 * @since libpcap 1.8 (Unix only)
 	 */
 	protected int getSelectableFd() throws PcapException {

@@ -17,7 +17,7 @@
  */
 package org.jnetpcap;
 
-import static org.jnetpcap.internal.UnsafePcapHandle.makeDeadHandleName;
+import static org.jnetpcap.internal.UnsafePcapHandle.*;
 
 import java.lang.foreign.MemoryAddress;
 import java.util.concurrent.TimeUnit;
@@ -204,7 +204,7 @@ public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 
 	/**
 	 * Open a fake pcap_t for compiling filters or opening a capture for output.
-	 *
+	 * 
 	 * <p>
 	 * {@link #openDead} and pcap_open_dead_with_tstamp_precision() are used for
 	 * creating a pcap_t structure to use when calling the other functions in
@@ -223,20 +223,23 @@ public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 	 * have time stamps in seconds and nanoseconds. Its value does not affect
 	 * pcap_compile(3PCAP).
 	 * </p>
-	 * 
-	 * @param linktype specifies the link-layer type for the pcap handle
-	 * @param snaplen  specifies the snapshot length for the pcap handle
+	 *
+	 * @param <T>       the generic factory type
+	 * @param factory   the pcap instance factory
+	 * @param linktype  specifies the link-layer type for the pcap handle
+	 * @param snaplen   specifies the snapshot length for the pcap handle
+	 * @param precision the precision
 	 * @return A dead pcap handle
 	 * @throws PcapException any errors
 	 * @since libpcap 1.5.1
 	 */
-	protected static <T extends Pcap> T openDeadWithTstampPrecision(BiFunction<MemoryAddress, String, T> pcapSupplier,
+	protected static <T extends Pcap> T openDeadWithTstampPrecision(BiFunction<MemoryAddress, String, T> factory,
 			PcapDlt linktype, int snaplen, PcapTStampPrecision precision)
 			throws PcapException {
 		MemoryAddress pcapAddress = pcap_open_dead_with_tstamp_precision
 				.invokeObj(linktype.getAsInt(), snaplen, precision.getAsInt());
 
-		return pcapSupplier.apply(pcapAddress, makeDeadHandleName(linktype));
+		return factory.apply(pcapAddress, makeDeadHandleName(linktype));
 	}
 
 	/**
@@ -294,16 +297,23 @@ public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 	 * Instantiates a new pcap 150.
 	 *
 	 * @param pcapHandle the pcap handle
+	 * @param name       the handle name
 	 */
 	protected Pcap1_5(MemoryAddress pcapHandle, String name) {
 		super(pcapHandle, name);
 	}
 
+	/**
+	 * @see org.jnetpcap.Pcap#getTstampPrecision()
+	 */
 	@Override
 	public final PcapTStampPrecision getTstampPrecision() throws PcapException {
 		return PcapTStampPrecision.valueOf(pcap_get_tstamp_precision.invokeInt(this::getErrorString, getPcapHandle()));
 	}
 
+	/**
+	 * @see org.jnetpcap.Pcap#setImmediateMode(boolean)
+	 */
 	@Override
 	public final Pcap1_5 setImmediateMode(boolean enable) throws PcapException {
 		pcap_set_immediate_mode.invokeInt(this::getErrorString, getPcapHandle(), enable ? 1 : 0);
@@ -312,6 +322,11 @@ public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 	}
 
 	/**
+	 * Sets the tstamp precision.
+	 *
+	 * @param precision the precision
+	 * @return the pcap
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#setTstampPrecision(org.jnetpcap.constant.PcapTStampPrecision)
 	 */
 	@Override
