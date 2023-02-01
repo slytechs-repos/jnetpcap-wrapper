@@ -152,7 +152,7 @@ See [Wiki pages][wiki]
 Reference [Javadocs](https://slytechs-repos.github.io/jnetpcap/apidocs/org.jnetpcap/org/jnetpcap/package-summary.html)
 
 ## Contact
-* `sales@slytechs.com` for commercial and licensing issues
+* `sales@slytechs.com` for commercial and licensing questions
 * [jNetPcap Issue Tracker][bugs]
 
 ## Compatibility with jNetPcap version 1
