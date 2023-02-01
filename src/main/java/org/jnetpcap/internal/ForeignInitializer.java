@@ -22,11 +22,12 @@ import java.lang.foreign.Linker;
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.SymbolLookup;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,10 +47,6 @@ import java.util.regex.Pattern;
  *
  */
 public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwable> implements AutoCloseable {
-
-	public interface DowncallSupplier<T extends ForeignDowncall<?>> {
-		T newDowncall(String symbolName, MemorySegment symbolAddress, MethodHandle handle);
-	}
 
 	public enum CType {
 		C_POINTER(ValueLayout.ADDRESS, MemoryAddress.class),
@@ -80,6 +78,15 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 		}
 	}
 
+	public interface DowncallSupplier<T extends ForeignDowncall<?>> {
+		T newDowncall(String symbolName, MemorySegment symbolAddress, MethodHandle handle);
+	}
+
+	public interface MethodHandleLookup {
+		MethodHandle lookup(Lookup lookup, Class<?> clazz, String methodName, MethodType type)
+				throws IllegalAccessException, NoSuchMethodException;
+	}
+
 	public interface MissingSymbolsPolicy {
 		void onMissingSymbols(String name, List<String> missingDowncallSymbols, List<String> missingUpcallMethods)
 				throws Throwable;
@@ -97,7 +104,11 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 		private static final Pattern SIG = Pattern.compile(
 				"^(\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*)\\(([BCDFIJSAV]*)\\)([BCDFIJSAV]);?");
 
-		private static MemoryLayout[] map(String sig) {
+		private static Class<?>[] mapJavaPrimitiveTypes(String sig) {
+			return sig.chars().mapToObj(SignatureParser::mapToJavaPrimitiveType).toArray(Class[]::new);
+		}
+
+		private static MemoryLayout[] mapLayouts(String sig) {
 			return sig.chars().mapToObj(SignatureParser::mapToLayout).toArray(MemoryLayout[]::new);
 		}
 
@@ -116,6 +127,21 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 			};
 		}
 
+		private static Class<?> mapToJavaPrimitiveType(int ch) {
+			return switch (ch) {
+			case 'A' -> MemoryAddress.class;
+			case 'B' -> byte.class;
+			case 'I' -> int.class;
+			case 'J' -> long.class;
+			case 'S' -> short.class;
+			case 'F' -> float.class;
+			case 'D' -> double.class;
+			case 'V' -> void.class;
+
+			default -> throw new IllegalStateException("illegal char in signature " + ch);
+			};
+		}
+
 		private static MemoryLayout mapToLayout(int ch) {
 			return mapToCType(ch).getLayout();
 		}
@@ -123,11 +149,19 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 		private Matcher matcher;
 
 		public MemoryLayout[] args() {
-			return map(group(2));
+			return mapLayouts(group(2));
 		}
 
 		public String group(int index) {
 			return matcher.group(index);
+		}
+
+		public Class<?>[] javaArgs() {
+			return mapJavaPrimitiveTypes(group(2));
+		}
+
+		public Class<?> javaRet() {
+			return mapToJavaPrimitiveType(matcher.group(3).charAt(0));
 		}
 
 		private boolean match(String str) {
@@ -146,10 +180,8 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 	}
 
 	private static final SignatureParser PARSER = new SignatureParser();
-
 	private static final SymbolLookup C_SYMBOLS = SymbolLookup.loaderLookup();
 	private static final Linker C_LINKER = Linker.nativeLinker();
-	private static final MethodHandles.Lookup J_LOOKUP = MethodHandles.lookup();
 
 	@SuppressWarnings({ "unchecked",
 			"rawtypes" })
@@ -183,7 +215,10 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 		return clazz.getDeclaredMethod(methodName, signature);
 	}
 
+	private final MethodHandles.Lookup methodHandleLookup;
+
 	private DowncallSupplier<T> newFunctionSupplier;
+
 	private BiFunction<String, Throwable, T> exceptionSupplier;
 
 	private List<String> missingDowncalls = new ArrayList<>();
@@ -201,14 +236,29 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 	private String name;
 
 	public ForeignInitializer(String name) {
-		this(name, ForeignInitializer::defaultInstance, ForeignInitializer::defaultInstance);
+		this(name,
+				ForeignInitializer::defaultInstance,
+				ForeignInitializer::defaultInstance,
+				MethodHandles.lookup());
 	}
 
-	public ForeignInitializer(String name, DowncallSupplier<T> newFunctionSupplier,
-			BiFunction<String, Throwable, T> exceptionSupplier) {
+	protected ForeignInitializer(String name,
+			DowncallSupplier<T> newFunctionSupplier,
+			BiFunction<String, Throwable, T> exceptionSupplier,
+			Lookup lookup) {
+
 		this.setName(name);
 		this.newFunctionSupplier = newFunctionSupplier;
 		this.exceptionSupplier = exceptionSupplier;
+
+		this.methodHandleLookup = lookup;
+	}
+
+	public ForeignInitializer(String name, Lookup lookup) {
+		this(name,
+				ForeignInitializer::defaultInstance,
+				ForeignInitializer::defaultInstance,
+				lookup);
 	}
 
 	/**
@@ -275,14 +325,6 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 		}
 	}
 
-	private MemorySegment resolveSymbol(String symbolName) throws NoSuchElementException {
-		Optional<MemorySegment> symbol = C_SYMBOLS.lookup(symbolName);
-		if (symbol.isEmpty())
-			throw new NoSuchElementException("native C symbol \"" + symbolName + "\" not found");
-
-		return symbol.get();
-	}
-
 	private MethodHandle downcallHandle(MemorySegment symbol, MemoryLayout retLayout, MemoryLayout[] argLayouts)
 			throws NoSuchElementException {
 
@@ -295,15 +337,77 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 		return handle;
 	}
 
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
 	public void makeAccessible(boolean b) {
 		this.makeAccessible = b;
+	}
+
+	private MethodType methodType() {
+		return MethodType.methodType(PARSER.javaRet(), PARSER.javaArgs());
+	}
+
+	private MemorySegment resolveSymbol(String symbolName) throws NoSuchElementException {
+		Optional<MemorySegment> symbol = C_SYMBOLS.lookup(symbolName);
+		if (symbol.isEmpty())
+			throw new NoSuchElementException("native C symbol \"" + symbolName + "\" not found");
+
+		return symbol.get();
 	}
 
 	public void setMissingSymbolsPolicy(MissingSymbolsPolicy missingSymbolsPolicy) {
 		this.missingSymbolPolicty = missingSymbolsPolicy;
 	}
 
-	public <U> ForeignUpcall<U> upcall(Class<?> clazz, String signature) {
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	private MethodHandle toStaticMethodHandle(Method method, MemoryLayout returnLayout,
+			MemoryLayout[] argLayouts)
+			throws IllegalAccessException {
+
+		if (returnLayout == null) {
+			FunctionDescriptor.ofVoid(argLayouts);
+		} else {
+			FunctionDescriptor.of(returnLayout, argLayouts);
+		}
+
+		// Enable accessibility for private static methods
+		boolean isAccessible = method.canAccess(null);
+		if (makeAccessible && !isAccessible)
+			method.setAccessible(true);
+
+		MethodHandle staticHandle = methodHandleLookup.unreflect(method);
+
+		// Restore accessibility setting
+		if (makeAccessible && (isAccessible != method.canAccess(null)))
+			method.setAccessible(false);
+
+		return staticHandle;
+	}
+
+	private MethodHandle toVirtualMethodHandle(
+			MethodType type, Class<?> clazz, String methodName,
+			Consumer<Method> methodSetup)
+			throws IllegalAccessException, NoSuchMethodException {
+
+		methodSetup.accept(clazz.getMethod(methodName, type.parameterArray()));
+
+		var handle = methodHandleLookup.findVirtual(clazz, methodName, type);
+
+		return handle;
+	}
+
+	public <U> ForeignUpcall<U> upcallStatic(Class<?> clazz, String signature) {
 		if (!PARSER.match(signature))
 			throw new IllegalArgumentException("invalid signature for java method (upcall) " + signature + "in class "
 					+ clazz.getName());
@@ -319,8 +423,8 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 
 			Method method = findMethodInClass(clazz, methodName);
 
-			MethodHandle handle = methodToMethodHandle(method, retLayout, argLayouts);
-			return new ForeignUpcall<>(handle, descriptor, MemorySession.global());
+			MethodHandle handle = toStaticMethodHandle(method, retLayout, argLayouts);
+			return new ForeignUpcall<>(handle, descriptor);
 		} catch (IllegalAccessException | SecurityException e) {
 			throw new RuntimeException(methodName, e);
 
@@ -331,7 +435,7 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 		}
 	}
 
-	public <U> ForeignUpcall<U> upcall(Class<?> clazz, String methodName, CType returnType, CType... argTypes) {
+	public <U> ForeignUpcall<U> upcallStatic(Class<?> clazz, String methodName, CType returnType, CType... argTypes) {
 
 		try {
 			Method method = findMethodInClass(clazz, methodName);
@@ -343,9 +447,9 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 					? FunctionDescriptor.ofVoid(argLayouts)
 					: FunctionDescriptor.of(retLayout, argLayouts);
 
-			MethodHandle handle = methodToMethodHandle(method, retLayout, argLayouts);
+			MethodHandle staticHandle = toStaticMethodHandle(method, retLayout, argLayouts);
 
-			return new ForeignUpcall<>(handle, descriptor, MemorySession.global());
+			return new ForeignUpcall<>(staticHandle, descriptor);
 		} catch (SecurityException | IllegalAccessException e) {
 			throw new RuntimeException(methodName, e);
 
@@ -357,41 +461,39 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 
 	}
 
-	private MethodHandle methodToMethodHandle(Method method, MemoryLayout returnLayout,
-			MemoryLayout[] argLayouts)
-			throws IllegalAccessException {
+	public <U> ForeignUpcall<U> upcall(String signature, Class<U> clazz) {
+		return upcallVirtual(signature, clazz, m -> m.setAccessible(makeAccessible));
+	}
 
-		if (returnLayout == null) {
-			FunctionDescriptor.ofVoid(argLayouts);
-		} else {
-			FunctionDescriptor.of(returnLayout, argLayouts);
+	public <U> ForeignUpcall<U> upcallVirtual(
+			String signature, Class<?> clazz, Consumer<Method> methodSetup) {
+
+		if (!PARSER.match(signature))
+			throw new IllegalArgumentException("invalid signature for java method (upcall) " + signature + "in class "
+					+ clazz.getName());
+
+		String methodName = PARSER.symbol();
+		MemoryLayout retLayout = PARSER.ret();
+		MemoryLayout[] argLayouts = PARSER.args();
+
+		try {
+			FunctionDescriptor descriptor = (retLayout == null)
+					? FunctionDescriptor.ofVoid(argLayouts)
+					: FunctionDescriptor.of(retLayout, argLayouts);
+
+			MethodType type = methodType();
+
+			MethodHandle virtualHandle = toVirtualMethodHandle(
+					type, clazz, methodName, methodSetup);
+
+			return new ForeignUpcall<>(virtualHandle, descriptor);
+		} catch (IllegalAccessException | SecurityException e) {
+			throw new RuntimeException("[%s] %s".formatted(methodName, e.getMessage()), e);
+
+		} catch (NoSuchMethodError | NoSuchMethodException e) {
+			missingUpcalls.add(methodName);
+
+			return new ForeignUpcall<>(methodName, e);
 		}
-
-		// Enable accessibility for private static methods
-		boolean isAccessible = method.canAccess(null);
-		if (makeAccessible && !isAccessible)
-			method.setAccessible(true);
-
-		MethodHandle handle = J_LOOKUP.unreflect(method);
-
-		// Restore accessibility setting
-		if (makeAccessible && (isAccessible != method.canAccess(null)))
-			method.setAccessible(false);
-
-		return handle;
-	}
-
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
 	}
 }

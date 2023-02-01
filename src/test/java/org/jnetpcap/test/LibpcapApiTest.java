@@ -17,22 +17,10 @@
  */
 package org.jnetpcap.test;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.jnetpcap.constant.PcapConstants.MAX_SNAPLEN;
-import static org.jnetpcap.constant.PcapConstants.PCAP_ERROR_BREAK;
-import static org.jnetpcap.constant.PcapConstants.PCAP_NETMASK_UNKNOWN;
-import static org.jnetpcap.test.AbstractTestBase.TestPacket.IP_ADDR_LEN;
-import static org.jnetpcap.test.AbstractTestBase.TestPacket.SRC_IP_OFFSET;
-import static org.jnetpcap.test.AbstractTestBase.TestPacket.fromPcapPacketRef;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static java.util.concurrent.TimeUnit.*;
+import static org.jnetpcap.constant.PcapConstants.*;
+import static org.jnetpcap.test.AbstractTestBase.TestPacket.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.lang.foreign.MemoryAddress;
@@ -385,7 +373,7 @@ class LibpcapApiTest extends AbstractTestBase {
 			throw new IllegalStateException("instanceof somehow failed!");
 
 		final int PACKET_COUNT = 5;
-		final PcapHandler.OfRawPacket HANDLER = (header, packet) -> {/* discard */};
+		final PcapHandler HANDLER = (ignore, header, packet) -> {/* discard */};
 
 		/* Pcap.dispatch retruns number of packets on success and -2 on breakloop */
 		assertEquals(PACKET_COUNT, source.sourcePackets(PACKET_COUNT, HANDLER));
@@ -422,7 +410,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		var pcap = pcapOpenOfflineTestHandle();
 
 		final int PACKET_COUNT = 5;
-		final PcapHandler.OfRawPacket HANDLER = (header, packet) -> {/* discard */};
+		final PcapHandler HANDLER = (ignore, header, packet) -> {/* discard */};
 
 		/* Pcap.dispatch retruns number of packets on success and -2 on breakloop */
 		assertEquals(PACKET_COUNT, pcap.dispatchWithAccessToRawPacket(PACKET_COUNT, HANDLER));
@@ -962,7 +950,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		final int PACKET_COUNT = 5;
 		final int LOOP_OK_STATUS = 0;
-		final PcapHandler.OfRawPacket HANDLER = (header, packet) -> {/* discard */};
+		final PcapHandler HANDLER = (user, header, packet) -> {/* discard */};
 
 		/* Pcap.loop returns 0 on success unlike Pcap.dispatch, -2 on breakloop */
 		assertEquals(LOOP_OK_STATUS, source.sourcePackets(PACKET_COUNT, HANDLER));
@@ -999,7 +987,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		final int PACKET_COUNT = 5;
 		final int LOOP_OK_STATUS = 0;
-		final PcapHandler.OfRawPacket HANDLER = (header, packet) -> {/* discard */};
+		final PcapHandler HANDLER = (user, header, packet) -> {/* discard */};
 
 		assertEquals(LOOP_OK_STATUS, pcap.loopWithAccessToRawPacket(PACKET_COUNT, HANDLER));
 	}

@@ -68,7 +68,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * process are captured and reported to this policy which may log, report, or
 	 * even halt the initialization process from continuing.
 	 * 
-	 * <h3>Logging and handling errors on missing native symbols</h3>
+	 * <h2>Logging and handling errors on missing native symbols</h2>
 	 * <p>
 	 * A policy also defines a logger output destination, a {@code Appendable},
 	 * where logs by the default policy on initialization errors are sent. By
@@ -121,7 +121,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * <dd>Defines directories where the native library will searched for.</dd>
 	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILE}:</dt>
 	 * <dd>Defines an absolute directory and decorated filename path to load the
-	 * native library using {@link System.#load(String)} system call.</dd>
+	 * native library using {@link System#load(String)} system call.</dd>
 	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILENAME}:</dt>
 	 * <dd>Defines a decorated filename only of the native library. The decorated
 	 * filename will be appended to the
@@ -2043,7 +2043,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 *         available in a ``savefile.''
 	 * @since libpcap 0.4
 	 */
-	protected int dispatch(int count, PcapHandler.OfRawPacket handler) {
+	protected int dispatch(int count, PcapHandler handler) {
 		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -2611,7 +2611,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @throws PcapException any pcap errors
 	 * @since libpcap 0.4
 	 */
-	protected int loop(int count, PcapHandler.OfRawPacket handler) {
+	protected int loop(int count, PcapHandler handler) {
 		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 

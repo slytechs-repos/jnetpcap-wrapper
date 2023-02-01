@@ -19,7 +19,7 @@ package org.jnetpcap.internal;
 
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.MemorySegment;
 import java.lang.foreign.MemorySession;
 import java.lang.invoke.MethodHandle;
 
@@ -33,44 +33,53 @@ public class ForeignUpcall<T> {
 
 	private static final Linker C_LINKER = Linker.nativeLinker();
 
-	private final MemoryAddress address;
-	private final MemorySession scope;
 	private final String message; // Stub error handler
 	private final Throwable cause; // Stub error handler
+	private final MethodHandle handle;
+	private final FunctionDescriptor descriptor;
 
-	public ForeignUpcall(MethodHandle handle, FunctionDescriptor descriptor, MemorySession scope) {
-		this.scope = scope;
-		this.address = C_LINKER.upcallStub(handle, descriptor, scope)
-				.address();
+	ForeignUpcall(MethodHandle handle, FunctionDescriptor descriptor) {
+		this.handle = handle;
+		this.descriptor = descriptor;
 		this.message = null;
 		this.cause = null;
 	}
 
-	public ForeignUpcall(String message, Throwable cause) {
+	ForeignUpcall(String message, Throwable cause) {
 		this.message = message;
 		this.cause = cause;
-		this.scope = null;
-		this.address = null;
+		this.handle = null;
+		this.descriptor = null;
 	}
 
-	private MemoryAddress checkedAddress() {
-		if (address == null)
+	private void throwIfErrors() {
+		if (cause != null)
 			throw (cause instanceof RuntimeException e)
 					? e
 					: new RuntimeException(message, cause);
-
-		return address;
 	}
 
-	public MemoryAddress bindTo(T target) {
-		throw new UnsupportedOperationException();
+	public MemorySegment virtualStubPointer(T target) {
+		return virtualStubPointer(target, MemorySession.openImplicit());
 	}
 
-	public MemoryAddress address() {
-		return checkedAddress();
+	public MemorySegment virtualStubPointer(T target, MemorySession scope) {
+		throwIfErrors();
+
+		MethodHandle handle = this.handle.bindTo(target);
+
+		return C_LINKER
+				.upcallStub(handle, descriptor, scope);
+
 	}
 
-	public MemorySession scope() {
-		return scope;
+	public MemorySegment staticStubPointer() {
+		return staticStubPointer(MemorySession.openImplicit());
+	}
+
+	public MemorySegment staticStubPointer(MemorySession scope) {
+		throwIfErrors();
+
+		return C_LINKER.upcallStub(handle, descriptor, scope);
 	}
 }

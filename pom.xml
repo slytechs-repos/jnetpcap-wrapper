@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.slytechs.libraries</groupId>
+	<groupId>com.slytechs.jnet</groupId>
 	<artifactId>jnetpcap</artifactId>
 	<version>2.0.0-alpha.1</version>
-	<name>jNetpcap</name>
-	<description>A native Libpcap library Java wrapper</description>
+	<name>jNetPcap</name>
+	<description>A Java wrapper for native libpcap library</description>
 	<url>https://www.jnetpcap.org</url>
 	<properties>
 		<jdk.version>19</jdk.version>
@@ -28,7 +28,7 @@
 			<id>markb</id>
 			<name>Mark Bednarczyk</name>
 			<email>mark@slytechs.com</email>
-			<organization>Sly Technlogies Inc</organization>
+			<organization>Sly Technlogies</organization>
 			<organizationUrl>http://slytechs.com</organizationUrl>
 		</developer>
 	</developers>
@@ -39,18 +39,17 @@
 			<artifactId>maven-compiler-plugin</artifactId>
 			<version>3.10.1</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.5.2</version>
-			<scope>test</scope>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.junit.platform/junit-platform-suite-api -->
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-suite-api</artifactId>
 			<version>1.9.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.9.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -103,6 +102,29 @@
 					</argLine>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<doctitle>Public API for ${project.name} ${project.version}</doctitle>
+					<windowtitle>Public API for ${project.name} ${project.version}</windowtitle>
+					<encoding>${java.encoding}</encoding>
+					<source>${jdk.version}</source>
+					<additionalOptions>
+								${java.preview}
+					</additionalOptions>
+					<show>public</show>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-publish-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<scmBranch>gh-pages</scmBranch>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	<reporting>
@@ -114,18 +136,48 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.22.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.4.1</version>
+				<version>3.2.0</version>
 				<configuration>
-					<doctitle>My API for ${project.name} ${project.version}</doctitle>
-					<windowtitle>My API for ${project.name} ${project.version}</windowtitle>
+					<doctitle>Public API for ${project.name} ${project.version}</doctitle>
+					<windowtitle>Public API for ${project.name} ${project.version}</windowtitle>
+					<testDoctitle>Test API for ${project.name} ${project.version}</testDoctitle>
+					<testWindowtitle>Test API for ${project.name} ${project.version}</testWindowtitle>
 					<encoding>${java.encoding}</encoding>
 					<source>${jdk.version}</source>
 					<additionalOptions>
 								${java.preview}
-							</additionalOptions>
-					<show>public</show>
+					</additionalOptions>
 				</configuration>
+				<reportSets>
+					<reportSet>
+						<id>aggregate-no-fork</id>
+						<configuration>
+							<goal>aggregate-no-fork</goal>
+							<show>public</show>
+							<skip>false</skip>
+						</configuration>
+						<reports>
+							<report>javadoc</report>
+						</reports>
+					</reportSet>
+					<reportSet>
+						<id>test-aggregate-no-fork</id>
+						<configuration>
+							<goal>test-aggregate-no-fork</goal>
+							<show>private</show>
+							<skip>true</skip>
+						</configuration>
+						<reports>
+							<report>test-javadoc</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 		</plugins>
 	</reporting>
@@ -248,4 +300,11 @@
 		<developerConnection>scm:git:ssh:git://github.com/slytechs-repos/jnetpcap.git</developerConnection>
 		<url>https://github.com/slytechs-repos/jnetpcap</url>
 	</scm>
+	<distributionManagement>
+		<!-- mvn clean site site:stage scm-publish:publish-scm -->
+		<site>
+			<id>github</id>
+			<url>scm:git:git@github.com:slytechs-repos/jnetpcap.git</url>
+		</site>
+	</distributionManagement>
 </project>

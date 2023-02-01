@@ -17,7 +17,6 @@
  */
 package org.jnetpcap.util;
 
-import java.lang.foreign.Addressable;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
@@ -29,7 +28,6 @@ import org.jnetpcap.PcapException;
 import org.jnetpcap.PcapHandler;
 import org.jnetpcap.PcapHandler.OfMemoryAddress;
 import org.jnetpcap.PcapHandler.OfMemorySegment;
-import org.jnetpcap.PcapHandler.OfRawPacket;
 import org.jnetpcap.PcapHandler.PacketSource.PcapPacketSource;
 import org.jnetpcap.PcapHeader;
 import org.jnetpcap.constant.PcapConstants;
@@ -116,7 +114,7 @@ public final class PcapReceiver implements PcapPacketSource {
 	public static <U> int commonArrayHandler(PcapPacketSource packetSource, int count,
 			PcapHandler.OfArray<U> handler, U user) {
 
-		return packetSource.sourcePackets(count, (header, bytes) -> {
+		return packetSource.sourcePackets(count, (ignore, header, bytes) -> {
 
 			try (var scope = newScope()) {
 				PcapHeader hdr = PcapHeader.newReadOnlyInstance(header);
@@ -175,7 +173,7 @@ public final class PcapReceiver implements PcapPacketSource {
 			ArrayAllocator arenaAllocator) {
 		ArrayAllocator heap = arenaAllocator;
 
-		return sourcePackets(count, (header, bytes) -> {
+		return sourcePackets(count, (ignore, header, bytes) -> {
 			try (var scope = newScope()) {
 				PcapHeader hdr = PcapHeader.newReadOnlyInstance(header);
 
@@ -204,7 +202,7 @@ public final class PcapReceiver implements PcapPacketSource {
 	 * @throws PcapException the pcap exception
 	 */
 	public <U> int forEach(int count, OfMemoryAddress<U> handler, U user) throws PcapException {
-		return packetSource.sourcePackets(count, (header, bytes) -> {
+		return packetSource.sourcePackets(count, (ignore, header, bytes) -> {
 			handler.handleAddress(user, header.address(), bytes.address());
 		});
 	}
@@ -221,7 +219,7 @@ public final class PcapReceiver implements PcapPacketSource {
 	 * @throws PcapException the pcap exception
 	 */
 	public <U> int forEach(int count, OfMemorySegment<U> handler, U user) throws PcapException {
-		return sourcePackets(count, (header, bytes) -> {
+		return sourcePackets(count, (ignore, header, bytes) -> {
 			try (var scope = MemorySession.openShared()) {
 				MemorySegment hseg = MemorySegment.ofAddress(header.address(),
 						PcapHeader.PCAP_HEADER_PADDED_LENGTH,
@@ -259,7 +257,7 @@ public final class PcapReceiver implements PcapPacketSource {
 	 * @return the int
 	 */
 	public <U> int forEachCopy(int count, PcapHandler.OfByteBuffer<U> handler, U user) {
-		return sourcePackets(count, (Addressable header, Addressable bytes) -> {
+		return sourcePackets(count, (ignore, header, bytes) -> {
 			try (var scope = newScope()) {
 
 				PcapHeader hdr = PcapHeader.newReadOnlyInstance(header);
@@ -286,7 +284,7 @@ public final class PcapReceiver implements PcapPacketSource {
 	 */
 	public <U> int forEachDirect(int count, PcapHandler.OfByteBuffer<U> handler, U user) throws PcapException {
 
-		return sourcePackets(count, (header, bytes) -> {
+		return sourcePackets(count, (ignore, header, bytes) -> {
 			try (var scope = newScope()) {
 				PcapHeader hdr = PcapHeader.newReadOnlyInstance(header);
 
@@ -309,7 +307,7 @@ public final class PcapReceiver implements PcapPacketSource {
 	 *      org.jnetpcap.PcapHandler.OfRawPacket)
 	 */
 	@Override
-	public int sourcePackets(int count, OfRawPacket handler) {
+	public int sourcePackets(int count, PcapHandler handler) {
 		return packetSource.sourcePackets(count, handler);
 	}
 

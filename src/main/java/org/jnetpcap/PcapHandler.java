@@ -37,7 +37,7 @@ public interface PcapHandler {
 	 * @param <U> the generic user type
 	 */
 	@FunctionalInterface
-	public interface OfArray<U> extends PcapHandler {
+	public interface OfArray<U> {
 
 		/**
 		 * Packet handler method. This method get called to handle or consume a pcap
@@ -60,7 +60,7 @@ public interface PcapHandler {
 	 * @param <U> the generic user type
 	 */
 	@FunctionalInterface
-	public interface OfArrayAtOffset<U> extends PcapHandler {
+	public interface OfArrayAtOffset<U> {
 
 		/**
 		 * Packet handler method. This method get called to handle or consume a pcap
@@ -82,7 +82,7 @@ public interface PcapHandler {
 	 * @param <U> the generic user type
 	 */
 	@FunctionalInterface
-	public interface OfByteBuffer<U> extends PcapHandler {
+	public interface OfByteBuffer<U> {
 
 		/**
 		 * Packet handler method. This method get called to handle or consume a pcap
@@ -105,7 +105,7 @@ public interface PcapHandler {
 	 * @param <U> the generic user type
 	 */
 	@FunctionalInterface
-	public interface OfMemoryAddress<U> extends PcapHandler {
+	public interface OfMemoryAddress<U> {
 
 		/**
 		 * Packet handler method. This method get called to handle or consume a pcap
@@ -128,7 +128,7 @@ public interface PcapHandler {
 	 * @param <U> the generic user type
 	 */
 	@FunctionalInterface
-	public interface OfMemorySegment<U> extends PcapHandler {
+	public interface OfMemorySegment<U> {
 
 		/**
 		 * Packet handler method. This method get called to handle or consume a pcap
@@ -143,26 +143,10 @@ public interface PcapHandler {
 	}
 
 	/**
-	 * Low level packet handler interface.
-	 */
-	@FunctionalInterface
-	public interface OfRawPacket extends PcapHandler {
-
-		/**
-		 * Packet handler method. This method get called to handle or consume a pcap
-		 * packet.
-		 *
-		 * @param headerAddress the header address
-		 * @param packetAddress the packet address
-		 */
-		void handleRawPacket(Addressable headerAddress, Addressable packetAddress);
-	}
-
-	/**
 	 * A marker interface implemented by all packet sinks. A packet sink consumes
 	 * raw packets which contain DLT header.
 	 */
-	public interface PacketSink extends PcapHandler {
+	public interface PacketSink {
 
 		/**
 		 * A functional interface and specialization implemented by packet sinks. The
@@ -204,7 +188,16 @@ public interface PcapHandler {
 			 * @param handler the handler
 			 * @return the int
 			 */
-			int sourcePackets(int count, OfRawPacket handler);
+			int sourcePackets(int count, PcapHandler handler);
 		}
 	}
+
+	/**
+	 * Handle native packets.
+	 *
+	 * @param user   the user
+	 * @param header the header
+	 * @param packet the packet
+	 */
+	void callback(MemoryAddress user, MemoryAddress header, MemoryAddress packet);
 }
