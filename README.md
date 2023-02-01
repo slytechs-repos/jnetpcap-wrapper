@@ -149,6 +149,8 @@ You will find instructions on how to compile from source on our [Wiki Pages][wik
 ## Documentation
 See [Wiki pages][wiki]
 
+Reference [Javadocs](https://slytechs-repos.github.io/jnetpcap/apidocs/org.jnetpcap/org/jnetpcap/package-summary.html)
+
 ## Contact
 * `sales@slytechs.com` for commercial and licensing issues
 * [jNetPcap Issue Tracker][bugs]
