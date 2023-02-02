@@ -142,7 +142,7 @@ Here are several methods for installing **jNetPcap** software.
 ```
 	
 ### Download Release Package
-Download release package: [jNetPcap v2.0.0-alpha.1][release]
+Latest release: [jNetPcap v2.0.0-alpha.1][release]
 
 ### Compile From Source
 You will find instructions on how to compile from source on our [Wiki Pages][wiki].
