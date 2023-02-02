@@ -1,7 +1,7 @@
 # jNetPcap version 2
 **jNetPcap** is a [*libpcap*][libpcap] java library. This is version 2 release of popular **jNetPcap** library, previously hosted on [SourceForge.net][sf.net].
 
-> **Reference Documentation:** [Javadocs](https://slytechs-repos.github.io/jnetpcap/apidocs/org.jnetpcap/org/jnetpcap/package-summary.html)
+> **Note**! See [Javadocs][javadocs] for a full rerference
 
 ## Overview
 **jNetPcap** provides out of the box [*libpcap*][libpcap] library in *Java*. By using *Foreign Function* features of *Java 19* or above, **jNetPcap** can bind directly to the native *libpcap* library. All native *libpcap* functions are accessible through easy to use *java* API. In addition, the latest [*Npcap*][npcap] and legacy [*WinPcap*][winpcap] tools and their API extensions on *Microsoft Windows* platforms are supported as well. 
@@ -11,7 +11,7 @@ To get started lets take a look at a couple of examples.
 
 Capturing and transmitting packets is straight forward and easy out of the box. 
 
-> **Note** **jNetPcap** also provides many useful utilities to help in working with the data received, such as byte arrays to hex string, and hex string to byte array, and much more. More advanced utility packet handlers such as no-copy on capture, are provides as well and discussed in the [Wiki pages][wiki]. 
+> **Note**! **jNetPcap** also provides many useful utilities to help in working with the data received, such as byte arrays to hex string, and hex string to byte array, and much more. More advanced utility packet handlers such as no-copy on capture, are provides as well and discussed in the [Wiki pages][wiki]. 
 
 ### Capture a Live Packet
 This quick example demonstrates how to **capture one or more packets** from a live network.
@@ -76,7 +76,7 @@ void main() throws PcapException {
 ```
 This example produces no output, but if you monitor the network, you will see our non-routable packet being sent from the example host.
 
-> **Note** `Pcap.inject()` can also be used to transmit packets. We can also transmit data in `ByteBuffer` object, and a foreign native `MemorySegment`, all covered under advanced topics in [wiki].
+> **Note**! `Pcap.inject()` can also be used to transmit packets. We can also transmit data in `ByteBuffer` object, and a foreign native `MemorySegment`, all covered under advanced topics in [wiki].
 
 ### Statistics Snapshots
 Our last example shows how to **take statistic snapshots** using `Pcap` API. The native *libpcap* library is able to capture statistics, even when our main thread is a sleep and only wakes up to take a snapshot of the current counters, store them in a `PcapStat` record and return them to our main thread. Then we simply print out the statistics structure values, sleep for 1 second and loop once again. For a total of 5 seconds or 5 loops.
@@ -151,7 +151,7 @@ You will find instructions on how to compile from source on our [Wiki Pages][wik
 ## Documentation
 See [Wiki pages][wiki]
 
-Reference [Javadocs](https://slytechs-repos.github.io/jnetpcap/apidocs/org.jnetpcap/org/jnetpcap/package-summary.html)
+See [Javadocs][javadocs] reference documentation
 
 ## Contact
 * `sales@slytechs.com` for commercial and licensing questions
@@ -172,4 +172,4 @@ Please see [wiki home page][wiki] for details.
 [bugs]: <https://github.com/slytechs-repos/jnetpcap/issues> "jnetPcap bug reports on Github"
 [homebrew]: <https://formulae.brew.sh/formula/libpcap> "Native libpcap install on Mac/Osx using Homebrew"
 [macports]: <https://ports.macports.org/port/libpcap/> "Native libpcap install on Mac/Osx using Mac Ports"
-
+[javadocs]: <https://slytechs-repos.github.io/jnetpcap/apidocs/org.jnetpcap/org/jnetpcap/package-summary.html> "jNetPcap v2 reference documentation"
