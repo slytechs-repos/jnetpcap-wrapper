@@ -56,7 +56,7 @@ We use [Wireshark][wireshark] to convert a previously captured packet to a hex s
 ```java
 void main() throws PcapException {
 
-	/* raw bytes of our packet */
+	/* raw bytes of our packet, spaces ignored */
 	final String ETHERNET = "0026622f4787 001d60b30184 0800";
 	final String IPv4 = "4500003ccb5b4000400628e4 c0a8FD05 c0a8FD06";
 	final String TCP = "e14e00508e50190100000000a00216d08f470000020405b40402080a0021d25a0000000001030307";
