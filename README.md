@@ -142,7 +142,7 @@ Here are several methods for installing **jNetPcap** software.
 ```
 	
 ### Download Release Package
-> TODO - add a link to the release
+Download release package: [jNetPcap v2.0.0-alpha.1][release]
 
 ### Compile From Source
 You will find instructions on how to compile from source on our [Wiki Pages][wiki].
@@ -172,3 +172,4 @@ Please see [wiki home page][wiki] for details.
 [homebrew]: <https://formulae.brew.sh/formula/libpcap> "Native libpcap install on Mac/Osx using Homebrew"
 [macports]: <https://ports.macports.org/port/libpcap/> "Native libpcap install on Mac/Osx using Mac Ports"
 [javadocs]: <https://slytechs-repos.github.io/jnetpcap/apidocs/org.jnetpcap/org/jnetpcap/package-summary.html> "jNetPcap v2 reference documentation"
+[release]: <https://github.com/slytechs-repos/jnetpcap/releases/tag/v2.0.0-alpha.1> "Latest jNetPcap v2 release"
