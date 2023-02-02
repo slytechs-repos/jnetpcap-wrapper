@@ -2,7 +2,7 @@
 **jNetPcap** is a [*libpcap*][libpcap] java library. This is **version 2** release of the popular **jNetPcap** library, previously hosted on [*SourceForge.net*][sf.net].
 
 ## Overview
-**jNetPcap** provides out of the box [*libpcap*][libpcap] library in *Java*. By using *Foreign Function* features of *Java 19* or above, **jNetPcap** can bind directly to the native *libpcap* library. All native *libpcap* functions are accessible through easy to use [*Java API*][javadocs]. In addition, the latest [*Npcap*][npcap] and legacy [*WinPcap*][winpcap] tools and their API extensions on *Microsoft Windows* platforms are supported as well. 
+**jNetPcap** provides out of the box [*libpcap*][libpcap] library in *Java*. By using [*Foreign Function*][jep424] features of *Java 19* or above, **jNetPcap** can bind directly to the native *libpcap* library. All native *libpcap* functions are accessible through easy to use [*Java API*][javadocs]. In addition, the latest [*Npcap*][npcap] and legacy [*WinPcap*][winpcap] tools and their API extensions on *Microsoft Windows* platforms are supported as well. 
 
 ## Examples
 To get started lets take a look at a couple of examples.
@@ -114,7 +114,7 @@ To run these exmamples the following command line arguments need to be added:
 <dl><dt>On MacOS platforms (native libpcap installed via <a href="https://formulae.brew.sh/formula/libpcap">Homebrew</a>)</dt><dd><pre><code>-Djava.library.path=/usr/local/Cellar/libpcap/${VERSION}/lib --enable-native-access=org.jnetpcap --enable-preview</pre></code></dd>
 <dl><dt>On MacOS platforms (native libpcap installed via <a href="https://ports.macports.org/port/libpcap/">Mac Ports</a>)</dt><dd><pre><code>-Djava.library.path=/opt/local/lib --enable-native-access=org.jnetpcap --enable-preview</pre></code></dd>
 	
-> **Note** that the `--enable-preview` command line option is only required until *Foreign Function* feature becomes permanent, possibly in [JDK 21 LTS][jdk_matrix].
+> **Note** that the `--enable-preview` command line option is only required until [*Foreign Function*][jep424] feature becomes permanent, possibly in [JDK 21 LTS][jdk_matrix].
 	
 ### For more examples
 See the [wiki] pages. Project's [unit tests][unit_test] are also a great source for usage examples of every single function in the module.
@@ -123,7 +123,7 @@ See the [wiki] pages. Project's [unit tests][unit_test] are also a great source 
 **jNetPcap** library has no external java dependencies except for modules provided by the java runtime.
 
 ### Java Dependencies for Module: `org.jnetpcap`
-* No java dependencies except for standard java modules and the *Foreign Function* feature, currently in java *preview* (enabled with `--enable-preview` VM args option), but one which is expected to be a permanent feature, in the near future.
+* No java dependencies except for standard java modules and the [*Foreign Function*][jep424] feature, currently in java *preview* (enabled with `--enable-preview` VM args option), but one which is expected to be a permanent feature, in the near future.
 
 ### Native Library Dependencies
 * The only native dependency is the native [*libpcap* library][libpcap] itself, which has to be installed prior to **jNetPcap** module initializing. On *Microsoft Windows* platforms, install [*WinPcap*][winpcap] or [*Npcap*][npcap] tools instead.
@@ -174,3 +174,4 @@ Please see [wiki home page][wiki] for details.
 [javadocs]: <https://slytechs-repos.github.io/jnetpcap/apidocs/org.jnetpcap/org/jnetpcap/package-summary.html> "jNetPcap v2 reference documentation"
 [release]: <https://github.com/slytechs-repos/jnetpcap/releases/tag/v2.0.0-alpha.1> "Latest jNetPcap v2 release"
 [jdk_matrix]: <https://www.java.com/releases/fullmatrix/> "JDK release full matrix"
+[jep424]: <https://openjdk.org/jeps/424> "Foreign Function & Memory API (Preview)"
