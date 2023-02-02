@@ -1,6 +1,8 @@
 # jNetPcap version 2
 **jNetPcap** is a [*libpcap*][libpcap] java library. This is version 2 release of popular **jNetPcap** library, previously hosted on [SourceForge.net][sf.net].
 
+> **Reference Documentation:** [Javadocs](https://slytechs-repos.github.io/jnetpcap/apidocs/org.jnetpcap/org/jnetpcap/package-summary.html)
+
 ## Overview
 **jNetPcap** provides out of the box [*libpcap*][libpcap] library in *Java*. By using *Foreign Function* features of *Java 19* or above, **jNetPcap** can bind directly to the native *libpcap* library. All native *libpcap* functions are accessible through easy to use *java* API. In addition, the latest [*Npcap*][npcap] and legacy [*WinPcap*][winpcap] tools and their API extensions on *Microsoft Windows* platforms are supported as well. 
 
