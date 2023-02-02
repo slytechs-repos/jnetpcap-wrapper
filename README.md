@@ -114,7 +114,7 @@ To run these exmamples the following command line arguments need to be added:
 <dl><dt>On MacOS platforms (native libpcap installed via <a href="https://formulae.brew.sh/formula/libpcap">Homebrew</a>)</dt><dd><pre><code>-Djava.library.path=/usr/local/Cellar/libpcap/${VERSION}/lib --enable-native-access=org.jnetpcap --enable-preview</pre></code></dd>
 <dl><dt>On MacOS platforms (native libpcap installed via <a href="https://ports.macports.org/port/libpcap/">Mac Ports</a>)</dt><dd><pre><code>-Djava.library.path=/opt/local/lib --enable-native-access=org.jnetpcap --enable-preview</pre></code></dd>
 	
-> **Note** that the `--enable-preview` command line option is only required until *Foreign Function* feature becomes permanent, possibly in Java 21 LTS.
+> **Note** that the `--enable-preview` command line option is only required until *Foreign Function* feature becomes permanent, possibly in [Java 21 LTS][jdk_matrix].
 	
 ### For more examples
 See the [wiki] pages. Project's [unit tests][unit_test] are also a great source for usage examples of every single function in the module.
@@ -173,3 +173,4 @@ Please see [wiki home page][wiki] for details.
 [macports]: <https://ports.macports.org/port/libpcap/> "Native libpcap install on Mac/Osx using Mac Ports"
 [javadocs]: <https://slytechs-repos.github.io/jnetpcap/apidocs/org.jnetpcap/org/jnetpcap/package-summary.html> "jNetPcap v2 reference documentation"
 [release]: <https://github.com/slytechs-repos/jnetpcap/releases/tag/v2.0.0-alpha.1> "Latest jNetPcap v2 release"
+[jdk_matrix]: <https://www.java.com/releases/fullmatrix/> "JDK release full matrix"
