@@ -132,14 +132,15 @@ See the [wiki] pages. Project's [unit tests][unit_test] are also a great source 
 Here are several methods for installing **jNetPcap** software.
 
 ### Maven Artifact Config
+	
 ```
 <dependency>
-    <groupId>com.slytechs.libraries</groupId>
+    <groupId>com.slytechs.jnet</groupId>
     <artifactId>jnetpcap</artifactId>
     <version>2.0.0-alpha.1</version>
 </dependency>
-
 ```
+	
 ### Download Release Package
 > TODO - add a link to the release
 
