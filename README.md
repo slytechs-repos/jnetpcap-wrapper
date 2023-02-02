@@ -114,10 +114,10 @@ To run these exmamples the following command line arguments need to be added:
 <dl><dt>On MacOS platforms (native libpcap installed via <a href="https://formulae.brew.sh/formula/libpcap">Homebrew</a>)</dt><dd><pre><code>-Djava.library.path=/usr/local/Cellar/libpcap/${VERSION}/lib --enable-native-access=org.jnetpcap --enable-preview</pre></code></dd>
 <dl><dt>On MacOS platforms (native libpcap installed via <a href="https://ports.macports.org/port/libpcap/">Mac Ports</a>)</dt><dd><pre><code>-Djava.library.path=/opt/local/lib --enable-native-access=org.jnetpcap --enable-preview</pre></code></dd>
 	
-> **Note** that the `--enable-preview` command line option is only required until [*Foreign Function*][jep424] feature becomes permanent, possibly in [JDK 21 LTS][jdk_matrix].
+> **Note** that the `--enable-preview` command line option is only required until [*Foreign Function*][jep424] feature becomes permanent, possibly in [*JDK 21 LTS*][jdk_matrix].
 	
 ### For more examples
-See the [wiki] pages. Project's [unit tests][unit_test] are also a great source for usage examples of every single function in the module.
+See the [*wiki*] pages. Project's [unit tests][unit_test] are also a great source for usage examples of every single function in the module.
 
 ## Dependencies
 **jNetPcap** library has no external java dependencies except for modules provided by the java runtime.
@@ -140,25 +140,25 @@ Here are several methods for installing **jNetPcap** software.
     <version>2.0.0-alpha.1</version>
 </dependency>
 ```
-> **Note** Maven artifacts have not been deployed yet to *central maven2* repository. Currently this is work in progress. As a work around, download the binary packages manually from github, of the [**Latest Release**][release].
+> **Note** Maven artifacts have not been deployed yet to *central maven2* repository. Currently this is work in progress. As a work around, download the binary packages manually from github, of the [*Latest Release*][release].
 ### Download Release Package
-Latest release: [jNetPcap v2.0.0-alpha.1][release]
+Latest release: [*download link*][release]
 
 ### Compile From Source
-You will find instructions on how to compile from source on our [Wiki Pages][wiki].
+You will find instructions on how to compile from source on our [*Wiki Pages*][wiki].
 
 ## Documentation
-See [Wiki pages][wiki]
+See [*Wiki pages*][wiki]
 
-See [Javadocs][javadocs] reference documentation
+See [*Javadocs*][javadocs] reference documentation
 
 ## Contact
 * `sales@slytechs.com` for commercial and licensing questions
-* [jNetPcap Issue Tracker][bugs]
+* [*jNetPcap Issue Tracker*][bugs]
 
 ## Compatibility with jNetPcap version 1
 There are API and license changes between version 1 and 2 of **jNetPcap**.
-Please see [wiki home page][wiki] for details.
+Please see [*wiki*][wiki] home page for details.
 
 [jnetpcap_v1_page]: <https://sourceforge.net/projects/jnetpcap> "Legacy jNetPcap Version 1 Project Page"
 [wiki]: <https://github.com/slytechs-repos/jnetpcap/wiki> "jNetPcap Project Wiki Pages"
