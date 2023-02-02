@@ -140,7 +140,7 @@ Here are several methods for installing **jNetPcap** software.
     <version>2.0.0-alpha.1</version>
 </dependency>
 ```
-	
+> **Note** Maven artifacts have not been deployed yet to *central maven2* repository. Currently this is work in progress. As a work around, download the binary packages manually from github, of the [**Latest Release**][release].
 ### Download Release Package
 Latest release: [jNetPcap v2.0.0-alpha.1][release]
 
