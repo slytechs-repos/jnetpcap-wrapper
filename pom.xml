@@ -111,6 +111,7 @@
 					<windowtitle>Public API for ${project.name} ${project.version}</windowtitle>
 					<encoding>${java.encoding}</encoding>
 					<source>${jdk.version}</source>
+					<overview>${basedir}/Overview.html</overview>
 					<additionalOptions>
 								${java.preview}
 					</additionalOptions>
@@ -150,6 +151,7 @@
 					<testWindowtitle>Test API for ${project.name} ${project.version}</testWindowtitle>
 					<encoding>${java.encoding}</encoding>
 					<source>${jdk.version}</source>
+					<overview>${basedir}/Overview.html</overview>
 					<additionalOptions>
 								${java.preview}
 					</additionalOptions>

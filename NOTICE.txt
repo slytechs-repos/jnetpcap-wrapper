@@ -1,0 +1,23 @@
+THIRD PARTY SOFTWARE ATTRIBUTION
+
+jNetPcap uses several 3rd party open source software libraries:
+
+* The libpcap portable packet capturing library from https://tcpdump.org
+* The Winpcap packet capturing library. It has been abandoned, but is
+  currently still available from https://www.winpcap.org/.
+* The ieee80211_radiotap.h header file from David Young
+
+All of these are open source with BSD-style licenses that allow for
+unlimited use and royalty-free redistribution within other software
+(including commercial/proprietary software). Some include a warranty
+disclaimer (relating to the original authors) and require a small
+amount of acknowledgment text be added somewhere in the documentation
+of any software which includes them (including indirect inclusion
+through jNetPcap).
+
+Since Sly Technologies Inc is not the author of this 3rd party code, we
+can not waive or modify its software copyright or license.  jNetPcap
+users and redistributors must comply with the relevant jNetPcap license
+(either the Apache v2 license, free/demo license or a commercial 
+jNetPcap OEM license they may have purchased) as well as the minimal 
+requirements of this 3rd party open source software.
