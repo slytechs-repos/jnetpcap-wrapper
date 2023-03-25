@@ -160,6 +160,11 @@ See [*Javadocs*][javadocs] reference documentation
 There are API and license changes between version 1 and 2 of **jNetPcap**.
 Please see [*wiki*][wiki] home page for details.
 
+## Git Branches
+So everyone is on the same page, we follow the following [branching model][git-branch-model].
+
+> **Note** 'main' branch replaces old 'master' branch references in document as per [Github recommendation][why-master-deprecated].
+
 [jnetpcap_v1_page]: <https://sourceforge.net/projects/jnetpcap> "Legacy jNetPcap Version 1 Project Page"
 [wiki]: <https://github.com/slytechs-repos/jnetpcap/wiki> "jNetPcap Project Wiki Pages"
 [unit_test]: <https://github.com/slytechs-repos/jnetpcap/blob/main/src/test/java/org/jnetpcap/test/LibpcapApiTest.java> "jUnit Test of Main Libpcap API library"
@@ -175,3 +180,5 @@ Please see [*wiki*][wiki] home page for details.
 [release]: <https://github.com/slytechs-repos/jnetpcap/releases/tag/v2.0.0-alpha.1> "Latest jNetPcap v2 release"
 [jdk_matrix]: <https://www.java.com/releases/fullmatrix/> "JDK release full matrix"
 [jep424]: <https://openjdk.org/jeps/424> "Foreign Function & Memory API (Preview)"
+[git-branch-model]: <https://nvie.com/posts/a-successful-git-branching-model>
+[why-master-deprecated]: <https://www.theserverside.com/feature/Why-GitHub-renamed-its-master-branch-to-main>
