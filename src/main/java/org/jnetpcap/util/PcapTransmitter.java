@@ -17,7 +17,6 @@
  */
 package org.jnetpcap.util;
 
-import java.lang.foreign.Addressable;
 import java.lang.foreign.MemorySegment;
 
 import org.jnetpcap.Pcap;
@@ -67,11 +66,11 @@ public final class PcapTransmitter implements PcapPacketSink {
 	 * @param packet the packet
 	 * @param length the length
 	 * @throws PcapException the pcap exception
-	 * @see org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink#sinkPacket(java.lang.foreign.Addressable,
+	 * @see org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink#sinkPacket(java.lang.foreign.MemorySegment,
 	 *      int)
 	 */
 	@Override
-	public void sinkPacket(Addressable packet, int length) throws PcapException {
+	public void sinkPacket(MemorySegment packet, int length) throws PcapException {
 		packetSink.sinkPacket(packet, length);
 	}
 

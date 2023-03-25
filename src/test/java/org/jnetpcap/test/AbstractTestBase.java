@@ -19,8 +19,8 @@ package org.jnetpcap.test;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -74,13 +74,13 @@ abstract class AbstractTestBase {
 			 * Make a packet from supplied byte array.
 			 *
 			 * @param dataSupplier the packet template
-			 * @param scope        the scope
+			 * @param arena        the scope
 			 * @return the test packet
 			 */
-			public TestPacket makePacket(Supplier<byte[]> dataSupplier, MemorySession scope) {
+			public TestPacket makePacket(Supplier<byte[]> dataSupplier, Arena arena) {
 				final byte[] packetBytes = dataSupplier.get();
 
-				return TestPacket.fromArray(packetBytes, scope);
+				return TestPacket.fromArray(packetBytes, arena);
 			}
 
 			/**
@@ -110,11 +110,11 @@ abstract class AbstractTestBase {
 			 * Make a TCP test packet suitable for unit testing purposes. IP addresses have
 			 * been modified to be on private non-routable network.
 			 *
-			 * @param scope the scope for native memory allocation
+			 * @param arena the scope for native memory allocation
 			 * @return the test packet containing a header and data in native memory
 			 */
-			public TestPacket tcpPacket(MemorySession scope) {
-				return makePacket(this::tcpArray, scope);
+			public TestPacket tcpPacket(Arena arena) {
+				return makePacket(this::tcpArray, arena);
 			}
 
 		}
@@ -127,19 +127,19 @@ abstract class AbstractTestBase {
 			int WIRELEN = length;
 
 			/* lets make our native header structure from values */
-			final MemorySegment HEADER = (MemorySegment) PcapHeader
+			final MemorySegment HEADER = PcapHeader
 					.newInstance(TV_SEC, TV_USEC, CAPLEN, WIRELEN)
-					.asMemoryReference();
+					.asMemoryReference(null);
 
 			return HEADER;
 		}
 
-		public static TestPacket fromArray(byte[] packetData, MemorySession scope) {
-			return fromArray(packetData, 0, packetData.length, scope);
+		public static TestPacket fromArray(byte[] packetData, Arena arena) {
+			return fromArray(packetData, 0, packetData.length, arena);
 		}
 
-		public static TestPacket fromArray(byte[] packetData, int offset, int length, MemorySession scope) {
-			MemorySegment packetSegment = scope.allocate(length);
+		public static TestPacket fromArray(byte[] packetData, int offset, int length, Arena arena) {
+			MemorySegment packetSegment = arena.allocate(length);
 			MemorySegment.copy(packetData, offset, packetSegment, ValueLayout.JAVA_BYTE, 0, length);
 
 			MemorySegment headerSegment = createHeaderAsSegment(length);
@@ -147,14 +147,14 @@ abstract class AbstractTestBase {
 			return new TestPacket(headerSegment, packetSegment);
 		}
 
-		public static TestPacket fromPcapPacketRef(PcapPacketRef ref, MemorySession scope) {
+		public static TestPacket fromPcapPacketRef(PcapPacketRef ref, Arena arena) {
 			if (ref == null)
 				return null;
 
-			var hdr = PcapHeader.ofAddress(ref.header());
-			var pkt = MemorySegment.ofAddress(ref.data().address(), hdr.captureLength(), scope);
+			var hdr = PcapHeader.ofAddress(ref.header(), arena.scope());
+			var pkt = MemorySegment.ofAddress(ref.data().address(), hdr.captureLength(), arena.scope());
 
-			return new TestPacket((MemorySegment) hdr.asMemoryReference(), pkt);
+			return new TestPacket(hdr.asMemoryReference(arena), pkt);
 		}
 
 		public PcapPacketRef getPacket() {
@@ -345,9 +345,9 @@ abstract class AbstractTestBase {
 	 *
 	 * @return the test transmitter
 	 */
-	protected TestTransmitter setupPacketTransmitter(Function<MemorySession, TestPacket> packetFactory,
+	protected TestTransmitter setupPacketTransmitter(Function<Arena, TestPacket> packetFactory,
 			BiConsumer<MemorySegment, Integer> sendAction) {
-		final MemorySession scope = MemorySession.openShared();
+		final Arena scope = Arena.openShared();
 		final TestPacket packetToSend = packetFactory.apply(scope);
 
 		final ScheduledExecutorService scheduleExecutor = Executors.newScheduledThreadPool(1);

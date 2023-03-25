@@ -17,8 +17,6 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.Addressable;
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -26,6 +24,7 @@ import java.util.function.BiFunction;
 import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDlt;
+import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 
@@ -142,18 +141,20 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * @return the version specific Pcap instance
 	 * @throws PcapException the pcap exception
 	 */
-	protected static <T extends Pcap> T create(BiFunction<MemoryAddress, String, T> factory, String device)
+	protected static <T extends Pcap> T create(
+			BiFunction<MemorySegment, String, T> factory, String device)
 			throws PcapException {
-		try (var scope = newScope()) {
-			MemorySegment c_errbuf = MemorySegment.allocateNative(PcapConstants.PCAP_ERRBUF_SIZE, scope);
-			MemorySegment c_device = MemorySegment.allocateNative(device.length() + 1, scope);
+		try {
+			var arena = newArena();
+			MemorySegment c_errbuf = arena.allocate(PcapConstants.PCAP_ERRBUF_SIZE);
+			MemorySegment c_device = arena.allocateUtf8String(device);
 
 			c_device.setUtf8String(0, device);
 
-			MemoryAddress pcapPointer = (MemoryAddress) pcap_create.handle().invokeExact((Addressable) c_device,
-					(Addressable) c_errbuf);
+			MemorySegment pcapPointer = (MemorySegment) pcap_create.handle()
+					.invokeExact(c_device, c_errbuf);
 
-			if (pcapPointer == MemoryAddress.NULL)
+			if (ForeignUtils.isNull(pcapPointer))
 				throw new PcapException(PcapCode.PCAP_ERROR, c_errbuf.getUtf8String(0));
 
 			return factory.apply(pcapPointer, device);
@@ -230,10 +231,10 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * @since libpcap 1.9
 	 */
 	public static void init(int opts) throws PcapException {
-		try (var scope = newScope()) {
-			MemorySegment errbuf = MemorySegment.allocateNative(PcapConstants.PCAP_ERRBUF_SIZE, scope);
+		try (var arena = newArena()) {
+			MemorySegment errbuf = arena.allocate(PcapConstants.PCAP_ERRBUF_SIZE);
 
-			int result = pcap_init.invokeInt(opts, errbuf.address());
+			int result = pcap_init.invokeInt(opts, errbuf);
 			if (result != PcapCode.PCAP_OK)
 				PcapException.throwIfNotOk(opts, () -> errbuf.getUtf8String(0));
 		}
@@ -291,9 +292,9 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * @return true, if filter matched packet otherwise false
 	 * @since libpcap 1.0
 	 */
-	public static boolean offlineFilter(BpFilter bpFilter, Addressable pktHdr, Addressable pktData) {
-		Addressable c_bpf = bpFilter.address()
-				.address();
+	public static boolean offlineFilter(
+			BpFilter bpFilter, MemorySegment pktHdr, MemorySegment pktData) {
+		MemorySegment c_bpf = bpFilter.address();
 
 		int result = pcap_offline_filter.invokeInt(c_bpf, pktHdr, pktData);
 
@@ -400,7 +401,7 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap1_0(MemoryAddress pcapHandle, String name) {
+	protected Pcap1_0(MemorySegment pcapHandle, String name) {
 		super(pcapHandle, name);
 	}
 

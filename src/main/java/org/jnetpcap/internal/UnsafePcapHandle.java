@@ -17,8 +17,7 @@
  */
 package org.jnetpcap.internal;
 
-import java.lang.foreign.Addressable;
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.MemorySegment;
 
 import org.jnetpcap.Pcap0_4;
 import org.jnetpcap.Pcap1_0;
@@ -96,11 +95,11 @@ public final class UnsafePcapHandle extends Pcap1_10 {
 	/**
 	 * @param pcapHandle
 	 */
-	protected UnsafePcapHandle(MemoryAddress pcapHandle, String name) {
+	protected UnsafePcapHandle(MemorySegment pcapHandle, String name) {
 		super(pcapHandle, name);
 	}
 
-	public MemoryAddress address() {
+	public MemorySegment address() {
 		return getPcapHandle();
 	}
 
@@ -253,18 +252,18 @@ public final class UnsafePcapHandle extends Pcap1_10 {
 	}
 
 	/**
-	 * @see org.jnetpcap.Pcap0_9#inject(java.lang.foreign.Addressable, int)
+	 * @see org.jnetpcap.Pcap0_9#inject(java.lang.foreign.MemorySegment, int)
 	 */
 	@Override
-	public int inject(Addressable packet, int length) throws PcapException {
+	public int inject(MemorySegment packet, int length) throws PcapException {
 		return super.inject(packet, length);
 	}
 
 	/**
-	 * @see org.jnetpcap.Pcap0_8#sendPacket(java.lang.foreign.Addressable, int)
+	 * @see org.jnetpcap.Pcap0_8#sendPacket(java.lang.foreign.MemorySegment, int)
 	 */
 	@Override
-	public void sendPacket(Addressable packet, int length) throws PcapException {
+	public void sendPacket(MemorySegment packet, int length) throws PcapException {
 		super.sendPacket(packet, length);
 	}
 

@@ -17,8 +17,7 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.Addressable;
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.MemorySegment;
 import java.util.concurrent.TimeUnit;
 
 import org.jnetpcap.constant.PcapDlt;
@@ -224,15 +223,15 @@ public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap0_9(MemoryAddress pcapHandle, String name) {
+	protected Pcap0_9(MemorySegment pcapHandle, String name) {
 		super(pcapHandle, name);
 	}
 
 	/**
-	 * @see org.jnetpcap.Pcap#inject(java.lang.foreign.Addressable, int)
+	 * @see org.jnetpcap.Pcap#inject(java.lang.foreign.MemorySegment, int)
 	 */
 	@Override
-	public int inject(Addressable packet, int length) throws PcapException {
+	public int inject(MemorySegment packet, int length) throws PcapException {
 		return pcap_inject.invokeInt(this::getErrorString, getPcapHandle(), packet, (long) length);
 	}
 

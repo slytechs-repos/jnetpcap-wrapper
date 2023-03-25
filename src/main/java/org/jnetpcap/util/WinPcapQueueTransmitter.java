@@ -17,8 +17,8 @@
  */
 package org.jnetpcap.util;
 
-import java.lang.foreign.Addressable;
-import java.lang.foreign.MemorySession;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
 
 import org.jnetpcap.PcapException;
 import org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink;
@@ -39,23 +39,23 @@ import org.jnetpcap.windows.WinPcap;
 public class WinPcapQueueTransmitter implements PcapPacketSink, AutoCloseable {
 
 	/** The scope. */
-	private final MemorySession scope;
-	
+	private final Arena arena;
+
 	/** The header. */
 	private final PcapHeader header;
-	
+
 	/** The capacity. */
 	private final int capacity;
-	
+
 	/** The send queue. */
 	private final PcapSendQueue sendQueue;
-	
+
 	/** The pcap. */
 	private final WinPcap pcap;
-	
+
 	/** The sync. */
 	private final boolean sync;
-	
+
 	/** The size. */
 	private int size;
 
@@ -72,9 +72,9 @@ public class WinPcapQueueTransmitter implements PcapPacketSink, AutoCloseable {
 		this.sync = sync;
 		this.capacity = sendQueue.maxlen();
 		this.size = sendQueue.len(); // incase queue is not empty
-		this.scope = MemorySession.openShared();
+		this.arena = Arena.openShared();
 
-		this.header = PcapHeader.allocate(scope);
+		this.header = PcapHeader.allocate(arena);
 	}
 
 	/**
@@ -83,12 +83,12 @@ public class WinPcapQueueTransmitter implements PcapPacketSink, AutoCloseable {
 	 * @param packet the packet
 	 * @param length the length
 	 * @throws PcapException the pcap exception
-	 * @see org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink#sinkPacket(java.lang.foreign.Addressable,
+	 * @see org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink#sinkPacket(java.lang.foreign.MemorySegment,
 	 *      int)
 	 */
 	@Override
-	public void sinkPacket(Addressable packet, int length) throws PcapException {
-		if (!scope.isAlive())
+	public void sinkPacket(MemorySegment packet, int length) throws PcapException {
+		if (!arena.scope().isAlive())
 			throw new IllegalStateException("transmitter is closed");
 
 		synchronized (this) {
@@ -99,7 +99,7 @@ public class WinPcapQueueTransmitter implements PcapPacketSink, AutoCloseable {
 
 			header.set(length);
 
-			sendQueue.queue(header.asMemoryReference(), packet);
+			sendQueue.queue(header.asMemoryReference(arena), packet);
 
 			assert (size == sendQueue.len()) : ""
 					+ "internal size tracking [%d] doesn't match sendQueue.len field [%d]"
@@ -116,7 +116,7 @@ public class WinPcapQueueTransmitter implements PcapPacketSink, AutoCloseable {
 	@Override
 	public void close() throws PcapException {
 		flush();
-		scope.close();
+		arena.close();
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class WinPcapQueueTransmitter implements PcapPacketSink, AutoCloseable {
 	 * @throws PcapException the pcap exception
 	 */
 	public void flush() throws PcapException {
-		if (!scope.isAlive())
+		if (!arena.scope().isAlive())
 			throw new IllegalStateException("transmitter is closed");
 
 		synchronized (this) {

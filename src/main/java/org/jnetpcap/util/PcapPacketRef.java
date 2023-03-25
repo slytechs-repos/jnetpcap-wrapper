@@ -17,9 +17,8 @@
  */
 package org.jnetpcap.util;
 
-import java.lang.foreign.Addressable;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 
 import org.jnetpcap.PcapHeader;
@@ -36,7 +35,7 @@ import org.jnetpcap.constant.PcapConstants;
  * @author repos@slytechs.com
  * @author mark
  */
-public record PcapPacketRef(Addressable header, Addressable data) {
+public record PcapPacketRef(MemorySegment header, MemorySegment data) {
 
 	/**
 	 * Returns byte[] representation of the entire packet.
@@ -56,12 +55,11 @@ public record PcapPacketRef(Addressable header, Addressable data) {
 	 * @return the byte[] containing the selected bytes
 	 */
 	public byte[] toArray(int offset, int length) {
-		var hdr = PcapHeader.ofAddress(header);
+		try (var arena = Arena.openConfined()) {
+			var hdr = PcapHeader.ofAddress(header, arena.scope());
 
-		if (length + offset > hdr.captureLength())
-			length = hdr.captureLength() - offset;
-
-		try (var scope = MemorySession.openShared()) {
+			if (length + offset > hdr.captureLength())
+				length = hdr.captureLength() - offset;
 
 			if (data instanceof MemorySegment src) {
 				return src
@@ -70,7 +68,7 @@ public record PcapPacketRef(Addressable header, Addressable data) {
 
 			} else {
 				return MemorySegment
-						.ofAddress(data.address().addOffset(offset), length, scope)
+						.ofAddress(data.address() + offset, length, arena.scope())
 						.toArray(ValueLayout.JAVA_BYTE);
 			}
 		}

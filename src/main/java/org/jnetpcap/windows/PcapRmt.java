@@ -17,16 +17,14 @@
  */
 package org.jnetpcap.windows;
 
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemoryLayout.PathElement;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
 
 import org.jnetpcap.constant.PcapSrc;
-import org.jnetpcap.internal.ForeignUtils;
 
 /**
  * Remote RPCAP authentication and source string marker interface.
@@ -90,20 +88,20 @@ public sealed interface PcapRmt permits PcapRmt.Source, PcapRmt.Auth {
 		/**
 		 * Allocate native memory segment and store the record's values in it.
 		 *
-		 * @param scope the memory scope
+		 * @param arena the memory scope
 		 * @return allocated segment's address
 		 */
-		MemoryAddress allocateNative(MemorySession scope) {
-			MemorySegment mseg = scope.allocate(LAYOUT.byteSize());
+		MemorySegment allocateNative(Arena arena) {
+			MemorySegment mseg = arena.allocate(LAYOUT.byteSize());
 
-			MemoryAddress c_username = ForeignUtils.toUtf8String(username, scope).address();
-			MemoryAddress c_password = ForeignUtils.toUtf8String(password, scope).address();
+			MemorySegment c_username = arena.allocateUtf8String(username);
+			MemorySegment c_password = arena.allocateUtf8String(password);
 
 			rmtauth_type.set(mseg, type);
 			rmtauth_username.set(mseg, c_username);
 			rmtauth_password.set(mseg, c_password);
 
-			return mseg.address();
+			return mseg;
 		}
 
 	}

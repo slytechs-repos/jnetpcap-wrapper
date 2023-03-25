@@ -22,9 +22,7 @@ import static org.jnetpcap.PcapHeader.*;
 import static org.jnetpcap.constant.PcapConstants.*;
 import static org.jnetpcap.internal.UnsafePcapHandle.*;
 
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +32,6 @@ import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.internal.ForeignUpcall;
-import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.internal.PcapStatRecord;
@@ -42,7 +39,6 @@ import org.jnetpcap.util.NetIp4Address;
 import org.jnetpcap.util.PcapPacketRef;
 import org.jnetpcap.util.PcapReceiver;
 
-import static java.lang.foreign.MemoryAddress.*;
 import static java.lang.foreign.MemorySegment.*;
 import static java.lang.foreign.ValueLayout.*;
 
@@ -71,11 +67,11 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 		}
 
 		/**
-		 * @see org.jnetpcap.PcapHandler#callback(java.lang.foreign.MemoryAddress,
-		 *      java.lang.foreign.MemoryAddress, java.lang.foreign.MemoryAddress)
+		 * @see org.jnetpcap.PcapHandler#callback(java.lang.foreign.MemorySegment,
+		 *      java.lang.foreign.MemorySegment, java.lang.foreign.MemorySegment)
 		 */
 		@Override
-		public void callback(MemoryAddress user, MemoryAddress header, MemoryAddress packet) {
+		public void callback(MemorySegment user, MemorySegment header, MemorySegment packet) {
 			this.sink.callback(user, header, packet);
 		}
 
@@ -331,8 +327,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @throws PcapException the pcap exception
 	 */
 	public static String lookupDev() throws PcapException {
-		try (var scope = MemorySession.openShared()) {
-			MemorySegment errbuf = scope.allocate(PCAP_ERRBUF_SIZE);
+		try (var arena = newArena()) {
+			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
 			String dev = pcap_lookupdev.invokeString(errbuf);
 			if (dev == null)
@@ -355,11 +351,11 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @since libpcap 0.4
 	 */
 	public static NetIp4Address lookupNet(String device) throws PcapException {
-		try (var scope = newScope()) {
-			MemorySegment pTop1 = scope.allocate(ADDRESS);
-			MemorySegment pTop2 = scope.allocate(ADDRESS);
-			MemorySegment errbuf = scope.allocate(PCAP_ERRBUF_SIZE);
-			MemoryAddress dev = ForeignUtils.toUtf8String(device, scope).address();
+		try (var arena = newArena()) {
+			MemorySegment pTop1 = arena.allocate(ADDRESS);
+			MemorySegment pTop2 = arena.allocate(ADDRESS);
+			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
+			MemorySegment dev = arena.allocateUtf8String(device);
 
 			int code = pcap_lookupnet.invokeInt(dev, pTop1, pTop2, errbuf);
 			PcapException.throwIfNotOk(code, () -> errbuf.getUtf8String(0));
@@ -385,20 +381,20 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @return the t
 	 * @throws PcapException the pcap exception
 	 */
-	protected static <T extends Pcap> T openLive(BiFunction<MemoryAddress, String, T> pcapSupplier, String device,
+	protected static <T extends Pcap> T openLive(BiFunction<MemorySegment, String, T> pcapSupplier, String device,
 			int snaplen,
 			boolean promisc, long timeout, TimeUnit unit)
 			throws PcapException {
 
-		try (var scope = newScope()) {
-			MemoryAddress c_device = ForeignUtils.toUtf8String(requireNonNull(device, "device"), scope).address();
-			MemoryAddress errbuf = scope.allocate(PCAP_ERRBUF_SIZE).address();
+		try (var arena = newArena()) {
+			MemorySegment c_device = arena.allocateUtf8String(requireNonNull(device, "device"));
+			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
 			int c_snaplen = snaplen;
 			int c_promisc = promisc ? 1 : 0;
 			int c_to_ms = (unit == null) ? (int) timeout : (int) unit.toMillis(timeout);
 
-			MemoryAddress pcapPointer = pcap_open_live.invokeObj(c_device, c_snaplen, c_promisc, c_to_ms,
+			MemorySegment pcapPointer = pcap_open_live.invokeObj(c_device, c_snaplen, c_promisc, c_to_ms,
 					errbuf);
 
 			if (pcapPointer == NULL)
@@ -457,18 +453,18 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @throws PcapException any errors
 	 * @since Pcap 0.4
 	 */
-	protected static <T extends Pcap> T openOffline(BiFunction<MemoryAddress, String, T> pcapSupplier, String fname)
+	protected static <T extends Pcap> T openOffline(BiFunction<MemorySegment, String, T> pcapSupplier, String fname)
 			throws PcapException {
 
 		Objects.requireNonNull(fname, "fname"); //$NON-NLS-1$
 
-		try (var scope = newScope()) {
-			MemorySegment c_fname = ForeignUtils.toUtf8String(fname, scope);
-			MemorySegment errbuf = scope.allocate(PCAP_ERRBUF_SIZE);
+		try (var arena = newArena()) {
+			MemorySegment c_fname = arena.allocateUtf8String(fname);
+			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
-			MemoryAddress pcapPointer = pcap_open_offline.invokeObj(c_fname, errbuf);
+			MemorySegment pcapPointer = pcap_open_offline.invokeObj(c_fname, errbuf);
 
-			if (pcapPointer == NULL)
+			if (pcapPointer == NULL || pcapPointer == MemorySegment.NULL)
 				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getUtf8String(0));
 
 			return pcapSupplier.apply(pcapPointer, makeOfflineHandleName(fname));
@@ -503,16 +499,17 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @return the error string for the given full
 	 */
 	public static String strerror(int code) {
-		MemoryAddress c_str = pcap_strerror.invokeObj(code);
+		MemorySegment c_str = pcap_strerror.invokeObj(code);
+		c_str = MemorySegment.ofAddress(c_str.address(), PCAP_ERRBUF_SIZE);
 
-		return ForeignUtils.toJavaString(c_str);
+		return c_str.getUtf8String(0);
 	}
 
 	/**
 	 * The pcap header buffer for use with next() call. Header and packet references
 	 * are valid only from call to call and then out of pcap scope.
 	 */
-	private final MemorySegment PCAP0_4_HEADER_BUFFER = MemorySession.openImplicit()
+	private final MemorySegment PCAP0_4_HEADER_BUFFER = PRIVATE_ARENA
 			.allocate(PCAP_HEADER_PADDED_LENGTH);
 
 	private final ProxyPcapHandler proxyHandler;
@@ -523,7 +520,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the name
 	 */
-	protected Pcap0_4(MemoryAddress pcapHandle, String name) {
+	protected Pcap0_4(MemorySegment pcapHandle, String name) {
 		super(pcapHandle, name);
 		this.proxyHandler = new ProxyPcapHandler();
 	}
@@ -536,6 +533,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 		pcap_close.invokeVoid(getPcapHandle());
 
 		closed = true;
+
+		PRIVATE_ARENA.close();
 	}
 
 	/**
@@ -545,10 +544,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	public final BpFilter compile(String str, boolean optimize, int netmask) throws PcapException {
 		int opt = optimize ? 1 : 0;
 
-		try (var scope = newScope()) {
+		try (var arena = newArena()) {
 			BpFilter bpFilter = new BpFilter(str);
 
-			MemorySegment c_filter = ForeignUtils.toUtf8String(str, scope);
+			MemorySegment c_filter = arena.allocateUtf8String(str);
 
 			pcap_compile.invokeInt(this::getErrorString, getPcapHandle(), bpFilter.address(), c_filter, opt, netmask);
 
@@ -600,8 +599,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 		/* Make sure no one can close the dumper while we're using it */
 		synchronized (pcapDumper) {
-			MemoryAddress pcap_dump_func = pcapDumper.addressOfDumpFunction();
-			MemoryAddress pcap_dumper = pcapDumper.address();
+			MemorySegment pcap_dump_func = pcapDumper.addressOfDumpFunction();
+			MemorySegment pcap_dumper = pcapDumper.address();
 
 			return pcap_dispatch.invokeInt(getPcapHandle(), count, pcap_dump_func, pcap_dumper);
 		}
@@ -633,10 +632,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 */
 	@Override
 	public final PcapDumper dumpOpen(String fname) throws PcapException {
-		try (var scope = newScope()) {
-			MemorySegment c_file = ForeignUtils.toUtf8String(fname, scope);
+		try (var arena = newArena()) {
+			MemorySegment c_file = arena.allocateUtf8String(fname);
 
-			MemoryAddress pcap_dumper_ptr = pcap_dump_open.invokeObj(this::geterr, getPcapHandle(), c_file);
+			MemorySegment pcap_dumper_ptr = pcap_dump_open.invokeObj(this::geterr, getPcapHandle(), c_file);
 
 			return new PcapDumper(pcap_dumper_ptr, fname);
 		}
@@ -662,7 +661,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @return the OS standard I/O stream, only suitable with OS calls
 	 * @throws PcapException the pcap exception
 	 */
-	public final MemoryAddress file() throws PcapException {
+	public final MemorySegment file() throws PcapException {
 		return pcap_file.invokeObj(this::geterr, getPcapHandle());
 	}
 
@@ -710,8 +709,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 		/* Make sure no one can close the dumper while we're using it */
 		synchronized (pcapDumper) {
-			MemoryAddress pcap_dump_func = pcapDumper.addressOfDumpFunction();
-			MemoryAddress pcap_dumper = pcapDumper.address();
+			MemorySegment pcap_dump_func = pcapDumper.addressOfDumpFunction();
+			MemorySegment pcap_dumper = pcapDumper.address();
 
 			return pcap_loop.invokeInt(getPcapHandle(), count, pcap_dump_func, pcap_dumper);
 		}
@@ -761,7 +760,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	public final PcapPacketRef next() throws PcapException {
 
 		MemorySegment hdr = PCAP0_4_HEADER_BUFFER;
-		MemoryAddress pkt = pcap_next.invokeObj(this::geterr, getPcapHandle(), hdr);
+		MemorySegment pkt = pcap_next.invokeObj(this::geterr, getPcapHandle(), hdr);
 
 		return (pkt == null) || (pkt == NULL)
 				? null
@@ -773,8 +772,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 */
 	@Override
 	public final Pcap0_4 perror(String prefix) {
-		try (var scope = newScope()) {
-			pcap_perror.invokeVoid(getPcapHandle(), ForeignUtils.toUtf8String(prefix, scope));
+		try (var arena = newArena()) {
+			pcap_perror.invokeVoid(getPcapHandle(), arena.allocateUtf8String(prefix));
 
 			return this;
 		}
@@ -803,8 +802,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 */
 	@Override
 	public final PcapStat stats() throws PcapException {
-		try (var scope = newScope()) {
-			MemorySegment mseg = allocateNative(PcapConstants.PCAP_STAT_SIZE, scope);
+		try (var arena = newArena()) {
+			MemorySegment mseg = arena.allocate(PcapConstants.PCAP_STAT_SIZE);
 
 			pcap_stats.invokeInt(this::getErrorString, getPcapHandle(), mseg);
 

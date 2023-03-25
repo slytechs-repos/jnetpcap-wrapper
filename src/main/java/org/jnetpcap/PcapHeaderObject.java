@@ -17,7 +17,7 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.Addressable;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.ByteOrder;
 
@@ -56,8 +56,8 @@ final class PcapHeaderObject implements PcapHeader {
 	 * @see org.jnetpcap.PcapHeader#asMemoryReference()
 	 */
 	@Override
-	public Addressable asMemoryReference() {
-		return PcapHeaderMemory.newMemory(tvSec, tvUsec, captureLength, wireLength, order);
+	public MemorySegment asMemoryReference(Arena arena) {
+		return PcapHeaderMemory.newMemory(tvSec, tvUsec, captureLength, wireLength, order, arena);
 	}
 
 	/**

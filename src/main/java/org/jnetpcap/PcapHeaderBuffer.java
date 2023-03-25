@@ -17,7 +17,7 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.Addressable;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -77,7 +77,7 @@ final class PcapHeaderBuffer implements PcapHeader {
 	 * @see org.jnetpcap.PcapHeader#asMemoryReference()
 	 */
 	@Override
-	public Addressable asMemoryReference() {
+	public MemorySegment asMemoryReference(Arena arena) {
 
 		if (PCAP_HEADER_LENGTH == PCAP_HEADER_PADDED_LENGTH) {
 			/* We can return compact (non-padded) directly without copy */
@@ -85,7 +85,7 @@ final class PcapHeaderBuffer implements PcapHeader {
 
 		} else {
 			/* Copy to new segment using padded ABI */
-			return PcapHeaderMemory.newMemoryFrom(this);
+			return PcapHeaderMemory.newMemoryFrom(this, arena);
 		}
 	}
 

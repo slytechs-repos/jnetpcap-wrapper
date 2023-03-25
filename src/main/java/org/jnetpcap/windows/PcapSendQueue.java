@@ -17,12 +17,10 @@
  */
 package org.jnetpcap.windows;
 
-import java.lang.foreign.Addressable;
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemoryLayout.PathElement;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
 
@@ -54,7 +52,7 @@ public class PcapSendQueue implements AutoCloseable {
 	 */
 	@SuppressWarnings("unused")
 	private static class Struct {
-		
+
 		/** The Constant LAYOUT. */
 		private static final MemoryLayout LAYOUT = MemoryLayout.structLayout(
 				ValueLayout.JAVA_INT.withName("maxlen"), /*
@@ -66,7 +64,7 @@ public class PcapSendQueue implements AutoCloseable {
 
 		/** The Constant MAXLEN. */
 		private static final VarHandle MAXLEN = LAYOUT.varHandle(PathElement.groupElement("maxlen"));
-		
+
 		/** The Constant LEN. */
 		private static final VarHandle LEN = LAYOUT.varHandle(PathElement.groupElement("len"));
 	}
@@ -135,15 +133,15 @@ public class PcapSendQueue implements AutoCloseable {
 	 * @param capacity maximum size of the send queue in bytes
 	 * @return address of the allocated sendqueue
 	 */
-	private static MemoryAddress alloc(int capacity) {
+	private static MemorySegment alloc(int capacity) {
 		return pcap_sendqueue_alloc.invokeObj(capacity);
 	}
 
 	/** The queue ptr. */
-	private final MemoryAddress queue_ptr;
-	
+	private final MemorySegment queue_ptr;
+
 	/** The scope. */
-	private final MemorySession scope;
+	private final Arena arena;
 
 	/**
 	 * Instantiates a new pcap send queue.
@@ -151,7 +149,7 @@ public class PcapSendQueue implements AutoCloseable {
 	 * @param capacity Maximum size of the queue, in bytes
 	 */
 	public PcapSendQueue(int capacity) {
-		this.scope = MemorySession.openShared();
+		this.arena = Arena.openShared();
 		this.queue_ptr = alloc(capacity);
 	}
 
@@ -173,13 +171,13 @@ public class PcapSendQueue implements AutoCloseable {
 	 * .
 	 */
 	private void destroy() {
-		if (!scope.isAlive())
+		if (!arena.scope().isAlive())
 			throw new IllegalStateException("already closed");
 
 		try {
 			pcap_sendqueue_destroy.invokeVoid(queue_ptr);
 		} finally {
-			scope.close();
+			arena.close();
 		}
 	}
 
@@ -205,7 +203,7 @@ public class PcapSendQueue implements AutoCloseable {
 	 * @param packet the packet
 	 * @return the int
 	 */
-	public int queue(Addressable header, Addressable packet) {
+	public int queue(MemorySegment header, MemorySegment packet) {
 		return pcap_sendqueue_queue.invokeInt(queue_ptr, header, packet);
 	}
 
@@ -236,10 +234,18 @@ public class PcapSendQueue implements AutoCloseable {
 		if (offset < 0 || offset >= packet.length)
 			throw new IllegalArgumentException("offset out of bounds");
 
-		try (var scope = WinPcap.newScope()) {
+		try (var arena = WinPcap.newArena()) {
 
-			MemoryAddress pkt = MemorySegment.ofArray(packet).address().addOffset(offset);
-			MemoryAddress hdr = header.asMemoryReference().address();
+			/* Since JDK 20, can instrument on-heap array as memory segment */
+			MemorySegment pkt = MemorySegment.ofArray(packet);
+			MemorySegment hdr = header.asMemoryReference(arena);
+
+			/*
+			 * If there is an offset into the array, slice the segment to get the offset
+			 * view
+			 */
+			if (offset > 0)
+				pkt = pkt.asSlice(offset);
 
 			return queue(hdr, pkt);
 		}
@@ -277,7 +283,7 @@ public class PcapSendQueue implements AutoCloseable {
 	 *               precision timestamp
 	 * @return number of packets transmitted
 	 */
-	int transmit(MemoryAddress pcap_t, boolean sync) {
+	int transmit(MemorySegment pcap_t, boolean sync) {
 		return pcap_sendqueue_transmit.invokeInt(pcap_t, queue_ptr, sync ? 1 : 0);
 	}
 

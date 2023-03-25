@@ -17,8 +17,8 @@
  */
 package org.jnetpcap.util;
 
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 import java.nio.ByteBuffer;
 import java.util.function.Supplier;
@@ -116,13 +116,13 @@ public final class PcapReceiver implements PcapPacketSource {
 
 		return packetSource.sourcePackets(count, (ignore, header, bytes) -> {
 
-			try (var scope = newScope()) {
+			try (var arena = newArena()) {
 				PcapHeader hdr = PcapHeader.newReadOnlyInstance(header);
 
 				int caplen = hdr.captureLength();
 				assert caplen < PcapConstants.MAX_SNAPLEN : "caplen/wirelen out of range " + caplen;
 
-				byte[] packet = MemorySegment.ofAddress(bytes.address(), caplen, scope)
+				byte[] packet = MemorySegment.ofAddress(bytes.address(), caplen, arena.scope())
 						.toArray(ValueLayout.JAVA_BYTE);
 
 				handler.handleArray(user, hdr, packet);
@@ -135,8 +135,8 @@ public final class PcapReceiver implements PcapPacketSource {
 	 *
 	 * @return the memory session
 	 */
-	private static final MemorySession newScope() {
-		return MemorySession.openShared();
+	private static final Arena newArena() {
+		return Arena.openShared();
 	}
 
 	/** The packet source from which we receive packets. */
@@ -174,14 +174,14 @@ public final class PcapReceiver implements PcapPacketSource {
 		ArrayAllocator heap = arenaAllocator;
 
 		return sourcePackets(count, (ignore, header, bytes) -> {
-			try (var scope = newScope()) {
+			try (var arena = newArena()) {
 				PcapHeader hdr = PcapHeader.newReadOnlyInstance(header);
 
 				int caplen = hdr.captureLength();
 				assert caplen < 1560 : "caplen/wirelen out of range " + caplen;
 
 				int offset = heap.allocate(caplen);
-				heap.copy(MemorySegment.ofAddress(bytes.address(), caplen, scope));
+				heap.copy(MemorySegment.ofAddress(bytes.address(), caplen, arena.scope()));
 
 				assert heap.length() == caplen;
 
@@ -203,7 +203,7 @@ public final class PcapReceiver implements PcapPacketSource {
 	 */
 	public <U> int forEach(int count, OfMemoryAddress<U> handler, U user) throws PcapException {
 		return packetSource.sourcePackets(count, (ignore, header, bytes) -> {
-			handler.handleAddress(user, header.address(), bytes.address());
+			handler.handleAddress(user, header, bytes);
 		});
 	}
 
@@ -220,15 +220,15 @@ public final class PcapReceiver implements PcapPacketSource {
 	 */
 	public <U> int forEach(int count, OfMemorySegment<U> handler, U user) throws PcapException {
 		return sourcePackets(count, (ignore, header, bytes) -> {
-			try (var scope = MemorySession.openShared()) {
+			try (var arena = newArena()) {
 				MemorySegment hseg = MemorySegment.ofAddress(header.address(),
 						PcapHeader.PCAP_HEADER_PADDED_LENGTH,
-						scope);
+						arena.scope());
 
 				int caplen = PcapHeader.readCaptureLength(hseg);
-				MemorySegment pseg = MemorySegment.ofAddress(bytes.address(), caplen, scope);
+				MemorySegment pseg = MemorySegment.ofAddress(bytes.address(), caplen, arena.scope());
 
-				handler.handleMemorySegment(user, hseg, pseg, scope);
+				handler.handleMemorySegment(user, hseg, pseg, arena.scope());
 			}
 		});
 	}
@@ -258,11 +258,11 @@ public final class PcapReceiver implements PcapPacketSource {
 	 */
 	public <U> int forEachCopy(int count, PcapHandler.OfByteBuffer<U> handler, U user) {
 		return sourcePackets(count, (ignore, header, bytes) -> {
-			try (var scope = newScope()) {
+			try (var arena = newArena()) {
 
 				PcapHeader hdr = PcapHeader.newReadOnlyInstance(header);
 
-				var pseg = MemorySegment.ofAddress(bytes.address(), hdr.captureLength(), scope);
+				var pseg = MemorySegment.ofAddress(bytes.address(), hdr.captureLength(), arena.scope());
 
 				ByteBuffer packet = ByteBuffer.wrap(pseg.toArray(ValueLayout.JAVA_BYTE));
 
@@ -285,11 +285,11 @@ public final class PcapReceiver implements PcapPacketSource {
 	public <U> int forEachDirect(int count, PcapHandler.OfByteBuffer<U> handler, U user) throws PcapException {
 
 		return sourcePackets(count, (ignore, header, bytes) -> {
-			try (var scope = newScope()) {
+			try (var arena = newArena()) {
 				PcapHeader hdr = PcapHeader.newReadOnlyInstance(header);
 
 				ByteBuffer packet = MemorySegment
-						.ofAddress(bytes.address(), hdr.captureLength(), scope)
+						.ofAddress(bytes.address(), hdr.captureLength(), arena.scope())
 						.asByteBuffer();
 
 				handler.handleByteBuffer(user, hdr, packet);

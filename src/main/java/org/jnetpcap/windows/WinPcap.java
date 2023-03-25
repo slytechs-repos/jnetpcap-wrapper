@@ -17,17 +17,11 @@
  */
 package org.jnetpcap.windows;
 
-import static java.lang.foreign.MemoryAddress.NULL;
-import static java.lang.foreign.ValueLayout.ADDRESS;
-import static java.lang.foreign.ValueLayout.JAVA_INT;
-import static org.jnetpcap.constant.PcapConstants.PCAP_BUF_SIZE;
-import static org.jnetpcap.constant.PcapConstants.PCAP_ERRBUF_SIZE;
-import static org.jnetpcap.internal.ForeignUtils.toUtf8String;
-import static org.jnetpcap.windows.PcapStatEx.PCAP_STAT_EX_LENGTH;
+import static org.jnetpcap.constant.PcapConstants.*;
+import static org.jnetpcap.windows.PcapStatEx.*;
 
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,10 +35,12 @@ import org.jnetpcap.PcapIf;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapSrc;
 import org.jnetpcap.constant.WinPcapMode;
-import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.internal.PcapStatExRecord;
+
+import static java.lang.foreign.MemorySegment.*;
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * WinPcap is a wrapper around, windows packet capture library.
@@ -248,13 +244,13 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * @throws PcapException the pcap exception
 	 */
 	public static String createSrcStr(PcapSrc type, String host, String port, String name) throws PcapException {
-		try (var scope = newScope()) {
-			MemorySegment c_source = scope.allocate(PCAP_BUF_SIZE);
-			MemorySegment errbuf = scope.allocate(PCAP_ERRBUF_SIZE);
+		try (var arena = newArena()) {
+			MemorySegment c_source = arena.allocate(PCAP_BUF_SIZE);
+			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
-			MemoryAddress c_host = (host != null) ? toUtf8String(host, scope).address() : NULL;
-			MemoryAddress c_port = (port != null) ? toUtf8String(port, scope).address() : NULL;
-			MemoryAddress c_name = (name != null) ? toUtf8String(name, scope).address() : NULL;
+			MemorySegment c_host = (host != null) ? arena.allocateUtf8String(host) : NULL;
+			MemorySegment c_port = (port != null) ? arena.allocateUtf8String(port) : NULL;
+			MemorySegment c_name = (name != null) ? arena.allocateUtf8String(name) : NULL;
 
 			int result = pcap_createsrcstr.invokeInt(c_source, type.getAsInt(), c_host, c_port, c_name, errbuf);
 			PcapException.throwIfNotOk(result, () -> errbuf.getUtf8String(0));
@@ -316,16 +312,16 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 		username = username == null ? "" : username;
 		password = password == null ? "" : password;
 
-		try (var scope = newScope()) {
-			MemorySegment c_source = toUtf8String(source, scope);
-			MemorySegment c_alldevsp = scope.allocate(ADDRESS);
-			MemoryAddress c_rmtauth = new PcapRmt.Auth(type, username, password).allocateNative(scope);
-			MemorySegment errbuf = scope.allocate(PCAP_ERRBUF_SIZE);
+		try (var arena = newArena()) {
+			MemorySegment c_source = arena.allocateUtf8String(source);
+			MemorySegment c_alldevsp = arena.allocate(ADDRESS);
+			MemorySegment c_rmtauth = new PcapRmt.Auth(type, username, password).allocateNative(arena);
+			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
 			int result = pcap_findalldevs_ex.invokeInt(c_source, c_rmtauth, c_alldevsp, errbuf);
 			PcapException.throwIfNotOk(result, () -> errbuf.getUtf8String(0));
 
-			return listAllPcapIf(c_alldevsp.get(ADDRESS, 0), scope);
+			return listAllPcapIf(c_alldevsp.get(ADDRESS, 0), arena);
 		}
 	}
 
@@ -370,8 +366,8 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 *
 	 * @return the memory session
 	 */
-	protected static MemorySession newScope() {
-		return Pcap.newScope();
+	protected static Arena newArena() {
+		return Pcap.newArena();
 	}
 
 	/**
@@ -457,15 +453,14 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * @since early days of WinPcap
 	 */
 	public static PcapRmt.Source parseSrcStr(String source) throws PcapException {
-		try (var scope = newScope()) {
-			MemorySegment errbuf = scope.allocate(PCAP_ERRBUF_SIZE);
-			MemoryAddress buf = MemorySegment.allocateNative(PCAP_BUF_SIZE * 3, scope).address();
+		try (var arena = newArena()) {
+			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
-			MemorySegment c_source = scope.allocateUtf8String(source);
-			MemorySegment c_type = scope.allocate(JAVA_INT);
-			MemoryAddress c_host = buf.addOffset(0);
-			MemoryAddress c_port = c_host.addOffset(PCAP_BUF_SIZE);
-			MemoryAddress c_name = c_port.addOffset(PCAP_BUF_SIZE);
+			MemorySegment c_source = arena.allocateUtf8String(source);
+			MemorySegment c_type = arena.allocate(JAVA_INT);
+			MemorySegment c_host = arena.allocate(PCAP_BUF_SIZE);
+			MemorySegment c_port = arena.allocate(PCAP_BUF_SIZE);
+			MemorySegment c_name = arena.allocate(PCAP_BUF_SIZE);
 
 			int result = pcap_parsesrcstr.invokeInt(c_source, c_type, c_host, c_port, c_name, errbuf);
 			PcapException.throwIfNotOk(result, () -> errbuf.getUtf8String(0));
@@ -502,7 +497,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the name
 	 */
-	WinPcap(MemoryAddress pcapHandle, String name) {
+	WinPcap(MemorySegment pcapHandle, String name) {
 		super(pcapHandle, name);
 	}
 
@@ -521,7 +516,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * @throws PcapException the pcap exception
 	 * @since Microsoft Windows only
 	 */
-	public MemoryAddress getEvent() throws PcapException {
+	public MemorySegment getEvent() throws PcapException {
 		return pcap_getevent.invokeObj(this::geterr, getPcapHandle());
 	}
 
@@ -558,8 +553,8 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * @since Microsoft Windows only
 	 */
 	public void liveDump(String filename, int maxsize, int maxpacks) throws PcapException {
-		try (var scope = newScope()) {
-			MemorySegment c_filename = ForeignUtils.toUtf8String(filename, scope);
+		try (var arena = newArena()) {
+			MemorySegment c_filename = arena.allocateUtf8String(filename);
 			pcap_live_dump.invokeInt(this::geterr, c_filename, maxsize, maxpacks);
 		}
 	}
@@ -721,11 +716,12 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 */
 	public PcapStatEx statsEx() throws PcapException {
 
-		try (var scope = newScope()) {
-			MemorySegment sizeIntPtr = scope.allocate(JAVA_INT);
-			MemoryAddress pcap_stat_ex_ptr = pcap_stat_ex.invokeObj(this::geterr, getPcapHandle(), sizeIntPtr);
+		try (var arena = newArena()) {
+			MemorySegment sizeIntPtr = arena.allocate(JAVA_INT);
+			MemorySegment pcap_stat_ex_ptr = pcap_stat_ex.invokeObj(this::geterr, getPcapHandle(), sizeIntPtr);
 
-			MemorySegment mseg = MemorySegment.ofAddress(pcap_stat_ex_ptr, PCAP_STAT_EX_LENGTH, scope);
+			MemorySegment mseg = MemorySegment
+					.ofAddress(pcap_stat_ex_ptr.address(), PCAP_STAT_EX_LENGTH, arena.scope());
 			int statStructSize = sizeIntPtr.get(JAVA_INT, 0);
 
 			return new PcapStatExRecord(statStructSize, mseg);

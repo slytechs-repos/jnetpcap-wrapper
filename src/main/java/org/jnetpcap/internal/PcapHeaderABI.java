@@ -17,14 +17,13 @@
  */
 package org.jnetpcap.internal;
 
-import static java.lang.foreign.ValueLayout.JAVA_INT;
-import static java.nio.ByteOrder.BIG_ENDIAN;
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import static java.nio.ByteOrder.*;
 
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout.OfInt;
 import java.nio.ByteOrder;
+
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * Configures different ABI (Application Binary Interfaces) for access to binary
@@ -131,20 +130,12 @@ public enum PcapHeaderABI {
 		this.order = bo;
 	}
 
-	public int captureLength(MemoryAddress address) {
+	public int captureLength(MemorySegment address) {
 		return address.get(layout, captureLengthOffset) & BITMASK16;
 	}
 
-	public void captureLength(MemoryAddress address, int newLength) {
+	public void captureLength(MemorySegment address, int newLength) {
 		address.set(layout, captureLengthOffset, newLength & BITMASK16);
-	}
-
-	public int captureLength(MemorySegment mseg) {
-		return mseg.get(layout, captureLengthOffset) & BITMASK16;
-	}
-
-	public void captureLength(MemorySegment mseg, int newLength) {
-		mseg.set(layout, captureLengthOffset, newLength & BITMASK16);
 	}
 
 	public int captureLengthOffset() {
@@ -164,60 +155,36 @@ public enum PcapHeaderABI {
 		return this.order;
 	}
 
-	public long tvSec(MemoryAddress address) {
+	public long tvSec(MemorySegment address) {
 		return Integer.toUnsignedLong(address.get(layout, tvSecOffset));
 	}
 
-	public long tvSec(MemorySegment mseg) {
-		return Integer.toUnsignedLong(mseg.get(layout, tvSecOffset));
-	}
-
-	public void tvSec(MemoryAddress address, long newTvSec) {
+	public void tvSec(MemorySegment address, long newTvSec) {
 		address.set(layout, tvSecOffset, (int) newTvSec);
-	}
-
-	public void tvSec(MemorySegment mseg, long newTvSec) {
-		mseg.set(layout, tvSecOffset, (int) newTvSec);
 	}
 
 	public int tvSecOffset() {
 		return tvSecOffset;
 	}
 
-	public long tvUsec(MemoryAddress address) {
+	public long tvUsec(MemorySegment address) {
 		return Integer.toUnsignedLong(address.get(layout, tvUsecOffset));
 	}
 
-	public long tvUsec(MemorySegment mseg) {
-		return Integer.toUnsignedLong(mseg.get(layout, tvUsecOffset));
-	}
-
-	public void tvUsec(MemoryAddress address, long newTvUsec) {
+	public void tvUsec(MemorySegment address, long newTvUsec) {
 		address.set(layout, tvUsecOffset, (int) newTvUsec);
-	}
-
-	public void tvUsec(MemorySegment mseg, long newTvUsec) {
-		mseg.set(layout, tvUsecOffset, (int) newTvUsec);
 	}
 
 	public int tvUsecOffset() {
 		return tvUsecOffset;
 	}
 
-	public int wireLength(MemoryAddress address) {
+	public int wireLength(MemorySegment address) {
 		return address.get(layout, wireLengthOffset) & BITMASK16;
 	}
 
-	public void wireLength(MemoryAddress address, int newLength) {
+	public void wireLength(MemorySegment address, int newLength) {
 		address.set(layout, wireLengthOffset, newLength & BITMASK16);
-	}
-
-	public int wireLength(MemorySegment mseg) {
-		return mseg.get(layout, wireLengthOffset) & BITMASK16;
-	}
-
-	public void wireLength(MemorySegment mseg, int newLength) {
-		mseg.set(layout, wireLengthOffset, newLength & BITMASK16);
 	}
 
 	public int wireLengthOffset() {

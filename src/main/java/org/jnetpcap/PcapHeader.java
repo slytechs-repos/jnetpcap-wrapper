@@ -17,11 +17,11 @@
  */
 package org.jnetpcap;
 
-import static org.jnetpcap.internal.PcapHeaderABI.nativeAbi;
+import static org.jnetpcap.internal.PcapHeaderABI.*;
 
-import java.lang.foreign.Addressable;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
+import java.lang.foreign.SegmentScope;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -62,7 +62,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param scope  for memory allocation
 	 * @return new native memory backed pcap header
 	 */
-	static PcapHeader allocate(int length, MemorySession scope) {
+	static PcapHeader allocate(int length, Arena scope) {
 		return PcapHeaderMemory.allocate(length, scope);
 	}
 
@@ -73,7 +73,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param scope for memory allocation
 	 * @return new native memory backed pcap header
 	 */
-	static PcapHeader allocate(MemorySession scope) {
+	static PcapHeader allocate(Arena scope) {
 		return PcapHeaderMemory.allocate(scope);
 	}
 
@@ -85,7 +85,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param src the src
 	 * @return new pcap header
 	 */
-	static PcapHeader newInstance(Addressable src) {
+	static PcapHeader newInstance(MemorySegment src) {
 		return newInstance(src, ByteOrder.nativeOrder());
 	}
 
@@ -98,7 +98,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param order byte ordering
 	 * @return new pcap header
 	 */
-	static PcapHeader newInstance(Addressable src, ByteOrder order) {
+	static PcapHeader newInstance(MemorySegment src, ByteOrder order) {
 		return PcapHeaderMemory.newObjectHeader(src, order);
 	}
 
@@ -139,7 +139,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param src memory source where native pcap header is found
 	 * @return new pcap header
 	 */
-	static PcapHeader newReadOnlyInstance(Addressable src) {
+	static PcapHeader newReadOnlyInstance(MemorySegment src) {
 		return newReadOnlyInstance(src, ByteOrder.nativeOrder());
 	}
 
@@ -152,7 +152,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param order byte order of the native memory segment
 	 * @return new pcap header
 	 */
-	static PcapHeader newReadOnlyInstance(Addressable src, ByteOrder order) {
+	static PcapHeader newReadOnlyInstance(MemorySegment src, ByteOrder order) {
 		return PcapHeaderMemory.newRecordHeader(src, order);
 	}
 
@@ -175,15 +175,15 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	/**
 	 * Wraps a header instance around the provided memory object. If addressable is
 	 * a {@code MemorySegment} it will be wrapped directly. If the addressible is a
-	 * {@code MemoryAddress}, a new {@code MemorySegment} will be created and
+	 * {@code MemorySegment}, a new {@code MemorySegment} will be created and
 	 * wrapped around the address.
 	 *
-	 * @param addressable native memory address or segment at the start of the pcap
-	 *                    structure in native memory
+	 * @param address native memory address or segment at the start of the pcap
+	 *                structure in native memory
 	 * @return new PcapHeader instance
 	 */
-	static PcapHeader ofAddress(Addressable addressable) {
-		return new PcapHeaderMemory(addressable.address());
+	static PcapHeader ofAddress(MemorySegment address, SegmentScope scope) {
+		return new PcapHeaderMemory(address, scope);
 	}
 
 	/**
@@ -226,8 +226,8 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param memory the memory
 	 * @return number of bytes captured, possibly truncated
 	 */
-	static int readCaptureLength(Addressable memory) {
-		return PcapHeaderABI.nativeAbi().captureLength(memory.address());
+	static int readCaptureLength(MemorySegment memory) {
+		return PcapHeaderABI.nativeAbi().captureLength(memory);
 	}
 
 	/**
@@ -236,8 +236,8 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param memory the memory
 	 * @return number of seconds from the start of epoch time, Jan 1st 1970 12:00am.
 	 */
-	static long readTvSec(Addressable memory) {
-		return PcapHeaderABI.nativeAbi().tvSec(memory.address());
+	static long readTvSec(MemorySegment memory) {
+		return PcapHeaderABI.nativeAbi().tvSec(memory);
 	}
 
 	/**
@@ -247,8 +247,8 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @return faction of a second either in nanos or micros depending the capture
 	 *         source
 	 */
-	static long readTvUsec(Addressable memory) {
-		return PcapHeaderABI.nativeAbi().tvUsec(memory.address());
+	static long readTvUsec(MemorySegment memory) {
+		return PcapHeaderABI.nativeAbi().tvUsec(memory);
 	}
 
 	/**
@@ -257,8 +257,8 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param memory the memory
 	 * @return number of bytes in the original packet seen on the wire
 	 */
-	static int readWireLength(Addressable memory) {
-		return PcapHeaderABI.nativeAbi().wireLength(memory.address());
+	static int readWireLength(MemorySegment memory) {
+		return PcapHeaderABI.nativeAbi().wireLength(memory);
 	}
 
 	/**
@@ -273,7 +273,7 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * @param order   the endianness of the values to be written
 	 * @return the int
 	 */
-	static int write(long tvSec, long tvUsec, int caplen, int wirelen, Addressable dst, ByteOrder order) {
+	static int write(long tvSec, long tvUsec, int caplen, int wirelen, MemorySegment dst, ByteOrder order) {
 		return PcapHeaderMemory.write(tvSec, tvUsec, caplen, wirelen, dst, order);
 	}
 
@@ -319,12 +319,12 @@ public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, P
 	 * based, a new native memory segment will be allocated and values of this
 	 * header copied into it. Therefore if pcap header is be to used natively, it is
 	 * more efficient to wrap and instance around a memory segment using one of the
-	 * {@linkplain PcapHeader#ofAddress(Addressable)} factory methods.
+	 * {@linkplain PcapHeader#ofAddress(MemorySegment)} factory methods.
 	 * </p>
 	 *
 	 * @return the memory segment containing this header's field values
 	 */
-	Addressable asMemoryReference();
+	MemorySegment asMemoryReference(Arena arena);
 
 	/**
 	 * Returns a read-only version of the pcap header.

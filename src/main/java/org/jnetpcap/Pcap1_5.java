@@ -19,7 +19,7 @@ package org.jnetpcap;
 
 import static org.jnetpcap.internal.UnsafePcapHandle.*;
 
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.MemorySegment;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
@@ -233,10 +233,10 @@ public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 	 * @throws PcapException any errors
 	 * @since libpcap 1.5.1
 	 */
-	protected static <T extends Pcap> T openDeadWithTstampPrecision(BiFunction<MemoryAddress, String, T> factory,
+	protected static <T extends Pcap> T openDeadWithTstampPrecision(BiFunction<MemorySegment, String, T> factory,
 			PcapDlt linktype, int snaplen, PcapTStampPrecision precision)
 			throws PcapException {
-		MemoryAddress pcapAddress = pcap_open_dead_with_tstamp_precision
+		MemorySegment pcapAddress = pcap_open_dead_with_tstamp_precision
 				.invokeObj(linktype.getAsInt(), snaplen, precision.getAsInt());
 
 		return factory.apply(pcapAddress, makeDeadHandleName(linktype));
@@ -299,7 +299,7 @@ public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap1_5(MemoryAddress pcapHandle, String name) {
+	protected Pcap1_5(MemorySegment pcapHandle, String name) {
 		super(pcapHandle, name);
 	}
 

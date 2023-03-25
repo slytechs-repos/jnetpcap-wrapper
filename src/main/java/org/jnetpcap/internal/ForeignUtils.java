@@ -17,10 +17,7 @@
  */
 package org.jnetpcap.internal;
 
-import java.lang.foreign.Addressable;
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 
 /**
  * @author Sly Technologies Inc
@@ -30,26 +27,12 @@ import java.lang.foreign.MemorySession;
  */
 public final class ForeignUtils {
 
-	public static MemoryAddress toAddress(Object value) {
-		return (MemoryAddress) value;
+	public static MemorySegment toAddress(Object value) {
+		return (MemorySegment) value;
 	}
 
-	public static String toJavaString(Object value) {
-		return toJavaString(((Addressable) value).address());
-	}
-
-	public static MemorySegment toUtf8String(String str, MemorySession scope) {
-		MemorySegment mseg = MemorySegment.allocateNative(str.length() + 1, scope);
-		mseg.setUtf8String(0, str);
-
-		return mseg;
-	}
-
-	public static String toJavaString(MemoryAddress addr) {
-		if ((addr == null) || (addr == MemoryAddress.NULL))
-			return null;
-
-		return addr.getUtf8String(0);
+	public static boolean isNull(MemorySegment mseg) {
+		return mseg.address() != 0;
 	}
 
 	private ForeignUtils() {

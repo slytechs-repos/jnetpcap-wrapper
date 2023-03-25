@@ -17,10 +17,8 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.Addressable;
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
+import java.lang.foreign.SegmentScope;
 import java.nio.ByteBuffer;
 
 /**
@@ -115,7 +113,7 @@ public interface PcapHandler {
 		 * @param header the header
 		 * @param packet the packet
 		 */
-		void handleAddress(U user, MemoryAddress header, MemoryAddress packet);
+		void handleAddress(U user, MemorySegment header, MemorySegment packet);
 	}
 
 	/**
@@ -139,7 +137,7 @@ public interface PcapHandler {
 		 * @param Packet the packet
 		 * @param scope  the scope
 		 */
-		void handleMemorySegment(U user, MemorySegment header, MemorySegment Packet, MemorySession scope);
+		void handleMemorySegment(U user, MemorySegment header, MemorySegment Packet, SegmentScope scope);
 	}
 
 	/**
@@ -163,7 +161,7 @@ public interface PcapHandler {
 			 * @param length the length
 			 * @throws PcapException the pcap exception
 			 */
-			void sinkPacket(Addressable packet, int length) throws PcapException;
+			void sinkPacket(MemorySegment packet, int length) throws PcapException;
 		}
 	}
 
@@ -199,5 +197,5 @@ public interface PcapHandler {
 	 * @param header the header
 	 * @param packet the packet
 	 */
-	void callback(MemoryAddress user, MemoryAddress header, MemoryAddress packet);
+	void callback(MemorySegment user, MemorySegment header, MemorySegment packet);
 }

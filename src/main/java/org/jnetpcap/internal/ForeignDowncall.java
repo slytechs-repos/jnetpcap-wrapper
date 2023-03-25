@@ -17,7 +17,6 @@
  */
 package org.jnetpcap.internal;
 
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.MethodHandle;
 import java.util.Objects;
@@ -187,12 +186,20 @@ public class ForeignDowncall<E extends Throwable> {
 		return result;
 	}
 
+	private static final int BUFFER_LENGTH = 256;
+
 	public String invokeString(Object... args) {
 
 		try {
-			MemoryAddress address = (MemoryAddress) handle().invokeWithArguments(args);
+			MemorySegment stringPtr = (MemorySegment) handle().invokeWithArguments(args);
+			if (ForeignUtils.isNull(stringPtr))
+				return null;
 
-			return ForeignUtils.toJavaString(address);
+			stringPtr = MemorySegment.ofAddress(stringPtr.address(), BUFFER_LENGTH);
+			System.out.println(stringPtr);
+			System.out.flush();
+
+			return stringPtr.getUtf8String(0);
 		} catch (RuntimeException e) { // VarHandle could throw this
 			throw e;
 
@@ -203,10 +210,15 @@ public class ForeignDowncall<E extends Throwable> {
 
 	public String invokeString(Supplier<String> messageFactory, Object... args) throws E {
 
-		MemoryAddress address;
+		MemorySegment stringPtr;
 		try {
-			address = (MemoryAddress) handle().invokeWithArguments(args);
+			stringPtr = (MemorySegment) handle().invokeWithArguments(args);
+			if (ForeignUtils.isNull(stringPtr))
+				return null;
 
+			stringPtr = MemorySegment.ofAddress(stringPtr.address(), BUFFER_LENGTH);
+			System.out.println(stringPtr);
+			System.out.flush();
 		} catch (RuntimeException e) { // VarHandle could throw this
 			throw e;
 
@@ -214,9 +226,9 @@ public class ForeignDowncall<E extends Throwable> {
 			throw new RuntimeException(e);
 		}
 
-		validateObj(address, messageFactory);
+		validateObj(stringPtr, messageFactory);
 
-		return address.getUtf8String(0);
+		return stringPtr.getUtf8String(0);
 
 	}
 
@@ -236,8 +248,8 @@ public class ForeignDowncall<E extends Throwable> {
 		return handle != null;
 	}
 
-	public MemoryAddress address() {
-		return symbolAddress.address();
+	public MemorySegment address() {
+		return symbolAddress;
 	}
 
 	public String symbolName() {
@@ -265,7 +277,7 @@ public class ForeignDowncall<E extends Throwable> {
 	}
 
 	protected void validateObj(Object obj, Supplier<String> errorFactory) throws E {
-		if (obj == null || (obj instanceof MemoryAddress addr) && addr == MemoryAddress.NULL)
+		if (obj == null || (obj instanceof MemorySegment addr) && addr == MemorySegment.NULL)
 			throw exceptionFactory.apply(errorFactory.get());
 	}
 

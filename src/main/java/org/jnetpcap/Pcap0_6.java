@@ -17,7 +17,7 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.MemorySegment;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
@@ -67,7 +67,7 @@ public sealed class Pcap0_6 extends Pcap0_5 permits Pcap0_7 {
 	 * @param bpf_program_ptr memory address, a C pointer to BPF program
 	 * @since libpcap 0.6
 	 */
-	static void freecode(MemoryAddress bpf_program_ptr) {
+	static void freecode(MemorySegment bpf_program_ptr) {
 		Pcap0_6.pcap_freecode.invokeVoid(bpf_program_ptr.address());
 	}
 
@@ -137,10 +137,10 @@ public sealed class Pcap0_6 extends Pcap0_5 permits Pcap0_7 {
 	 * @throws PcapException any errors
 	 * @since libpcap 0.6
 	 */
-	protected static <T extends Pcap> T openDead(BiFunction<MemoryAddress, String, T> factory, PcapDlt linktype,
+	protected static <T extends Pcap> T openDead(BiFunction<MemorySegment, String, T> factory, PcapDlt linktype,
 			int snaplen)
 			throws PcapException {
-		MemoryAddress pcapPointer = pcap_open_dead.invokeObj(linktype.getAsInt(), snaplen);
+		MemorySegment pcapPointer = pcap_open_dead.invokeObj(linktype.getAsInt(), snaplen);
 
 		return factory.apply(pcapPointer, "dead:dlt=%s".formatted(linktype));
 	}
@@ -202,7 +202,7 @@ public sealed class Pcap0_6 extends Pcap0_5 permits Pcap0_7 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the name
 	 */
-	protected Pcap0_6(MemoryAddress pcapHandle, String name) {
+	protected Pcap0_6(MemorySegment pcapHandle, String name) {
 		super(pcapHandle, name);
 	}
 

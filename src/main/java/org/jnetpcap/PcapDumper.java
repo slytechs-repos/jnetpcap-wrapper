@@ -19,8 +19,8 @@ package org.jnetpcap;
 
 import java.io.Flushable;
 import java.io.IOException;
-import java.lang.foreign.MemoryAddress;
-import java.lang.foreign.MemorySession;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
 
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
@@ -61,14 +61,14 @@ public class PcapDumper implements AutoCloseable, Flushable {
 
 	static {
 		try (var foreign = new PcapForeignInitializer(Pcap0_5.class)) {
-			
+
 			// @formatter:off
 			pcap_dump_close    = foreign.downcall("pcap_dump_close(A)V"); //$NON-NLS-1$
 			pcap_dump          = foreign.downcall("pcap_dump(AAA)V"); //$NON-NLS-1$
 			pcap_dump_file     = foreign.downcall("pcap_dump_file(A)A");
 			pcap_dump_flush    = foreign.downcall("pcap_dump_flush(A)I");
 			// @formatter:on
-			
+
 		}
 	}
 
@@ -76,19 +76,19 @@ public class PcapDumper implements AutoCloseable, Flushable {
 		return new IllegalStateException("already closed");
 	}
 
-	private final MemoryAddress pcap_dumper_ptr;
-	private final MemorySession scope;
+	private final MemorySegment pcap_dumper_ptr;
+	private final Arena arena;
 	private final String fname;
 
 	/**
 	 * Instantiates a new pcap dumper.
 	 *
-	 * @param pcap_dumper MemoryAddress pointer to pcap_dumper_t structure
+	 * @param pcap_dumper MemorySegment pointer to pcap_dumper_t structure
 	 */
-	PcapDumper(MemoryAddress pcap_dumper, String fname) {
+	PcapDumper(MemorySegment pcap_dumper, String fname) {
 		this.pcap_dumper_ptr = pcap_dumper;
 		this.fname = fname;
-		this.scope = MemorySession.openShared();
+		this.arena = Arena.openShared();
 	}
 
 	/**
@@ -96,8 +96,8 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	 *
 	 * @return the memory address
 	 */
-	MemoryAddress address() {
-		if (!scope.isAlive())
+	MemorySegment address() {
+		if (!arena.scope().isAlive())
 			throw alreadyClosedError();
 
 		return pcap_dumper_ptr;
@@ -108,7 +108,7 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	 *
 	 * @return the memory address
 	 */
-	MemoryAddress addressOfDumpFunction() {
+	MemorySegment addressOfDumpFunction() {
 		return pcap_dump.address();
 	}
 
@@ -123,12 +123,12 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	 */
 	@Override
 	public void close() {
-		if (!scope.isAlive())
+		if (!arena.scope().isAlive())
 			throw alreadyClosedError();
 
 		pcap_dump_close.invokeVoid(pcap_dumper_ptr);
 
-		scope.close();
+		arena.close();
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 * @since libpcap 0.4
 	 */
-	public void dump(MemoryAddress header, MemoryAddress packet) throws IOException {
+	public void dump(MemorySegment header, MemorySegment packet) throws IOException {
 		pcap_dump.invokeVoid(header, packet, pcap_dumper_ptr);
 	}
 
@@ -154,9 +154,11 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	 *
 	 * @return address to OS's stream I/O handle
 	 * @since libpcap 0.8
-	 * @see <a href="https://www.tcpdump.org/manpages/pcap_dump_open.3pcap.html">FILE *pcap_dump_file(pcap_dumper_t *p)</a>
+	 * @see <a href=
+	 *      "https://www.tcpdump.org/manpages/pcap_dump_open.3pcap.html">FILE
+	 *      *pcap_dump_file(pcap_dumper_t *p)</a>
 	 */
-	public MemoryAddress dumpFile() {
+	public MemorySegment dumpFile() {
 		return pcap_dump_file.invokeObj(pcap_dumper_ptr);
 	}
 

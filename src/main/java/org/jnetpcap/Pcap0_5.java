@@ -17,12 +17,10 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.util.concurrent.TimeUnit;
 
 import org.jnetpcap.constant.PcapDlt;
-import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 
@@ -103,13 +101,19 @@ public sealed class Pcap0_5 extends Pcap0_4 permits Pcap0_6 {
 
 		int opt = optimize ? 1 : 0;
 
-		try (var scope = newScope()) {
+		try (var arena = newArena()) {
 			BpFilter bpFilter = new BpFilter(str);
 
-			MemorySegment c_filter = ForeignUtils.toUtf8String(str, scope);
+			MemorySegment c_filter = arena.allocateUtf8String(str);
 
-			int code = pcap_compile_nopcap.invokeInt(snaplen, pcapDlt.getAsInt(), bpFilter.address(), c_filter, opt,
-					netmask);
+			int code = pcap_compile_nopcap
+					.invokeInt(
+							snaplen,
+							pcapDlt.getAsInt(),
+							bpFilter.address(),
+							c_filter,
+							opt,
+							netmask);
 			PcapException.throwIfNotOk(code);
 
 			return bpFilter;
@@ -209,7 +213,7 @@ public sealed class Pcap0_5 extends Pcap0_4 permits Pcap0_6 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the name
 	 */
-	protected Pcap0_5(MemoryAddress pcapHandle, String name) {
+	protected Pcap0_5(MemorySegment pcapHandle, String name) {
 		super(pcapHandle, name);
 	}
 

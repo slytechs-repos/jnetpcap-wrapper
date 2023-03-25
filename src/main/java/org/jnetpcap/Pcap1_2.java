@@ -17,7 +17,6 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.util.Collections;
 import java.util.List;
@@ -219,7 +218,7 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap1_2(MemoryAddress pcapHandle, String name) {
+	protected Pcap1_2(MemorySegment pcapHandle, String name) {
 		super(pcapHandle, name);
 	}
 
@@ -229,26 +228,25 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 	@Override
 	public final List<PcapTstampType> listTstampTypes() throws PcapException {
 
-		try (var scope = newScope()) {
+		/* Pcap allocates space to hold int[] natively */
+		int len = pcap_list_tstamp_types
+				.invokeInt(this::getErrorString, getPcapHandle(), POINTER_TO_POINTER1);
 
-			/* Pcap allocates space to hold int[] natively */
-			int len = pcap_list_tstamp_types.invokeInt(this::getErrorString, getPcapHandle(), POINTER_TO_POINTER1);
+		/* Dereference to int[] address */
+		MemorySegment arrayAddress = POINTER_TO_POINTER1.get(ADDRESS, 0);
+		int[] array = MemorySegment
+				.ofAddress(arrayAddress.address(), JAVA_INT.byteSize() * len)
+				.toArray(JAVA_INT);
 
-			/* Dereference to int[] address */
-			MemoryAddress arrayAddress = POINTER_TO_POINTER1.get(ADDRESS, 0);
-			int[] array = MemorySegment.ofAddress(arrayAddress, JAVA_INT.byteSize() * len, scope)
-					.toArray(JAVA_INT);
+		/* Copy from native int[] to java int[] */
+		List<PcapTstampType> result = IntStream.of(array)
+				.mapToObj(PcapTstampType::valueOf)
+				.toList();
 
-			/* Copy from native int[] to java int[] */
-			List<PcapTstampType> result = IntStream.of(array)
-					.mapToObj(PcapTstampType::valueOf)
-					.toList();
+		/* free int[] allocated by libpcap */
+		pcap_free_tstamp_types.invokeVoid(arrayAddress);
 
-			/* free int[] allocated by libpcap */
-			pcap_free_tstamp_types.invokeVoid(arrayAddress);
-
-			return Collections.unmodifiableList(result);
-		}
+		return Collections.unmodifiableList(result);
 	}
 
 	/**

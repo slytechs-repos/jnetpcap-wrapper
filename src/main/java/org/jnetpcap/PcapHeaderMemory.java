@@ -17,10 +17,9 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.Addressable;
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
+import java.lang.foreign.SegmentScope;
 import java.nio.ByteOrder;
 
 import org.jnetpcap.internal.PcapHeaderABI;
@@ -39,49 +38,49 @@ final class PcapHeaderMemory implements PcapHeader {
 	 * 
 	 * @param length the length of the packet in bytes, used to initialize both
 	 *               wireLength and captureLength fields.
-	 * @param scope  for memory allocation
+	 * @param arena  for memory allocation
 	 * @return new native memory backed pcap header
 	 */
-	public static PcapHeader allocate(int length, MemorySession scope) {
-		MemorySegment mseg = scope.allocate(PcapHeader.PCAP_HEADER_PADDED_LENGTH);
+	public static PcapHeader allocate(int length, Arena arena) {
+		MemorySegment mseg = arena.allocate(PcapHeader.PCAP_HEADER_PADDED_LENGTH);
 		long time = System.currentTimeMillis();
 		long tvSec = time / 1000;
 		long tvUsed = (time % 1000) * 1000;
 
 		write(tvSec, tvUsed, length, length, mseg, ByteOrder.nativeOrder());
 
-		return new PcapHeaderMemory(mseg);
+		return new PcapHeaderMemory(mseg, arena.scope());
 	}
 
 	/**
 	 * Allocates a new PcapHeader in native memory. All fields are uninitialized and
 	 * may not be zeroed out, depending on the constants of the native memory.
 	 *
-	 * @param scope for memory allocation
+	 * @param arena for memory allocation
 	 * @return new native memory backed pcap header
 	 */
-	public static PcapHeader allocate(MemorySession scope) {
-		MemorySegment mseg = scope.allocate(PcapHeader.PCAP_HEADER_PADDED_LENGTH);
+	public static PcapHeader allocate(Arena arena) {
+		MemorySegment mseg = arena.allocate(PcapHeader.PCAP_HEADER_PADDED_LENGTH);
 
-		return new PcapHeaderMemory(mseg);
+		return new PcapHeaderMemory(mseg, arena.scope());
 	}
 
-	static MemorySegment newMemory(long tvSec, long tvUsec, int caplen, int wirelen, ByteOrder order) {
-		MemorySegment dst = MemorySegment.allocateNative(PCAP_HEADER_PADDED_LENGTH, MemorySession.global());
+	static MemorySegment newMemory(long tvSec, long tvUsec, int caplen, int wirelen, ByteOrder order, Arena arena) {
+		MemorySegment dst = arena.allocate(PCAP_HEADER_PADDED_LENGTH);
 		PcapHeaderABI abi = PcapHeaderABI.nativeAbi(order);
 
-		writeUsingAbi0(abi, dst.address(), tvSec, tvUsec, caplen, wirelen);
+		writeUsingAbi0(abi, dst, tvSec, tvUsec, caplen, wirelen);
 
 		return dst;
 	}
 
-	static MemorySegment newMemoryFrom(PcapHeader src) {
-		return newMemory(src.tvSec(), src.tvUsec(), src.captureLength(), src.wireLength(), src.order());
+	static MemorySegment newMemoryFrom(PcapHeader src, Arena arena) {
+		return newMemory(src.tvSec(), src.tvUsec(), src.captureLength(), src.wireLength(), src.order(), arena);
 	}
 
-	static PcapHeader newObjectHeader(Addressable address, ByteOrder order) {
+	static PcapHeader newObjectHeader(MemorySegment address, ByteOrder order) {
 		PcapHeaderABI abi = PcapHeaderABI.nativeAbi(order);
-		MemoryAddress addr = address.address();
+		MemorySegment addr = address;
 
 		return new PcapHeaderObject(
 				abi.tvSec(addr),
@@ -91,9 +90,9 @@ final class PcapHeaderMemory implements PcapHeader {
 				order);
 	}
 
-	static PcapHeader newRecordHeader(Addressable address, ByteOrder order) {
+	static PcapHeader newRecordHeader(MemorySegment address, ByteOrder order) {
 		PcapHeaderABI abi = PcapHeaderABI.nativeAbi(order);
-		MemoryAddress addr = address.address();
+		MemorySegment addr = MemorySegment.ofAddress(address.address(), PCAP_HEADER_PADDED_LENGTH);
 
 		return new PcapHeaderRecord(
 				abi.tvSec(addr),
@@ -103,20 +102,21 @@ final class PcapHeaderMemory implements PcapHeader {
 				order);
 	}
 
-	static int write(long tvSec, long tvUsec, int caplen, int wirelen, Addressable dst, ByteOrder order) {
+	static int write(long tvSec, long tvUsec, int caplen, int wirelen, MemorySegment dst, ByteOrder order) {
 		PcapHeaderABI abi = PcapHeaderABI.nativeAbi(order);
 
-		writeUsingAbi0(abi, dst.address(), tvSec, tvUsec, caplen, wirelen);
+		writeUsingAbi0(abi, dst, tvSec, tvUsec, caplen, wirelen);
 
 		return abi.headerLength();
 	}
 
-	private static void writeUsingAbi0(PcapHeaderABI abi, Addressable addressable, long tvSec, long tvUsec, int caplen,
+	private static void writeUsingAbi0(PcapHeaderABI abi, MemorySegment addressable, long tvSec, long tvUsec,
+			int caplen,
 			int wirelen) {
 
 		var mseg = addressable instanceof MemorySegment seg
 				? seg
-				: MemorySegment.ofAddress(addressable.address(), PCAP_HEADER_PADDED_LENGTH, MemorySession.global());
+				: MemorySegment.ofAddress(addressable.address(), PCAP_HEADER_PADDED_LENGTH, SegmentScope.auto());
 
 		abi.tvSec(mseg, tvSec);
 		abi.tvUsec(mseg, tvUsec);
@@ -129,18 +129,18 @@ final class PcapHeaderMemory implements PcapHeader {
 
 	private PcapHeaderABI abi;
 
-	public PcapHeaderMemory(Addressable addressable) {
+	public PcapHeaderMemory(MemorySegment address, SegmentScope scope) {
 		this.abi = PcapHeaderABI.nativeAbi();
-		this.mseg = addressable instanceof MemorySegment mseg
+		this.mseg = address instanceof MemorySegment mseg
 				? mseg
-				: MemorySegment.ofAddress(addressable.address(), PCAP_HEADER_PADDED_LENGTH, MemorySession.global());
+				: MemorySegment.ofAddress(address.address(), PCAP_HEADER_PADDED_LENGTH, scope);
 	}
 
 	/**
 	 * @see org.jnetpcap.PcapHeader#asMemoryReference()
 	 */
 	@Override
-	public Addressable asMemoryReference() {
+	public MemorySegment asMemoryReference(Arena arena) {
 		return mseg;
 	}
 
@@ -150,7 +150,7 @@ final class PcapHeaderMemory implements PcapHeader {
 	@Override
 	public PcapHeader asReadOnly() {
 		if (!mseg.isReadOnly())
-			return new PcapHeaderMemory(mseg.asReadOnly());
+			return new PcapHeaderMemory(mseg.asReadOnly(), mseg.scope());
 
 		return this;
 	}
