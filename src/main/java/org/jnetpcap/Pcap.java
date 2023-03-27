@@ -33,9 +33,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
 
-import org.jnetpcap.PcapHandler.PacketSink;
-import org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink;
-import org.jnetpcap.PcapHandler.PacketSource.PcapPacketSource;
 import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDirection;
@@ -1823,17 +1820,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	}
 
 	/**
-	 * Dispatch based packet source.
-	 *
-	 * @return the packet source
-	 */
-	public final PcapHandler.PacketSource dispatch() {
-		PcapPacketSource src = this::dispatch;
-
-		return src;
-	}
-
-	/**
 	 * Process packets from a live capture or savefile.
 	 * 
 	 * <p>
@@ -1906,6 +1892,81 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @since libpcap 0.4
 	 */
 	public <U> int dispatch(int count, PcapDumper pcapDumper) throws PcapException {
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/**
+	 * Process packets from a live capture or savefile.
+	 * 
+	 * <p>
+	 * Processes packets from a live capture or ``savefile'' until cnt packets are
+	 * processed, the end of the current bufferful of packets is reached when doing
+	 * a live capture, the end of the ``savefile'' is reached when reading from a
+	 * ``savefile'', pcap_breakloop() is called, or an error occurs. Thus, when
+	 * doing a live capture, cnt is the maximum number of packets to process before
+	 * returning, but is not a minimum number; when reading a live capture, only one
+	 * bufferful of packets is read at a time, so fewer than cnt packets may be
+	 * processed. A value of -1 or 0 for cnt causes all the packets received in one
+	 * buffer to be processed when reading a live capture, and causes all the
+	 * packets in the file to be processed when reading a ``savefile''.
+	 * </p>
+	 * 
+	 * <p>
+	 * Note that, when doing a live capture on some platforms, if the read timeout
+	 * expires when there are no packets available, pcap_dispatch() will return 0,
+	 * even when not in non-blocking mode, as there are no packets to process.
+	 * Applications should be prepared for this to happen, but must not rely on it
+	 * happening.
+	 * </p>
+	 * 
+	 * <p>
+	 * Callback specifies a pcap_handler routine to be called with three arguments:
+	 * a u_char pointer which is passed in the user argument to pcap_loop() or
+	 * pcap_dispatch(), a const struct pcap_pkthdr pointer pointing to the packet
+	 * time stamp and lengths, and a const u_char pointer to the first caplen (as
+	 * given in the struct pcap_pkthdr a pointer to which is passed to the callback
+	 * routine) bytes of data from the packet. The struct pcap_pkthdr and the packet
+	 * data are not to be freed by the callback routine, and are not guaranteed to
+	 * be valid after the callback routine returns; if the full needs them to be
+	 * valid after the callback, it must make a copy of them.
+	 * </p>
+	 * 
+	 * <p>
+	 * The bytes of data from the packet begin with a link-layer header. The format
+	 * of the link-layer header is indicated by the return value of the
+	 * pcap_datalink(3PCAP) routine when handed the pcap_t value also passed to
+	 * pcap_loop() or pcap_dispatch(). https://www.tcpdump.org/linktypes.html lists
+	 * the values pcap_datalink() can return and describes the packet formats that
+	 * correspond to those values. The value it returns will be valid for all
+	 * packets received unless and until pcap_set_datalink(3PCAP) is called; after a
+	 * successful call to pcap_set_datalink(), all subsequent packets will have a
+	 * link-layer header of the type specified by the link-layer header type value
+	 * passed to pcap_set_datalink().
+	 * </p>
+	 * 
+	 * <p>
+	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
+	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
+	 * example, the "any" device on Linux will have a link-layer header type of
+	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
+	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
+	 * for Ethernet.
+	 * </p>
+	 *
+	 * @param count   maximum number of packets to process before returning
+	 * @param handler the handler
+	 * @param user    TODO
+	 * @return the number of packets processed on success; this can be 0 if no
+	 *         packets were read from a live capture (if, for example, they were
+	 *         discarded because they didn't pass the packet filter, or if, on
+	 *         platforms that support a packet buffer timeout that starts before any
+	 *         packets arrive, the timeout expires before any packets arrive, or if
+	 *         the file descriptor for the capture device is in non-blocking mode
+	 *         and no packets were available to be read) or if no more packets are
+	 *         available in a ``savefile.''
+	 * @since libpcap 0.4
+	 */
+	public int dispatch(int count, PcapHandler.NativeCallback handler, MemoryAddress user) {
 		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -2044,8 +2105,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * for Ethernet.
 	 * </p>
 	 *
+	 * @param <U>     the generic type
 	 * @param count   maximum number of packets to process before returning
-	 * @param handler the handler
+	 * @param handler specifies a handler method to be called
+	 * @param user    the user opaque object
 	 * @return the number of packets processed on success; this can be 0 if no
 	 *         packets were read from a live capture (if, for example, they were
 	 *         discarded because they didn't pass the packet filter, or if, on
@@ -2054,9 +2117,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 *         the file descriptor for the capture device is in non-blocking mode
 	 *         and no packets were available to be read) or if no more packets are
 	 *         available in a ``savefile.''
+	 * @throws PcapException any pcap exceptions during call setup
 	 * @since libpcap 0.4
 	 */
-	protected int dispatch(int count, PcapHandler handler) {
+	public <U> int dispatch(int count, PcapHandler.OfMemorySegment<U> handler, U user) throws PcapException {
 		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -2124,6 +2188,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		return msg;
 	}
 
+	public final String getName() {
+		return name;
+	}
+
 	/**
 	 * Gets the state of non-blocking mode on a capture device.
 	 *
@@ -2188,18 +2256,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 */
 	public PcapTStampPrecision getTstampPrecision() throws PcapException {
 		throw new UnsupportedOperationException(minApi("Pcap1_5", "1.5")); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	/**
-	 * Returns a compatible packet sink which sends the packets to whatever sink the
-	 * Pcap handle is opened to.
-	 *
-	 * @return a packet sink that uses {@code Pcap::inject} method to sink packets
-	 */
-	public PacketSink inject() {
-		PcapPacketSink sink = this::inject;
-
-		return sink;
 	}
 
 	/**
@@ -2420,18 +2476,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	}
 
 	/**
-	 * Loop based packet source.
-	 *
-	 * @return the packet source
-	 */
-	public final PcapHandler.PacketSource loop() {
-
-		PcapPacketSource src = this::loop;
-
-		return src;
-	}
-
-	/**
 	 * Process packets from a live capture or savefile.
 	 * <p>
 	 * pcap_loop() processes packets from a live capture or ``savefile'' until cnt
@@ -2493,6 +2537,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @since libpcap 0.4
 	 */
 	public <U> int loop(int count, PcapDumper pcapDumper) throws PcapException {
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public <U> int loop(int count, PcapHandler.NativeCallback handler, MemoryAddress user) {
 		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -2621,7 +2669,11 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 *         pcap_breakloop() before any packets were processed
 	 * @since libpcap 0.4
 	 */
-	protected int loop(int count, PcapHandler handler) {
+	protected <U> int loop(int count, PcapHandler.OfMemorySegment<U> handler) {
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public <U> int loop(int count, PcapHandler.OfMemorySegment<U> handler, U user) {
 		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -2793,19 +2845,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 */
 	public Pcap perror(String prefix) {
 		throw new UnsupportedOperationException(minApi("Pcap0_X", "0.X")); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	/**
-	 * Returns a compatible packet sink which sends the packets to whatever sink the
-	 * Pcap handle is opened to.
-	 *
-	 * @return a packet sink that uses {@code Pcap::sendPacket} method to sink
-	 *         packets
-	 */
-	public PacketSink sendPacket() {
-		PcapPacketSink sink = this::sendPacket;
-
-		return sink;
 	}
 
 	/**

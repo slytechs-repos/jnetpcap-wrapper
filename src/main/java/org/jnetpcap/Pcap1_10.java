@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapTStampPrecision;
+import org.jnetpcap.internal.NonSealedPcap;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.internal.UnsafePcapHandle;
@@ -35,7 +36,7 @@ import org.jnetpcap.windows.WinPcap;
  * @author mark
  *
  */
-public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafePcapHandle {
+public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafePcapHandle, NonSealedPcap {
 
 	/**
 	 * @see const char *pcap_datalink_val_to_description_or_dlt(int)}

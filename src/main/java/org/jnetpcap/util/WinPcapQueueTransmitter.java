@@ -21,7 +21,6 @@ import java.lang.foreign.Addressable;
 import java.lang.foreign.MemorySession;
 
 import org.jnetpcap.PcapException;
-import org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink;
 import org.jnetpcap.PcapHeader;
 import org.jnetpcap.windows.PcapSendQueue;
 import org.jnetpcap.windows.WinPcap;
@@ -36,26 +35,26 @@ import org.jnetpcap.windows.WinPcap;
  * @author mark
  *
  */
-public class WinPcapQueueTransmitter implements PcapPacketSink, AutoCloseable {
+public class WinPcapQueueTransmitter implements AutoCloseable {
 
 	/** The scope. */
 	private final MemorySession scope;
-	
+
 	/** The header. */
 	private final PcapHeader header;
-	
+
 	/** The capacity. */
 	private final int capacity;
-	
+
 	/** The send queue. */
 	private final PcapSendQueue sendQueue;
-	
+
 	/** The pcap. */
 	private final WinPcap pcap;
-	
+
 	/** The sync. */
 	private final boolean sync;
-	
+
 	/** The size. */
 	private int size;
 
@@ -86,7 +85,6 @@ public class WinPcapQueueTransmitter implements PcapPacketSink, AutoCloseable {
 	 * @see org.jnetpcap.PcapHandler.PacketSink.PcapPacketSink#sinkPacket(java.lang.foreign.Addressable,
 	 *      int)
 	 */
-	@Override
 	public void sinkPacket(Addressable packet, int length) throws PcapException {
 		if (!scope.isAlive())
 			throw new IllegalStateException("transmitter is closed");

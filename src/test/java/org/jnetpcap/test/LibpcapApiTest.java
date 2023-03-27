@@ -356,30 +356,6 @@ class LibpcapApiTest extends AbstractTestBase {
 	}
 
 	/**
-	 * Test method for {@link org.jnetpcap.Pcap#dispatch()}.
-	 * 
-	 * @throws PcapException
-	 */
-	@Test
-	@Tag("offline-capture")
-	@Tag("user-permission")
-	void testDispatch_PacketSource_OfflineHandle() throws PcapException {
-		var pcap = pcapOpenOfflineTestHandle();
-
-		assertTrue(pcap.dispatch() instanceof PcapHandler.PacketSource.PcapPacketSource);
-
-		// Not do safe cast with sanity check
-		if (!(pcap.dispatch() instanceof PcapHandler.PacketSource.PcapPacketSource source))
-			throw new IllegalStateException("instanceof somehow failed!");
-
-		final int PACKET_COUNT = 5;
-		final PcapHandler HANDLER = (ignore, header, packet) -> {/* discard */};
-
-		/* Pcap.dispatch retruns number of packets on success and -2 on breakloop */
-		assertEquals(PACKET_COUNT, source.sourcePackets(PACKET_COUNT, HANDLER));
-	}
-
-	/**
 	 * Test method for
 	 * {@link org.jnetpcap.Pcap#dispatch(int, org.jnetpcap.PcapHandler.OfArray, java.lang.Object)}.
 	 * 
@@ -401,7 +377,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 	/**
 	 * Test method for
-	 * {@link org.jnetpcap.Pcap#dispatch(int, org.jnetpcap.PcapHandler.OfRawPacket)}.
+	 * {@link org.jnetpcap.Pcap#dispatchRaw(int, org.jnetpcap.PcapHandler.OfRawPacket, MemoryAddress)}.
 	 */
 	@Test
 	@Tag("offline-capture")
@@ -410,10 +386,14 @@ class LibpcapApiTest extends AbstractTestBase {
 		var pcap = pcapOpenOfflineTestHandle();
 
 		final int PACKET_COUNT = 5;
-		final PcapHandler HANDLER = (ignore, header, packet) -> {/* discard */};
+		final PcapHandler.NativeCallback HANDLER = (ignore, header, packet) -> {/* discard */};
 
 		/* Pcap.dispatch retruns number of packets on success and -2 on breakloop */
-		assertEquals(PACKET_COUNT, pcap.dispatchWithAccessToRawPacket(PACKET_COUNT, HANDLER));
+		assertEquals(PACKET_COUNT, pcap
+				.dispatchWithAccessToRawPacket(
+						PACKET_COUNT,
+						HANDLER,
+						MemoryAddress.NULL));
 	}
 
 	/**
@@ -932,31 +912,6 @@ class LibpcapApiTest extends AbstractTestBase {
 	}
 
 	/**
-	 * Test method for {@link org.jnetpcap.Pcap#loop()}.
-	 * 
-	 * @throws PcapException
-	 */
-	@Test
-	@Tag("offline-capture")
-	@Tag("user-permission")
-	void testLoop_PacketSource_OfflineHandle() throws PcapException {
-		var pcap = pcapOpenOfflineTestHandle();
-
-		assertTrue(pcap.loop() instanceof PcapHandler.PacketSource.PcapPacketSource);
-
-		// Not do safe cast with sanity check
-		if (!(pcap.loop() instanceof PcapHandler.PacketSource.PcapPacketSource source))
-			throw new IllegalStateException("instanceof somehow failed!");
-
-		final int PACKET_COUNT = 5;
-		final int LOOP_OK_STATUS = 0;
-		final PcapHandler HANDLER = (user, header, packet) -> {/* discard */};
-
-		/* Pcap.loop returns 0 on success unlike Pcap.dispatch, -2 on breakloop */
-		assertEquals(LOOP_OK_STATUS, source.sourcePackets(PACKET_COUNT, HANDLER));
-	}
-
-	/**
 	 * Test method for
 	 * {@link org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.OfArray, java.lang.Object)}.
 	 */
@@ -977,7 +932,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 	/**
 	 * Test method for
-	 * {@link org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.OfRawPacket)}.
+	 * {@link org.jnetpcap.Pcap#loopRaw(int, org.jnetpcap.PcapHandler.OfRawPacket, MemoryAddress)}.
 	 */
 	@Test
 	@Tag("offline-capture")
@@ -987,7 +942,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		final int PACKET_COUNT = 5;
 		final int LOOP_OK_STATUS = 0;
-		final PcapHandler HANDLER = (user, header, packet) -> {/* discard */};
+		final PcapHandler.NativeCallback HANDLER = (user, header, packet) -> {/* discard */};
 
 		assertEquals(LOOP_OK_STATUS, pcap.loopWithAccessToRawPacket(PACKET_COUNT, HANDLER));
 	}

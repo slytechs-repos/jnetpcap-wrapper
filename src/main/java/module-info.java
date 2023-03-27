@@ -243,4 +243,7 @@ module org.jnetpcap {
 	exports org.jnetpcap.windows;
 	exports org.jnetpcap.constant;
 	exports org.jnetpcap.util;
+
+	exports org.jnetpcap.internal to
+			com.slytechs.jnetpcap.packet;
 }

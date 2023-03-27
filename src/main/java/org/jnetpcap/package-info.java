@@ -120,10 +120,10 @@ Packet [timestamp=2011-03-01T20:45:13.313Z, wirelen=200  caplen=200  {00:26:62:2
  * First the {@link Pcap#loop(int, org.jnetpcap.PcapHandler.OfArray, Object)} is
  * used to dispatch 1 packet. A single simple dispatcher type is provided
  * directly with Pcap class, as it is per native loop/dispatch calls available
- * from libpcap. Then a {@link org.jnetpcap.util.PcapReceiver} is setup with
+ * from libpcap. Then a {@link org.jnetpcap.internal.PcapReceiver} is setup with
  * additional capabilities and more advanced dispatch methods. Notice that both
  * copy and no-copy of packet data handlers are available through
- * {@link org.jnetpcap.util.PcapReceiver}.
+ * {@link org.jnetpcap.internal.PcapReceiver}.
  * </p>
  * 
  * @author Sly Technologies
