@@ -72,13 +72,8 @@ try (Pcap pcap = Pcap.openOffline(PCAP_FILE)) {
 
 	pcap.setFilter(filter);
 
-	pcap.loop(1, PcapExample1::nextDefault, "Hello, this is copy to byte[] from Pcap class dispatch");
-
-	PcapReceiver handler = new PcapReceiver(pcap::loop);
-
-	handler.forEachCopy(1, PcapExample1::nextDefault, "Hello, this is copy to byte[] dispatch");
-	handler.forEachCopy(1, PcapExample1::nextByteBuffer, "Helllo, this is copy to ByteBuffer dispatch");
-	handler.forEachDirect(1, PcapExample1::nextByteBuffer, "Hello, this is no-copy, direct ByteBuffer dispatch");
+	pcap.loop(1, PcapExample1::nextDefault, "Hello, this is a copy to byte[] dispatch");
+	pcap.loop(1, PcapExample1::nextByteBuffer, "Hello, this is a no-copy to ByteBuffer dispatch");
 }
 ...
 private static void nextByteBuffer(String message, PcapHeader header, ByteBuffer packet) {
@@ -106,25 +101,11 @@ private static void nextDefault(String message, PcapHeader header, byte[] packet
  * Output:
  * 
  * <pre>
-Hello, this is copy to byte[] from Pcap class dispatch
+Hello, this is a copy to byte[] dispatch
 Packet [timestamp=2011-03-01T20:45:13.266Z, wirelen=74   caplen=74   {00:26:62:2f:47:87}]
-Hello, this is copy to byte[] dispatch
+Hello, this is a no-copy to ByteBuffer dispatch
 Packet [timestamp=2011-03-01T20:45:13.313Z, wirelen=74   caplen=74   {00:1d:60:b3:01:84}]
-Helllo, this is copy to ByteBuffer dispatch
-Packet [timestamp=2011-03-01T20:45:13.313Z, wirelen=66   caplen=66   {00:26:62:2f:47:87}]
-Hello, this is no-copy, direct ByteBuffer dispatch
-Packet [timestamp=2011-03-01T20:45:13.313Z, wirelen=200  caplen=200  {00:26:62:2f:47:87}]
  * </pre>
- * 
- * <p>
- * First the {@link Pcap#loop(int, org.jnetpcap.PcapHandler.OfArray, Object)} is
- * used to dispatch 1 packet. A single simple dispatcher type is provided
- * directly with Pcap class, as it is per native loop/dispatch calls available
- * from libpcap. Then a {@link org.jnetpcap.internal.PcapReceiver} is setup with
- * additional capabilities and more advanced dispatch methods. Notice that both
- * copy and no-copy of packet data handlers are available through
- * {@link org.jnetpcap.internal.PcapReceiver}.
- * </p>
  * 
  * @author Sly Technologies
  * @author repos@slytechs.com

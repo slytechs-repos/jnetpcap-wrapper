@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.slytechs.jnet</groupId>
 	<artifactId>jnetpcap</artifactId>
-	<version>2.0.0-alpha.1</version>
+	<version>2.0.SNAPSHOT</version>
 	<name>jNetPcap</name>
 	<description>A Java wrapper for native libpcap library</description>
 	<url>https://www.jnetpcap.org</url>
@@ -116,6 +116,7 @@
 								${java.preview}
 					</additionalOptions>
 					<show>public</show>
+          			<excludePackageNames>*.internal</excludePackageNames>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -155,6 +156,7 @@
 					<additionalOptions>
 								${java.preview}
 					</additionalOptions>
+          			<excludePackageNames>*.internal</excludePackageNames>
 				</configuration>
 				<reportSets>
 					<reportSet>
