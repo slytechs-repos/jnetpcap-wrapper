@@ -91,11 +91,11 @@ public class PcapHeader {
 		return (tvSec() << 32 | tvUsec());
 	}
 
-	public long toTimestampEpochMilli() {
-		return toTimestampEpochMilli(false);
+	public long toEpochMilli() {
+		return toEpochMilli(false);
 	}
 
-	public long toTimestampEpochMilli(boolean nanoTime) {
+	public long toEpochMilli(boolean nanoTime) {
 		if (nanoTime)
 			return tvSec() * NANO_TIME_SCALE + tvUsec();
 		else
