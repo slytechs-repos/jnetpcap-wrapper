@@ -19,6 +19,7 @@ package org.jnetpcap.internal;
 
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.MemorySession;
 
 /**
  * A proxy PcapHandler, which receives packets from native pcap handle and
@@ -71,9 +72,12 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	private final MemoryAddress pcapHandle;
 	private NativeCallback sink;
 
+	protected final MemorySession session;
+
 	public StandardPcapDispatcher(MemoryAddress pcapHandle) {
 		this.pcapHandle = pcapHandle;
-		this.pcapCallbackStub = pcap_handler.virtualStubPointer(this);
+		this.session = MemorySession.openShared();
+		this.pcapCallbackStub = pcap_handler.virtualStubPointer(this, this.session);
 	}
 
 	/**
@@ -82,6 +86,14 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	@Override
 	public int captureLength(MemoryAddress headerAddress) {
 		return ABI.captureLength(headerAddress);
+	}
+
+	/**
+	 * @see java.lang.AutoCloseable#close()
+	 */
+	@Override
+	public void close() {
+		session.close();
 	}
 
 	@Override

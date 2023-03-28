@@ -245,5 +245,5 @@ module org.jnetpcap {
 	exports org.jnetpcap.util;
 
 	exports org.jnetpcap.internal to
-			com.slytechs.jnetpcap.packet;
+			com.slytechs.jnet.jnetpcap.pro;
 }

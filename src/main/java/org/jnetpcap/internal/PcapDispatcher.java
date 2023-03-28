@@ -21,8 +21,8 @@ import java.lang.foreign.MemoryAddress;
 
 import org.jnetpcap.PcapHandler.NativeCallback;
 
-public interface PcapDispatcher extends NativeCallback {
-	
+public interface PcapDispatcher extends NativeCallback, AutoCloseable {
+
 	int captureLength(MemoryAddress address);
 
 	int dispatchNative(int count, NativeCallback handler, MemoryAddress user);
@@ -35,4 +35,6 @@ public interface PcapDispatcher extends NativeCallback {
 
 	int loopRaw(int count, MemoryAddress callbackFunc, MemoryAddress userData);
 
+	@Override
+	void close();
 }

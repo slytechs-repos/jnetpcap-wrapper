@@ -467,6 +467,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	protected void setDispatcher(PcapDispatcher newDispatcher) {
+		this.dispatcher.close(); // Close old dispatcher
 		this.dispatcher = Objects.requireNonNull(newDispatcher, "dispatcher");
 	}
 
@@ -480,7 +481,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	@Override
 	public final void close() {
 		pcap_close.invokeVoid(getPcapHandle());
-
+		dispatcher.close();
+		
 		closed = true;
 	}
 
