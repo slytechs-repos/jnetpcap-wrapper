@@ -18,7 +18,6 @@
 package org.jnetpcap;
 
 import static java.util.Objects.*;
-import static org.jnetpcap.PcapHeader.*;
 import static org.jnetpcap.constant.PcapConstants.*;
 import static org.jnetpcap.internal.UnsafePcapHandle.*;
 
@@ -39,6 +38,7 @@ import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapDispatcher;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.internal.PcapStatRecord;
 import org.jnetpcap.internal.StandardPcapDispatcher;
 import org.jnetpcap.util.NetIp4Address;
@@ -446,7 +446,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * are valid only from call to call and then out of pcap scope.
 	 */
 	private final MemorySegment PCAP0_4_HEADER_BUFFER = MemorySession.openImplicit()
-			.allocate(PCAP_HEADER_PADDED_LENGTH);
+			.allocate(PcapHeaderABI.nativeAbi().headerLength());
 
 	/**
 	 * Packet dispatcher implementation. The standard dispatcher just calls
@@ -482,7 +482,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	public final void close() {
 		pcap_close.invokeVoid(getPcapHandle());
 		dispatcher.close();
-		
+
 		closed = true;
 	}
 
@@ -604,7 +604,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 		return dispatcher.dispatchNative(count, (u, header, bytes) -> {
 			try (var scope = newScope()) {
-				PcapHeader hdr = PcapHeader.newReadOnlyInstance(header);
+				PcapHeader hdr = new PcapHeader(header, scope);
 
 				int caplen = hdr.captureLength();
 				assert caplen < PcapConstants.MAX_SNAPLEN : "caplen/wirelen out of range " + caplen;
@@ -721,7 +721,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 		return dispatcher.loopNative(count, (u, header, bytes) -> {
 			try (var scope = newScope()) {
-				PcapHeader hdr = PcapHeader.newReadOnlyInstance(header);
+				PcapHeader hdr = new PcapHeader(header, scope);
 
 				int caplen = hdr.captureLength();
 				assert caplen < PcapConstants.MAX_SNAPLEN : "caplen/wirelen out of range " + caplen;

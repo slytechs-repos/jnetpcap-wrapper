@@ -56,7 +56,7 @@ public record PcapPacketRef(Addressable header, Addressable data) {
 	 * @return the byte[] containing the selected bytes
 	 */
 	public byte[] toArray(int offset, int length) {
-		var hdr = PcapHeader.ofAddress(header);
+		var hdr = new PcapHeader(header.address(), MemorySession.openShared());
 
 		if (length + offset > hdr.captureLength())
 			length = hdr.captureLength() - offset;

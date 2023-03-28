@@ -121,15 +121,14 @@ abstract class AbstractTestBase {
 
 		private static MemorySegment createHeaderAsSegment(int length) {
 			long epochMillis = System.currentTimeMillis();
-			long TV_SEC = epochMillis / 1000;
-			long TV_USEC = (epochMillis % 1000) + (System.nanoTime() % 1000_1000) / 1000;
+			int TV_SEC = (int) (epochMillis / 1000);
+			int TV_USEC = (int) ((epochMillis % 1000) + (System.nanoTime() % 1000_1000) / 1000);
 			int CAPLEN = length;
 			int WIRELEN = length;
 
 			/* lets make our native header structure from values */
-			final MemorySegment HEADER = (MemorySegment) PcapHeader
-					.newInstance(TV_SEC, TV_USEC, CAPLEN, WIRELEN)
-					.asMemoryReference();
+			final MemorySegment HEADER = new PcapHeader(TV_SEC, TV_USEC, CAPLEN, WIRELEN)
+					.asMemorySegment();
 
 			return HEADER;
 		}
@@ -151,7 +150,7 @@ abstract class AbstractTestBase {
 			if (ref == null)
 				return null;
 
-			var hdr = PcapHeader.ofAddress(ref.header());
+			var hdr = new PcapHeader(ref.header().address(), scope);
 			var pkt = MemorySegment.ofAddress(ref.data().address(), hdr.captureLength(), scope);
 
 			return new TestPacket((MemorySegment) hdr.asMemoryReference(), pkt);
