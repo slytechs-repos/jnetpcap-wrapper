@@ -31,8 +31,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.jnetpcap.Pcap;
@@ -40,6 +40,7 @@ import org.jnetpcap.PcapException;
 import org.jnetpcap.PcapHeader;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDlt;
+import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.internal.UnsafePcapHandle;
 import org.jnetpcap.test.AbstractTestBase.TestPacket.PacketTemplates;
 import org.jnetpcap.util.PcapPacketRef;
@@ -62,7 +63,7 @@ abstract class AbstractTestBase {
 	 * A private packet container using in unit testing with 2 simple fields, header
 	 * and data.
 	 */
-	protected record TestPacket(MemorySegment header, MemorySegment data) {
+	protected record TestPacket(PcapHeaderABI abi, MemorySegment header, MemorySegment data) {
 
 		public static final int SRC_IP_OFFSET = 14 + 12;
 		public static final int DST_IP_OFFSET = 14 + 16;
@@ -77,10 +78,10 @@ abstract class AbstractTestBase {
 			 * @param scope        the scope
 			 * @return the test packet
 			 */
-			public TestPacket makePacket(Supplier<byte[]> dataSupplier, MemorySession scope) {
+			public TestPacket makePacket(PcapHeaderABI abi, Supplier<byte[]> dataSupplier, MemorySession scope) {
 				final byte[] packetBytes = dataSupplier.get();
 
-				return TestPacket.fromArray(packetBytes, scope);
+				return TestPacket.fromArray(abi, packetBytes, scope);
 			}
 
 			/**
@@ -113,13 +114,13 @@ abstract class AbstractTestBase {
 			 * @param scope the scope for native memory allocation
 			 * @return the test packet containing a header and data in native memory
 			 */
-			public TestPacket tcpPacket(MemorySession scope) {
-				return makePacket(this::tcpArray, scope);
+			public TestPacket tcpPacket(PcapHeaderABI abi, MemorySession scope) {
+				return makePacket(abi, this::tcpArray, scope);
 			}
 
 		}
 
-		private static MemorySegment createHeaderAsSegment(int length) {
+		private static MemorySegment createHeaderAsSegment(PcapHeaderABI abi, int length) {
 			long epochMillis = System.currentTimeMillis();
 			int TV_SEC = (int) (epochMillis / 1000);
 			int TV_USEC = (int) ((epochMillis % 1000) + (System.nanoTime() % 1000_1000) / 1000);
@@ -127,37 +128,37 @@ abstract class AbstractTestBase {
 			int WIRELEN = length;
 
 			/* lets make our native header structure from values */
-			final MemorySegment HEADER = new PcapHeader(TV_SEC, TV_USEC, CAPLEN, WIRELEN)
+			final MemorySegment HEADER = new PcapHeader(abi, TV_SEC, TV_USEC, CAPLEN, WIRELEN)
 					.asMemorySegment();
 
 			return HEADER;
 		}
 
-		public static TestPacket fromArray(byte[] packetData, MemorySession scope) {
-			return fromArray(packetData, 0, packetData.length, scope);
+		public static TestPacket fromArray(PcapHeaderABI abi, byte[] packetData, MemorySession scope) {
+			return fromArray(abi, packetData, 0, packetData.length, scope);
 		}
 
-		public static TestPacket fromArray(byte[] packetData, int offset, int length, MemorySession scope) {
+		public static TestPacket fromArray(PcapHeaderABI abi, byte[] packetData, int offset, int length, MemorySession scope) {
 			MemorySegment packetSegment = scope.allocate(length);
 			MemorySegment.copy(packetData, offset, packetSegment, ValueLayout.JAVA_BYTE, 0, length);
 
-			MemorySegment headerSegment = createHeaderAsSegment(length);
+			MemorySegment headerSegment = createHeaderAsSegment(abi, length);
 
-			return new TestPacket(headerSegment, packetSegment);
+			return new TestPacket(abi, headerSegment, packetSegment);
 		}
 
-		public static TestPacket fromPcapPacketRef(PcapPacketRef ref, MemorySession scope) {
+		public static TestPacket fromPcapPacketRef(PcapHeaderABI abi, PcapPacketRef ref, MemorySession scope) {
 			if (ref == null)
 				return null;
 
-			var hdr = new PcapHeader(ref.header().address(), scope);
+			var hdr = new PcapHeader(abi, ref.header().address(), scope);
 			var pkt = MemorySegment.ofAddress(ref.data().address(), hdr.captureLength(), scope);
 
-			return new TestPacket((MemorySegment) hdr.asMemoryReference(), pkt);
+			return new TestPacket(abi, hdr.asMemorySegment(), pkt);
 		}
-
+		
 		public PcapPacketRef getPacket() {
-			return new PcapPacketRef(header, data);
+			return new PcapPacketRef(abi, header, data);
 		}
 
 		public byte[] toArray() {
@@ -207,10 +208,11 @@ abstract class AbstractTestBase {
 		Joinable transmitPacketWithDelay(long delayInMillis);
 	}
 
-	protected static final String OFFLINE_FILE = "src/test/pcaps/HTTP.cap";
+//	protected static final String OFFLINE_FILE = "src/test/pcaps/HTTP.cap";
+	protected static final String OFFLINE_FILE = "/opt/pcaps/jnetpcap-ticket-28-den-krupsky/dump den-krupsky.pcap";
 
 	protected Runnable cleanupAction;
-
+	
 	protected final PacketTemplates templates = new PacketTemplates();
 
 	/**
@@ -344,10 +346,10 @@ abstract class AbstractTestBase {
 	 *
 	 * @return the test transmitter
 	 */
-	protected TestTransmitter setupPacketTransmitter(Function<MemorySession, TestPacket> packetFactory,
+	protected TestTransmitter setupPacketTransmitter(PcapHeaderABI abi, BiFunction<PcapHeaderABI, MemorySession, TestPacket> packetFactory,
 			BiConsumer<MemorySegment, Integer> sendAction) {
 		final MemorySession scope = MemorySession.openShared();
-		final TestPacket packetToSend = packetFactory.apply(scope);
+		final TestPacket packetToSend = packetFactory.apply(abi, scope);
 
 		final ScheduledExecutorService scheduleExecutor = Executors.newScheduledThreadPool(1);
 

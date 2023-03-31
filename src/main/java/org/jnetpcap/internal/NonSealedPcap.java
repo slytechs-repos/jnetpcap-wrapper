@@ -33,8 +33,8 @@ public non-sealed class NonSealedPcap extends Pcap1_10 {
 	 * @param pcapHandle
 	 * @param name
 	 */
-	protected NonSealedPcap(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected NonSealedPcap(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 }

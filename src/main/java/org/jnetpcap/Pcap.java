@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.BiFunction;
 
+import org.jnetpcap.Pcap0_4.PcapSupplier;
 import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDirection;
@@ -42,6 +42,7 @@ import org.jnetpcap.constant.PcapSrc;
 import org.jnetpcap.constant.PcapTStampPrecision;
 import org.jnetpcap.constant.PcapTstampType;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.util.NetIp4Address;
 import org.jnetpcap.util.PcapPacketRef;
 import org.jnetpcap.util.PcapVersionException;
@@ -484,8 +485,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * @param pcapHandle the pcap handle
 		 * @param name       the name
 		 */
-		Linux(MemoryAddress pcapHandle, String name) {
-			super(pcapHandle, name);
+		Linux(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+			super(pcapHandle, name, abi);
 		}
 
 		/**
@@ -713,8 +714,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * @param pcapHandle the pcap handle
 		 * @param name       the name
 		 */
-		Unix(MemoryAddress pcapHandle, String name) {
-			super(pcapHandle, name);
+		Unix(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+			super(pcapHandle, name, abi);
 		}
 
 		/**
@@ -1201,8 +1202,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @return the bi function
 	 */
 	@SuppressWarnings("unchecked")
-	private static <T extends Pcap> BiFunction<MemoryAddress, String, T> latest() {
-		return (pcap, name) -> (T) new Pcap1_10(pcap, name);
+	private static <T extends Pcap> PcapSupplier<T> latest() {
+		return (pcap, name, abi) -> (T) new Pcap1_10(pcap, name, abi);
 	}
 
 	/**
@@ -1570,14 +1571,17 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	/** The name of this pcap handle. */
 	private final String name;
 
+	protected final PcapHeaderABI pcapHeaderABI;
+
 	/**
 	 * Instantiates a new pcap.
 	 *
 	 * @param pcapHandle the pcap handle or pcap_t * address.
 	 * @param name       the name of this pcap handle.
 	 */
-	protected Pcap(MemoryAddress pcapHandle, String name) {
+	protected Pcap(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
 		this.name = name;
+		this.pcapHeaderABI = abi;
 		this.pcapHandle = requireNonNull(pcapHandle, "pcapHandle"); //$NON-NLS-1$
 	}
 
@@ -3518,5 +3522,12 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	public String toString() {
 		return "%s [name=%s, pcapAddress=%s]"
 				.formatted(getClass().getSimpleName(), name, getPcapHandle());
+	}
+
+	/**
+	 * @return the pcapHeaderABI
+	 */
+	public PcapHeaderABI getPcapHeaderABI() {
+		return pcapHeaderABI;
 	}
 }

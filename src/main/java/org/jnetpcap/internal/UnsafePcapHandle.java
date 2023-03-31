@@ -96,8 +96,8 @@ public non-sealed class UnsafePcapHandle extends Pcap1_10 {
 	/**
 	 * @param pcapHandle
 	 */
-	protected UnsafePcapHandle(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected UnsafePcapHandle(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 	public MemoryAddress address() {

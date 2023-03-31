@@ -17,14 +17,15 @@
  */
 package org.jnetpcap.internal;
 
-import static java.lang.foreign.ValueLayout.JAVA_INT;
-import static java.nio.ByteOrder.BIG_ENDIAN;
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import static java.nio.ByteOrder.*;
 
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout.OfInt;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * Configures different ABI (Application Binary Interfaces) for access to binary
@@ -42,13 +43,19 @@ import java.nio.ByteOrder;
  *
  */
 public enum PcapHeaderABI {
+
 	PCAP_HEADER_COMPACT_LE(0, 4, 8, 12, LITTLE_ENDIAN), // 16 byte size
 	PCAP_HEADER_COMPACT_BE(0, 4, 8, 12, BIG_ENDIAN), // 16 byte size
 	PCAP_HEADER_PADDED_LE(0, 8, 16, 20, LITTLE_ENDIAN), // 24 byte size due to padding
-	PCAP_HEADER_PADDED_BE(0, 8, 16, 20, BIG_ENDIAN); // 24 byte size due to padding
+	PCAP_HEADER_PADDED_BE(0, 8, 16, 20, BIG_ENDIAN) // 24 byte size due to padding
+
+	;
 
 	private static final PcapHeaderABI NATIVE_ABI;
 	private static final int BITMASK16 = 0xFFFFFFFF;
+	private static final int MIN_FRAME_SIZE = 14;
+	private static final int MAX_FRAME_SIZE = 16 * 1024;
+
 	static {
 		if (NativeABI.is32bit() && (ByteOrder.nativeOrder() == LITTLE_ENDIAN))
 			NATIVE_ABI = PCAP_HEADER_COMPACT_LE;
@@ -64,8 +71,43 @@ public enum PcapHeaderABI {
 
 	}
 
+	private int validateLength(int length) {
+		if (length < MIN_FRAME_SIZE || length > MAX_FRAME_SIZE)
+			throw new IllegalStateException("invalid length [%d] from PcapHeaderABI [%s]"
+					.formatted(length, name()));
+
+		return length;
+	}
+
+	public static PcapHeaderABI selectLiveAbi() {
+		return selectAbi(true, false);
+	}
+
+	public static PcapHeaderABI selectDeadAbi() {
+		return selectAbi(true, false);
+	}
+
+	public static PcapHeaderABI selectAbi(boolean isLiveCapture, boolean isSwapped) {
+		if (isLiveCapture)
+			return nativeAbi();
+		else
+			return compactAbi(isSwapped);
+	}
+
 	public static PcapHeaderABI compactAbi() {
 		return compactAbi(ByteOrder.nativeOrder());
+	}
+
+	public static PcapHeaderABI compactAbi(boolean isSwapped) {
+		if (!isSwapped)
+			return compactAbi(ByteOrder.nativeOrder());
+
+		ByteOrder swappedOrder = (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN)
+				? ByteOrder.BIG_ENDIAN
+				: ByteOrder.LITTLE_ENDIAN;
+
+		return compactAbi(swappedOrder);
+
 	}
 
 	public static PcapHeaderABI compactAbi(ByteOrder bo) {
@@ -132,7 +174,7 @@ public enum PcapHeaderABI {
 	}
 
 	public int captureLength(MemoryAddress address) {
-		return address.get(layout, captureLengthOffset) & BITMASK16;
+		return validateLength(address.get(layout, captureLengthOffset) & BITMASK16);
 	}
 
 	public void captureLength(MemoryAddress address, int newLength) {
@@ -140,7 +182,11 @@ public enum PcapHeaderABI {
 	}
 
 	public int captureLength(MemorySegment mseg) {
-		return mseg.get(layout, captureLengthOffset) & BITMASK16;
+		return validateLength(mseg.get(layout, captureLengthOffset) & BITMASK16);
+	}
+
+	public int captureLength(ByteBuffer buffer) {
+		return validateLength(buffer.getShort(captureLengthOffset) & BITMASK16);
 	}
 
 	public void captureLength(MemorySegment mseg, int newLength) {
@@ -205,7 +251,11 @@ public enum PcapHeaderABI {
 	}
 
 	public int wireLength(MemoryAddress address) {
-		return address.get(layout, wireLengthOffset) & BITMASK16;
+		return validateLength(address.get(layout, wireLengthOffset) & BITMASK16);
+	}
+
+	public int wireLength(ByteBuffer buffer) {
+		return validateLength(buffer.getInt(wireLengthOffset) & BITMASK16);
 	}
 
 	public void wireLength(MemoryAddress address, int newLength) {
@@ -213,7 +263,7 @@ public enum PcapHeaderABI {
 	}
 
 	public int wireLength(MemorySegment mseg) {
-		return mseg.get(layout, wireLengthOffset) & BITMASK16;
+		return validateLength(mseg.get(layout, wireLengthOffset) & BITMASK16);
 	}
 
 	public void wireLength(MemorySegment mseg, int newLength) {

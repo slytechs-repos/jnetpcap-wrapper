@@ -21,7 +21,6 @@ import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.MemorySession;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 import org.jnetpcap.internal.PcapHeaderABI;
 
@@ -33,16 +32,23 @@ import org.jnetpcap.internal.PcapHeaderABI;
  */
 public class PcapHeader {
 
-	private static final PcapHeaderABI ABI = PcapHeaderABI.nativeAbi();
+	private static ByteBuffer newInitializedBuffer(
+			PcapHeaderABI abi, int tvSec, int tvUsec, int captureLength,
+			int wireLength) {
+		ByteBuffer buffer = allocateBuffer(abi);
 
-	private static ByteBuffer newInitializedBuffer(int tvSec, int tvUsec, int captureLength, int wireLength) {
-		ByteBuffer buffer = ByteBuffer.allocateDirect(ABI.headerLength())
-				.order(ByteOrder.nativeOrder());
+		buffer.putInt(abi.tvSecOffset(), tvSec);
+		buffer.putInt(abi.tvUsecOffset(), tvUsec);
+		buffer.putInt(abi.captureLengthOffset(), captureLength);
+		buffer.putInt(abi.wireLengthOffset(), wireLength);
 
-		buffer.putInt(ABI.tvSecOffset(), tvSec);
-		buffer.putInt(ABI.tvUsecOffset(), tvUsec);
-		buffer.putInt(ABI.captureLengthOffset(), captureLength);
-		buffer.putInt(ABI.wireLengthOffset(), wireLength);
+		return buffer;
+	}
+
+	private static ByteBuffer allocateBuffer(PcapHeaderABI abi) {
+		ByteBuffer buffer = ByteBuffer
+				.allocateDirect(abi.headerLength())
+				.order(abi.order());
 
 		return buffer;
 	}
@@ -51,34 +57,46 @@ public class PcapHeader {
 	private static final int NANO_TIME_SCALE = 1000_000_000;
 
 	private final ByteBuffer buffer;
+	private final PcapHeaderABI abi;
 
-	public PcapHeader() {
-		this(ByteBuffer.allocateDirect(ABI.headerLength()).order(ByteOrder.nativeOrder()));
+	public PcapHeader(PcapHeaderABI abi) {
+		this.abi = abi;
+		this.buffer = allocateBuffer(abi);
 	}
 
-	public PcapHeader(int tvSec, int tvUsec, int captureLength, int wireLength) {
-		this(newInitializedBuffer(tvSec, tvUsec, captureLength, wireLength));
+	public PcapHeader(PcapHeaderABI abi, int tvSec, int tvUsec, int captureLength, int wireLength) {
+		this.abi = abi;
+		this.buffer = newInitializedBuffer(abi, tvSec, tvUsec, captureLength, wireLength);
 	}
 
-	public PcapHeader(byte[] array, int offset) {
-		this.buffer = ByteBuffer.wrap(array, offset, ABI.headerLength());
+	public PcapHeader(PcapHeaderABI abi, byte[] array, int offset) {
+		this.abi = abi;
+		this.buffer = ByteBuffer
+				.wrap(array, offset, abi.headerLength())
+				.order(abi.order());
 	}
 
-	public PcapHeader(ByteBuffer headerBuffer) {
-		this.buffer = headerBuffer;
+	public PcapHeader(PcapHeaderABI abi, ByteBuffer headerBuffer) {
+		this.abi = abi;
+		this.buffer = headerBuffer.order(abi.order());
 	}
 
-	public PcapHeader(MemoryAddress headerAddress, MemorySession session) {
-		this.buffer = MemorySegment.ofAddress(headerAddress, ABI.headerLength(), session)
-				.asByteBuffer();
+	public PcapHeader(PcapHeaderABI abi, MemoryAddress headerAddress, MemorySession session) {
+		this.abi = abi;
+		this.buffer = MemorySegment.ofAddress(headerAddress, abi.headerLength(), session)
+				.asByteBuffer()
+				.order(abi.order());
 	}
 
-	public PcapHeader(MemorySegment headerSegment) {
-		this.buffer = headerSegment.asByteBuffer();
+	public PcapHeader(PcapHeaderABI abi, MemorySegment headerSegment) {
+		this.abi = abi;
+		this.buffer = headerSegment
+				.asByteBuffer()
+				.order(abi.order());
 	}
 
 	public int captureLength() {
-		return buffer.getInt(ABI.captureLengthOffset());
+		return abi.captureLength(buffer);
 	}
 
 	/**
@@ -103,15 +121,15 @@ public class PcapHeader {
 	}
 
 	public int tvSec() {
-		return buffer.getInt(ABI.tvSecOffset());
+		return buffer.getInt(abi.tvSecOffset());
 	}
 
 	public int tvUsec() {
-		return buffer.getInt(ABI.tvUsecOffset());
+		return buffer.getInt(abi.tvUsecOffset());
 	}
 
 	public int wireLength() {
-		return buffer.getInt(ABI.wireLengthOffset());
+		return abi.wireLength(buffer);
 	}
 
 	public MemoryAddress asMemoryReference() {

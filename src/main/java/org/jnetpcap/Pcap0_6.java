@@ -19,11 +19,11 @@ package org.jnetpcap;
 
 import java.lang.foreign.MemoryAddress;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
  * Provides Pcap API method calls for up to libpcap version 0.6
@@ -137,12 +137,15 @@ public sealed class Pcap0_6 extends Pcap0_5 permits Pcap0_7 {
 	 * @throws PcapException any errors
 	 * @since libpcap 0.6
 	 */
-	protected static <T extends Pcap> T openDead(BiFunction<MemoryAddress, String, T> factory, PcapDlt linktype,
+	protected static <T extends Pcap> T openDead(PcapSupplier<T> factory, PcapDlt linktype,
 			int snaplen)
 			throws PcapException {
 		MemoryAddress pcapPointer = pcap_open_dead.invokeObj(linktype.getAsInt(), snaplen);
 
-		return factory.apply(pcapPointer, "dead:dlt=%s".formatted(linktype));
+		return factory.newPcap(
+				pcapPointer,
+				"dead:dlt=%s".formatted(linktype),
+				PcapHeaderABI.selectDeadAbi());
 	}
 
 	/**
@@ -202,8 +205,8 @@ public sealed class Pcap0_6 extends Pcap0_5 permits Pcap0_7 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the name
 	 */
-	protected Pcap0_6(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected Pcap0_6(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 }

@@ -24,6 +24,7 @@ import java.lang.foreign.ValueLayout;
 
 import org.jnetpcap.PcapHeader;
 import org.jnetpcap.constant.PcapConstants;
+import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
  * A utility class which holds references to native pcap header and native pcap
@@ -36,7 +37,7 @@ import org.jnetpcap.constant.PcapConstants;
  * @author repos@slytechs.com
  * @author mark
  */
-public record PcapPacketRef(Addressable header, Addressable data) {
+public record PcapPacketRef(PcapHeaderABI abi, Addressable header, Addressable data) {
 
 	/**
 	 * Returns byte[] representation of the entire packet.
@@ -56,7 +57,7 @@ public record PcapPacketRef(Addressable header, Addressable data) {
 	 * @return the byte[] containing the selected bytes
 	 */
 	public byte[] toArray(int offset, int length) {
-		var hdr = new PcapHeader(header.address(), MemorySession.openShared());
+		var hdr = new PcapHeader(abi, header.address(), MemorySession.openShared());
 
 		if (length + offset > hdr.captureLength())
 			length = hdr.captureLength() - offset;
