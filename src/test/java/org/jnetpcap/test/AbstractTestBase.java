@@ -208,8 +208,7 @@ abstract class AbstractTestBase {
 		Joinable transmitPacketWithDelay(long delayInMillis);
 	}
 
-//	protected static final String OFFLINE_FILE = "src/test/pcaps/HTTP.cap";
-	protected static final String OFFLINE_FILE = "/opt/pcaps/jnetpcap-ticket-28-den-krupsky/dump den-krupsky.pcap";
+	protected static final String OFFLINE_FILE = "src/test/pcaps/HTTP.cap";
 
 	protected Runnable cleanupAction;
 	
