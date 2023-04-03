@@ -2,6 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.slytechs.jnet</groupId>
 	<artifactId>jnetpcap</artifactId>
+	<!-- mvn versions:set -DnewVersion=_new_version_ -->
 	<version>2.0.0-alpha.1</version>
 	<name>jNetPcap</name>
 	<description>A Java wrapper for native libpcap library</description>
