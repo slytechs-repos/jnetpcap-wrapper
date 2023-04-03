@@ -566,10 +566,6 @@ class LibpcapApiTest extends AbstractTestBase {
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
 
-//				System.out.printf("TestPacket:: caplen=%d wirelen=%d%n",
-//						abi.captureLength(packet.getPacket().header().address()),
-//						abi.wireLength(packet.getPacket().header().address()));
-
 				/* Check if we have the just transmitted packet */
 				if ((packet != null) && Arrays.equals(sentSrcAddress, packet.ipSrc())) {
 					CAPTURED_PACKET = packet.toArray();
@@ -934,15 +930,11 @@ class LibpcapApiTest extends AbstractTestBase {
 	@Tag("offline-capture")
 	@Tag("user-permission")
 	void testLoop_OfArray_OfflineHandle() throws PcapException {
-//		System.setProperty(LibraryPolicy.SYSTEM_PROPERTY_ABI, "PCAP_HEADER_COMPACT_LE");
 		var pcap = pcapOpenOfflineTestHandle();
 
 		final int PACKET_COUNT = 5;
 		final int LOOP_OK_STATUS = 0;
 		final PcapHandler.OfArray<String> HANDLER = (user, header, packet) -> {/* discard */};
-//		final PcapHandler.OfArray<String> HANDLER = (user, header, packet) -> {
-//			System.out.printf("testLoop_OfArray_OfflineHandle:: caplen=%d ABI=%s%n", header.captureLength(), pcap.getPcapHeaderABI());
-//		};
 		final String USER = "";
 
 		/* Pcap.loop returns 0 on success unlike Pcap.dispatch, -2 on breakloop */
