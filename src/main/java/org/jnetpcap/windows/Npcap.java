@@ -31,6 +31,7 @@ import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapTStampPrecision;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
  * Npcap, is a wrapper, around libpcap implementation for Microsoft Windows.
@@ -264,8 +265,8 @@ public final class Npcap extends WinPcap {
 	 *
 	 * @param pcapHandle the pcap handle
 	 */
-	Npcap(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	Npcap(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 }

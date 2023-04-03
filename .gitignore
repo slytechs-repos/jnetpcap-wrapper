@@ -2,3 +2,5 @@ target
 .classpath
 .project
 .settings/
+/bin/
+/pom.xml.versionsBackup

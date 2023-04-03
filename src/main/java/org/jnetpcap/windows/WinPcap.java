@@ -17,13 +17,9 @@
  */
 package org.jnetpcap.windows;
 
-import static java.lang.foreign.MemoryAddress.NULL;
-import static java.lang.foreign.ValueLayout.ADDRESS;
-import static java.lang.foreign.ValueLayout.JAVA_INT;
-import static org.jnetpcap.constant.PcapConstants.PCAP_BUF_SIZE;
-import static org.jnetpcap.constant.PcapConstants.PCAP_ERRBUF_SIZE;
-import static org.jnetpcap.internal.ForeignUtils.toUtf8String;
-import static org.jnetpcap.windows.PcapStatEx.PCAP_STAT_EX_LENGTH;
+import static org.jnetpcap.constant.PcapConstants.*;
+import static org.jnetpcap.internal.ForeignUtils.*;
+import static org.jnetpcap.windows.PcapStatEx.*;
 
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
@@ -44,7 +40,11 @@ import org.jnetpcap.constant.WinPcapMode;
 import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.internal.PcapStatExRecord;
+
+import static java.lang.foreign.MemoryAddress.*;
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * WinPcap is a wrapper around, windows packet capture library.
@@ -502,8 +502,8 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the name
 	 */
-	WinPcap(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	WinPcap(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 	/**
