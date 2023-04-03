@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
  * Provides Pcap API method calls for up to libpcap version 0.9
@@ -224,8 +225,8 @@ public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap0_9(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected Pcap0_9(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 	/**

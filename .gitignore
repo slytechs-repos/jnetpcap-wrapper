@@ -3,3 +3,4 @@ target
 .project
 .settings/
 /bin/
+/pom.xml.versionsBackup

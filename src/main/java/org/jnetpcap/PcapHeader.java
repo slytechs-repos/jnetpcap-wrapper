@@ -17,12 +17,14 @@
  */
 package org.jnetpcap;
 
+import static org.jnetpcap.internal.PcapHeaderABI.*;
+
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.MemorySession;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
+import org.jnetpcap.PcapHeaderException.OutOfRangeException;
 import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
@@ -33,16 +35,23 @@ import org.jnetpcap.internal.PcapHeaderABI;
  */
 public class PcapHeader {
 
-	private static final PcapHeaderABI ABI = PcapHeaderABI.nativeAbi();
+	private static ByteBuffer newInitializedBuffer(
+			PcapHeaderABI abi, int tvSec, int tvUsec, int captureLength,
+			int wireLength) {
+		ByteBuffer buffer = allocateBuffer(abi);
 
-	private static ByteBuffer newInitializedBuffer(int tvSec, int tvUsec, int captureLength, int wireLength) {
-		ByteBuffer buffer = ByteBuffer.allocateDirect(ABI.headerLength())
-				.order(ByteOrder.nativeOrder());
+		buffer.putInt(abi.tvSecOffset(), tvSec);
+		buffer.putInt(abi.tvUsecOffset(), tvUsec);
+		buffer.putInt(abi.captureLengthOffset(), captureLength);
+		buffer.putInt(abi.wireLengthOffset(), wireLength);
 
-		buffer.putInt(ABI.tvSecOffset(), tvSec);
-		buffer.putInt(ABI.tvUsecOffset(), tvUsec);
-		buffer.putInt(ABI.captureLengthOffset(), captureLength);
-		buffer.putInt(ABI.wireLengthOffset(), wireLength);
+		return buffer;
+	}
+
+	private static ByteBuffer allocateBuffer(PcapHeaderABI abi) {
+		ByteBuffer buffer = ByteBuffer
+				.allocateDirect(abi.headerLength())
+				.order(abi.order());
 
 		return buffer;
 	}
@@ -50,35 +59,62 @@ public class PcapHeader {
 	private static final int MILLI_TIME_SCALE = 1000_000;
 	private static final int NANO_TIME_SCALE = 1000_000_000;
 
+	private static final int HEADER_LEN_MAX = 24;
+
 	private final ByteBuffer buffer;
+	private final PcapHeaderABI abi;
 
-	public PcapHeader() {
-		this(ByteBuffer.allocateDirect(ABI.headerLength()).order(ByteOrder.nativeOrder()));
+	public PcapHeader(PcapHeaderABI abi) {
+		this.abi = abi;
+		this.buffer = allocateBuffer(abi);
 	}
 
-	public PcapHeader(int tvSec, int tvUsec, int captureLength, int wireLength) {
-		this(newInitializedBuffer(tvSec, tvUsec, captureLength, wireLength));
+	public PcapHeader(PcapHeaderABI abi, int tvSec, int tvUsec, int captureLength, int wireLength) {
+		this.abi = abi;
+		this.buffer = newInitializedBuffer(abi, tvSec, tvUsec, captureLength, wireLength);
 	}
 
-	public PcapHeader(byte[] array, int offset) {
-		this.buffer = ByteBuffer.wrap(array, offset, ABI.headerLength());
+	public PcapHeader(PcapHeaderABI abi, byte[] array, int offset) {
+		this.abi = abi;
+		this.buffer = ByteBuffer
+				.wrap(array, offset, HEADER_LEN_MAX)
+				.order(abi.order());
 	}
 
-	public PcapHeader(ByteBuffer headerBuffer) {
-		this.buffer = headerBuffer;
+	public PcapHeader(PcapHeaderABI abi, ByteBuffer headerBuffer) {
+		this.abi = abi;
+		this.buffer = headerBuffer.order(abi.order());
 	}
 
-	public PcapHeader(MemoryAddress headerAddress, MemorySession session) {
-		this.buffer = MemorySegment.ofAddress(headerAddress, ABI.headerLength(), session)
-				.asByteBuffer();
+	public PcapHeader(PcapHeaderABI abi, MemoryAddress headerAddress, MemorySession session) {
+		this.abi = abi;
+		this.buffer = MemorySegment.ofAddress(headerAddress, HEADER_LEN_MAX, session)
+				.asByteBuffer()
+				.order(abi.order());
 	}
 
-	public PcapHeader(MemorySegment headerSegment) {
-		this.buffer = headerSegment.asByteBuffer();
+	public PcapHeader(PcapHeaderABI abi, MemorySegment headerSegment) {
+		this.abi = abi;
+		this.buffer = headerSegment
+				.asByteBuffer()
+				.order(abi.order());
 	}
 
-	public int captureLength() {
-		return buffer.getInt(ABI.captureLengthOffset());
+	public int captureLength() throws OutOfRangeException {
+		try {
+			try {
+				return abi.captureLength(buffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						buffer,
+						e,
+						"captureLength",
+						PcapHeaderABI::captureLength);
+			}
+
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(buffer));
+		}
 	}
 
 	/**
@@ -87,32 +123,44 @@ public class PcapHeader {
 	 *
 	 * @return the long
 	 */
-	public long timestamp() {
+	public long timestamp() throws PcapHeaderException {
 		return (tvSec() << 32 | tvUsec());
 	}
 
-	public long toTimestampEpochMilli() {
-		return toTimestampEpochMilli(false);
+	public long toEpochMilli() throws PcapHeaderException {
+		return toEpochMilli(false);
 	}
 
-	public long toTimestampEpochMilli(boolean nanoTime) {
+	public long toEpochMilli(boolean nanoTime) throws PcapHeaderException {
 		if (nanoTime)
 			return tvSec() * NANO_TIME_SCALE + tvUsec();
 		else
 			return tvSec() * MILLI_TIME_SCALE + tvUsec();
 	}
 
-	public int tvSec() {
-		return buffer.getInt(ABI.tvSecOffset());
+	public int tvSec() throws PcapHeaderException {
+		return buffer.getInt(abi.tvSecOffset());
 	}
 
-	public int tvUsec() {
-		return buffer.getInt(ABI.tvUsecOffset());
+	public int tvUsec() throws PcapHeaderException {
+		return buffer.getInt(abi.tvUsecOffset());
 	}
 
-	public int wireLength() {
-		return buffer.getInt(ABI.wireLengthOffset());
-	}
+	public int wireLength() throws PcapHeaderException {
+		try {
+			try {
+				return abi.wireLength(buffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						buffer,
+						e,
+						"wireLength",
+						PcapHeaderABI::captureLength);
+			}
+
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(buffer));
+		}	}
 
 	public MemoryAddress asMemoryReference() {
 		return asMemorySegment().address();

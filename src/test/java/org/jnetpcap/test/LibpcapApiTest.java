@@ -45,6 +45,7 @@ import org.jnetpcap.constant.PcapDirection;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapTStampPrecision;
 import org.jnetpcap.constant.PcapTstampType;
+import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.util.NetIp4Address;
 import org.jnetpcap.util.PcapPacketRef;
 import org.junit.jupiter.api.Assertions;
@@ -540,10 +541,13 @@ class LibpcapApiTest extends AbstractTestBase {
 		captureHandle.setTimeout(1000).activate();
 		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
 
+		var abi = captureHandle.getPcapHeaderABI();
+
 		var transmitHandle = super.pcapCreateTestHandle();
 		transmitHandle.activate();
 
 		var transmitter = super.setupPacketTransmitter(
+				abi,
 				templates::tcpPacket /* packet factory */,
 				(pkt, pktSize) -> Assertions /* Unit test */
 						.assertDoesNotThrow(() -> transmitHandle.inject(pkt, pktSize)));
@@ -560,7 +564,7 @@ class LibpcapApiTest extends AbstractTestBase {
 					var pcapScope = MemorySession.openShared()) {
 
 				/* do capture */
-				var packet = fromPcapPacketRef(captureHandle.next(), pcapScope);
+				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
 
 				/* Check if we have the just transmitted packet */
 				if ((packet != null) && Arrays.equals(sentSrcAddress, packet.ipSrc())) {
@@ -600,6 +604,8 @@ class LibpcapApiTest extends AbstractTestBase {
 		captureHandle.setTimeout(1000).activate();
 		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
 
+		var abi = captureHandle.getPcapHeaderABI();
+
 		var transmitHandle = super.pcapCreateTestHandle();
 		transmitHandle.activate();
 
@@ -617,7 +623,7 @@ class LibpcapApiTest extends AbstractTestBase {
 					var pcapScope = MemorySession.openShared()) {
 
 				/* do capture */
-				var packet = fromPcapPacketRef(captureHandle.next(), pcapScope);
+				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
 
 				/* Check if we have the just transmitted packet */
 				if ((packet != null) && Arrays.equals(sentSrcAddress, packet.ipSrc())) {
@@ -635,6 +641,7 @@ class LibpcapApiTest extends AbstractTestBase {
 				"unable to capture the transmitted packet after %d tries"
 						.formatted(TRANSMIT_RETRIES_COUNT));
 	}
+
 
 	/**
 	 * Test method for {@link org.jnetpcap.Pcap#inject(byte[], int, int)}.
@@ -662,6 +669,8 @@ class LibpcapApiTest extends AbstractTestBase {
 		captureHandle.setTimeout(1000).activate();
 		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
 
+		var abi = captureHandle.getPcapHeaderABI();
+
 		var transmitHandle = super.pcapCreateTestHandle();
 		transmitHandle.activate();
 
@@ -679,7 +688,7 @@ class LibpcapApiTest extends AbstractTestBase {
 					var pcapScope = MemorySession.openShared()) {
 
 				/* do capture */
-				var packet = fromPcapPacketRef(captureHandle.next(), pcapScope);
+				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
 
 				/* Check if we have the just transmitted packet */
 				if ((packet != null) && Arrays.equals(sentSrcAddress, packet.ipSrc())) {
@@ -718,6 +727,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
 		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
 		transmitHandle.activate();
@@ -736,7 +746,7 @@ class LibpcapApiTest extends AbstractTestBase {
 					var pcapScope = MemorySession.openShared()) {
 
 				/* do capture */
-				var packet = fromPcapPacketRef(captureHandle.next(), pcapScope);
+				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
 
 				/* Check if we have the just transmitted packet */
 				if ((packet != null) && Arrays.equals(sentSrcAddress, packet.ipSrc())) {
@@ -776,6 +786,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
 		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
 		transmitHandle.activate();
@@ -794,7 +805,7 @@ class LibpcapApiTest extends AbstractTestBase {
 					var pcapScope = MemorySession.openShared()) {
 
 				/* do capture */
-				var packet = fromPcapPacketRef(captureHandle.next(), pcapScope);
+				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
 
 				/* Check if we have the just transmitted packet */
 				if ((packet != null) && Arrays.equals(sentSrcAddress, packet.ipSrc())) {
@@ -1056,8 +1067,9 @@ class LibpcapApiTest extends AbstractTestBase {
 		 */
 		try (BpFilter filter = Pcap.compileNoPcap(SNAPLEN, DLT, FILTER_STR, OPTIMIZE, NETMASK);
 				var scope = MemorySession.openShared()) {
+			var abi = PcapHeaderABI.selectDeadAbi();
 
-			final TestPacket packet = templates.tcpPacket(scope);
+			final TestPacket packet = templates.tcpPacket(abi, scope);
 			final MemorySegment HEADER = packet.header();
 			final MemorySegment PACKET = packet.data();
 
@@ -1186,11 +1198,13 @@ class LibpcapApiTest extends AbstractTestBase {
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
 		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
 		transmitHandle.activate();
 
 		var transmitter = super.setupPacketTransmitter(
+				abi,
 				templates::tcpPacket /* packet factory */,
 				(pkt, pktSize) -> Assertions /* Unit test */
 						.assertDoesNotThrow(() -> transmitHandle.sendPacket(pkt, pktSize)));
@@ -1207,7 +1221,7 @@ class LibpcapApiTest extends AbstractTestBase {
 					var pcapScope = MemorySession.openShared()) {
 
 				/* do capture */
-				var packet = fromPcapPacketRef(captureHandle.next(), pcapScope);
+				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
 
 				/* Check if we have the just transmitted packet */
 				if ((packet != null) && Arrays.equals(sentSrcAddress, packet.ipSrc())) {
@@ -1248,6 +1262,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
 		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
 		transmitHandle.activate();
@@ -1266,7 +1281,7 @@ class LibpcapApiTest extends AbstractTestBase {
 					var pcapScope = MemorySession.openShared()) {
 
 				/* do capture */
-				var packet = fromPcapPacketRef(captureHandle.next(), pcapScope);
+				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
 
 				/* Check if we have the just transmitted packet */
 				if ((packet != null) && Arrays.equals(sentSrcAddress, packet.ipSrc())) {
@@ -1312,6 +1327,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
 		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
 		transmitHandle.activate();
@@ -1330,7 +1346,7 @@ class LibpcapApiTest extends AbstractTestBase {
 					var pcapScope = MemorySession.openShared()) {
 
 				/* do capture */
-				var packet = fromPcapPacketRef(captureHandle.next(), pcapScope);
+				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
 
 				/* Check if we have the just transmitted packet */
 				if ((packet != null) && Arrays.equals(sentSrcAddress, packet.ipSrc())) {
@@ -1371,6 +1387,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
 		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
 		transmitHandle.activate();
@@ -1389,7 +1406,7 @@ class LibpcapApiTest extends AbstractTestBase {
 					var pcapScope = MemorySession.openShared()) {
 
 				/* do capture */
-				var packet = fromPcapPacketRef(captureHandle.next(), pcapScope);
+				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
 
 				/* Check if we have the just transmitted packet */
 				if ((packet != null) && Arrays.equals(sentSrcAddress, packet.ipSrc())) {
@@ -1433,6 +1450,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
 		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
 		transmitHandle.activate();
@@ -1451,7 +1469,7 @@ class LibpcapApiTest extends AbstractTestBase {
 					var pcapScope = MemorySession.openShared()) {
 
 				/* do capture */
-				var packet = fromPcapPacketRef(captureHandle.next(), pcapScope);
+				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
 
 				/* Check if we have the just transmitted packet */
 				if ((packet != null) && Arrays.equals(sentSrcAddress, packet.ipSrc())) {

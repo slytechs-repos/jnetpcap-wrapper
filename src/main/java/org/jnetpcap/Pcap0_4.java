@@ -28,7 +28,6 @@ import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 
 import org.jnetpcap.PcapHandler.OfMemorySegment;
 import org.jnetpcap.constant.PcapCode;
@@ -55,6 +54,13 @@ import static java.lang.foreign.ValueLayout.*;
  * @author repos@slytechs.com
  */
 public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
+
+	protected interface PcapSupplier<T extends Pcap> {
+		// <T extends Pcap> T openLive(BiFunction<MemoryAddress, String, T>
+
+		T newPcap(MemoryAddress handle, String name, PcapHeaderABI abi);
+
+	}
 
 	/**
 	 * @see {@code pcap_t *pcap_open_live (const char *device, int snaplen, int
@@ -318,7 +324,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @return the t
 	 * @throws PcapException the pcap exception
 	 */
-	protected static <T extends Pcap> T openLive(BiFunction<MemoryAddress, String, T> pcapSupplier, String device,
+	protected static <T extends Pcap> T openLive(PcapSupplier<T> pcapSupplier, String device,
 			int snaplen,
 			boolean promisc, long timeout, TimeUnit unit)
 			throws PcapException {
@@ -337,7 +343,9 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			if (pcapPointer == NULL)
 				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getUtf8String(0));
 
-			return pcapSupplier.apply(pcapPointer, makeLiveHandleName(device));
+			var abi = PcapHeaderABI.selectLiveAbi();
+
+			return pcapSupplier.newPcap(pcapPointer, makeLiveHandleName(device), abi);
 		}
 	}
 
@@ -390,7 +398,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @throws PcapException any errors
 	 * @since Pcap 0.4
 	 */
-	protected static <T extends Pcap> T openOffline(BiFunction<MemoryAddress, String, T> pcapSupplier, String fname)
+	protected static <T extends Pcap> T openOffline(PcapSupplier<T> pcapSupplier, String fname)
 			throws PcapException {
 
 		Objects.requireNonNull(fname, "fname"); //$NON-NLS-1$
@@ -404,7 +412,12 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			if (pcapPointer == NULL)
 				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getUtf8String(0));
 
-			return pcapSupplier.apply(pcapPointer, makeOfflineHandleName(fname));
+			boolean isSwapped = pcap_is_swapped
+					.invokeInt(pcapPointer) == 1;
+
+			var abi = PcapHeaderABI.selectOfflineAbi(isSwapped);
+
+			return pcapSupplier.newPcap(pcapPointer, makeOfflineHandleName(fname), abi);
 		}
 	}
 
@@ -461,9 +474,9 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the name
 	 */
-	protected Pcap0_4(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
-		this.dispatcher = new StandardPcapDispatcher(getPcapHandle());
+	protected Pcap0_4(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
+		this.dispatcher = new StandardPcapDispatcher(getPcapHandle(), this::breakloop);
 	}
 
 	protected void setDispatcher(PcapDispatcher newDispatcher) {
@@ -604,7 +617,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 		return dispatcher.dispatchNative(count, (u, header, bytes) -> {
 			try (var scope = newScope()) {
-				PcapHeader hdr = new PcapHeader(header, scope);
+				PcapHeader hdr = new PcapHeader(super.pcapHeaderABI, header, scope);
 
 				int caplen = hdr.captureLength();
 				assert caplen < PcapConstants.MAX_SNAPLEN : "caplen/wirelen out of range " + caplen;
@@ -721,7 +734,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 		return dispatcher.loopNative(count, (u, header, bytes) -> {
 			try (var scope = newScope()) {
-				PcapHeader hdr = new PcapHeader(header, scope);
+				PcapHeader hdr = new PcapHeader(super.pcapHeaderABI, header, scope);
 
 				int caplen = hdr.captureLength();
 				assert caplen < PcapConstants.MAX_SNAPLEN : "caplen/wirelen out of range " + caplen;
@@ -790,7 +803,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 		return (pkt == null) || (pkt == NULL)
 				? null
-				: new PcapPacketRef(hdr, pkt);
+				: new PcapPacketRef(super.pcapHeaderABI, hdr, pkt);
 	}
 
 	/**

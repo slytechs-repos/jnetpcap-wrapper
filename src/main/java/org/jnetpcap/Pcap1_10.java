@@ -25,6 +25,7 @@ import org.jnetpcap.constant.PcapTStampPrecision;
 import org.jnetpcap.internal.NonSealedPcap;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.internal.UnsafePcapHandle;
 import org.jnetpcap.windows.WinPcap;
 
@@ -214,8 +215,8 @@ public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafeP
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap1_10(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected Pcap1_10(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 }

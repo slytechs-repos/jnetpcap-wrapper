@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.BiFunction;
 
+import org.jnetpcap.Pcap0_4.PcapSupplier;
 import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDirection;
@@ -42,6 +42,7 @@ import org.jnetpcap.constant.PcapSrc;
 import org.jnetpcap.constant.PcapTStampPrecision;
 import org.jnetpcap.constant.PcapTstampType;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.util.NetIp4Address;
 import org.jnetpcap.util.PcapPacketRef;
 import org.jnetpcap.util.PcapVersionException;
@@ -198,6 +199,43 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * corresponding native library has not been loaded at runtime.
 		 */
 		String SYSTEM_PROPERTY_SO_IGNORE_LOAD_ERRORS = "org.jnetpcap.so.ignoreLoadErrors";
+
+		/**
+		 * System property used to override the selection of the PcapHeaderABI. ABI
+		 * stands for Application Binary Interface, a low level hardware architecture
+		 * dependent description how native primitive data structures are encoded.
+		 * <p>
+		 * The main difference between "compact" and "padded" native C structures is how
+		 * individual members within a give C structure an encoded. Specifically the
+		 * <code>struct pkt_header_t</code> in libpcap is suseptable to such encoding
+		 * differences. The timestamp field is defined as two int sub-fields (seconds
+		 * and micro-seconds), each of which is typically 32-bits but on modern 64-bit
+		 * machines. Therefore the sizeof(pkt_header_t) can be either 16 or 24 bytes,
+		 * depending on the architecture. Further more, even on 64-bit machines, when
+		 * reading offline files, the header stored is byte encoded to the machine that
+		 * wrote the offline file. Thus you can have a "compact" header on a 64-bit
+		 * machine, and even with its bytes swapped for integer values. The ABI values
+		 * determines the best ABI to utilize to read such binary headers.
+		 * </p>
+		 * <p>
+		 * The applicable values are:
+		 * </p>
+		 * <dl>
+		 * <dt>PCAP_HEADER_COMPACT_LE</dt>
+		 * <dd>Native C structure is "compact" encoded with LITTLE endian byte encoding.
+		 * The total length of pkt_header is 16 bytes.</dd>
+		 * <dt>PCAP_HEADER_COMPACT_BE</dt>
+		 * <dd>Native C structure is "compact" encoded with BIG endian byte encoding.
+		 * The total length of pkt_header is 16 bytes.</dd>
+		 * <dt>PCAP_HEADER_PADDED_LE</dt>
+		 * <dd>Native C structure is "paddded" encoded with LITTLE endian byte encoding.
+		 * The total length of pkt_header is 24 bytes.</dd>
+		 * <dt>PCAP_HEADER_PADDED_BE</dt>
+		 * <dd>Native C structure is "paddded" encoded with BIG endian byte encoding.
+		 * The total length of pkt_header is 24 bytes.</dd>
+		 * </dl>
+		 */
+		String SYSTEM_PROPERTY_ABI = "org.jnetpcap.abi";
 
 		/**
 		 * The Constant which defines the default logging output which discards all of
@@ -484,8 +522,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * @param pcapHandle the pcap handle
 		 * @param name       the name
 		 */
-		Linux(MemoryAddress pcapHandle, String name) {
-			super(pcapHandle, name);
+		Linux(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+			super(pcapHandle, name, abi);
 		}
 
 		/**
@@ -713,8 +751,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * @param pcapHandle the pcap handle
 		 * @param name       the name
 		 */
-		Unix(MemoryAddress pcapHandle, String name) {
-			super(pcapHandle, name);
+		Unix(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+			super(pcapHandle, name, abi);
 		}
 
 		/**
@@ -1201,8 +1239,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @return the bi function
 	 */
 	@SuppressWarnings("unchecked")
-	private static <T extends Pcap> BiFunction<MemoryAddress, String, T> latest() {
-		return (pcap, name) -> (T) new Pcap1_10(pcap, name);
+	private static <T extends Pcap> PcapSupplier<T> latest() {
+		return (pcap, name, abi) -> (T) new Pcap1_10(pcap, name, abi);
 	}
 
 	/**
@@ -1570,14 +1608,17 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	/** The name of this pcap handle. */
 	private final String name;
 
+	protected final PcapHeaderABI pcapHeaderABI;
+
 	/**
 	 * Instantiates a new pcap.
 	 *
 	 * @param pcapHandle the pcap handle or pcap_t * address.
 	 * @param name       the name of this pcap handle.
 	 */
-	protected Pcap(MemoryAddress pcapHandle, String name) {
+	protected Pcap(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
 		this.name = name;
+		this.pcapHeaderABI = abi;
 		this.pcapHandle = requireNonNull(pcapHandle, "pcapHandle"); //$NON-NLS-1$
 	}
 
@@ -3518,5 +3559,12 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	public String toString() {
 		return "%s [name=%s, pcapAddress=%s]"
 				.formatted(getClass().getSimpleName(), name, getPcapHandle());
+	}
+
+	/**
+	 * @return the pcapHeaderABI
+	 */
+	public PcapHeaderABI getPcapHeaderABI() {
+		return pcapHeaderABI;
 	}
 }
