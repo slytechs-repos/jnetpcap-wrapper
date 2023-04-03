@@ -74,8 +74,15 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 
 	protected final MemorySession session;
 
-	public StandardPcapDispatcher(MemoryAddress pcapHandle) {
+	private RuntimeException uncaughtException;
+	private boolean interrupted = false;
+	private boolean interruptOnErrors = true;
+
+	private final Runnable breakDispatch;
+
+	public StandardPcapDispatcher(MemoryAddress pcapHandle, Runnable breakDispatch) {
 		this.pcapHandle = pcapHandle;
+		this.breakDispatch = breakDispatch;
 		this.session = MemorySession.openShared();
 		this.pcapCallbackStub = pcap_handler.virtualStubPointer(this, this.session);
 	}
@@ -97,13 +104,12 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	@Override
-	public int dispatchNative(int count, NativeCallback handler, MemoryAddress user) {
+	public final int dispatchNative(int count, NativeCallback handler, MemoryAddress user) {
 		this.sink = handler;
 
-		return pcap_dispatch.invokeInt(
-				pcapHandle,
+		return dispatchRaw(
 				count,
-				pcapCallbackStub,
+				pcapCallbackStub.address(),
 				user);
 	}
 
@@ -113,12 +119,17 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	 * @param userData
 	 */
 	@Override
-	public int dispatchRaw(int count, MemoryAddress callbackFunc, MemoryAddress userData) {
-		return pcap_dispatch.invokeInt(
+	public final int dispatchRaw(int count, MemoryAddress callbackFunc, MemoryAddress userData) {
+		int result = pcap_dispatch.invokeInt(
 				pcapHandle,
 				count,
 				callbackFunc,
 				userData);
+
+		if (interrupted)
+			handleInterrupt();
+
+		return result;
 	}
 
 	/**
@@ -129,14 +140,18 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		return ABI.headerLength();
 	}
 
+	private final void interrupt() {
+		this.breakDispatch.run();
+		this.interrupted = true;
+	}
+
 	@Override
-	public int loopNative(int count, NativeCallback handler, MemoryAddress user) {
+	public final int loopNative(int count, NativeCallback handler, MemoryAddress user) {
 		this.sink = handler;
 
-		return pcap_loop.invokeInt(
-				pcapHandle,
+		return loopRaw(
 				count,
-				pcapCallbackStub,
+				pcapCallbackStub.address(),
 				user);
 	}
 
@@ -146,12 +161,17 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	 * @param userData
 	 */
 	@Override
-	public int loopRaw(int count, MemoryAddress callbackFunc, MemoryAddress userData) {
-		return pcap_loop.invokeInt(
+	public final int loopRaw(int count, MemoryAddress callbackFunc, MemoryAddress userData) {
+		int result = pcap_loop.invokeInt(
 				pcapHandle,
 				count,
 				callbackFunc,
 				userData);
+
+		if (interrupted)
+			handleInterrupt();
+
+		return result;
 	}
 
 	/**
@@ -159,7 +179,34 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	 *      java.lang.foreign.MemoryAddress, java.lang.foreign.MemoryAddress)
 	 */
 	@Override
-	public void nativeCallback(MemoryAddress user, MemoryAddress header, MemoryAddress packet) {
-		this.sink.nativeCallback(user, header, packet);
+	public final void nativeCallback(MemoryAddress user, MemoryAddress header, MemoryAddress packet) {
+		this.uncaughtException = null; // Reset any previous unclaimed exceptions
+
+		try {
+			this.sink.nativeCallback(user, header, packet);
+		} catch (RuntimeException e) {
+			this.uncaughtException = e;
+			interrupt();
+
+		} catch (Throwable e) {
+			this.uncaughtException = new IllegalStateException(e);
+			interrupt();
+		}
+	}
+
+	private final void handleInterrupt() throws RuntimeException {
+		interrupted = false; // Reset flag
+		
+		if (uncaughtException != null) {
+			throw uncaughtException;
+		}
+	}
+
+	/**
+	 * @return the uncaughtException
+	 */
+	@Override
+	public final RuntimeException getUncaughtException() {
+		return uncaughtException;
 	}
 }

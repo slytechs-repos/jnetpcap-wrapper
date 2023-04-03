@@ -415,7 +415,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			boolean isSwapped = pcap_is_swapped
 					.invokeInt(pcapPointer) == 1;
 
-			var abi = PcapHeaderABI.selectAbi(true, isSwapped);
+			var abi = PcapHeaderABI.selectOfflineAbi(isSwapped);
 
 			return pcapSupplier.newPcap(pcapPointer, makeOfflineHandleName(fname), abi);
 		}
@@ -476,7 +476,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 */
 	protected Pcap0_4(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
-		this.dispatcher = new StandardPcapDispatcher(getPcapHandle());
+		this.dispatcher = new StandardPcapDispatcher(getPcapHandle(), this::breakloop);
 	}
 
 	protected void setDispatcher(PcapDispatcher newDispatcher) {
@@ -618,7 +618,6 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 		return dispatcher.dispatchNative(count, (u, header, bytes) -> {
 			try (var scope = newScope()) {
 				PcapHeader hdr = new PcapHeader(super.pcapHeaderABI, header, scope);
-//				PcapHeader hdr = new PcapHeader(PcapHeaderABI.PCAP_HEADER_PADDED_LE, header, scope);
 
 				int caplen = hdr.captureLength();
 				assert caplen < PcapConstants.MAX_SNAPLEN : "caplen/wirelen out of range " + caplen;

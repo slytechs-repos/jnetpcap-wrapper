@@ -35,6 +35,8 @@ public interface PcapDispatcher extends NativeCallback, AutoCloseable {
 
 	int loopRaw(int count, MemoryAddress callbackFunc, MemoryAddress userData);
 
+	RuntimeException getUncaughtException();
+
 	@Override
 	void close();
 }
