@@ -118,6 +118,12 @@ public enum PcapHeaderABI {
 	}
 
 	private static PcapHeaderABI selectNativeABI() {
+		/* Npcap compiles all structures in "compact" mode even on 64-bit machines */
+		if (NativeABI.current() == NativeABI.WIN64)
+			return ByteOrder.nativeOrder() == LITTLE_ENDIAN
+					? PCAP_HEADER_COMPACT_LE
+					: PCAP_HEADER_COMPACT_BE;
+
 		if (NativeABI.is32bit() && (ByteOrder.nativeOrder() == LITTLE_ENDIAN))
 			return PCAP_HEADER_COMPACT_LE;
 
@@ -201,9 +207,6 @@ public enum PcapHeaderABI {
 	}
 
 	public static PcapHeaderABI selectOfflineAbi(boolean isSwapped) {
-		if (NativeABI.current() == NativeABI.WIN64)
-			return compactAbi(isSwapped);
-
 		return isSwapped
 				? calcSwappedABI(NATIVE_ABI)
 				: NATIVE_ABI;
