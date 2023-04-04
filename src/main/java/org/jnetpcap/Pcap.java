@@ -221,21 +221,29 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * The applicable values are:
 		 * </p>
 		 * <dl>
-		 * <dt>PCAP_HEADER_COMPACT_LE</dt>
+		 * <dt>COMPACT_LE</dt>
 		 * <dd>Native C structure is "compact" encoded with LITTLE endian byte encoding.
 		 * The total length of pkt_header is 16 bytes.</dd>
-		 * <dt>PCAP_HEADER_COMPACT_BE</dt>
+		 * <dt>COMPACT_BE</dt>
 		 * <dd>Native C structure is "compact" encoded with BIG endian byte encoding.
 		 * The total length of pkt_header is 16 bytes.</dd>
-		 * <dt>PCAP_HEADER_PADDED_LE</dt>
+		 * <dt>PADDED_LE</dt>
 		 * <dd>Native C structure is "paddded" encoded with LITTLE endian byte encoding.
 		 * The total length of pkt_header is 24 bytes.</dd>
-		 * <dt>PCAP_HEADER_PADDED_BE</dt>
+		 * <dt>PADDED_BE</dt>
 		 * <dd>Native C structure is "paddded" encoded with BIG endian byte encoding.
 		 * The total length of pkt_header is 24 bytes.</dd>
 		 * </dl>
 		 */
 		String SYSTEM_PROPERTY_ABI = "org.jnetpcap.abi";
+
+		/**
+		 * Default value ("true") for <em>ignore load errors</em> property if not
+		 * specified in system properties.
+		 * 
+		 * @see #SYSTEM_PROPERTY_SO_IGNORE_LOAD_ERRORS
+		 */
+		String DEFAULT_SO_IGNORE_LOAD_ERRORS = "true";
 
 		/**
 		 * The Constant which defines the default logging output which discards all of
@@ -776,7 +784,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		LibraryPolicy policy = LibraryPolicy.getDefault();
 
 		boolean ignoreErrors = Boolean.parseBoolean(System.getProperty(
-				LibraryPolicy.SYSTEM_PROPERTY_SO_IGNORE_LOAD_ERRORS, "true"));
+				LibraryPolicy.SYSTEM_PROPERTY_SO_IGNORE_LOAD_ERRORS,
+				LibraryPolicy.DEFAULT_SO_IGNORE_LOAD_ERRORS));
 
 		policy.loadNativePcapLibrary(ignoreErrors);
 	}

@@ -54,10 +54,10 @@ import static java.lang.foreign.ValueLayout.*;
  */
 public enum PcapHeaderABI {
 
-	PCAP_HEADER_COMPACT_LE("CMP_LE", 0, 4, 8, 12, LITTLE_ENDIAN), // 16 byte size
-	PCAP_HEADER_COMPACT_BE("CMP_BE", 0, 4, 8, 12, BIG_ENDIAN), // 16 byte size
-	PCAP_HEADER_PADDED_LE("PAD_LE", 0, 8, 16, 20, LITTLE_ENDIAN), // 24 byte size due to padding
-	PCAP_HEADER_PADDED_BE("PAD_BE", 0, 8, 16, 20, BIG_ENDIAN) // 24 byte size due to padding
+	COMPACT_LE("CL", 0, 4, 8, 12, LITTLE_ENDIAN), // 16 byte size
+	COMPACT_BE("CB", 0, 4, 8, 12, BIG_ENDIAN), // 16 byte size
+	PADDED_LE("PL", 0, 8, 16, 20, LITTLE_ENDIAN), // 24 byte size due to padding
+	PADDED_BE("PB", 0, 8, 16, 20, BIG_ENDIAN) // 24 byte size due to padding
 
 	;
 
@@ -109,10 +109,10 @@ public enum PcapHeaderABI {
 
 	private static PcapHeaderABI calcSwappedABI(PcapHeaderABI abi) {
 		return switch (abi) {
-		case PCAP_HEADER_COMPACT_BE -> PCAP_HEADER_COMPACT_LE;
-		case PCAP_HEADER_COMPACT_LE -> PCAP_HEADER_COMPACT_BE;
-		case PCAP_HEADER_PADDED_BE -> PCAP_HEADER_PADDED_LE;
-		case PCAP_HEADER_PADDED_LE -> PCAP_HEADER_PADDED_BE;
+		case COMPACT_BE -> COMPACT_LE;
+		case COMPACT_LE -> COMPACT_BE;
+		case PADDED_BE -> PADDED_LE;
+		case PADDED_LE -> PADDED_BE;
 
 		};
 	}
@@ -121,20 +121,20 @@ public enum PcapHeaderABI {
 		/* Npcap compiles all structures in "compact" mode even on 64-bit machines */
 		if (NativeABI.current() == NativeABI.WIN64)
 			return ByteOrder.nativeOrder() == LITTLE_ENDIAN
-					? PCAP_HEADER_COMPACT_LE
-					: PCAP_HEADER_COMPACT_BE;
+					? COMPACT_LE
+					: COMPACT_BE;
 
 		if (NativeABI.is32bit() && (ByteOrder.nativeOrder() == LITTLE_ENDIAN))
-			return PCAP_HEADER_COMPACT_LE;
+			return COMPACT_LE;
 
 		else if (NativeABI.is64bit() && (ByteOrder.nativeOrder() == LITTLE_ENDIAN))
-			return PCAP_HEADER_PADDED_LE;
+			return PADDED_LE;
 
 		else if (NativeABI.is32bit())
-			return PCAP_HEADER_COMPACT_BE;
+			return COMPACT_BE;
 
 		else
-			return PCAP_HEADER_PADDED_BE;
+			return PADDED_BE;
 	}
 
 	public static PcapHeaderException throwListOfAllAbiPossibilities(
@@ -228,8 +228,8 @@ public enum PcapHeaderABI {
 	public static PcapHeaderABI compactAbi(ByteOrder bo) {
 
 		return (bo == ByteOrder.BIG_ENDIAN)
-				? PCAP_HEADER_COMPACT_BE
-				: PCAP_HEADER_COMPACT_LE;
+				? COMPACT_BE
+				: COMPACT_LE;
 	}
 
 	public static PcapHeaderABI paddedAbi() {
@@ -246,15 +246,15 @@ public enum PcapHeaderABI {
 
 		if (bo == LITTLE_ENDIAN) {
 			return switch (NATIVE_ABI) {
-			case PCAP_HEADER_COMPACT_BE -> PCAP_HEADER_COMPACT_LE;
-			case PCAP_HEADER_PADDED_BE -> PCAP_HEADER_PADDED_LE;
+			case COMPACT_BE -> COMPACT_LE;
+			case PADDED_BE -> PADDED_LE;
 			default -> NATIVE_ABI;
 			};
 
 		} else {
 			return switch (NATIVE_ABI) {
-			case PCAP_HEADER_COMPACT_LE -> PCAP_HEADER_COMPACT_BE;
-			case PCAP_HEADER_PADDED_LE -> PCAP_HEADER_PADDED_BE;
+			case COMPACT_LE -> COMPACT_BE;
+			case PADDED_LE -> PADDED_BE;
 			default -> NATIVE_ABI;
 			};
 
