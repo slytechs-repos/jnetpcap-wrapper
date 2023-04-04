@@ -76,6 +76,7 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 
 	private RuntimeException uncaughtException;
 	private boolean interrupted = false;
+	@SuppressWarnings("unused")
 	private boolean interruptOnErrors = true;
 
 	private final Runnable breakDispatch;
@@ -196,7 +197,7 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 
 	private final void handleInterrupt() throws RuntimeException {
 		interrupted = false; // Reset flag
-		
+
 		if (uncaughtException != null) {
 			throw uncaughtException;
 		}

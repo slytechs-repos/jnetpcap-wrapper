@@ -56,8 +56,15 @@ import static java.lang.foreign.ValueLayout.*;
 public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 	protected interface PcapSupplier<T extends Pcap> {
-		// <T extends Pcap> T openLive(BiFunction<MemoryAddress, String, T>
 
+		/**
+		 * Supplier of specific versioned Pcap subclasses and instantiations.
+		 *
+		 * @param handle the pcap handle
+		 * @param name   the device name name
+		 * @param abi    the native header abi
+		 * @return the instance of specific Pcap subclass
+		 */
 		T newPcap(MemoryAddress handle, String name, PcapHeaderABI abi);
 
 	}
@@ -582,7 +589,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 				@SuppressWarnings("unchecked")
 				U usr = (aUser == NULL) ? user : (U) u;
 
-				handler.handleSegment(usr, mPkt, mHdr);
+				handler.handleSegment(usr, mHdr, mPkt);
 			}
 		}, aUser);
 	}
@@ -771,7 +778,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 				@SuppressWarnings("unchecked")
 				U usr = (aUser == NULL) ? user : (U) u;
 
-				handler.handleSegment(usr, mPkt, mHdr);
+				handler.handleSegment(usr, mHdr, mPkt);
 			}
 		}, aUser);
 	}

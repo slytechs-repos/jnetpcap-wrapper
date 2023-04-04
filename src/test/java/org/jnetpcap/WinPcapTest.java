@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.io.IOException;
 
-import org.jnetpcap.PcapException;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapSrc;
 import org.jnetpcap.windows.WinPcap;

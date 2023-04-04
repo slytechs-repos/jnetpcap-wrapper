@@ -69,15 +69,6 @@ public enum PcapHeaderABI {
 	private static final int MAX_FRAME_SIZE = 9 * 1024;
 	private static final Lock CAREFUL_LOCK = new ReentrantLock();
 
-	private static PcapHeaderABI valueOfPcapHeaderABI(String name) {
-		for (PcapHeaderABI abi : values()) {
-			if (abi.name().equalsIgnoreCase(name))
-				return abi;
-		}
-
-		return null;
-	}
-
 	static {
 
 		if (System.getProperty(LibraryPolicy.SYSTEM_PROPERTY_ABI) != null) {
@@ -107,6 +98,8 @@ public enum PcapHeaderABI {
 
 	}
 
+	private static volatile boolean disableValidation = false;
+
 	private static PcapHeaderABI calcSwappedABI(PcapHeaderABI abi) {
 		return switch (abi) {
 		case COMPACT_BE -> COMPACT_LE;
@@ -115,6 +108,63 @@ public enum PcapHeaderABI {
 		case PADDED_LE -> PADDED_BE;
 
 		};
+	}
+
+	public static PcapHeaderABI compactAbi() {
+		return compactAbi(ByteOrder.nativeOrder());
+	}
+
+	public static PcapHeaderABI compactAbi(boolean isSwapped) {
+		if (isSwapped) {
+			return calcSwappedABI(compactAbi(ByteOrder.nativeOrder()));
+
+		} else {
+			return compactAbi(ByteOrder.nativeOrder());
+		}
+	}
+
+	public static PcapHeaderABI compactAbi(ByteOrder bo) {
+
+		return (bo == ByteOrder.BIG_ENDIAN)
+				? COMPACT_BE
+				: COMPACT_LE;
+	}
+
+	public static PcapHeaderABI nativeAbi() {
+		return NATIVE_ABI;
+	}
+
+	public static PcapHeaderABI nativeAbi(ByteOrder bo) {
+		if (bo == ByteOrder.nativeOrder())
+			return NATIVE_ABI;
+
+		if (bo == LITTLE_ENDIAN) {
+			return switch (NATIVE_ABI) {
+			case COMPACT_BE -> COMPACT_LE;
+			case PADDED_BE -> PADDED_LE;
+			default -> NATIVE_ABI;
+			};
+
+		} else {
+			return switch (NATIVE_ABI) {
+			case COMPACT_LE -> COMPACT_BE;
+			case PADDED_LE -> PADDED_BE;
+			default -> NATIVE_ABI;
+			};
+
+		}
+	}
+
+	public static PcapHeaderABI paddedAbi() {
+		return compactAbi(ByteOrder.nativeOrder());
+	}
+
+	public static PcapHeaderABI selectDeadAbi() {
+		return NATIVE_ABI;
+	}
+
+	public static PcapHeaderABI selectLiveAbi() {
+		return NATIVE_ABI;
 	}
 
 	private static PcapHeaderABI selectNativeABI() {
@@ -135,6 +185,12 @@ public enum PcapHeaderABI {
 
 		else
 			return PADDED_BE;
+	}
+
+	public static PcapHeaderABI selectOfflineAbi(boolean isSwapped) {
+		return isSwapped
+				? calcSwappedABI(NATIVE_ABI)
+				: NATIVE_ABI;
 	}
 
 	public static PcapHeaderException throwListOfAllAbiPossibilities(
@@ -175,7 +231,7 @@ public enum PcapHeaderABI {
 				}
 			}
 
-			list.add("Buf[p=%d l=%d c=%d]"
+			list.add("Buf[%d/%d/%d]"
 					.formatted(buffer.position(), buffer.limit(), buffer.capacity()));
 
 			return cause
@@ -188,77 +244,13 @@ public enum PcapHeaderABI {
 		}
 	}
 
-	private int validateLength(int length) throws OutOfRangeException {
-		if (disableValidation)
-			return length;
-
-		if ((length < MIN_FRAME_SIZE) || (length > MAX_FRAME_SIZE))
-			throw new OutOfRangeException(this, length);
-
-		return length;
-	}
-
-	public static PcapHeaderABI selectLiveAbi() {
-		return NATIVE_ABI;
-	}
-
-	public static PcapHeaderABI selectDeadAbi() {
-		return NATIVE_ABI;
-	}
-
-	public static PcapHeaderABI selectOfflineAbi(boolean isSwapped) {
-		return isSwapped
-				? calcSwappedABI(NATIVE_ABI)
-				: NATIVE_ABI;
-	}
-
-	public static PcapHeaderABI compactAbi() {
-		return compactAbi(ByteOrder.nativeOrder());
-	}
-
-	public static PcapHeaderABI compactAbi(boolean isSwapped) {
-		if (isSwapped) {
-			return calcSwappedABI(compactAbi(ByteOrder.nativeOrder()));
-
-		} else {
-			return compactAbi(ByteOrder.nativeOrder());
+	private static PcapHeaderABI valueOfPcapHeaderABI(String name) {
+		for (PcapHeaderABI abi : values()) {
+			if (abi.name().equalsIgnoreCase(name))
+				return abi;
 		}
-	}
 
-	public static PcapHeaderABI compactAbi(ByteOrder bo) {
-
-		return (bo == ByteOrder.BIG_ENDIAN)
-				? COMPACT_BE
-				: COMPACT_LE;
-	}
-
-	public static PcapHeaderABI paddedAbi() {
-		return compactAbi(ByteOrder.nativeOrder());
-	}
-
-	public static PcapHeaderABI nativeAbi() {
-		return NATIVE_ABI;
-	}
-
-	public static PcapHeaderABI nativeAbi(ByteOrder bo) {
-		if (bo == ByteOrder.nativeOrder())
-			return NATIVE_ABI;
-
-		if (bo == LITTLE_ENDIAN) {
-			return switch (NATIVE_ABI) {
-			case COMPACT_BE -> COMPACT_LE;
-			case PADDED_BE -> PADDED_LE;
-			default -> NATIVE_ABI;
-			};
-
-		} else {
-			return switch (NATIVE_ABI) {
-			case COMPACT_LE -> COMPACT_BE;
-			case PADDED_LE -> PADDED_BE;
-			default -> NATIVE_ABI;
-			};
-
-		}
+		return null;
 	}
 
 	private final int tvSecOffset;
@@ -270,9 +262,7 @@ public enum PcapHeaderABI {
 	private final OfInt layout;
 	private final int headerLenth;
 	private final ByteOrder order;
-	private static volatile boolean disableValidation = false;
 	private final String abbr;
-
 	PcapHeaderABI(String abbr, int secOff, int usecOff, int capOff, int wireOff, ByteOrder bo) {
 		this.abbr = abbr;
 		this.tvSecOffset = secOff;
@@ -282,6 +272,10 @@ public enum PcapHeaderABI {
 		this.layout = JAVA_INT.withOrder(bo);
 		this.headerLenth = (wireOff == 12) ? 16 : 24;
 		this.order = bo;
+	}
+
+	public int captureLength(ByteBuffer buffer) {
+		return validateLength(buffer.order(order).getInt(captureLengthOffset) & BITMASK16);
 	}
 
 	public int captureLength(MemoryAddress address) {
@@ -294,10 +288,6 @@ public enum PcapHeaderABI {
 
 	public int captureLength(MemorySegment mseg) {
 		return validateLength(mseg.get(layout, captureLengthOffset) & BITMASK16);
-	}
-
-	public int captureLength(ByteBuffer buffer) {
-		return validateLength(buffer.order(order).getInt(captureLengthOffset) & BITMASK16);
 	}
 
 	public void captureLength(MemorySegment mseg, int newLength) {
@@ -325,12 +315,12 @@ public enum PcapHeaderABI {
 		return Integer.toUnsignedLong(address.get(layout, tvSecOffset));
 	}
 
-	public long tvSec(MemorySegment mseg) {
-		return Integer.toUnsignedLong(mseg.get(layout, tvSecOffset));
-	}
-
 	public void tvSec(MemoryAddress address, long newTvSec) {
 		address.set(layout, tvSecOffset, (int) newTvSec);
+	}
+
+	public long tvSec(MemorySegment mseg) {
+		return Integer.toUnsignedLong(mseg.get(layout, tvSecOffset));
 	}
 
 	public void tvSec(MemorySegment mseg, long newTvSec) {
@@ -345,12 +335,12 @@ public enum PcapHeaderABI {
 		return Integer.toUnsignedLong(address.get(layout, tvUsecOffset));
 	}
 
-	public long tvUsec(MemorySegment mseg) {
-		return Integer.toUnsignedLong(mseg.get(layout, tvUsecOffset));
-	}
-
 	public void tvUsec(MemoryAddress address, long newTvUsec) {
 		address.set(layout, tvUsecOffset, (int) newTvUsec);
+	}
+
+	public long tvUsec(MemorySegment mseg) {
+		return Integer.toUnsignedLong(mseg.get(layout, tvUsecOffset));
 	}
 
 	public void tvUsec(MemorySegment mseg, long newTvUsec) {
@@ -361,12 +351,22 @@ public enum PcapHeaderABI {
 		return tvUsecOffset;
 	}
 
-	public int wireLength(MemoryAddress address) {
-		return validateLength(address.get(layout, wireLengthOffset) & BITMASK16);
+	private int validateLength(int length) throws OutOfRangeException {
+		if (disableValidation)
+			return length;
+
+		if ((length < MIN_FRAME_SIZE) || (length > MAX_FRAME_SIZE))
+			throw new OutOfRangeException(this, length);
+
+		return length;
 	}
 
 	public int wireLength(ByteBuffer buffer) {
 		return validateLength(buffer.order(order).getInt(wireLengthOffset) & BITMASK16);
+	}
+
+	public int wireLength(MemoryAddress address) {
+		return validateLength(address.get(layout, wireLengthOffset) & BITMASK16);
 	}
 
 	public void wireLength(MemoryAddress address, int newLength) {

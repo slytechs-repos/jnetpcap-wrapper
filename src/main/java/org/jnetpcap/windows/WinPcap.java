@@ -174,6 +174,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 *      *auth, int uses_ssl, char *errbuf)}
 	 * @since libpcap 1.10
 	 */
+	@SuppressWarnings("unused")
 	private static final PcapForeignDowncall pcap_remoteact_accept_ex;
 
 	static {

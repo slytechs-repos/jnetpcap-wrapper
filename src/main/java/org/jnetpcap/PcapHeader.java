@@ -23,6 +23,7 @@ import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.MemorySession;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 
 import org.jnetpcap.Pcap.LibraryPolicy;
 import org.jnetpcap.PcapHeaderException.OutOfRangeException;
@@ -45,7 +46,122 @@ import org.jnetpcap.internal.PcapHeaderABI;
  * @author Mark Bednarczyk
  * @see LibraryPolicy#SYSTEM_PROPERTY_ABI
  */
-public class PcapHeader {
+public final class PcapHeader {
+
+	/** The Constant MILLI_TIME_SCALE. */
+	private static final int MILLI_TIME_SCALE = 1000_000;
+
+	/** The Constant NANO_TIME_SCALE. */
+	private static final int NANO_TIME_SCALE = 1000_000_000;
+
+	/** The Constant HEADER_LEN_MAX. */
+	private static final int HEADER_LEN_MAX = 24;
+
+	/**
+	 * Allocate buffer.
+	 *
+	 * @param abi the abi
+	 * @return the byte buffer
+	 */
+	private static ByteBuffer allocateBuffer(PcapHeaderABI abi) {
+		ByteBuffer buffer = ByteBuffer
+				.allocateDirect(abi.headerLength())
+				.order(abi.order());
+
+		return buffer;
+	}
+
+	/**
+	 * Packet capture length.
+	 *
+	 * @param headerBuffer the buffer containing pcap header contents
+	 * @return the number of packet bytes captured
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
+	 */
+	public static int captureLength(ByteBuffer headerBuffer) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.nativeAbi();
+		try {
+			try {
+				return abi.captureLength(headerBuffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						headerBuffer,
+						e,
+						"captureLength",
+						PcapHeaderABI::captureLength);
+			}
+
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(headerBuffer));
+		}
+	}
+
+	/**
+	 * Packet capture length for offline file capture.
+	 *
+	 * @param headerBuffer the buffer containing pcap header contents
+	 * @param isSwapped    for offline files which were captured according to the
+	 *                     capturing system ABI, the bytes written maybe swapped for
+	 *                     this system's architecture.
+	 * @return the number of packet bytes captured
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
+	 */
+	public static int captureLength(ByteBuffer headerBuffer, boolean isSwapped) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.selectOfflineAbi(isSwapped);
+		try {
+			try {
+				return abi.captureLength(headerBuffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						headerBuffer,
+						e,
+						"captureLength",
+						PcapHeaderABI::captureLength);
+			}
+
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(headerBuffer));
+		}
+	}
+
+	/**
+	 * Packet capture length for offline file capture.
+	 *
+	 * @param headerSegment the memory segment containing pcap header contents
+	 * @return the number of packet bytes captured
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
+	 */
+	public static int captureLength(MemorySegment headerSegment) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.nativeAbi();
+		return abi.captureLength(headerSegment);
+	}
+
+	/**
+	 * Packet capture length for offline file capture.
+	 *
+	 * @param headerSegment the memory segment containing pcap header contents
+	 * @param isSwapped     for offline files which were captured according to the
+	 *                      capturing system ABI, the bytes written maybe swapped
+	 *                      for this system's architecture.
+	 * @return the number of packet bytes captured
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
+	 */
+	public static int captureLength(MemorySegment headerSegment, boolean isSwapped) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.selectOfflineAbi(isSwapped);
+		return abi.captureLength(headerSegment);
+	}
 
 	/**
 	 * New initialized buffer.
@@ -71,33 +187,168 @@ public class PcapHeader {
 	}
 
 	/**
-	 * Allocate buffer.
+	 * Packet wire length .
 	 *
-	 * @param abi the abi
-	 * @return the byte buffer
+	 * @param headerBuffer the buffer containing pcap header contents
+	 * @return the number of packet bytes originally seen on the network
+	 *         wire/wireless before truncation due to "snaplen" parameter if set.
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
 	 */
-	private static ByteBuffer allocateBuffer(PcapHeaderABI abi) {
-		ByteBuffer buffer = ByteBuffer
-				.allocateDirect(abi.headerLength())
-				.order(abi.order());
+	public static int wireLength(ByteBuffer headerBuffer) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.nativeAbi();
+		try {
+			try {
+				return abi.wireLength(headerBuffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						headerBuffer,
+						e,
+						"wireLength",
+						PcapHeaderABI::wireLength);
+			}
 
-		return buffer;
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(headerBuffer));
+		}
 	}
 
-	/** The Constant MILLI_TIME_SCALE. */
-	private static final int MILLI_TIME_SCALE = 1000_000;
+	/**
+	 * Packet wire length for offline file capture.
+	 *
+	 * @param headerBuffer the buffer containing pcap header contents
+	 * @param isSwapped    for offline files which were captured according to the
+	 *                     capturing system ABI, the bytes written maybe swapped for
+	 *                     this system's architecture.
+	 * @return the number of packet bytes originally seen on the network
+	 *         wire/wireless before truncation due to "snaplen" parameter if set.
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
+	 */
+	public static int wireLength(ByteBuffer headerBuffer, boolean isSwapped) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.selectOfflineAbi(isSwapped);
+		try {
+			try {
+				return abi.wireLength(headerBuffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						headerBuffer,
+						e,
+						"wireLength",
+						PcapHeaderABI::wireLength);
+			}
 
-	/** The Constant NANO_TIME_SCALE. */
-	private static final int NANO_TIME_SCALE = 1000_000_000;
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(headerBuffer));
+		}
+	}
 
-	/** The Constant HEADER_LEN_MAX. */
-	private static final int HEADER_LEN_MAX = 24;
+	/**
+	 * Packet wire length.
+	 *
+	 * @param headerSegment the memory segment containing pcap header contents
+	 * @return the number of packet bytes originally seen on the network
+	 *         wire/wireless before truncation due to "snaplen" parameter if set.
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
+	 */
+	public static int wireLength(MemorySegment headerSegment) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.nativeAbi();
+		return abi.wireLength(headerSegment);
+	}
+
+	/**
+	 * Packet wire length for offline file capture.
+	 *
+	 * @param headerSegment the memory segment containing pcap header contents
+	 * @param isSwapped     for offline files which were captured according to the
+	 *                      capturing system ABI, the bytes written maybe swapped
+	 *                      for this system's architecture.
+	 * @return the number of packet bytes originally seen on the network
+	 *         wire/wireless before truncation due to "snaplen" parameter if set.
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
+	 */
+	public static int wireLength(MemorySegment headerSegment, boolean isSwapped) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.selectOfflineAbi(isSwapped);
+		return abi.wireLength(headerSegment);
+	}
 
 	/** The buffer. */
 	private final ByteBuffer buffer;
 
 	/** The abi. */
 	private final PcapHeaderABI abi;
+
+	private boolean isNanoTime = false;
+
+	/**
+	 * Instantiates a new pcap header.
+	 *
+	 * @param headerBuffer the header buffer
+	 */
+	public PcapHeader(ByteBuffer headerBuffer) {
+		this(PcapHeaderABI.nativeAbi(), headerBuffer);
+	}
+
+	/**
+	 * Instantiates a new pcap header.
+	 *
+	 * @param tvSec         the tv sec
+	 * @param tvUsec        the tv usec
+	 * @param captureLength the capture length
+	 * @param wireLength    the wire length
+	 */
+	public PcapHeader(int tvSec, int tvUsec, int captureLength, int wireLength) {
+		this.abi = PcapHeaderABI.nativeAbi();
+		this.buffer = newInitializedBuffer(abi, tvSec, tvUsec, captureLength, wireLength);
+	}
+
+	/**
+	 * Instantiates a new pcap header.
+	 *
+	 * @param mseg the {@code struct pcap_pkthdr} memory address.
+	 */
+	public PcapHeader(MemorySegment mseg) {
+		this(PcapHeaderABI.nativeAbi(), mseg);
+	}
+
+	/**
+	 * Instantiates a new pcap header.
+	 *
+	 * @param mseg      the {@code struct pcap_pkthdr} memory address.
+	 * @param isSwapped the flag indicates that the header is referencing memory for
+	 *                  an offline capture and that the header field byte may be
+	 *                  swapped, as recorded based on the original capture system
+	 *                  architecture.
+	 */
+	public PcapHeader(MemorySegment mseg, boolean isSwapped) {
+		this(PcapHeaderABI.selectOfflineAbi(isSwapped), mseg);
+	}
+
+	/**
+	 * Instantiates a new pcap header.
+	 *
+	 * @param mseg         the {@code struct pcap_pkthdr} memory address.
+	 * @param isSwapped    the flag indicates that the header is referencing memory
+	 *                     for an offline capture and that the header field byte may
+	 *                     be swapped, as recorded based on the original capture
+	 *                     system architecture. *
+	 * @param isCompactAbi if true, forces the pcap binary interface to use the
+	 *                     compact form.
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_ABI
+	 */
+	public PcapHeader(MemorySegment mseg, boolean isSwapped, boolean isCompactAbi) {
+		this(PcapHeaderABI.compactAbi(isSwapped), mseg);
+	}
 
 	/**
 	 * Instantiates a new pcap header.
@@ -107,20 +358,6 @@ public class PcapHeader {
 	PcapHeader(PcapHeaderABI abi) {
 		this.abi = abi;
 		this.buffer = allocateBuffer(abi);
-	}
-
-	/**
-	 * Instantiates a new pcap header.
-	 *
-	 * @param abi           the abi
-	 * @param tvSec         the tv sec
-	 * @param tvUsec        the tv usec
-	 * @param captureLength the capture length
-	 * @param wireLength    the wire length
-	 */
-	PcapHeader(PcapHeaderABI abi, int tvSec, int tvUsec, int captureLength, int wireLength) {
-		this.abi = abi;
-		this.buffer = newInitializedBuffer(abi, tvSec, tvUsec, captureLength, wireLength);
 	}
 
 	/**
@@ -176,6 +413,24 @@ public class PcapHeader {
 	}
 
 	/**
+	 * As memory reference.
+	 *
+	 * @return the memory address
+	 */
+	public MemoryAddress asMemoryReference() {
+		return asMemorySegment().address();
+	}
+
+	/**
+	 * As memory segment.
+	 *
+	 * @return the memory segment
+	 */
+	public MemorySegment asMemorySegment() {
+		return MemorySegment.ofBuffer(buffer);
+	}
+
+	/**
 	 * Capture length.
 	 *
 	 * @return the int
@@ -199,6 +454,29 @@ public class PcapHeader {
 	}
 
 	/**
+	 * The length of this header.
+	 *
+	 * @return the length of this header in bytes.
+	 */
+	public int headerLength() {
+		return abi.headerLength();
+	}
+
+	/**
+	 * Sets a flag if the timestamp for this header is calculated using nanosecond
+	 * or the default microsecond precision.
+	 *
+	 * @param nanoTime if true, a call to {@link #timestamp()} or
+	 *                 {@link #toEpochMilli()} will use nano second precision
+	 * @return this pcap header
+	 */
+	public PcapHeader setNanoTimePrecision(boolean nanoTime) {
+		this.isNanoTime = nanoTime;
+
+		return this;
+	}
+
+	/**
 	 * Timestamp with 32-bit seconds (MSB bits) and 32-bit usecs (LSB bits) from a
 	 * base of January 1, 1970.
 	 *
@@ -206,7 +484,14 @@ public class PcapHeader {
 	 * @throws PcapHeaderException the pcap header exception
 	 */
 	public long timestamp() throws PcapHeaderException {
-		return (tvSec() << 32 | tvUsec());
+		return timestamp(isNanoTime);
+	}
+
+	public long timestamp(boolean nanoTime) throws PcapHeaderException {
+		if (nanoTime)
+			return tvSec() * NANO_TIME_SCALE + tvUsec();
+		else
+			return tvSec() * MILLI_TIME_SCALE + tvUsec();
 	}
 
 	/**
@@ -215,6 +500,7 @@ public class PcapHeader {
 	 * @return the long
 	 * @throws PcapHeaderException the pcap header exception
 	 */
+
 	public long toEpochMilli() throws PcapHeaderException {
 		return toEpochMilli(false);
 	}
@@ -228,9 +514,24 @@ public class PcapHeader {
 	 */
 	public long toEpochMilli(boolean nanoTime) throws PcapHeaderException {
 		if (nanoTime)
-			return tvSec() * NANO_TIME_SCALE + tvUsec();
+			return timestamp(nanoTime) / 1000_000;
 		else
-			return tvSec() * MILLI_TIME_SCALE + tvUsec();
+			return timestamp() / 1000;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "PcapHeader ["
+				+ "captureLength=%4d".formatted(captureLength())
+				+ ", wireLength=%4d".formatted(wireLength())
+				+ ", timestamp=\"%s\" [s=%d, us=%6d]".formatted(
+						Instant.ofEpochMilli(toEpochMilli()),
+						tvSec(), tvUsec())
+				+ ", abi=%s".formatted(abi)
+				+ "]";
 	}
 
 	/**
@@ -239,8 +540,8 @@ public class PcapHeader {
 	 * @return the int
 	 * @throws PcapHeaderException the pcap header exception
 	 */
-	public int tvSec() throws PcapHeaderException {
-		return buffer.getInt(abi.tvSecOffset());
+	public long tvSec() throws PcapHeaderException {
+		return Integer.toUnsignedLong(buffer.getInt(abi.tvSecOffset()));
 	}
 
 	/**
@@ -249,8 +550,8 @@ public class PcapHeader {
 	 * @return the int
 	 * @throws PcapHeaderException the pcap header exception
 	 */
-	public int tvUsec() throws PcapHeaderException {
-		return buffer.getInt(abi.tvUsecOffset());
+	public long tvUsec() throws PcapHeaderException {
+		return Integer.toUnsignedLong(buffer.getInt(abi.tvUsecOffset()));
 	}
 
 	/**
@@ -275,23 +576,4 @@ public class PcapHeader {
 			throw new IndexOutOfBoundsException("%s".formatted(buffer));
 		}
 	}
-
-	/**
-	 * As memory reference.
-	 *
-	 * @return the memory address
-	 */
-	public MemoryAddress asMemoryReference() {
-		return asMemorySegment().address();
-	}
-
-	/**
-	 * As memory segment.
-	 *
-	 * @return the memory segment
-	 */
-	public MemorySegment asMemorySegment() {
-		return MemorySegment.ofBuffer(buffer);
-	}
-
 }
