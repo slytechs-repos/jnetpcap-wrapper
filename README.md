@@ -119,7 +119,7 @@ To run these exmamples the following command line arguments need to be added:
 ### For more examples
 See the [*wiki*] pages. Project's [unit tests][unit_test] are also a great source for usage examples of every single function in the module.
 
-For extensive API usage exampels, please see the dedicated [jnetpcap-examples](https://github.com/slytechs-repos/jnetpcap-examples) module.
+For extensive API usage examples, please see the dedicated [jnetpcap-examples](https://github.com/slytechs-repos/jnetpcap-examples) module.
 
 ## Dependencies
 **jNetPcap** library has no external java dependencies except for modules provided by the java runtime.
