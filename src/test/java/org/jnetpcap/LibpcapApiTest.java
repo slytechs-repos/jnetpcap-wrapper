@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jnetpcap.test;
+package org.jnetpcap;
 
 import static java.util.concurrent.TimeUnit.*;
+import static org.jnetpcap.AbstractTestBase.TestPacket.*;
 import static org.jnetpcap.constant.PcapConstants.*;
-import static org.jnetpcap.test.AbstractTestBase.TestPacket.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
@@ -34,12 +34,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.jnetpcap.BpFilter;
-import org.jnetpcap.Pcap;
 import org.jnetpcap.Pcap.LibraryPolicy;
-import org.jnetpcap.PcapDumper;
-import org.jnetpcap.PcapException;
-import org.jnetpcap.PcapHandler;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDirection;
 import org.jnetpcap.constant.PcapDlt;

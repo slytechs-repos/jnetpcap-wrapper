@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jnetpcap.test;
+package org.jnetpcap;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,14 +35,11 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.jnetpcap.Pcap;
-import org.jnetpcap.PcapException;
-import org.jnetpcap.PcapHeader;
+import org.jnetpcap.AbstractTestBase.TestPacket.PacketTemplates;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.internal.UnsafePcapHandle;
-import org.jnetpcap.test.AbstractTestBase.TestPacket.PacketTemplates;
 import org.jnetpcap.util.PcapPacketRef;
 import org.jnetpcap.util.PcapUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -58,6 +55,7 @@ import org.junit.jupiter.api.TestInfo;
  * @author mark
  *
  */
+@SuppressWarnings("exports")
 abstract class AbstractTestBase {
 	/**
 	 * A private packet container using in unit testing with 2 simple fields, header
