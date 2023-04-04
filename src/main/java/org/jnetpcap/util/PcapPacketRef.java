@@ -102,23 +102,21 @@ public record PcapPacketRef(Object abi, Addressable header, Addressable data) {
 	 * @return the byte[] containing the selected bytes
 	 */
 	public byte[] toArray(int offset, int length) {
-		int caplen = getAbi().captureLength(header.address());
+		int caplen = captureLength();
 
-		if (length + offset > caplen)
-			length = caplen - offset;
+		if ((length + offset) > caplen)
+			length = (caplen - offset);
+
+		if (data instanceof MemorySegment src) {
+			return src
+					.asSlice(offset, length)
+					.toArray(ValueLayout.JAVA_BYTE);
+		}
 
 		try (var scope = MemorySession.openShared()) {
-
-			if (data instanceof MemorySegment src) {
-				return src
-						.asSlice(offset, length)
-						.toArray(ValueLayout.JAVA_BYTE);
-
-			} else {
-				return MemorySegment
-						.ofAddress(data.address().addOffset(offset), length, scope)
-						.toArray(ValueLayout.JAVA_BYTE);
-			}
+			return MemorySegment
+					.ofAddress(data.address().addOffset(offset), length, scope)
+					.toArray(ValueLayout.JAVA_BYTE);
 		}
 	}
 
