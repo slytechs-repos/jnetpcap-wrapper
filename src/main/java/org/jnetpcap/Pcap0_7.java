@@ -30,6 +30,7 @@ import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 
 import static java.lang.foreign.MemorySegment.*;
 import static java.lang.foreign.ValueLayout.*;
@@ -330,8 +331,8 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap0_7(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected Pcap0_7(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 	/**

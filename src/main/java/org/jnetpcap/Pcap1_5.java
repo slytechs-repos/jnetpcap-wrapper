@@ -21,12 +21,12 @@ import static org.jnetpcap.internal.UnsafePcapHandle.*;
 
 import java.lang.foreign.MemoryAddress;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapTStampPrecision;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
  * Provides Pcap API method calls for up to libpcap version 1.5
@@ -233,13 +233,13 @@ public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 	 * @throws PcapException any errors
 	 * @since libpcap 1.5.1
 	 */
-	protected static <T extends Pcap> T openDeadWithTstampPrecision(BiFunction<MemoryAddress, String, T> factory,
+	protected static <T extends Pcap> T openDeadWithTstampPrecision(PcapSupplier<T> factory,
 			PcapDlt linktype, int snaplen, PcapTStampPrecision precision)
 			throws PcapException {
 		MemoryAddress pcapAddress = pcap_open_dead_with_tstamp_precision
 				.invokeObj(linktype.getAsInt(), snaplen, precision.getAsInt());
 
-		return factory.apply(pcapAddress, makeDeadHandleName(linktype));
+		return factory.newPcap(pcapAddress, makeDeadHandleName(linktype), PcapHeaderABI.selectDeadAbi());
 	}
 
 	/**
@@ -299,8 +299,8 @@ public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap1_5(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected Pcap1_5(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 	/**

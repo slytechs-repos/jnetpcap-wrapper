@@ -4,6 +4,11 @@
 ## Overview
 **jNetPcap** provides out of the box [*libpcap*][libpcap] library in *Java*. By using [*Foreign Function*][jep424] features of *Java 19* or above, **jNetPcap** can bind directly to the native *libpcap* library. All native *libpcap* functions are accessible through easy to use [*Java API*][javadocs]. In addition, the latest [*Npcap*][npcap] and legacy [*WinPcap*][winpcap] tools and their API extensions on *Microsoft Windows* platforms are supported as well. 
 
+## Documentation
+See [*Wiki pages*][wiki] for user guides and examples.
+
+See [*Javadocs*][javadocs] reference documentation.
+
 ## Examples
 To get started lets take a look at a couple of examples.
 
@@ -148,11 +153,6 @@ Latest release: [*download link*][release]
 
 ### Compile From Source
 You will find instructions on how to compile from source on our [*Wiki Pages*][wiki].
-
-## Documentation
-See [*Wiki pages*][wiki]
-
-See [*Javadocs*][javadocs] reference documentation
 
 ## Contact
 * `sales@slytechs.com` for commercial and licensing questions

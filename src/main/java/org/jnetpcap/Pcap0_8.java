@@ -31,6 +31,7 @@ import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.util.PcapPacketRef;
 
 import static java.lang.foreign.ValueLayout.*;
@@ -364,8 +365,8 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap0_8(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected Pcap0_8(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 	/**
@@ -492,7 +493,7 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 		MemoryAddress hdr = super.POINTER_TO_POINTER1.get(ADDRESS, 0);
 		MemoryAddress pkt = super.POINTER_TO_POINTER2.get(ADDRESS, 0);
 
-		return new PcapPacketRef(hdr, pkt);
+		return new PcapPacketRef(super.pcapHeaderABI, hdr, pkt);
 	}
 
 	/**

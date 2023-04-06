@@ -17,494 +17,563 @@
  */
 package org.jnetpcap;
 
-import static org.jnetpcap.internal.PcapHeaderABI.nativeAbi;
+import static org.jnetpcap.internal.PcapHeaderABI.*;
 
-import java.lang.foreign.Addressable;
+import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.MemorySession;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.time.Instant;
 
-import org.jnetpcap.constant.PcapTStampPrecision;
+import org.jnetpcap.Pcap.LibraryPolicy;
+import org.jnetpcap.PcapHeaderException.OutOfRangeException;
 import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
- * The pcap header which describes how many bytes of a packet were seen on the
- * network, how many were actually captured and the capture timestamp.
+ * A Pcap packet header also called a descriptor that precedes each packet. The
+ * pcap header is supplied natively by libpcap library and {@code PcapHeader}
+ * can bind to native memory without copy to access its fields.
+ * <p>
+ * {@code PcapHeader} supplies vital information about the captured packet.
+ * These fields disclaim the length of the data capture and if a packet was
+ * truncated with <em>snaplen</em> parameter on the {@code Pcap} handle, the
+ * packet length as originally seen on the wire. Additionally a timestamp of the
+ * instant when the packet was captured.
+ * </p>
  * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
- * @author mark
- *
+ * @author Mark Bednarczyk
+ * @see LibraryPolicy#SYSTEM_PROPERTY_ABI
  */
-public sealed interface PcapHeader permits PcapHeaderMemory, PcapHeaderBuffer, PcapHeaderRecord, PcapHeaderObject {
+public final class PcapHeader {
+
+	/** The Constant MILLI_TIME_SCALE. */
+	private static final int MILLI_TIME_SCALE = 1000_000;
+
+	/** The Constant NANO_TIME_SCALE. */
+	private static final int NANO_TIME_SCALE = 1000_000_000;
+
+	/** The Constant HEADER_LEN_MAX. */
+	private static final int HEADER_LEN_MAX = 24;
 
 	/**
-	 * The normal header length is 16 bytes. This is when all of the pcap header
-	 * structure fields are compacted or one 32-bit system.
+	 * Allocate buffer.
+	 *
+	 * @param abi the abi
+	 * @return the byte buffer
 	 */
-	public static final int PCAP_HEADER_LENGTH = 16;
+	private static ByteBuffer allocateBuffer(PcapHeaderABI abi) {
+		ByteBuffer buffer = ByteBuffer
+				.allocateDirect(abi.headerLength())
+				.order(abi.order());
 
-	/**
-	 * The padded header length can be up to 24 bytes. This is when tv_sec and
-	 * tv_usec fields are padded to 8 bytes each instead of 4 bytes of actual field
-	 * sizes. When allocating native memory to hold a header, it is safer and
-	 * recommended to use the padded length.
-	 */
-	public static final int PCAP_HEADER_PADDED_LENGTH = nativeAbi().headerLength();
-
-	/**
-	 * Allocates a new PcapHeader in native memory. Current, low resolution time
-	 * source is used to estimate the tvSec and tvUsec values.
-	 * 
-	 * @param length the length of the packet in bytes, used to initialize both
-	 *               wireLength and captureLength fields.
-	 * @param scope  for memory allocation
-	 * @return new native memory backed pcap header
-	 */
-	static PcapHeader allocate(int length, MemorySession scope) {
-		return PcapHeaderMemory.allocate(length, scope);
+		return buffer;
 	}
 
 	/**
-	 * Allocates a new PcapHeader in native memory. All fields are uninitialized and
-	 * may not be zeroed out, depending on the constants of the native memory.
+	 * Packet capture length.
 	 *
-	 * @param scope for memory allocation
-	 * @return new native memory backed pcap header
+	 * @param headerBuffer the buffer containing pcap header contents
+	 * @return the number of packet bytes captured
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
 	 */
-	static PcapHeader allocate(MemorySession scope) {
-		return PcapHeaderMemory.allocate(scope);
+	public static int captureLength(ByteBuffer headerBuffer) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.nativeAbi();
+		try {
+			try {
+				return abi.captureLength(headerBuffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						headerBuffer,
+						e,
+						"captureLength",
+						PcapHeaderABI::captureLength);
+			}
+
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(headerBuffer));
+		}
 	}
 
 	/**
-	 * Creates a new writable instance of the pcap header. The header field values
-	 * are copied from the memory into this header. Byte ordering defaults to native
-	 * byte order.
+	 * Packet capture length for offline file capture.
 	 *
-	 * @param src the src
-	 * @return new pcap header
+	 * @param headerBuffer the buffer containing pcap header contents
+	 * @param isSwapped    for offline files which were captured according to the
+	 *                     capturing system ABI, the bytes written maybe swapped for
+	 *                     this system's architecture.
+	 * @return the number of packet bytes captured
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
 	 */
-	static PcapHeader newInstance(Addressable src) {
-		return newInstance(src, ByteOrder.nativeOrder());
+	public static int captureLength(ByteBuffer headerBuffer, boolean isSwapped) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.selectOfflineAbi(isSwapped);
+		try {
+			try {
+				return abi.captureLength(headerBuffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						headerBuffer,
+						e,
+						"captureLength",
+						PcapHeaderABI::captureLength);
+			}
+
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(headerBuffer));
+		}
 	}
 
 	/**
-	 * Creates a new writable instance of the pcap header. The header field values
-	 * are copied from the memory into this header. Byte ordering defaults to native
-	 * byte order.
+	 * Packet capture length for offline file capture.
 	 *
-	 * @param src   the src
-	 * @param order byte ordering
-	 * @return new pcap header
+	 * @param headerSegment the memory segment containing pcap header contents
+	 * @return the number of packet bytes captured
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
 	 */
-	static PcapHeader newInstance(Addressable src, ByteOrder order) {
-		return PcapHeaderMemory.newObjectHeader(src, order);
+	public static int captureLength(MemorySegment headerSegment) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.nativeAbi();
+		return abi.captureLength(headerSegment);
 	}
 
 	/**
-	 * Creates a new writable instance of the pcap header. The header field values
-	 * are copied from the memory into this header using native byte ordering.
+	 * Packet capture length for offline file capture.
 	 *
-	 * @param tvSec   the tv sec epoch time in seconds since Jan 1st, 1970 12:00am
-	 * @param tvUsec  the tv usec micro or nano second fraction of a second
-	 * @param caplen  the caplen how much data was captured
-	 * @param wirelen the wirelen actual packet length as seen on the wire
-	 * @return new pcap header
+	 * @param headerSegment the memory segment containing pcap header contents
+	 * @param isSwapped     for offline files which were captured according to the
+	 *                      capturing system ABI, the bytes written maybe swapped
+	 *                      for this system's architecture.
+	 * @return the number of packet bytes captured
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
 	 */
-	static PcapHeader newInstance(long tvSec, long tvUsec, int caplen, int wirelen) {
-		return new PcapHeaderObject(tvSec, tvUsec, wirelen, wirelen, ByteOrder.nativeOrder());
+	public static int captureLength(MemorySegment headerSegment, boolean isSwapped) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.selectOfflineAbi(isSwapped);
+		return abi.captureLength(headerSegment);
 	}
 
 	/**
-	 * Creates a new writable instance of the pcap header. The header field values
-	 * are copied from the memory into this header using the provided byte ordering.
+	 * New initialized buffer.
 	 *
-	 * @param tvSec   the tv sec epoch time in seconds since Jan 1st, 1970 12:00am
-	 * @param tvUsec  the tv usec micro or nano second fraction of a second
-	 * @param caplen  the caplen how much data was captured
-	 * @param wirelen the wirelen actual packet length as seen on the wire
-	 * @param order   byte ordering
-	 * @return new pcap header
+	 * @param abi           the abi
+	 * @param tvSec         the tv sec
+	 * @param tvUsec        the tv usec
+	 * @param captureLength the capture length
+	 * @param wireLength    the wire length
+	 * @return the byte buffer
 	 */
-	static PcapHeader newInstance(long tvSec, long tvUsec, int caplen, int wirelen, ByteOrder order) {
-		return new PcapHeaderObject(tvSec, tvUsec, wirelen, wirelen, order);
+	private static ByteBuffer newInitializedBuffer(
+			PcapHeaderABI abi, int tvSec, int tvUsec, int captureLength,
+			int wireLength) {
+		ByteBuffer buffer = allocateBuffer(abi);
+
+		buffer.putInt(abi.tvSecOffset(), tvSec);
+		buffer.putInt(abi.tvUsecOffset(), tvUsec);
+		buffer.putInt(abi.captureLengthOffset(), captureLength);
+		buffer.putInt(abi.wireLengthOffset(), wireLength);
+
+		return buffer;
 	}
 
 	/**
-	 * Creates a new fast read only instance of the pcap header. The header field
-	 * values are copied from the memory into this header. Byte ordering defaults to
-	 * native byte order.
+	 * Packet wire length .
 	 *
-	 * @param src memory source where native pcap header is found
-	 * @return new pcap header
+	 * @param headerBuffer the buffer containing pcap header contents
+	 * @return the number of packet bytes originally seen on the network
+	 *         wire/wireless before truncation due to "snaplen" parameter if set.
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
 	 */
-	static PcapHeader newReadOnlyInstance(Addressable src) {
-		return newReadOnlyInstance(src, ByteOrder.nativeOrder());
+	public static int wireLength(ByteBuffer headerBuffer) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.nativeAbi();
+		try {
+			try {
+				return abi.wireLength(headerBuffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						headerBuffer,
+						e,
+						"wireLength",
+						PcapHeaderABI::wireLength);
+			}
+
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(headerBuffer));
+		}
 	}
 
 	/**
-	 * Creates a new fast read only instance of the pcap header. The header field
-	 * values are copied from the memory into this header using the provided byte
-	 * ordering.
+	 * Packet wire length for offline file capture.
 	 *
-	 * @param src   memory source where native pcap header is found
-	 * @param order byte order of the native memory segment
-	 * @return new pcap header
+	 * @param headerBuffer the buffer containing pcap header contents
+	 * @param isSwapped    for offline files which were captured according to the
+	 *                     capturing system ABI, the bytes written maybe swapped for
+	 *                     this system's architecture.
+	 * @return the number of packet bytes originally seen on the network
+	 *         wire/wireless before truncation due to "snaplen" parameter if set.
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
 	 */
-	static PcapHeader newReadOnlyInstance(Addressable src, ByteOrder order) {
-		return PcapHeaderMemory.newRecordHeader(src, order);
+	public static int wireLength(ByteBuffer headerBuffer, boolean isSwapped) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.selectOfflineAbi(isSwapped);
+		try {
+			try {
+				return abi.wireLength(headerBuffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						headerBuffer,
+						e,
+						"wireLength",
+						PcapHeaderABI::wireLength);
+			}
+
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(headerBuffer));
+		}
 	}
 
 	/**
-	 * Creates a new fast read only instance of the pcap header. The header field
-	 * values are copied from the memory into this header using the specified byte
-	 * ordering.
+	 * Packet wire length.
 	 *
-	 * @param tvSec   the tv sec epoch time in seconds since Jan 1st, 1970 12:00am
-	 * @param tvUsec  the tv usec micro or nano second fraction of a second
-	 * @param caplen  the caplen how much data was captured
-	 * @param wirelen the wirelen actual packet length as seen on the wire
-	 * @param order   byte ordering
-	 * @return new pcap header
+	 * @param headerSegment the memory segment containing pcap header contents
+	 * @return the number of packet bytes originally seen on the network
+	 *         wire/wireless before truncation due to "snaplen" parameter if set.
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
 	 */
-	static PcapHeader newReadOnlyInstance(long tvSec, long tvUsec, int caplen, int wirelen, ByteOrder order) {
-		return new PcapHeaderRecord(tvSec, tvUsec, caplen, wirelen, order);
+	public static int wireLength(MemorySegment headerSegment) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.nativeAbi();
+		return abi.wireLength(headerSegment);
 	}
 
 	/**
-	 * Wraps a header instance around the provided memory object. If addressable is
-	 * a {@code MemorySegment} it will be wrapped directly. If the addressible is a
-	 * {@code MemoryAddress}, a new {@code MemorySegment} will be created and
-	 * wrapped around the address.
+	 * Packet wire length for offline file capture.
 	 *
-	 * @param addressable native memory address or segment at the start of the pcap
-	 *                    structure in native memory
-	 * @return new PcapHeader instance
+	 * @param headerSegment the memory segment containing pcap header contents
+	 * @param isSwapped     for offline files which were captured according to the
+	 *                      capturing system ABI, the bytes written maybe swapped
+	 *                      for this system's architecture.
+	 * @return the number of packet bytes originally seen on the network
+	 *         wire/wireless before truncation due to "snaplen" parameter if set.
+	 * @throws OutOfRangeException the out of range exception, typically indicates
+	 *                             invalid ABI (Application Binary Interface)
+	 *                             setting which is platform and offline capture
+	 *                             file dependent
 	 */
-	static PcapHeader ofAddress(Addressable addressable) {
-		return new PcapHeaderMemory(addressable.address());
+	public static int wireLength(MemorySegment headerSegment, boolean isSwapped) throws OutOfRangeException {
+		PcapHeaderABI abi = PcapHeaderABI.selectOfflineAbi(isSwapped);
+		return abi.wireLength(headerSegment);
+	}
+
+	/** The buffer. */
+	private final ByteBuffer buffer;
+
+	/** The abi. */
+	private final PcapHeaderABI abi;
+
+	private boolean isNanoTime = false;
+
+	/**
+	 * Instantiates a new pcap header.
+	 *
+	 * @param headerBuffer the header buffer
+	 */
+	public PcapHeader(ByteBuffer headerBuffer) {
+		this(PcapHeaderABI.nativeAbi(), headerBuffer);
 	}
 
 	/**
-	 * Creates a no-copy, Pcap header that wraps around the byte array. The integer
-	 * byte ordering is assumed to be {@code ByteOrder.nativeOrder()}.
+	 * Instantiates a new pcap header.
 	 *
-	 * @param arr the arr
-	 * @return the new pcap header
+	 * @param tvSec         the tv sec
+	 * @param tvUsec        the tv usec
+	 * @param captureLength the capture length
+	 * @param wireLength    the wire length
 	 */
-	static PcapHeader ofArray(byte[] arr) {
-		return ofArray(arr, 0);
+	public PcapHeader(int tvSec, int tvUsec, int captureLength, int wireLength) {
+		this.abi = PcapHeaderABI.nativeAbi();
+		this.buffer = newInitializedBuffer(abi, tvSec, tvUsec, captureLength, wireLength);
 	}
 
 	/**
-	 * Creates a no-copy, Pcap header that wraps around the byte array. The integer
-	 * byte ordering is assumed to be {@code ByteOrder.nativeOrder()}.
+	 * Instantiates a new pcap header.
 	 *
-	 * @param arr    the byte array containing the header data at a specific offset
-	 * @param offset the offset in to arr where the header start
-	 * @return the new pcap header
+	 * @param mseg the {@code struct pcap_pkthdr} memory address.
 	 */
-	static PcapHeader ofArray(byte[] arr, int offset) {
-		ByteBuffer buf = ByteBuffer.wrap(arr, offset, PCAP_HEADER_PADDED_LENGTH);
-		return new PcapHeaderBuffer(buf);
+	public PcapHeader(MemorySegment mseg) {
+		this(PcapHeaderABI.nativeAbi(), mseg);
 	}
 
 	/**
-	 * Of buffer.
+	 * Instantiates a new pcap header.
 	 *
-	 * @param buffer the buffer
-	 * @return the pcap header
+	 * @param mseg      the {@code struct pcap_pkthdr} memory address.
+	 * @param isSwapped the flag indicates that the header is referencing memory for
+	 *                  an offline capture and that the header field byte may be
+	 *                  swapped, as recorded based on the original capture system
+	 *                  architecture.
 	 */
-	static PcapHeader ofBuffer(ByteBuffer buffer) {
-		return new PcapHeaderBuffer(buffer);
+	public PcapHeader(MemorySegment mseg, boolean isSwapped) {
+		this(PcapHeaderABI.selectOfflineAbi(isSwapped), mseg);
 	}
 
 	/**
-	 * Reads the {@code captureLength} field value from the memory object.
+	 * Instantiates a new pcap header.
 	 *
-	 * @param memory the memory
-	 * @return number of bytes captured, possibly truncated
+	 * @param mseg         the {@code struct pcap_pkthdr} memory address.
+	 * @param isSwapped    the flag indicates that the header is referencing memory
+	 *                     for an offline capture and that the header field byte may
+	 *                     be swapped, as recorded based on the original capture
+	 *                     system architecture. *
+	 * @param isCompactAbi if true, forces the pcap binary interface to use the
+	 *                     compact form.
+	 * @see LibraryPolicy#SYSTEM_PROPERTY_ABI
 	 */
-	static int readCaptureLength(Addressable memory) {
-		return PcapHeaderABI.nativeAbi().captureLength(memory.address());
+	public PcapHeader(MemorySegment mseg, boolean isSwapped, boolean isCompactAbi) {
+		this(PcapHeaderABI.compactAbi(isSwapped), mseg);
 	}
 
 	/**
-	 * Reads the {@code tvSec} field value from the memory object.
+	 * Instantiates a new pcap header.
 	 *
-	 * @param memory the memory
-	 * @return number of seconds from the start of epoch time, Jan 1st 1970 12:00am.
+	 * @param abi the abi
 	 */
-	static long readTvSec(Addressable memory) {
-		return PcapHeaderABI.nativeAbi().tvSec(memory.address());
+	PcapHeader(PcapHeaderABI abi) {
+		this.abi = abi;
+		this.buffer = allocateBuffer(abi);
 	}
 
 	/**
-	 * Reads the {@code tvUsec} field value from the memory object.
+	 * Instantiates a new pcap header.
 	 *
-	 * @param memory the memory
-	 * @return faction of a second either in nanos or micros depending the capture
-	 *         source
+	 * @param abi    the abi
+	 * @param array  the array
+	 * @param offset the offset
 	 */
-	static long readTvUsec(Addressable memory) {
-		return PcapHeaderABI.nativeAbi().tvUsec(memory.address());
+	PcapHeader(PcapHeaderABI abi, byte[] array, int offset) {
+		this.abi = abi;
+		this.buffer = ByteBuffer
+				.wrap(array, offset, HEADER_LEN_MAX)
+				.order(abi.order());
 	}
 
 	/**
-	 * Reads the {@code wireLength} field value from the memory object.
+	 * Instantiates a new pcap header.
 	 *
-	 * @param memory the memory
-	 * @return number of bytes in the original packet seen on the wire
+	 * @param abi          the abi
+	 * @param headerBuffer the header buffer
 	 */
-	static int readWireLength(Addressable memory) {
-		return PcapHeaderABI.nativeAbi().wireLength(memory.address());
+	PcapHeader(PcapHeaderABI abi, ByteBuffer headerBuffer) {
+		this.abi = abi;
+		this.buffer = headerBuffer.order(abi.order());
 	}
 
 	/**
-	 * Writes values directly into native memory.
+	 * Instantiates a new pcap header.
 	 *
-	 * @param tvSec   the tv sec epoch time in seconds since Jan 1st, 1970 12:00am
-	 * @param tvUsec  the tv usec micro or nano second fraction of a second
-	 * @param caplen  the caplen how much data was captured
-	 * @param wirelen the wirelen actual packet length as seen on the wire
-	 * @param dst     dst could be a memory address or a memory segment, either of
-	 *                which is acceptable
-	 * @param order   the endianness of the values to be written
+	 * @param abi           the abi
+	 * @param headerAddress the header address
+	 * @param session       the session
+	 */
+	PcapHeader(PcapHeaderABI abi, MemoryAddress headerAddress, MemorySession session) {
+		this.abi = abi;
+		this.buffer = MemorySegment.ofAddress(headerAddress, HEADER_LEN_MAX, session)
+				.asByteBuffer()
+				.order(abi.order());
+	}
+
+	/**
+	 * Instantiates a new pcap header.
+	 *
+	 * @param abi           the abi
+	 * @param headerSegment the header segment
+	 */
+	PcapHeader(PcapHeaderABI abi, MemorySegment headerSegment) {
+		this.abi = abi;
+		this.buffer = headerSegment
+				.asByteBuffer()
+				.order(abi.order());
+	}
+
+	/**
+	 * As memory reference.
+	 *
+	 * @return the memory address
+	 */
+	public MemoryAddress asMemoryReference() {
+		return asMemorySegment().address();
+	}
+
+	/**
+	 * As memory segment.
+	 *
+	 * @return the memory segment
+	 */
+	public MemorySegment asMemorySegment() {
+		return MemorySegment.ofBuffer(buffer);
+	}
+
+	/**
+	 * Capture length.
+	 *
 	 * @return the int
+	 * @throws OutOfRangeException the out of range exception
 	 */
-	static int write(long tvSec, long tvUsec, int caplen, int wirelen, Addressable dst, ByteOrder order) {
-		return PcapHeaderMemory.write(tvSec, tvUsec, caplen, wirelen, dst, order);
+	public int captureLength() throws OutOfRangeException {
+		try {
+			try {
+				return abi.captureLength(buffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						buffer,
+						e,
+						"captureLength",
+						PcapHeaderABI::captureLength);
+			}
+
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(buffer));
+		}
 	}
 
 	/**
-	 * Writes values directly into the destination byte array at specified offset.
+	 * The length of this header.
 	 *
-	 * @param tvSec   the tv sec epoch time in seconds since Jan 1st, 1970 12:00am
-	 * @param tvUsec  the tv usec micro or nano second fraction of a second
-	 * @param caplen  the caplen how much data was captured
-	 * @param wirelen the wirelen actual packet length as seen on the wire
-	 * @param dst     the byte array to write to
-	 * @param offset  the offset in to dst array
-	 * @param order   the endianness of the values to be written
+	 * @return the length of this header in bytes.
+	 */
+	public int headerLength() {
+		return abi.headerLength();
+	}
+
+	/**
+	 * Sets a flag if the timestamp for this header is calculated using nanosecond
+	 * or the default microsecond precision.
+	 *
+	 * @param nanoTime if true, a call to {@link #timestamp()} or
+	 *                 {@link #toEpochMilli()} will use nano second precision
+	 * @return this pcap header
+	 */
+	public PcapHeader setNanoTimePrecision(boolean nanoTime) {
+		this.isNanoTime = nanoTime;
+
+		return this;
+	}
+
+	/**
+	 * Timestamp with 32-bit seconds (MSB bits) and 32-bit usecs (LSB bits) from a
+	 * base of January 1, 1970.
+	 *
+	 * @return the long
+	 * @throws PcapHeaderException the pcap header exception
+	 */
+	public long timestamp() throws PcapHeaderException {
+		return timestamp(isNanoTime);
+	}
+
+	public long timestamp(boolean nanoTime) throws PcapHeaderException {
+		if (nanoTime)
+			return tvSec() * NANO_TIME_SCALE + tvUsec();
+		else
+			return tvSec() * MILLI_TIME_SCALE + tvUsec();
+	}
+
+	/**
+	 * To epoch milli.
+	 *
+	 * @return the long
+	 * @throws PcapHeaderException the pcap header exception
+	 */
+
+	public long toEpochMilli() throws PcapHeaderException {
+		return toEpochMilli(false);
+	}
+
+	/**
+	 * To epoch milli.
+	 *
+	 * @param nanoTime the nano time
+	 * @return the long
+	 * @throws PcapHeaderException the pcap header exception
+	 */
+	public long toEpochMilli(boolean nanoTime) throws PcapHeaderException {
+		if (nanoTime)
+			return timestamp(nanoTime) / 1000_000;
+		else
+			return timestamp() / 1000;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "PcapHeader ["
+				+ "captureLength=%4d".formatted(captureLength())
+				+ ", wireLength=%4d".formatted(wireLength())
+				+ ", timestamp=\"%s\" [s=%d, us=%6d]".formatted(
+						Instant.ofEpochMilli(toEpochMilli()),
+						tvSec(), tvUsec())
+				+ ", abi=%s".formatted(abi)
+				+ "]";
+	}
+
+	/**
+	 * Tv sec.
+	 *
 	 * @return the int
+	 * @throws PcapHeaderException the pcap header exception
 	 */
-	static int write(long tvSec, long tvUsec, int caplen, int wirelen, byte[] dst, int offset, ByteOrder order) {
-		return PcapHeaderBuffer.write(tvSec, tvUsec, caplen, wirelen, dst, offset, order);
+	public long tvSec() throws PcapHeaderException {
+		return Integer.toUnsignedLong(buffer.getInt(abi.tvSecOffset()));
 	}
 
 	/**
-	 * Writes values directly into the destination buffer.
+	 * Tv usec.
 	 *
-	 * @param tvSec   the tv sec epoch time in seconds since Jan 1st, 1970 12:00am
-	 * @param tvUsec  the tv usec micro or nano second fraction of a second
-	 * @param caplen  the caplen how much data was captured
-	 * @param wirelen the wirelen actual packet length as seen on the wire
-	 * @param dst     the byte array to write to at current buffers position
 	 * @return the int
+	 * @throws PcapHeaderException the pcap header exception
 	 */
-	static int write(long tvSec, long tvUsec, int caplen, int wirelen, ByteBuffer dst) {
-		return PcapHeaderBuffer.write(tvSec, tvUsec, caplen, wirelen, dst);
+	public long tvUsec() throws PcapHeaderException {
+		return Integer.toUnsignedLong(buffer.getInt(abi.tvUsecOffset()));
 	}
 
 	/**
-	 * Returns a memory address of this pcap header as addressable, suitable for use
-	 * in native downcall functions. An addressable keeps any backing memory
-	 * segments, arrays or buffers reachable. If implementating header is non-memory
-	 * based, a new memory segment will be allocated and its address returned.
-	 * 
-	 * <p>
-	 * Note, that if this header instance is backed by native memory, the backing
-	 * native memory segment will be returned. If the header instance is non-memory
-	 * based, a new native memory segment will be allocated and values of this
-	 * header copied into it. Therefore if pcap header is be to used natively, it is
-	 * more efficient to wrap and instance around a memory segment using one of the
-	 * {@linkplain PcapHeader#ofAddress(Addressable)} factory methods.
-	 * </p>
+	 * Wire length.
 	 *
-	 * @return the memory segment containing this header's field values
+	 * @return the int
+	 * @throws PcapHeaderException the pcap header exception
 	 */
-	Addressable asMemoryReference();
+	public int wireLength() throws PcapHeaderException {
+		try {
+			try {
+				return abi.wireLength(buffer);
+			} catch (OutOfRangeException e) {
+				throw throwListOfAllAbiPossibilities( // Throw a more robust explanation
+						buffer,
+						e,
+						"wireLength",
+						PcapHeaderABI::captureLength);
+			}
 
-	/**
-	 * Returns a read-only version of the pcap header.
-	 *
-	 * @return the pcap header
-	 */
-	PcapHeader asReadOnly();
-
-	/**
-	 * Number of packet bytes actually captured, up to maximum length of 'snaplen'
-	 * if set on a capture. Only 16-bits LSB are significant.
-	 *
-	 * @return actual number of bytes captured
-	 */
-	int captureLength();
-
-	/**
-	 * Copies this header's contents to the destination byte array at specific
-	 * offset. The values of this pcap header are copied into the array compacted
-	 * (no padding).
-	 *
-	 * @param dst    the destination byte array
-	 * @param offset the offset in to the byte array
-	 * @return number of bytes copied which should be {@value #PCAP_HEADER_LENGTH}
-	 *         non non-padded header length
-	 */
-	default int copyTo(byte[] dst, int offset) {
-		return write((int) tvSec(), (int) tvUsec(), captureLength(), wireLength(), dst, offset, order());
+		} catch (IndexOutOfBoundsException e) {
+			throw new IndexOutOfBoundsException("%s".formatted(buffer));
+		}
 	}
-
-	/**
-	 * Copies this header's contents to the destination buffer starting at the
-	 * buffer's position. The buffer's position is not advanced. The values of this
-	 * pcap header are copied into the buffer compacted (no padding).
-	 *
-	 * @param dst the destination buffer
-	 * @return number of bytes copied which should be {@value #PCAP_HEADER_LENGTH}
-	 *         non non-padded header length
-	 */
-	default int copyTo(ByteBuffer dst) {
-		return write((int) tvSec(), (int) tvUsec(), captureLength(), wireLength(), dst);
-	}
-
-	/**
-	 * Copies this header's contents to the destination memory segment. Values are
-	 * copied into the memory segment with ABI padding, if any and using the byte
-	 * ordering of this header.
-	 *
-	 * @param dst the destination memory segment
-	 * @return the number of byte written to memory, on certain systems (i.e.
-	 *         64-bit) the number may reflected padding as well and should be the
-	 *         same value as {@code 24}.
-	 */
-	int copyTo(MemorySegment dst);
-
-	/**
-	 * Checks if the header is read only.
-	 *
-	 * @return true, if is read only
-	 */
-	boolean isReadOnly();
-
-	/**
-	 * Byte ordering of the values of this header.
-	 *
-	 * @return endianness of the pcap header
-	 */
-	ByteOrder order();
-
-	/**
-	 * changes the byte order of values are read from this pcap header.
-	 *
-	 * @param newOrder the new byte order
-	 * @return this pcap header
-	 */
-	PcapHeader order(ByteOrder newOrder);
-
-	/**
-	 * Sets new header values by estimating the tvSec and tvUsec values using a
-	 * current low resolution time source and setting both captureLength and
-	 * wireLength fields to length.
-	 *
-	 * @param length packet length in bytes
-	 * @return this pcap header
-	 */
-	default PcapHeader set(int length) {
-		return set(length, length);
-	}
-
-	/**
-	 * Sets new header values by estimating the tvSec and tvUsec values using a
-	 * current low resolution time source.
-	 *
-	 * @param caplen  number of bytes captured
-	 * @param wirelen number of bytes in the packet on the wire
-	 * @return this pcap header
-	 */
-	default PcapHeader set(int caplen, int wirelen) {
-		long time = System.currentTimeMillis();
-		long tvSec = time / 1000;
-		long tvUsec = (time % 1000) * 1000;
-
-		return set(tvSec, tvUsec, caplen, wirelen);
-	}
-
-	/**
-	 * Sets new header values.
-	 *
-	 * @param tvSec   set the tvSec field or number of seconds since start of epoch,
-	 *                Jan 1st, 1970 12:00am
-	 * @param tvUsec  set the tvUsec field or fraction of a second in micros or
-	 *                nanos
-	 * @param caplen  number of bytes captured
-	 * @param wirelen number of bytes in the packet on the wire
-	 * @return this pcap header
-	 */
-	PcapHeader set(long tvSec, long tvUsec, int caplen, int wirelen);
-
-	/**
-	 * Converts the {@link #tvSec()} and {@link #tvUsec()} values into a epoch
-	 * microsecond value.
-	 *
-	 * @return Number of microseconds since epoch start, Jan 1st, 1970 12:00am.
-	 */
-	default long toEpochMicro() {
-		return toEpochTime(PcapTStampPrecision.TSTAMP_PRECISION_MICRO);
-	}
-
-	/**
-	 * Converts the {@link #tvSec()} and {@link #tvUsec()} values into a epoch
-	 * millisecond value, compatible with java {@code Date} class and
-	 * {@code java.time} package. The method uses the default
-	 * {@link PcapTStampPrecision#TSTAMP_PRECISION_MICRO} precision value for
-	 * {@link #tvUsec()} field.
-	 *
-	 * @return Number of milliseconds since epoch start, Jan 1st, 1970 12:00am.
-	 */
-	default long toEpochMilli() {
-		return PcapTStampPrecision.TSTAMP_PRECISION_MICRO.toEpochMilli(tvSec(), tvUsec());
-	}
-
-	/**
-	 * Converts the {@link #tvSec()} and {@link #tvUsec()} values into a epoch time
-	 * of provided precision.
-	 *
-	 * @param precision the precision of {@link #tvUsec()} field and how it is
-	 *                  interpreted
-	 * @return Number of micro or nano seconds since epoch start, Jan 1st, 1970
-	 *         12:00am, depending on the precision argument
-	 */
-	default long toEpochTime(PcapTStampPrecision precision) {
-		return precision.toEpochTime(tvSec(), tvUsec());
-	}
-
-	/**
-	 * Pcap timestamp seconds value within pcap header. The value is an epoch or
-	 * unix time, which is number of seconds since Jan 1, 1970 at 12:00am. Only
-	 * 32-bits LSB are significant.
-	 *
-	 * @return Number of seconds since epoch start (Jan 1st, 1970 12:00am)
-	 */
-	long tvSec();
-
-	/**
-	 * A fraction of a second, by default in micro-seconds but may also be in
-	 * nanoseconds depending on the capture device or how the timestamp was stored
-	 * in a 'savefile'. Only 32-bits LSB are significant.
-	 *
-	 * @return fraction of a second in micros or nanos
-	 */
-	long tvUsec();
-
-	/**
-	 * Original packet length in bytes as seen on the wire. This can be different
-	 * from {@link #captureLength()} value, as packets can be captured truncated
-	 * resulting in smaller packet capture size. Only 16-bits LSB are significant.
-	 *
-	 * @return the length of a packet in bytes as seen on the wire before any
-	 *         truncation, if any
-	 */
-	int wireLength();
-
 }

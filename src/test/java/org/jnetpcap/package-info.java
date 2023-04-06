@@ -39,4 +39,4 @@
  * </dl>
  * </p>
  */
-package org.jnetpcap.test;
+package org.jnetpcap;

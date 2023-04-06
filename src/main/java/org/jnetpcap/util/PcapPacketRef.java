@@ -22,21 +22,19 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 
-import org.jnetpcap.PcapHeader;
 import org.jnetpcap.constant.PcapConstants;
+import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
  * A utility class which holds references to native pcap header and native pcap
  * packet data. The scope of these addresses is libpcap packet scope and should
  * be used with great care or VM crashes can occur.
- * 
- * @param header memory address of the pcap header structure in native memory
- * @param data   memory address of the packet's data in native memory
+ *
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  * @author mark
  */
-public record PcapPacketRef(Addressable header, Addressable data) {
+public record PcapPacketRef(Object abi, Addressable header, Addressable data) {
 
 	/**
 	 * Returns byte[] representation of the entire packet.
@@ -48,31 +46,77 @@ public record PcapPacketRef(Addressable header, Addressable data) {
 	}
 
 	/**
+	 * Calculate the header ABI.
+	 *
+	 * @return the calculated ABI
+	 */
+	private PcapHeaderABI getAbi() {
+		if (abi instanceof PcapHeaderABI a)
+			return a;
+
+		return PcapHeaderABI.nativeAbi();
+	}
+
+	/**
+	 * Capture length of the packet.
+	 *
+	 * @return the capture length pcap header field value
+	 */
+	public int captureLength() {
+		return getAbi().captureLength(header.address());
+	}
+
+	/**
+	 * Wire length of the packet.
+	 *
+	 * @return the wire length pcap header field value
+	 */
+	public int wireLength() {
+		return getAbi().wireLength(header.address());
+	}
+
+	/**
+	 * The timestamp in seconds in epoch time.
+	 *
+	 * @return the epoch seconds since Jan 1st, 1970.
+	 */
+	public long tvSec() {
+		return getAbi().tvSec(header.address());
+	}
+
+	/**
+	 * The timestamp fraction of a second.
+	 *
+	 * @return fraction of a second in micros or nanos.
+	 */
+	public long tvUsec() {
+		return getAbi().tvUsec(header.address());
+	}
+
+	/**
 	 * Returns an array containing only the packet bytes starting at {@code offset}
-	 * and {@code offset + length}
+	 * and {@code offset + length}.
 	 *
 	 * @param offset the offset offset into the packet
 	 * @param length number of bytes starting at the offset
 	 * @return the byte[] containing the selected bytes
 	 */
 	public byte[] toArray(int offset, int length) {
-		var hdr = PcapHeader.ofAddress(header);
+		int caplen = captureLength();
 
-		if (length + offset > hdr.captureLength())
-			length = hdr.captureLength() - offset;
+		if ((length + offset) > caplen)
+			length = (caplen - offset);
+
+		if (data instanceof MemorySegment src) {
+			return src
+					.asSlice(offset, length)
+					.toArray(ValueLayout.JAVA_BYTE);
+		}
 
 		try (var scope = MemorySession.openShared()) {
-
-			if (data instanceof MemorySegment src) {
-				return src
-						.asSlice(offset, length)
-						.toArray(ValueLayout.JAVA_BYTE);
-
-			} else {
-				return MemorySegment
-						.ofAddress(data.address().addOffset(offset), length, scope)
-						.toArray(ValueLayout.JAVA_BYTE);
-			}
+			return MemorySegment
+					.ofAddress(data.address().addOffset(offset), length, scope)
+					.toArray(ValueLayout.JAVA_BYTE);
 		}
 	}
 
