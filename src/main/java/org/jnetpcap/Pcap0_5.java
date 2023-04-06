@@ -25,6 +25,7 @@ import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
  * Provides Pcap API method calls for up to libpcap version 0.5
@@ -209,8 +210,8 @@ public sealed class Pcap0_5 extends Pcap0_4 permits Pcap0_6 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the name
 	 */
-	protected Pcap0_5(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected Pcap0_5(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 }

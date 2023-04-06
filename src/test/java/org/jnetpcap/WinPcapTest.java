@@ -15,21 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jnetpcap.test;
+package org.jnetpcap;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.jnetpcap.Pcap;
-import org.jnetpcap.PcapException;
+import java.io.File;
+import java.io.IOException;
+
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapSrc;
 import org.jnetpcap.windows.WinPcap;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 /**
  * WinPcap unit tests.
@@ -160,23 +159,54 @@ class WinPcapTest extends AbstractTestBase {
 	 * {@link org.jnetpcap.windows.WinPcap#liveDump(java.lang.String, int, int)}.
 	 * 
 	 * @throws PcapException
+	 * @throws IOException
 	 */
 	@Test
 	@Tag("sudo-permission")
-	@Tag("live-capture")
+	@Tag("offline-capture")
+	@Tag("libpcap-dumper-api")
 	@Tag("windows")
-	void testLiveDump() throws PcapException {
-		var pcapIf = Pcap.findAllDevs().get(0);
-//		try (var pcap = WinPcap.openOffline(OFFLINE_FILE)) {}
+	void testLiveDump(TestInfo info) throws PcapException, IOException {
+		final File tempDumpFile = cleanup(super.tempDumpFile(info), File::delete);
+		final String filename = tempDumpFile.getCanonicalPath();
+		final int MAX_BYTE_SIZE = 10 * 1024;
+		final int MAX_PACKET_COUNT = 10;
+
+		try (var pcap = WinPcap.openOffline(OFFLINE_FILE)) {
+
+			/* Async operation */
+			pcap.liveDump(filename, MAX_BYTE_SIZE, MAX_PACKET_COUNT);
+
+			pcap.liveDumpEnded(true); // Block until liveDump finishes
+
+			assertTrue(tempDumpFile.exists());
+		}
 	}
 
 	/**
 	 * Test method for {@link org.jnetpcap.windows.WinPcap#liveDumpEnded(boolean)}.
+	 * 
+	 * @throws IOException
+	 * @throws PcapException
 	 */
 	@Test
 	@Disabled
-	void testLiveDumpEnded() {
-		fail("Not yet implemented");
+	void testLiveDumpEnded(TestInfo info) throws IOException, PcapException {
+		final File tempDumpFile = cleanup(super.tempDumpFile(info), File::delete);
+		final String filename = tempDumpFile.getCanonicalPath();
+		final int MAX_BYTE_SIZE = 10 * 1024;
+		final int MAX_PACKET_COUNT = 10;
+
+		try (var pcap = WinPcap.openOffline(OFFLINE_FILE)) {
+
+			/* Async operation */
+			pcap.liveDump(filename, MAX_BYTE_SIZE, MAX_PACKET_COUNT);
+
+			pcap.liveDumpEnded(true); // Block until liveDump finishes
+
+			/* Transfered 10 packets worth of data */
+			assertTrue(tempDumpFile.length() > 0);
+		}
 	}
 
 	/**

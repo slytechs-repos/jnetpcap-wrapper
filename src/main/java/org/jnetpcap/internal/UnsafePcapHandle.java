@@ -35,7 +35,7 @@ import org.jnetpcap.constant.PcapDlt;
  * @author mark
  *
  */
-public final class UnsafePcapHandle extends Pcap1_10 {
+public non-sealed class UnsafePcapHandle extends Pcap1_10 {
 	public static String makeDeadHandleName(PcapDlt dlt) {
 		return "dead-" + dlt.name().toLowerCase();
 	}
@@ -96,8 +96,8 @@ public final class UnsafePcapHandle extends Pcap1_10 {
 	/**
 	 * @param pcapHandle
 	 */
-	protected UnsafePcapHandle(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected UnsafePcapHandle(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 	public MemoryAddress address() {
@@ -164,6 +164,7 @@ public final class UnsafePcapHandle extends Pcap1_10 {
 	 *
 	 * @param count   maximum number of packets to process before returning
 	 * @param handler the handler
+	 * @param user    TODO
 	 * @return the number of packets processed on success; this can be 0 if no
 	 *         packets were read from a live capture (if, for example, they were
 	 *         discarded because they didn't pass the packet filter, or if, on
@@ -174,8 +175,11 @@ public final class UnsafePcapHandle extends Pcap1_10 {
 	 *         available in a ``savefile.''
 	 * @since libpcap 0.4
 	 */
-	public int dispatchWithAccessToRawPacket(int count, PcapHandler handler) {
-		return super.dispatch(count, handler);
+	public int dispatchWithAccessToRawPacket(
+			int count,
+			PcapHandler.NativeCallback handler,
+			MemoryAddress user) {
+		return super.dispatch(count, handler, user);
 	}
 
 	/**
@@ -248,8 +252,8 @@ public final class UnsafePcapHandle extends Pcap1_10 {
 	 *         available in a ``savefile.''
 	 * @since libpcap 0.4
 	 */
-	public int loopWithAccessToRawPacket(int count, PcapHandler handler) {
-		return super.loop(count, handler);
+	public int loopWithAccessToRawPacket(int count, PcapHandler.NativeCallback handler) {
+		return super.loop(count, handler, MemoryAddress.NULL);
 	}
 
 	/**

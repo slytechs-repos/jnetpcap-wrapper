@@ -21,13 +21,13 @@ import java.lang.foreign.Addressable;
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 
 import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
  * Provides Pcap API method calls for up to libpcap version 1.0
@@ -142,7 +142,7 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * @return the version specific Pcap instance
 	 * @throws PcapException the pcap exception
 	 */
-	protected static <T extends Pcap> T create(BiFunction<MemoryAddress, String, T> factory, String device)
+	protected static <T extends Pcap> T create(PcapSupplier<T> factory, String device)
 			throws PcapException {
 		try (var scope = newScope()) {
 			MemorySegment c_errbuf = MemorySegment.allocateNative(PcapConstants.PCAP_ERRBUF_SIZE, scope);
@@ -156,7 +156,9 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 			if (pcapPointer == MemoryAddress.NULL)
 				throw new PcapException(PcapCode.PCAP_ERROR, c_errbuf.getUtf8String(0));
 
-			return factory.apply(pcapPointer, device);
+			var abi = PcapHeaderABI.selectLiveAbi();
+			
+			return factory.newPcap(pcapPointer, device, abi);
 
 		} catch (PcapException e) {
 			throw e;
@@ -400,8 +402,8 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap1_0(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected Pcap1_0(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 	/**

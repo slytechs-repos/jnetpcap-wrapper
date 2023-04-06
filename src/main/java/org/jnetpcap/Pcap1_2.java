@@ -28,6 +28,7 @@ import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapTstampType;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
+import org.jnetpcap.internal.PcapHeaderABI;
 
 import static java.lang.foreign.ValueLayout.*;
 
@@ -219,8 +220,8 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap1_2(MemoryAddress pcapHandle, String name) {
-		super(pcapHandle, name);
+	protected Pcap1_2(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		super(pcapHandle, name, abi);
 	}
 
 	/**
