@@ -66,7 +66,7 @@ public enum PcapHeaderABI {
 
 	private static final int BITMASK16 = 0xFFFFFFFF;
 	private static final int MIN_FRAME_SIZE = 14;
-	private static final int MAX_FRAME_SIZE = 9 * 1024;
+	private static final int MAX_FRAME_SIZE = 64 * 1024;
 	private static final Lock CAREFUL_LOCK = new ReentrantLock();
 
 	static {
