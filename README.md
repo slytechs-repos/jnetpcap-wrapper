@@ -19,7 +19,7 @@ Ip4 ip4 = new Ip4();
 if (packet.hasHeader(ip4))
   System.out.printf("IPv4.version=%d%n", ip4.version());
 ```
-please use [**jnetpcap-pro**][jnetpcap-pro] module which extends that basic **jnetpcap** module API (ie. `PcapPro extends Pcap`) by providing additional protocol level features and API. Click here to download [**jNetPcap Pro + Protocols**][download-bundle] bundle.
+please use [**jnetpcap-pro**][jnetpcap-pro] module which extends that basic **jnetpcap** module API (ie. `PcapPro extends Pcap`) by providing additional protocol level features and API. Click here to download [**jNetPcap Pro + Protocols bundle**][download-bundle].
 
 > **Note:** The actual protocol definitions are in their own modules as well, all based on the main [**core-protocols**][core-protocols] protocol pack module and others.
 
@@ -198,6 +198,6 @@ So everyone is on the same page, we follow the following [branching model][git-b
 [jep424]: <https://openjdk.org/jeps/424> "Foreign Function & Memory API (Preview)"
 [git-branch-model]: <https://nvie.com/posts/a-successful-git-branching-model>
 [why-master-deprecated]: <https://www.theserverside.com/feature/Why-GitHub-renamed-its-master-branch-to-main>
-[jnetpcap-pro]: <https://slytechs-repos.github.io/jnetpcap-pro>
+[jnetpcap-pro]: <https://github.com/slytechs-repos/jnetpcap-pro>
 [core-protocols]: <https://github.com/slytechs-repos/core-protocols>
 [download-bundle]: <https://github.com/slytechs-repos/slytechs-repos/releases>
