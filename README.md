@@ -21,7 +21,7 @@ if (packet.hasHeader(ip4))
 ```
 please use [**jnetpcap-pro**][jnetpcap-pro] module which extends that basic **jnetpcap** module API (ie. `PcapPro extends Pcap`) by providing additional protocol level features and API. Click here to download [**jNetPcap Pro + Protocols bundle**][download-bundle].
 
-> **Note:** The protocol definitions are in their own modules called *protocol packs*, starting with [**core-protocols**][core-protocols] protocol pack.
+> **Note:** The protocol definitions are in their own modules called [**protocol packs**][protocol-packs], starting with [**core-protocols**][core-protocols] protocol pack.
 
 ## Examples
 To get started lets take a look at a couple of examples.
@@ -201,3 +201,4 @@ So everyone is on the same page, we follow the following [branching model][git-b
 [jnetpcap-pro]: <https://github.com/slytechs-repos/jnetpcap-pro>
 [core-protocols]: <https://github.com/slytechs-repos/core-protocols>
 [download-bundle]: <https://github.com/slytechs-repos/slytechs-repos/releases>
+[protocol-packs]: <https://github.com/slytechs-repos/jnetpcap-pro/wiki#about-protocol-packs>
