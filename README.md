@@ -21,7 +21,7 @@ if (packet.hasHeader(ip4))
 ```
 please use [**jnetpcap-pro**][jnetpcap-pro] module which extends that basic **jnetpcap** module API (ie. `PcapPro extends Pcap`) by providing additional protocol level features and API. Click here to download [**jNetPcap Pro + Protocols bundle**][download-bundle].
 
-> **Note:** The actual protocol definitions are in their own modules as well, all based on the main [**core-protocols**][core-protocols] protocol pack module and others.
+> **Note:** The actual protocol definitions are in their own modules called *protocol packs*, starting with [**core-protocols**][core-protocols] protocol pack.
 
 ## Examples
 To get started lets take a look at a couple of examples.
