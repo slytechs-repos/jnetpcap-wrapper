@@ -1,25 +1,26 @@
 /*
- * Apache License, Version 2.0
+ * Sly Technologies Free License
  * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Sly Technologies Free License (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ * http://www.slytechs.com/free-license-text
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.jnetpcap;
 
 import static java.util.Objects.*;
 
 import java.io.File;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.foreign.Addressable;
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 import org.jnetpcap.Pcap0_4.PcapSupplier;
 import org.jnetpcap.constant.PcapCode;
@@ -3576,5 +3578,29 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 */
 	public PcapHeaderABI getPcapHeaderABI() {
 		return pcapHeaderABI;
+	}
+
+	/**
+	 * Sets the uncaught exception handler for {@link #loop} and {@link #dispatch}
+	 * methods. Any exception thrown within the user callback methods, will be
+	 * caught and sent to the specified user exception handler.
+	 *
+	 * @param exceptionHandler the exception handler
+	 * @return this pcap
+	 */
+	public Pcap setUncaughtExceptionHandler(Consumer<? super Throwable> exceptionHandler) {
+		return setUncaughtExceptionHandler((t, e) -> exceptionHandler.accept(e));
+	}
+
+	/**
+	 * Sets the uncaught exception handler for {@link #loop} and {@link #dispatch}
+	 * methods. Any exception thrown within the user callback methods, will be
+	 * caught and sent to the specified user exception handler.
+	 *
+	 * @param exceptionHandler the exception handler
+	 * @return this pcap
+	 */
+	public Pcap setUncaughtExceptionHandler(UncaughtExceptionHandler exceptionHandler) {
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

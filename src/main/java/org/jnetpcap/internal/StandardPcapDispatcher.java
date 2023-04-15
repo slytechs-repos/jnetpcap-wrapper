@@ -17,6 +17,7 @@
  */
 package org.jnetpcap.internal;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.MemorySession;
@@ -70,10 +71,11 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 
 	private final MemorySegment pcapCallbackStub;
 	private final MemoryAddress pcapHandle;
-	private NativeCallback sink;
+	private NativeCallback userSink;
 
 	protected final MemorySession session;
 
+	private UncaughtExceptionHandler uncaughtExceptionHandler;
 	private RuntimeException uncaughtException;
 	private boolean interrupted = false;
 	@SuppressWarnings("unused")
@@ -106,7 +108,7 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 
 	@Override
 	public final int dispatchNative(int count, NativeCallback handler, MemoryAddress user) {
-		this.sink = handler;
+		this.userSink = handler;
 
 		return dispatchRaw(
 				count,
@@ -134,6 +136,22 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
+	 * @return the uncaughtException
+	 */
+	@Override
+	public final RuntimeException getUncaughtException() {
+		return uncaughtException;
+	}
+
+	private final void handleInterrupt() throws RuntimeException {
+		interrupted = false; // Reset flag
+
+		if (uncaughtException != null) {
+			throw uncaughtException;
+		}
+	}
+
+	/**
 	 * @see org.jnetpcap.internal.PcapDispatcher#headerLength(java.lang.foreign.MemoryAddress)
 	 */
 	@Override
@@ -148,7 +166,7 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 
 	@Override
 	public final int loopNative(int count, NativeCallback handler, MemoryAddress user) {
-		this.sink = handler;
+		this.userSink = handler;
 
 		return loopRaw(
 				count,
@@ -184,30 +202,34 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		this.uncaughtException = null; // Reset any previous unclaimed exceptions
 
 		try {
-			this.sink.nativeCallback(user, header, packet);
+			this.userSink.nativeCallback(user, header, packet);
 		} catch (RuntimeException e) {
-			this.uncaughtException = e;
-			interrupt();
-
-		} catch (Throwable e) {
-			this.uncaughtException = new IllegalStateException(e);
-			interrupt();
-		}
-	}
-
-	private final void handleInterrupt() throws RuntimeException {
-		interrupted = false; // Reset flag
-
-		if (uncaughtException != null) {
-			throw uncaughtException;
+			onNativeCallbackException(e);
 		}
 	}
 
 	/**
-	 * @return the uncaughtException
+	 * Called on a native callback exception within the user handler.
+	 *
+	 * @param e the exception
 	 */
-	@Override
-	public final RuntimeException getUncaughtException() {
-		return uncaughtException;
+	protected final void onNativeCallbackException(RuntimeException e) {
+		this.uncaughtException = e;
+
+		if (uncaughtExceptionHandler != null) {
+			var veto = VetoableExceptionHandler.wrap(uncaughtExceptionHandler);
+			if (veto.vetoableException(e)) {
+				this.uncaughtException = e;
+				interrupt();
+			}
+
+		} else {
+			this.uncaughtException = e;
+			interrupt();
+		}
+	}
+
+	public final void setUncaughtExceptionHandler(UncaughtExceptionHandler exceptionHandler) {
+		this.uncaughtExceptionHandler = exceptionHandler;
 	}
 }

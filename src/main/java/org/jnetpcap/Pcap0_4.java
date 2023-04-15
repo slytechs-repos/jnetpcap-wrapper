@@ -21,6 +21,7 @@ import static java.util.Objects.*;
 import static org.jnetpcap.constant.PcapConstants.*;
 import static org.jnetpcap.internal.UnsafePcapHandle.*;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.foreign.Addressable;
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
@@ -855,5 +856,20 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 			return PcapStatRecord.ofMemoryPlatformDependent(mseg);
 		}
+	}
+
+	/**
+	 * Sets the uncaught exception handler for {@link #loop} and {@link #dispatch}
+	 * methods. Any exception thrown within the user callback methods, will be
+	 * caught and sent to the specified user exception handler.
+	 *
+	 * @param exceptionHandler the exception handler
+	 * @return this pcap
+	 */
+	@Override
+	public Pcap setUncaughtExceptionHandler(UncaughtExceptionHandler exceptionHandler) {
+		dispatcher.setUncaughtExceptionHandler(exceptionHandler);
+
+		return this;
 	}
 }

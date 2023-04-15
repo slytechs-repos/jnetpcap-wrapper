@@ -17,6 +17,7 @@
  */
 package org.jnetpcap.internal;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.foreign.MemoryAddress;
 
 import org.jnetpcap.PcapHandler.NativeCallback;
@@ -36,6 +37,11 @@ public interface PcapDispatcher extends NativeCallback, AutoCloseable {
 	int loopRaw(int count, MemoryAddress callbackFunc, MemoryAddress userData);
 
 	RuntimeException getUncaughtException();
+
+	/**
+	 * @param exceptionHandler
+	 */
+	void setUncaughtExceptionHandler(UncaughtExceptionHandler exceptionHandler);
 
 	@Override
 	void close();
