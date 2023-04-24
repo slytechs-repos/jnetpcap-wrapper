@@ -410,7 +410,7 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * @see org.jnetpcap.Pcap#activate()
 	 */
 	@Override
-	public final void activate() throws PcapException {
+	public void activate() throws PcapException {
 		pcap_activate.invokeInt(this::getErrorString, getPcapHandle());
 	}
 

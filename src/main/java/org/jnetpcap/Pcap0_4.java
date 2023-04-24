@@ -804,7 +804,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @see org.jnetpcap.Pcap#next()
 	 */
 	@Override
-	public final PcapPacketRef next() throws PcapException {
+	public PcapPacketRef next() throws PcapException {
 
 		MemorySegment hdr = PCAP0_4_HEADER_BUFFER;
 		MemoryAddress pkt = pcap_next.invokeObj(this::geterr, getPcapHandle(), hdr);
