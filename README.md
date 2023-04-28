@@ -2,7 +2,15 @@
 **jNetPcap** is a [*libpcap*][libpcap] java library. This is **version 2** release of the popular **jNetPcap** library, previously hosted on [*SourceForge.net*][sf.net].
 
 ## Overview
-**jNetPcap** provides out of the box [*libpcap*][libpcap] library in *Java*. By using [*Foreign Function*][jep424] features of *Java 19* or above, **jNetPcap** can bind directly to the native *libpcap* library. All native *libpcap* functions are accessible through easy to use [*Java API*][javadocs]. In addition, the latest [*Npcap*][npcap] and legacy [*WinPcap*][winpcap] tools and their API extensions on *Microsoft Windows* platforms are supported as well. 
+**jNetPcap** is a Java library that provides access to libpcap, a low-level network monitoring library. The library allows Java developers to write applications that can capture, read, and manipulate network packets in real-time. 
+
+To use JNetPcap, you need to download and install the library and add it to your Java project's classpath. Once you have done that, you can use the Java API provided by *jNetPcap** to interact with network packets.
+
+The library includes a set of classes and methods that allow you to capture network packets, filter and search through them, extract and analyze packet data, and ultimately write custom network analysis applications. 
+
+To begin capturing packets, you can create an instance of the `Pcap` class, which represents a network interface that the library will use to capture packets. Then you can create a `PcapPacketHandler` instance to process each packet as it is captured. 
+
+**jNetPcap** also includes functionality for creating filters to capture only the packets that match certain criteria, such as a specific port, protocol, or IP address.
 
 ## Documentation
 See [*Wiki pages*][wiki] for user guides and examples.
