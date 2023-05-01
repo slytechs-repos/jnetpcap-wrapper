@@ -159,7 +159,7 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		return ABI.headerLength();
 	}
 
-	private final void interrupt() {
+	protected final void interrupt() {
 		this.breakDispatch.run();
 		this.interrupted = true;
 	}
@@ -229,6 +229,7 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		}
 	}
 
+	@Override
 	public final void setUncaughtExceptionHandler(UncaughtExceptionHandler exceptionHandler) {
 		this.uncaughtExceptionHandler = exceptionHandler;
 	}
