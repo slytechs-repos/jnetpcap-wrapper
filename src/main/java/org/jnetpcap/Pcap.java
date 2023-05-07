@@ -1641,34 +1641,36 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * network, with the options that were set on the handle being in effect.
 	 * </p>
 	 *
-	 * @throws PcapException The possible error values are:
-	 *                       <dl>
-	 *                       <dt>PCAP_ERROR_ACTIVATED</dt>
-	 *                       <dd>The handle has already been activated</dd>
-	 *                       <dt>PCAP_ERROR_NO_SUCH_DEVICE</dt>
-	 *                       <dd>e capture source specified when the handle was
-	 *                       created doesn't exist</dd>
-	 *                       <dt>PCAP_ERROR_PERM_DENIED</dt>
-	 *                       <dd>The process doesn't have permission to open the
-	 *                       capture source</dd>
-	 *                       <dt>PCAP_ERROR_PROMISC_PERM_DENIED</dt>
-	 *                       <dd>The process has permission to open the capture
-	 *                       source but doesn't have permission to put it into
-	 *                       promiscuous mode</dd>
-	 *                       <dt>PCAP_ERROR_RFMON_NOTSUP</dt>
-	 *                       <dd>Monitor mode was specified but the capture source
-	 *                       doesn't support monitor mode</dd>
-	 *                       <dt>PCAP_ERROR_IFACE_NOT_UP</dt>
-	 *                       <dd>The capture source device is not up</dd>
-	 *                       <dt>PCAP_ERROR</dt>
-	 *                       <dd>Another error occurred</dd>
-	 *                       </dl>
+	 * @throws PcapActivatedException thrown if this pcap handle is already
+	 *                                activated
+	 * @throws PcapException          The possible error values are:
+	 *                                <dl>
+	 *                                <dt>PCAP_ERROR_ACTIVATED</dt>
+	 *                                <dd>The handle has already been activated</dd>
+	 *                                <dt>PCAP_ERROR_NO_SUCH_DEVICE</dt>
+	 *                                <dd>e capture source specified when the handle
+	 *                                was created doesn't exist</dd>
+	 *                                <dt>PCAP_ERROR_PERM_DENIED</dt>
+	 *                                <dd>The process doesn't have permission to
+	 *                                open the capture source</dd>
+	 *                                <dt>PCAP_ERROR_PROMISC_PERM_DENIED</dt>
+	 *                                <dd>The process has permission to open the
+	 *                                capture source but doesn't have permission to
+	 *                                put it into promiscuous mode</dd>
+	 *                                <dt>PCAP_ERROR_RFMON_NOTSUP</dt>
+	 *                                <dd>Monitor mode was specified but the capture
+	 *                                source doesn't support monitor mode</dd>
+	 *                                <dt>PCAP_ERROR_IFACE_NOT_UP</dt>
+	 *                                <dd>The capture source device is not up</dd>
+	 *                                <dt>PCAP_ERROR</dt>
+	 *                                <dd>Another error occurred</dd>
+	 *                                </dl>
 	 * @see <a href=
 	 *      "https://man7.org/linux/man-pages/man3/pcap_activate.3pcap.html">int
 	 *      pcap_activate(pcap_t *)</a>
 	 * @since libpcap 1.0
 	 */
-	public void activate() throws PcapException {
+	public void activate() throws PcapActivatedException, PcapException {
 		throw new UnsupportedOperationException(minApi("Pcap1_0", "libpcap 1.0"));
 	}
 

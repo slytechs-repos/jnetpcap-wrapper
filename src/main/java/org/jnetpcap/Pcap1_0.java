@@ -157,7 +157,7 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 				throw new PcapException(PcapCode.PCAP_ERROR, c_errbuf.getUtf8String(0));
 
 			var abi = PcapHeaderABI.selectLiveAbi();
-			
+
 			return factory.newPcap(pcapPointer, device, abi);
 
 		} catch (PcapException e) {
@@ -410,8 +410,12 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 * @see org.jnetpcap.Pcap#activate()
 	 */
 	@Override
-	public void activate() throws PcapException {
-		pcap_activate.invokeInt(this::getErrorString, getPcapHandle());
+	public void activate() throws PcapActivatedException, PcapException {
+		int code = pcap_activate.invokeInt(getPcapHandle());
+		if (code == PcapCode.PCAP_ERROR_ACTIVATED)
+			throw new PcapActivatedException(code, "can not activate, already active");
+
+		PcapException.throwIfNotOk(code);
 	}
 
 	/**
