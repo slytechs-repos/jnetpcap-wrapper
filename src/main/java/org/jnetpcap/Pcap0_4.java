@@ -474,7 +474,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * pcap_loop and pcap_dispatch native calls. Other dispatchers may perform
 	 * additional processing on packets before dispatching to callback handlers.
 	 */
-	private PcapDispatcher dispatcher;
+	protected PcapDispatcher dispatcher;
 
 	/**
 	 * Instantiates a new pcap 0 4.
@@ -484,7 +484,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 */
 	protected Pcap0_4(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
-		this.dispatcher = new StandardPcapDispatcher(getPcapHandle(), this::breakloop);
+		this.dispatcher = new StandardPcapDispatcher(getPcapHandle(), abi, this::breakloop);
 	}
 
 	protected void setDispatcher(PcapDispatcher newDispatcher) {
@@ -805,13 +805,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 */
 	@Override
 	public PcapPacketRef next() throws PcapException {
-
-		MemorySegment hdr = PCAP0_4_HEADER_BUFFER;
-		MemoryAddress pkt = pcap_next.invokeObj(this::geterr, getPcapHandle(), hdr);
-
-		return (pkt == null) || (pkt == NULL)
-				? null
-				: new PcapPacketRef(super.pcapHeaderABI, hdr, pkt);
+		return dispatcher.next();
 	}
 
 	/**

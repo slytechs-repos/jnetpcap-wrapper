@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
-import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
@@ -477,23 +476,8 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 * @see org.jnetpcap.Pcap#nextEx()
 	 */
 	@Override
-	public final PcapPacketRef nextEx() throws PcapException, TimeoutException {
-		int result = pcap_next_ex.invokeInt(
-				this::getErrorString,
-				getPcapHandle(),
-				POINTER_TO_POINTER1, // hdr_p
-				POINTER_TO_POINTER2); // pkt_p
-
-		if (result == 0)
-			throw new TimeoutException();
-
-		else if (result == PcapCode.PCAP_ERROR_BREAK)
-			return null;
-
-		MemoryAddress hdr = super.POINTER_TO_POINTER1.get(ADDRESS, 0);
-		MemoryAddress pkt = super.POINTER_TO_POINTER2.get(ADDRESS, 0);
-
-		return new PcapPacketRef(super.pcapHeaderABI, hdr, pkt);
+	public PcapPacketRef nextEx() throws PcapException, TimeoutException {
+		return dispatcher.nextEx();
 	}
 
 	/**

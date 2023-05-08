@@ -19,8 +19,11 @@ package org.jnetpcap.internal;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.foreign.MemoryAddress;
+import java.util.concurrent.TimeoutException;
 
+import org.jnetpcap.PcapException;
 import org.jnetpcap.PcapHandler.NativeCallback;
+import org.jnetpcap.util.PcapPacketRef;
 
 public interface PcapDispatcher extends NativeCallback, AutoCloseable {
 
@@ -45,4 +48,14 @@ public interface PcapDispatcher extends NativeCallback, AutoCloseable {
 
 	@Override
 	void close();
+
+	void onNativeCallbackException(RuntimeException e);
+
+	void interrupt();
+
+	PcapHeaderABI abi();
+
+	PcapPacketRef nextEx() throws PcapException, TimeoutException;
+
+	PcapPacketRef next() throws PcapException;
 }
