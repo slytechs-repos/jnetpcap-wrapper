@@ -249,6 +249,40 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		String DEFAULT_SO_IGNORE_LOAD_ERRORS = "true";
 
 		/**
+		 * The default java library path made up of many common paths on different
+		 * platforms where libpcap is typically installed.
+		 */
+		String DEFAULT_JAVA_LIBRARY_PATH = ""
+				+ "C:\\Windows\\SysWOW64;"
+				+ "C:\\Windows\\System32;"
+				+ "C:\\Program Files;"
+				+ "/usr/lib/x86_64-linux-gnu;"
+				+ "/usr/local/Cellar/libpcap/1.10.4/lib;"
+				+ "/usr/local/Cellar/libpcap/1.10.3/lib;"
+				+ "/usr/local/Cellar/libpcap/1.10.2/lib;"
+				+ "/usr/local/Cellar/libpcap/1.10.1/lib;"
+				+ "/usr/local/Cellar/libpcap/1.10.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.9.1/lib;"
+				+ "/usr/local/Cellar/libpcap/1.9.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.8.1/lib;"
+				+ "/usr/local/Cellar/libpcap/1.8.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.7.4/lib;"
+				+ "/usr/local/Cellar/libpcap/1.7.3/lib;"
+				+ "/usr/local/Cellar/libpcap/1.7.2/lib;"
+				+ "/usr/local/Cellar/libpcap/1.6.2/lib;"
+				+ "/usr/local/Cellar/libpcap/1.5.3/lib;"
+				+ "/usr/local/Cellar/libpcap/1.4.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.3.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.2.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.1.1/lib;"
+				+ "/usr/local/Cellar/libpcap/1.0.0/lib;"
+				+ "/usr/local/Cellar/libpcap/0.9.8/lib;"
+				+ "/opt/local/lib;"
+				+ "/opt/napatech3/lib;"
+				+ "/lib;"
+				+ "/usr/lib";
+
+		/**
 		 * The Constant which defines the default logging output which discards all of
 		 * its input.
 		 */

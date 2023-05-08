@@ -145,12 +145,25 @@ public class PcapForeignInitializer extends ForeignInitializer<PcapForeignDownca
 		String libpcapFile = System.getProperty(LibraryPolicy.SYSTEM_PROPERTY_LIBPCAP_FILE);
 		String libpcapFilename = System.getProperty(LibraryPolicy.SYSTEM_PROPERTY_LIBPCAP_FILENAME);
 		String libpcapNames = System.getProperty(LibraryPolicy.SYSTEM_PROPERTY_LIBPCAP_NAMES,
-				"npcap,wpcap,pcap");
+				"wpcap,pcap");
 		String soExtensions = System.getProperty(LibraryPolicy.SYSTEM_PROPERTY_SO_EXTENSIONS,
-				"so,dylib");
+				"so,dylib,dll");
 
 		boolean isLoaded = false;
 		StringBuilder errorBuilder = new StringBuilder();
+
+		/*
+		 * We perform our own scan for the library. We use ';' character as directory
+		 * separator.
+		 * 
+		 * Note that you can not set 'java.library.path' property programatically. It
+		 * read by VM on startup from the System properties and never again after that.
+		 * Therefore we perform our own scan.
+		 */
+		if (javaLibraryPath != null) {
+			javaLibraryPath = javaLibraryPath.replace(':', ';');
+			javaLibraryPath += ";" + LibraryPolicy.DEFAULT_JAVA_LIBRARY_PATH;
+		}
 
 		/* Try absolute file path first, highest priority */
 		if (!isLoaded && (libpcapFile != null)) {
@@ -206,19 +219,22 @@ public class PcapForeignInitializer extends ForeignInitializer<PcapForeignDownca
 		/* Last attempt, is to use the lib names and attempt to load absolute paths */
 		if (!isLoaded && (libpcapNames != null) && (soExtensions != null)) {
 			String[] exts = soExtensions.split("\\s*,\\s*");
-			String dir = (javaLibraryPath == null)
+			javaLibraryPath = (javaLibraryPath == null)
 					? "."
 					: javaLibraryPath;
 
-			LONG_SHOT_LOOP: for (String name : libpcapNames.split("\\s*,\\s*")) {
-				for (String ext : exts) {
-					Path path = Path.of(dir, DECORATED_FORMAT.formatted(name, ext));
+			for (String dir : javaLibraryPath.split(";")) {
 
-					try {
-						System.load(path.toString());
-						isLoaded = true;
-						break LONG_SHOT_LOOP;
-					} catch (Throwable e) {}
+				LONG_SHOT_LOOP: for (String name : libpcapNames.split("\\s*,\\s*")) {
+					for (String ext : exts) {
+						Path path = Path.of(dir, DECORATED_FORMAT.formatted(name, ext));
+
+						try {
+							System.load(path.toString());
+							isLoaded = true;
+							break LONG_SHOT_LOOP;
+						} catch (Throwable e) {}
+					}
 				}
 			}
 
