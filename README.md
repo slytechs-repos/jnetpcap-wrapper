@@ -2,7 +2,7 @@
 **jNetPcap** is a [*libpcap*][libpcap] java library. This is **version 2** release of the popular **jNetPcap** library, previously hosted on [*SourceForge.net*][sf.net].
 
 ## See Also
-If you are looking for protocol enabled versio of this library, please see [**jNetPcap Pro**][jnetpcap-pro] or [**jNetWorks**][jnetworks] libraries.
+If you are looking for protocol enabled version of this library, please see [**jNetPcap Pro**][jnetpcap-pro] extension or for advanced functionality the [**jNetWorks**][jnetworks] library.
 
 ## Overview
 **jNetPcap** is a Java library that provides access to libpcap, a low-level network monitoring library. The library allows Java developers to write applications that can capture, read, and manipulate network packets in real-time. 
