@@ -145,7 +145,8 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	 */
 	@Override
 	public void close() {
-		session.close();
+		if (session.isAlive())
+			session.close();
 	}
 
 	@Override
@@ -279,10 +280,10 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
-	 * @see org.jnetpcap.internal.PcapDispatcher#abi()
+	 * @see org.jnetpcap.internal.PcapDispatcher#pcapHeaderABI()
 	 */
 	@Override
-	public PcapHeaderABI abi() {
+	public PcapHeaderABI pcapHeaderABI() {
 		return this.abi;
 	}
 

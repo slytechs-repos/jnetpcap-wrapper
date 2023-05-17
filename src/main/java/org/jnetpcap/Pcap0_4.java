@@ -500,7 +500,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @see org.jnetpcap.Pcap#close()
 	 */
 	@Override
-	public final void close() {
+	public void close() {
 		pcap_close.invokeVoid(getPcapHandle());
 		dispatcher.close();
 

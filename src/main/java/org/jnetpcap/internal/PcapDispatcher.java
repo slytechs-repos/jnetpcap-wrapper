@@ -53,7 +53,7 @@ public interface PcapDispatcher extends NativeCallback, AutoCloseable {
 
 	void interrupt();
 
-	PcapHeaderABI abi();
+	PcapHeaderABI pcapHeaderABI();
 
 	PcapPacketRef nextEx() throws PcapException, TimeoutException;
 
