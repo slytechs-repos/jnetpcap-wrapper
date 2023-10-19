@@ -17,13 +17,14 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
 import java.util.Objects;
+
+import org.jnetpcap.internal.ForeignUtils;
 
 import static java.lang.foreign.MemoryLayout.*;
 import static java.lang.foreign.MemoryLayout.PathElement.*;
@@ -74,19 +75,19 @@ public final class BpFilter implements AutoCloseable {
 
 		private final MemorySegment mseg;
 
-		StructBpfProgram(MemorySession scope) {
-			mseg = scope.allocate(
+		StructBpfProgram(Arena arena) {
+			mseg = arena.allocate(
 					LAYOUT.byteSize(),
 					LAYOUT.bitAlignment());
 			mseg.fill((byte) 0);
 		}
 
-		public MemoryAddress address() {
-			return mseg.address();
+		public MemorySegment address() {
+			return mseg;
 		}
 
-		public MemoryAddress bf_insns() {
-			return (MemoryAddress) BF_INSNS.get(ValueLayout.ADDRESS);
+		public MemorySegment bf_insns() {
+			return (MemorySegment) BF_INSNS.get(ValueLayout.ADDRESS);
 		}
 
 		public int bf_len() {
@@ -95,12 +96,11 @@ public final class BpFilter implements AutoCloseable {
 
 		@SuppressWarnings("unused")
 		public long[] toArray() {
-			try (var scope = MemorySession.openShared()) {
+			try (var arena = Arena.openShared()) {
 
-				MemorySegment insns_mseg = MemorySegment.ofAddress(
+				MemorySegment insns_mseg = ForeignUtils.reinterpret(
 						bf_insns(),
-						bf_len() * JAVA_LONG.byteSize(),
-						scope);
+						bf_len() * JAVA_LONG.byteSize());
 
 				return insns_mseg.toArray(JAVA_LONG);
 			}
@@ -110,7 +110,7 @@ public final class BpFilter implements AutoCloseable {
 	private final String filterString;
 
 	private final StructBpfProgram program;
-	private final MemorySession scope;
+	private final Arena arena;
 
 	/**
 	 * Instantiates a new Berkley Packet filter with the given filter string.
@@ -119,12 +119,12 @@ public final class BpFilter implements AutoCloseable {
 	 */
 	BpFilter(String filterString) {
 		this.filterString = Objects.requireNonNull(filterString, "filterString");
-		this.scope = MemorySession.openShared();
-		this.program = new StructBpfProgram(scope);
+		this.arena = Arena.openShared();
+		this.program = new StructBpfProgram(arena);
 	}
 
-	MemoryAddress address() {
-		if (!scope.isAlive())
+	MemorySegment address() {
+		if (!arena.scope().isAlive())
 			throw new IllegalStateException("filter not allocated");
 
 		return program.address();
@@ -138,12 +138,12 @@ public final class BpFilter implements AutoCloseable {
 	 */
 	@Override
 	public void close() throws IllegalStateException {
-		if (!scope.isAlive())
+		if (!arena.scope().isAlive())
 			throw new IllegalStateException("already closed");
 
 		Pcap0_6.freecode(program.address());
 
-		scope.close();
+		arena.close();
 	}
 
 	/**

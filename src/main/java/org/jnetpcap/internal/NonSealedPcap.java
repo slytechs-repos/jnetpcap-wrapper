@@ -17,7 +17,7 @@
  */
 package org.jnetpcap.internal;
 
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.MemorySegment;
 
 import org.jnetpcap.Pcap1_10;
 
@@ -33,7 +33,7 @@ public non-sealed class NonSealedPcap extends Pcap1_10 {
 	 * @param pcapHandle
 	 * @param name
 	 */
-	protected NonSealedPcap(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+	protected NonSealedPcap(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 

@@ -18,18 +18,16 @@
 package org.jnetpcap.internal;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
+import java.lang.foreign.SegmentScope;
 import java.util.concurrent.TimeoutException;
 
 import org.jnetpcap.PcapException;
 import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.util.PcapPacketRef;
 
-import static java.lang.foreign.MemoryAddress.*;
 import static java.lang.foreign.MemorySegment.*;
-import static java.lang.foreign.MemorySession.*;
 import static java.lang.foreign.ValueLayout.*;
 
 /**
@@ -100,10 +98,10 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	private final MemorySegment pcapCallbackStub;
-	private final MemoryAddress pcapHandle;
+	private final MemorySegment pcapHandle;
 	private NativeCallback userSink;
 
-	protected final MemorySession session;
+	protected final Arena arena;
 
 	private UncaughtExceptionHandler uncaughtExceptionHandler;
 	private RuntimeException uncaughtException;
@@ -115,12 +113,12 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 
 	private final PcapHeaderABI abi;
 
-	public StandardPcapDispatcher(MemoryAddress pcapHandle, PcapHeaderABI abi, Runnable breakDispatch) {
+	public StandardPcapDispatcher(MemorySegment pcapHandle, PcapHeaderABI abi, Runnable breakDispatch) {
 		this.pcapHandle = pcapHandle;
 		this.abi = abi;
 		this.breakDispatch = breakDispatch;
-		this.session = MemorySession.openShared();
-		this.pcapCallbackStub = pcap_handler.virtualStubPointer(this, this.session);
+		this.arena = Arena.openShared();
+		this.pcapCallbackStub = pcap_handler.virtualStubPointer(this, this.arena.scope());
 	}
 
 	/**
@@ -133,10 +131,10 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
-	 * @see org.jnetpcap.internal.PcapDispatcher#captureLength(java.lang.foreign.MemoryAddress)
+	 * @see org.jnetpcap.internal.PcapDispatcher#captureLength(java.lang.foreign.MemorySegment)
 	 */
 	@Override
-	public int captureLength(MemoryAddress headerAddress) {
+	public int captureLength(MemorySegment headerAddress) {
 		return abi.captureLength(headerAddress);
 	}
 
@@ -145,17 +143,17 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	 */
 	@Override
 	public void close() {
-		if (session.isAlive())
-			session.close();
+		if (arena.scope().isAlive())
+			arena.close();
 	}
 
 	@Override
-	public final int dispatchNative(int count, NativeCallback handler, MemoryAddress user) {
+	public final int dispatchNative(int count, NativeCallback handler, MemorySegment user) {
 		this.userSink = handler;
 
 		return dispatchRaw(
 				count,
-				pcapCallbackStub.address(),
+				pcapCallbackStub,
 				user);
 	}
 
@@ -165,7 +163,7 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	 * @param userData
 	 */
 	@Override
-	public final int dispatchRaw(int count, MemoryAddress callbackFunc, MemoryAddress userData) {
+	public final int dispatchRaw(int count, MemorySegment callbackFunc, MemorySegment userData) {
 		int result = pcap_dispatch.invokeInt(
 				pcapHandle,
 				count,
@@ -195,10 +193,10 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
-	 * @see org.jnetpcap.internal.PcapDispatcher#headerLength(java.lang.foreign.MemoryAddress)
+	 * @see org.jnetpcap.internal.PcapDispatcher#headerLength(java.lang.foreign.MemorySegment)
 	 */
 	@Override
-	public int headerLength(MemoryAddress headerAddress) {
+	public int headerLength(MemorySegment headerAddress) {
 		return abi.headerLength();
 	}
 
@@ -209,12 +207,12 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	@Override
-	public final int loopNative(int count, NativeCallback handler, MemoryAddress user) {
+	public final int loopNative(int count, NativeCallback handler, MemorySegment user) {
 		this.userSink = handler;
 
 		return loopRaw(
 				count,
-				pcapCallbackStub.address(),
+				pcapCallbackStub,
 				user);
 	}
 
@@ -224,7 +222,7 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	 * @param userData
 	 */
 	@Override
-	public final int loopRaw(int count, MemoryAddress callbackFunc, MemoryAddress userData) {
+	public final int loopRaw(int count, MemorySegment callbackFunc, MemorySegment userData) {
 		int result = pcap_loop.invokeInt(
 				pcapHandle,
 				count,
@@ -238,11 +236,11 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
-	 * @see org.jnetpcap.Pcap0_4.MemoryAddressCallback#nativeCallback(java.lang.foreign.MemoryAddress,
-	 *      java.lang.foreign.MemoryAddress, java.lang.foreign.MemoryAddress)
+	 * @see org.jnetpcap.Pcap0_4.MemorySegmentCallback#nativeCallback(java.lang.foreign.MemorySegment,
+	 *      java.lang.foreign.MemorySegment, java.lang.foreign.MemorySegment)
 	 */
 	@Override
-	public final void nativeCallback(MemoryAddress user, MemoryAddress header, MemoryAddress packet) {
+	public final void nativeCallback(MemorySegment user, MemorySegment header, MemorySegment packet) {
 		this.uncaughtException = null; // Reset any previous unclaimed exceptions
 
 		try {
@@ -287,10 +285,9 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		return this.abi;
 	}
 
-	private final MemorySegment POINTER_TO_POINTER1 = allocateNative(ADDRESS, openImplicit());
-	private final MemorySegment POINTER_TO_POINTER2 = allocateNative(ADDRESS, openImplicit());
-	private final MemorySegment PCAP_HEADER_BUFFER = MemorySession.openImplicit()
-			.allocate(PcapHeaderABI.nativeAbi().headerLength());
+	private final MemorySegment POINTER_TO_POINTER1 = allocateNative(ADDRESS, SegmentScope.auto());
+	private final MemorySegment POINTER_TO_POINTER2 = allocateNative(ADDRESS, SegmentScope.auto());
+	private final MemorySegment PCAP_HEADER_BUFFER = allocateNative(PcapHeaderABI.nativeAbi().headerLength(), SegmentScope.auto());
 
 	/**
 	 * Dynamic non-pcap utility method to convert libpcap error code to a string, by
@@ -322,8 +319,8 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		else if (result == PcapCode.PCAP_ERROR_BREAK)
 			return null;
 
-		MemoryAddress hdr = POINTER_TO_POINTER1.get(ADDRESS, 0);
-		MemoryAddress pkt = POINTER_TO_POINTER2.get(ADDRESS, 0);
+		MemorySegment hdr = POINTER_TO_POINTER1.get(ADDRESS, 0);
+		MemorySegment pkt = POINTER_TO_POINTER2.get(ADDRESS, 0);
 
 		return new PcapPacketRef(abi, hdr, pkt);
 	}
@@ -334,9 +331,9 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	@Override
 	public PcapPacketRef next() throws PcapException {
 		MemorySegment hdr = PCAP_HEADER_BUFFER;
-		MemoryAddress pkt = pcap_next.invokeObj(this::geterr, pcapHandle, hdr);
+		MemorySegment pkt = pcap_next.invokeObj(this::geterr, pcapHandle, hdr);
 
-		return (pkt == null) || (pkt == NULL)
+		return (ForeignUtils.isNullAddress(pkt))
 				? null
 				: new PcapPacketRef(abi, hdr, pkt);
 	}

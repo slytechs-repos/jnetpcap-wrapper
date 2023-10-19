@@ -19,7 +19,6 @@ package org.jnetpcap;
 
 import static org.jnetpcap.constant.PcapConstants.*;
 
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.util.Collections;
@@ -32,7 +31,6 @@ import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.internal.PcapHeaderABI;
 
-import static java.lang.foreign.MemorySegment.*;
 import static java.lang.foreign.ValueLayout.*;
 
 /**
@@ -187,17 +185,17 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 */
 	public static List<PcapIf> findAllDevs() throws PcapException {
 
-		try (var scope = newScope()) {
-			MemorySegment alldevsp = allocateNative(ADDRESS, scope);
-			MemorySegment errbuf = allocateNative(PCAP_ERRBUF_SIZE, scope);
+		try (var arena = newArena()) {
+			MemorySegment alldevsp = arena.allocate(ADDRESS);
+			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
 			/* int pcap_findalldevs(pcap_if_t **alldevsp, char *errbuf) */
 			if (pcap_findalldevs.invokeInt(alldevsp, errbuf) == PcapCode.PCAP_ERROR)
 				throw new PcapException(errbuf.getUtf8String(0));
 
-			MemoryAddress alldev = alldevsp.get(ValueLayout.ADDRESS, 0);
+			MemorySegment alldev = alldevsp.get(ValueLayout.ADDRESS, 0);
 
-			List<PcapIf> list = PcapIf.listAll(alldev, scope);
+			List<PcapIf> list = PcapIf.listAll(alldev, arena);
 
 			/* void pcap_freealldevs(pcap_if_t *alldevs) */
 			pcap_freealldevs.invokeVoid(alldev);
@@ -331,7 +329,7 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap0_7(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+	protected Pcap0_7(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 
@@ -340,8 +338,8 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 */
 	@Override
 	public final boolean getNonBlock() throws PcapException {
-		try (var scope = newScope()) {
-			return pcap_getnonblock.invokeInt(this::getErrorString, getPcapHandle(), scope.allocate(
+		try (var arena = newArena()) {
+			return pcap_getnonblock.invokeInt(this::getErrorString, getPcapHandle(), arena.allocate(
 					PCAP_ERRBUF_SIZE)) == 1;
 		}
 	}
@@ -351,8 +349,8 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 */
 	@Override
 	public final Pcap0_7 setNonBlock(boolean b) throws PcapException {
-		try (var scope = newScope()) {
-			pcap_setnonblock.invokeInt(this::getErrorString, getPcapHandle(), b ? 1 : 0, scope.allocate(
+		try (var arena = newArena()) {
+			pcap_setnonblock.invokeInt(this::getErrorString, getPcapHandle(), b ? 1 : 0, arena.allocate(
 					PCAP_ERRBUF_SIZE));
 
 			return this;

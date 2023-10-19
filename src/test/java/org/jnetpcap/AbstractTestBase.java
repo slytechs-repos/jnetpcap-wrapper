@@ -19,8 +19,8 @@ package org.jnetpcap;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,6 +38,7 @@ import java.util.function.Supplier;
 import org.jnetpcap.AbstractTestBase.TestPacket.PacketTemplates;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDlt;
+import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.internal.UnsafePcapHandle;
 import org.jnetpcap.util.PcapPacketRef;
@@ -73,13 +74,13 @@ abstract class AbstractTestBase {
 			 * Make a packet from supplied byte array.
 			 *
 			 * @param dataSupplier the packet template
-			 * @param scope        the scope
+			 * @param arena        the arena
 			 * @return the test packet
 			 */
-			public TestPacket makePacket(PcapHeaderABI abi, Supplier<byte[]> dataSupplier, MemorySession scope) {
+			public TestPacket makePacket(PcapHeaderABI abi, Supplier<byte[]> dataSupplier, Arena arena) {
 				final byte[] packetBytes = dataSupplier.get();
 
-				return TestPacket.fromArray(abi, packetBytes, scope);
+				return TestPacket.fromArray(abi, packetBytes, arena);
 			}
 
 			/**
@@ -109,11 +110,11 @@ abstract class AbstractTestBase {
 			 * Make a TCP test packet suitable for unit testing purposes. IP addresses have
 			 * been modified to be on private non-routable network.
 			 *
-			 * @param scope the scope for native memory allocation
+			 * @param arena the arena for native memory allocation
 			 * @return the test packet containing a header and data in native memory
 			 */
-			public TestPacket tcpPacket(PcapHeaderABI abi, MemorySession scope) {
-				return makePacket(abi, this::tcpArray, scope);
+			public TestPacket tcpPacket(PcapHeaderABI abi, Arena arena) {
+				return makePacket(abi, this::tcpArray, arena);
 			}
 
 		}
@@ -132,13 +133,13 @@ abstract class AbstractTestBase {
 			return HEADER;
 		}
 
-		public static TestPacket fromArray(PcapHeaderABI abi, byte[] packetData, MemorySession scope) {
-			return fromArray(abi, packetData, 0, packetData.length, scope);
+		public static TestPacket fromArray(PcapHeaderABI abi, byte[] packetData, Arena arena) {
+			return fromArray(abi, packetData, 0, packetData.length, arena);
 		}
 
 		public static TestPacket fromArray(PcapHeaderABI abi, byte[] packetData, int offset, int length,
-				MemorySession scope) {
-			MemorySegment packetSegment = scope.allocate(length);
+				Arena arena) {
+			MemorySegment packetSegment = arena.allocate(length);
 			MemorySegment.copy(packetData, offset, packetSegment, ValueLayout.JAVA_BYTE, 0, length);
 
 			MemorySegment headerSegment = createHeaderAsSegment(length);
@@ -146,12 +147,12 @@ abstract class AbstractTestBase {
 			return new TestPacket(abi, headerSegment, packetSegment);
 		}
 
-		public static TestPacket fromPcapPacketRef(PcapHeaderABI abi, PcapPacketRef ref, MemorySession scope) {
+		public static TestPacket fromPcapPacketRef(PcapHeaderABI abi, PcapPacketRef ref, Arena arena) {
 			if (ref == null)
 				return null;
 
-			var hdr = new PcapHeader(abi, ref.header().address(), scope);
-			var pkt = MemorySegment.ofAddress(ref.data().address(), hdr.captureLength(), scope);
+			var hdr = new PcapHeader(abi, ref.header(), arena);
+			var pkt = ForeignUtils.reinterpret(ref.data().address(), hdr.captureLength(), arena);
 
 			return new TestPacket(abi, hdr.asMemorySegment(), pkt);
 		}
@@ -345,10 +346,10 @@ abstract class AbstractTestBase {
 	 * @return the test transmitter
 	 */
 	protected TestTransmitter setupPacketTransmitter(PcapHeaderABI abi,
-			BiFunction<PcapHeaderABI, MemorySession, TestPacket> packetFactory,
+			BiFunction<PcapHeaderABI, Arena, TestPacket> packetFactory,
 			BiConsumer<MemorySegment, Integer> sendAction) {
-		final MemorySession scope = MemorySession.openShared();
-		final TestPacket packetToSend = packetFactory.apply(abi, scope);
+		final Arena arena = Arena.openShared();
+		final TestPacket packetToSend = packetFactory.apply(abi, arena);
 
 		final ScheduledExecutorService scheduleExecutor = Executors.newScheduledThreadPool(1);
 
@@ -358,7 +359,7 @@ abstract class AbstractTestBase {
 
 			@Override
 			public void close() {
-				scope.close();
+				arena.close();
 				scheduleExecutor.close();
 			}
 

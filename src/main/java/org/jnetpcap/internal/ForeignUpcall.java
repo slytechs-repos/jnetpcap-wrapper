@@ -20,7 +20,7 @@ package org.jnetpcap.internal;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
+import java.lang.foreign.SegmentScope;
 import java.lang.invoke.MethodHandle;
 
 /**
@@ -60,10 +60,10 @@ public class ForeignUpcall<T> {
 	}
 
 	public MemorySegment virtualStubPointer(T target) {
-		return virtualStubPointer(target, MemorySession.openImplicit());
+		return virtualStubPointer(target, SegmentScope.auto());
 	}
 
-	public MemorySegment virtualStubPointer(T target, MemorySession scope) {
+	public MemorySegment virtualStubPointer(T target, SegmentScope scope) {
 		throwIfErrors();
 
 		MethodHandle handle = this.handle.bindTo(target);
@@ -74,10 +74,10 @@ public class ForeignUpcall<T> {
 	}
 
 	public MemorySegment staticStubPointer() {
-		return staticStubPointer(MemorySession.openImplicit());
+		return staticStubPointer(SegmentScope.auto());
 	}
 
-	public MemorySegment staticStubPointer(MemorySession scope) {
+	public MemorySegment staticStubPointer(SegmentScope scope) {
 		throwIfErrors();
 
 		return C_LINKER.upcallStub(handle, descriptor, scope);

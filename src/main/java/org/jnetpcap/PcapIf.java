@@ -19,21 +19,19 @@ package org.jnetpcap;
 
 import static org.jnetpcap.internal.ForeignUtils.*;
 
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jnetpcap.constant.SockAddrFamily;
+import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.util.PcapUtils;
 
-import static java.lang.foreign.MemoryAddress.*;
 import static java.lang.foreign.MemoryLayout.PathElement.*;
-import static java.lang.foreign.MemorySegment.*;
 import static java.lang.foreign.ValueLayout.*;
 
 /**
@@ -132,7 +130,7 @@ public class PcapIf {
 	 * addresses.
 	 */
 	public static class PcapAddr {
-		
+
 		/** The Constant LAYOUT. */
 		private static final MemoryLayout LAYOUT = MemoryLayout.structLayout(
 				ValueLayout.ADDRESS.withName("next"),
@@ -143,16 +141,16 @@ public class PcapIf {
 
 		/** The Constant nextHandle. */
 		private static final VarHandle nextHandle = LAYOUT.varHandle(groupElement("next"));
-		
+
 		/** The Constant addrHandle. */
 		private static final VarHandle addrHandle = LAYOUT.varHandle(groupElement("addr"));
-		
+
 		/** The Constant netmaskHandle. */
 		private static final VarHandle netmaskHandle = LAYOUT.varHandle(groupElement("netmask"));
-		
+
 		/** The Constant broadaddrHandle. */
 		private static final VarHandle broadaddrHandle = LAYOUT.varHandle(groupElement("broadaddr"));
-		
+
 		/** The Constant dstaddrHandle. */
 		private static final VarHandle dstaddrHandle = LAYOUT.varHandle(groupElement("dstaddr"));
 
@@ -163,27 +161,27 @@ public class PcapIf {
 		 * @param scope the scope
 		 * @return the list
 		 */
-		private static List<PcapAddr> listAll(MemoryAddress next, MemorySession scope) {
+		private static List<PcapAddr> listAll(MemorySegment next, Arena scope) {
 			List<PcapAddr> list = new ArrayList<>();
 
-			while (next != null && next != NULL) {
-				MemorySegment mseg = ofAddress(next, LAYOUT.byteSize(), scope);
+			while (!ForeignUtils.isNullAddress(next)) {
+				MemorySegment mseg = reinterpret(next, LAYOUT.byteSize());
 				list.add(new PcapAddr(mseg, scope));
 
-				next = (MemoryAddress) nextHandle.get(mseg);
+				next = (MemorySegment) nextHandle.get(mseg);
 			}
 			return list;
 		}
 
 		/** The addr. */
 		private final SockAddr addr;
-		
+
 		/** The netmask. */
 		private final SockAddr netmask;
-		
+
 		/** The broadaddr. */
 		private final SockAddr broadaddr;
-		
+
 		/** The dstaddr. */
 		private final SockAddr dstaddr;
 
@@ -193,11 +191,11 @@ public class PcapIf {
 		 * @param mseg  the mseg
 		 * @param scope the scope
 		 */
-		PcapAddr(MemorySegment mseg, MemorySession scope) {
-			addr = SockAddr.newInstance(addrHandle.get(mseg), scope);
-			netmask = SockAddr.newInstance(netmaskHandle.get(mseg), scope);
-			broadaddr = SockAddr.newInstance(broadaddrHandle.get(mseg), scope);
-			dstaddr = SockAddr.newInstance(dstaddrHandle.get(mseg), scope);
+		PcapAddr(MemorySegment mseg, Arena scope) {
+			addr = SockAddr.newInstance(ForeignUtils.readAddress(addrHandle, mseg), scope);
+			netmask = SockAddr.newInstance(ForeignUtils.readAddress(netmaskHandle, mseg), scope);
+			broadaddr = SockAddr.newInstance(ForeignUtils.readAddress(broadaddrHandle, mseg), scope);
+			dstaddr = SockAddr.newInstance(ForeignUtils.readAddress(dstaddrHandle, mseg), scope);
 		}
 
 		/**
@@ -228,10 +226,10 @@ public class PcapIf {
 
 		/** The Constant familyHandle. */
 		private static final VarHandle familyHandle = LAYOUT.varHandle(groupElement("family"));
-		
+
 		/** The Constant portHandle. */
 		private static final VarHandle portHandle = LAYOUT.varHandle(groupElement("port"));
-		
+
 		/** The Constant addrHandle. */
 		private static final VarHandle addrHandle = LAYOUT.varHandle(groupElement("addr"), sequenceElement());
 
@@ -242,9 +240,9 @@ public class PcapIf {
 		 * @param scope the scope
 		 * @return the sock addr
 		 */
-		static SockAddr newInstance(Object value, MemorySession scope) {
-			MemoryAddress addr = (MemoryAddress) value;
-			if (addr == null || addr == NULL)
+		static SockAddr newInstance(Object value, Arena scope) {
+			MemorySegment addr = (MemorySegment) value;
+			if (ForeignUtils.isNullAddress(addr))
 				return null;
 
 			return new SockAddr(addr, scope);
@@ -252,10 +250,10 @@ public class PcapIf {
 
 		/** The family. */
 		private final int family;
-		
+
 		/** The port. */
 		private final int port;
-		
+
 		/** The addr. */
 		private final byte[] addr;
 
@@ -265,8 +263,8 @@ public class PcapIf {
 		 * @param addr  the addr
 		 * @param scope the scope
 		 */
-		SockAddr(MemoryAddress addr, MemorySession scope) {
-			MemorySegment mseg = ofAddress(addr, LAYOUT.byteSize(), scope);
+		SockAddr(MemorySegment addr, Arena scope) {
+			MemorySegment mseg = ForeignUtils.reinterpret(addr, LAYOUT.byteSize(), scope);
 
 			this.family = Short.toUnsignedInt((short) familyHandle.get(mseg));
 			this.port = Short.toUnsignedInt((short) portHandle.get(mseg));
@@ -334,25 +332,25 @@ public class PcapIf {
 
 	/** The Constant nextHandle. */
 	private static final VarHandle nextHandle = LAYOUT.varHandle(groupElement("next"));
-	
+
 	/** The Constant nameHandle. */
 	private static final VarHandle nameHandle = LAYOUT.varHandle(groupElement("name"));
-	
+
 	/** The Constant descHandle. */
 	private static final VarHandle descHandle = LAYOUT.varHandle(groupElement("description"));
-	
+
 	/** The Constant addrsHandle. */
 	private static final VarHandle addrsHandle = LAYOUT.varHandle(groupElement("addresses"));
-	
+
 	/** The Constant flagsHandle. */
 	private static final VarHandle flagsHandle = LAYOUT.varHandle(groupElement("flags"));
 
 	/** interface is loopback. */
 	public final static int PCAP_IF_LOOPBACK = 0x00000001;
-	
+
 	/** interface is up. */
 	public final static int PCAP_IF_UP = 0x00000002;
-	
+
 	/** interface is running. */
 	public final static int PCAP_IF_RUNNING = 0x00000004;
 
@@ -363,14 +361,14 @@ public class PcapIf {
 	 * @param scope the scope
 	 * @return the list
 	 */
-	static List<PcapIf> listAll(MemoryAddress next, MemorySession scope) {
+	static List<PcapIf> listAll(MemorySegment next, Arena scope) {
 		List<PcapIf> list = new ArrayList<>();
 
-		while (next != null && next != NULL) {
-			MemorySegment mseg = ofAddress(next, LAYOUT.byteSize(), scope);
+		while (!ForeignUtils.isNullAddress(next)) {
+			MemorySegment mseg = ForeignUtils.reinterpret(next, LAYOUT.byteSize(), scope);
 			list.add(new PcapIf(mseg, scope));
 
-			next = (MemoryAddress) nextHandle.get(mseg);
+			next = (MemorySegment) nextHandle.get(mseg);
 		}
 
 		return list;
@@ -394,8 +392,8 @@ public class PcapIf {
 	 * @param mseg  the mseg
 	 * @param scope the scope
 	 */
-	PcapIf(MemorySegment mseg, MemorySession scope) {
-		MemoryAddress addrs = (MemoryAddress) addrsHandle.get(mseg);
+	PcapIf(MemorySegment mseg, Arena scope) {
+		MemorySegment addrs = (MemorySegment) addrsHandle.get(mseg);
 
 		name = toJavaString(nameHandle.get(mseg));
 		description = toJavaString(descHandle.get(mseg));

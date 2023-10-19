@@ -17,12 +17,12 @@
  */
 package org.jnetpcap.util;
 
-import java.lang.foreign.Addressable;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 
 import org.jnetpcap.constant.PcapConstants;
+import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
@@ -34,7 +34,7 @@ import org.jnetpcap.internal.PcapHeaderABI;
  * @author repos@slytechs.com
  * @author mark
  */
-public record PcapPacketRef(Object abi, Addressable header, Addressable data) {
+public record PcapPacketRef(Object abi, MemorySegment header, MemorySegment data) {
 
 	/**
 	 * Returns byte[] representation of the entire packet.
@@ -63,7 +63,7 @@ public record PcapPacketRef(Object abi, Addressable header, Addressable data) {
 	 * @return the capture length pcap header field value
 	 */
 	public int captureLength() {
-		return getAbi().captureLength(header.address());
+		return getAbi().captureLength(header);
 	}
 
 	/**
@@ -72,7 +72,7 @@ public record PcapPacketRef(Object abi, Addressable header, Addressable data) {
 	 * @return the wire length pcap header field value
 	 */
 	public int wireLength() {
-		return getAbi().wireLength(header.address());
+		return getAbi().wireLength(header);
 	}
 
 	/**
@@ -81,7 +81,7 @@ public record PcapPacketRef(Object abi, Addressable header, Addressable data) {
 	 * @return the epoch seconds since Jan 1st, 1970.
 	 */
 	public long tvSec() {
-		return getAbi().tvSec(header.address());
+		return getAbi().tvSec(header);
 	}
 
 	/**
@@ -90,7 +90,7 @@ public record PcapPacketRef(Object abi, Addressable header, Addressable data) {
 	 * @return fraction of a second in micros or nanos.
 	 */
 	public long tvUsec() {
-		return getAbi().tvUsec(header.address());
+		return getAbi().tvUsec(header);
 	}
 
 	/**
@@ -113,9 +113,9 @@ public record PcapPacketRef(Object abi, Addressable header, Addressable data) {
 					.toArray(ValueLayout.JAVA_BYTE);
 		}
 
-		try (var scope = MemorySession.openShared()) {
-			return MemorySegment
-					.ofAddress(data.address().addOffset(offset), length, scope)
+		try (var arena = Arena.openShared()) {
+			return ForeignUtils
+					.reinterpret(data.address() + offset, length, arena)
 					.toArray(ValueLayout.JAVA_BYTE);
 		}
 	}

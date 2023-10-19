@@ -18,7 +18,7 @@
 package org.jnetpcap.internal;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.MemorySegment;
 import java.util.concurrent.TimeoutException;
 
 import org.jnetpcap.PcapException;
@@ -27,17 +27,17 @@ import org.jnetpcap.util.PcapPacketRef;
 
 public interface PcapDispatcher extends NativeCallback, AutoCloseable {
 
-	int captureLength(MemoryAddress address);
+	int captureLength(MemorySegment address);
 
-	int dispatchNative(int count, NativeCallback handler, MemoryAddress user);
+	int dispatchNative(int count, NativeCallback handler, MemorySegment user);
 
-	int dispatchRaw(int count, MemoryAddress callbackFunc, MemoryAddress userData);
+	int dispatchRaw(int count, MemorySegment callbackFunc, MemorySegment userData);
 
-	int headerLength(MemoryAddress address);
+	int headerLength(MemorySegment address);
 
-	int loopNative(int count, NativeCallback handler, MemoryAddress user);
+	int loopNative(int count, NativeCallback handler, MemorySegment user);
 
-	int loopRaw(int count, MemoryAddress callbackFunc, MemoryAddress userData);
+	int loopRaw(int count, MemorySegment callbackFunc, MemorySegment userData);
 
 	RuntimeException getUncaughtException();
 

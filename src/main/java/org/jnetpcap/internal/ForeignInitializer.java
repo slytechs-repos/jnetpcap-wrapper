@@ -19,7 +19,6 @@ package org.jnetpcap.internal;
 
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SymbolLookup;
@@ -49,14 +48,14 @@ import java.util.regex.Pattern;
 public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwable> implements AutoCloseable {
 
 	public enum CType {
-		C_POINTER(ValueLayout.ADDRESS, MemoryAddress.class),
+		C_POINTER(ValueLayout.ADDRESS, MemorySegment.class),
 		C_CHAR(ValueLayout.JAVA_BYTE, byte.class),
 		C_SHORT(ValueLayout.JAVA_SHORT, short.class),
 		C_INT(ValueLayout.JAVA_INT, int.class),
 		C_LONG(ValueLayout.JAVA_LONG, long.class),
 		C_FLOAT(ValueLayout.JAVA_FLOAT, float.class),
 		C_DOUBLE(ValueLayout.JAVA_DOUBLE, double.class),
-		C_VA_LIST(ValueLayout.ADDRESS, MemoryAddress.class),
+		C_VA_LIST(ValueLayout.ADDRESS, MemorySegment.class),
 		C_VOID(null, null),
 
 		;
@@ -129,7 +128,7 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 
 		private static Class<?> mapToJavaPrimitiveType(int ch) {
 			return switch (ch) {
-			case 'A' -> MemoryAddress.class;
+			case 'A' -> MemorySegment.class;
 			case 'B' -> byte.class;
 			case 'I' -> int.class;
 			case 'J' -> long.class;
@@ -353,7 +352,7 @@ public class ForeignInitializer<T extends ForeignDowncall<E>, E extends Throwabl
 	}
 
 	private MemorySegment resolveSymbol(String symbolName) throws NoSuchElementException {
-		Optional<MemorySegment> symbol = C_SYMBOLS.lookup(symbolName);
+		Optional<MemorySegment> symbol = C_SYMBOLS.find(symbolName);
 		if (symbol.isEmpty())
 			throw new NoSuchElementException("native C symbol \"" + symbolName + "\" not found");
 

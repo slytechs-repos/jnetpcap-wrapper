@@ -17,7 +17,7 @@
  */
 package org.jnetpcap.windows;
 
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.MemorySegment;
 import java.util.concurrent.TimeUnit;
 
 import org.jnetpcap.Pcap0_4;
@@ -181,7 +181,7 @@ public final class Npcap extends WinPcap {
 	 * used for creating a pcap_t structure to use when calling the other functions
 	 * in libpcap. It is typically used when just using libpcap for compiling BPF
 	 * full; it can also be used if using {@code #dumpOpen(String)},
-	 * {@link PcapDumper#dump(MemoryAddress, MemoryAddress)}, and
+	 * {@link PcapDumper#dump(MemorySegment, MemorySegment)}, and
 	 * {@link PcapDumper#close()} to write a savefile if there is no pcap_t that
 	 * supplies the packets to be written.
 	 * </p>
@@ -265,7 +265,7 @@ public final class Npcap extends WinPcap {
 	 *
 	 * @param pcapHandle the pcap handle
 	 */
-	Npcap(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+	Npcap(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 
