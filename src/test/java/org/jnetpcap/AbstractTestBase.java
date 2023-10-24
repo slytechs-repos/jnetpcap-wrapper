@@ -38,7 +38,6 @@ import java.util.function.Supplier;
 import org.jnetpcap.AbstractTestBase.TestPacket.PacketTemplates;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDlt;
-import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.internal.UnsafePcapHandle;
 import org.jnetpcap.util.PcapPacketRef;
@@ -152,7 +151,7 @@ abstract class AbstractTestBase {
 				return null;
 
 			var hdr = new PcapHeader(abi, ref.header(), arena);
-			var pkt = ForeignUtils.reinterpret(ref.data().address(), hdr.captureLength(), arena);
+			var pkt = ref.data().reinterpret(hdr.captureLength(), arena, __ ->{});
 
 			return new TestPacket(abi, hdr.asMemorySegment(), pkt);
 		}
@@ -348,7 +347,7 @@ abstract class AbstractTestBase {
 	protected TestTransmitter setupPacketTransmitter(PcapHeaderABI abi,
 			BiFunction<PcapHeaderABI, Arena, TestPacket> packetFactory,
 			BiConsumer<MemorySegment, Integer> sendAction) {
-		final Arena arena = Arena.openShared();
+		final Arena arena = Arena.ofShared();
 		final TestPacket packetToSend = packetFactory.apply(abi, arena);
 
 		final ScheduledExecutorService scheduleExecutor = Executors.newScheduledThreadPool(1);

@@ -20,14 +20,12 @@ package org.jnetpcap.internal;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.SegmentScope;
 import java.util.concurrent.TimeoutException;
 
 import org.jnetpcap.PcapException;
 import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.util.PcapPacketRef;
 
-import static java.lang.foreign.MemorySegment.*;
 import static java.lang.foreign.ValueLayout.*;
 
 /**
@@ -117,8 +115,8 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		this.pcapHandle = pcapHandle;
 		this.abi = abi;
 		this.breakDispatch = breakDispatch;
-		this.arena = Arena.openShared();
-		this.pcapCallbackStub = pcap_handler.virtualStubPointer(this, this.arena.scope());
+		this.arena = Arena.ofShared();
+		this.pcapCallbackStub = pcap_handler.virtualStubPointer(this, this.arena);
 	}
 
 	/**
@@ -285,9 +283,9 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		return this.abi;
 	}
 
-	private final MemorySegment POINTER_TO_POINTER1 = allocateNative(ADDRESS, SegmentScope.auto());
-	private final MemorySegment POINTER_TO_POINTER2 = allocateNative(ADDRESS, SegmentScope.auto());
-	private final MemorySegment PCAP_HEADER_BUFFER = allocateNative(PcapHeaderABI.nativeAbi().headerLength(), SegmentScope.auto());
+	private final MemorySegment POINTER_TO_POINTER1 = Arena.ofAuto().allocate(ADDRESS);
+	private final MemorySegment POINTER_TO_POINTER2 = Arena.ofAuto().allocate(ADDRESS);
+	private final MemorySegment PCAP_HEADER_BUFFER = Arena.ofAuto().allocate(PcapHeaderABI.nativeAbi().headerLength());
 
 	/**
 	 * Dynamic non-pcap utility method to convert libpcap error code to a string, by

@@ -17,13 +17,12 @@
  */
 package org.jnetpcap.util;
 
-import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 
 import org.jnetpcap.constant.PcapConstants;
-import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapHeaderABI;
+
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * A utility class which holds references to native pcap header and native pcap
@@ -107,17 +106,14 @@ public record PcapPacketRef(Object abi, MemorySegment header, MemorySegment data
 		if ((length + offset) > caplen)
 			length = (caplen - offset);
 
-		if (data instanceof MemorySegment src) {
-			return src
-					.asSlice(offset, length)
-					.toArray(ValueLayout.JAVA_BYTE);
-		}
+		MemorySegment data = this.data;
 
-		try (var arena = Arena.openShared()) {
-			return ForeignUtils
-					.reinterpret(data.address() + offset, length, arena)
-					.toArray(ValueLayout.JAVA_BYTE);
-		}
+		if (data.byteSize() == 0)
+			data = data.reinterpret(caplen);
+
+		return data
+				.asSlice(offset, length)
+				.toArray(JAVA_BYTE);
 	}
 
 }

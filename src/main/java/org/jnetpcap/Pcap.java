@@ -23,7 +23,6 @@ import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.SegmentScope;
 import java.lang.foreign.ValueLayout;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -1405,7 +1404,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @return the memory session
 	 */
 	protected static Arena newArena() {
-		return Arena.openShared();
+		return Arena.ofShared();
 	}
 
 	/**
@@ -1631,13 +1630,13 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	}
 
 	/** The pointer to pointer1. */
-	protected final MemorySegment POINTER_TO_POINTER1 = MemorySegment.allocateNative(ADDRESS, SegmentScope.auto());
+	protected final MemorySegment POINTER_TO_POINTER1 = Arena.ofAuto().allocate(ADDRESS);
 
 	/** The pointer to pointer2. */
-	protected final MemorySegment POINTER_TO_POINTER2 = MemorySegment.allocateNative(ADDRESS, SegmentScope.auto());
+	protected final MemorySegment POINTER_TO_POINTER2 = Arena.ofAuto().allocate(ADDRESS);
 
 	/** The pointer to pointer3. */
-	protected final MemorySegment POINTER_TO_POINTER3 = MemorySegment.allocateNative(ADDRESS, SegmentScope.auto());
+	protected final MemorySegment POINTER_TO_POINTER3 = Arena.ofAuto().allocate(ADDRESS);
 
 	/** The pcap handle or pcap_t * address. */
 	private final MemorySegment pcapHandle;

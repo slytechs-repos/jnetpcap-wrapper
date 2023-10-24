@@ -17,10 +17,8 @@
  */
 package org.jnetpcap.internal;
 
-import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.VarHandle;
-import java.util.function.Consumer;
 
 /**
  * @author Sly Technologies Inc
@@ -38,53 +36,12 @@ public final class ForeignUtils {
 		return (address == null) || (address.address() == 0);
 	}
 
-	public static MemorySegment addOffset(MemorySegment address, long offset) {
-		if (address.byteSize() == 0) {
-			return MemorySegment.ofAddress(address.address() + offset, 0, address.scope());
-		} else
-			return MemorySegment.ofAddress(address.address() + offset, address.byteSize() - offset, address.scope());
-	}
-
-	public static MemorySegment addOffset(MemorySegment address, long offset, long newLength) {
-		if (address.byteSize() == 0) {
-			return MemorySegment.ofAddress(address.address() + offset, newLength, address.scope());
-		} else
-			return MemorySegment.ofAddress(address.address() + offset, newLength, address.scope());
-	}
-
-	public final static MemorySegment reinterpret(MemorySegment address, long newSize) {
-		// TODO: in JDK21 change to addr.reinterpret(...)
-		return MemorySegment.ofAddress(address.address(), newSize);
-	}
-
-	public final static MemorySegment reinterpret(long address, long newSize, Arena arena) {
-		// TODO: in JDK21 change to addr.reinterpret(...)
-		return MemorySegment.ofAddress(address, newSize, arena.scope());
-	}
-
-	public static MemorySegment reinterpret(MemorySegment address, long newSize, Arena arena) {
-		// TODO: in JDK21 change to addr.reinterpret(...)
-		return MemorySegment.ofAddress(address.address(), newSize, arena.scope());
-	}
-
-	public final static MemorySegment reinterpret(MemorySegment address, long newSize, Arena arena,
-			Consumer<MemorySegment> cleanup) {
-		// TODO: in JDK21 change to addr.reinterpret(...)
-		return MemorySegment.ofAddress(address.address(), newSize, arena.scope(), () -> cleanup.accept(address));
-	}
-
-	public final static MemorySegment reinterpret(MemorySegment mseg, Arena arena,
-			Consumer<MemorySegment> cleanup) {
-		// TODO: in JDK21 change to addr.reinterpret(...)
-		return MemorySegment.ofAddress(mseg.address(), mseg.byteSize(), arena.scope(), () -> cleanup.accept(mseg));
-	}
-
 	public static String toJavaString(MemorySegment addr) {
 		if (ForeignUtils.isNullAddress(addr))
 			return null;
 
 		if (addr.byteSize() == 0)
-			addr = reinterpret(addr, DEFAULT_MAX_STRING_LEN);
+			addr = addr.reinterpret(DEFAULT_MAX_STRING_LEN);
 
 		String str = addr.getUtf8String(0);
 		return str;

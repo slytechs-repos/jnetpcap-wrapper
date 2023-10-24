@@ -26,7 +26,6 @@ import java.time.Instant;
 
 import org.jnetpcap.Pcap.LibraryPolicy;
 import org.jnetpcap.PcapHeaderException.OutOfRangeException;
-import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
@@ -390,11 +389,11 @@ public final class PcapHeader {
 	 *
 	 * @param abi           the abi
 	 * @param headerAddress the header address
-	 * @param session       the session
+	 * @param arena       the session
 	 */
-	PcapHeader(PcapHeaderABI abi, MemorySegment headerAddress, Arena session) {
+	PcapHeader(PcapHeaderABI abi, MemorySegment headerAddress, Arena arena) {
 		this.abi = abi;
-		this.buffer = ForeignUtils.reinterpret(headerAddress, HEADER_LEN_MAX, session)
+		this.buffer = headerAddress.reinterpret(HEADER_LEN_MAX, arena, __ -> {})
 				.asByteBuffer()
 				.order(abi.order());
 	}

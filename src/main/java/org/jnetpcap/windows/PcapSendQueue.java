@@ -26,7 +26,6 @@ import java.lang.invoke.VarHandle;
 
 import org.jnetpcap.Pcap.Linux;
 import org.jnetpcap.PcapHeader;
-import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 
@@ -150,7 +149,7 @@ public class PcapSendQueue implements AutoCloseable {
 	 * @param capacity Maximum size of the queue, in bytes
 	 */
 	public PcapSendQueue(int capacity) {
-		this.arena = Arena.openShared();
+		this.arena = Arena.ofShared();
 		this.queue_ptr = alloc(capacity);
 	}
 
@@ -237,7 +236,11 @@ public class PcapSendQueue implements AutoCloseable {
 
 		try (var arena = WinPcap.newArena()) {
 
-			MemorySegment pkt = ForeignUtils.addOffset(MemorySegment.ofArray(packet), offset);
+			MemorySegment byteArray = MemorySegment.ofArray(packet)
+					.asSlice(offset);
+
+			MemorySegment pkt = arena.allocate(byteArray.byteSize())
+					.copyFrom(byteArray);
 			MemorySegment hdr = header.asMemoryReference();
 
 			return queue(hdr, pkt);

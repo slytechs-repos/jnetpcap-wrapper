@@ -21,10 +21,11 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemoryLayout.PathElement;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
 
 import org.jnetpcap.constant.PcapSrc;
+
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * Remote RPCAP authentication and source string marker interface.
@@ -66,9 +67,9 @@ public sealed interface PcapRmt permits PcapRmt.Source, PcapRmt.Auth {
 	public record Auth(int type, String username, String password) implements PcapRmt {
 
 		private static MemoryLayout LAYOUT = MemoryLayout.structLayout(
-				ValueLayout.JAVA_INT.withName("type"),
-				ValueLayout.ADDRESS.withName("username").withBitAlignment(32),
-				ValueLayout.ADDRESS.withName("password").withBitAlignment(32));
+				JAVA_INT.withName("type"),
+				ADDRESS.withName("username").withByteAlignment(JAVA_INT.byteSize()),
+				ADDRESS.withName("password").withByteAlignment(JAVA_INT.byteSize()));
 
 		private static final VarHandle rmtauth_type = LAYOUT.varHandle(PathElement.groupElement("type"));
 		private static final VarHandle rmtauth_username = LAYOUT.varHandle(PathElement.groupElement("username"));

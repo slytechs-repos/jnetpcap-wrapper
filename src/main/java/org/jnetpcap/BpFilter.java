@@ -24,8 +24,6 @@ import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
 import java.util.Objects;
 
-import org.jnetpcap.internal.ForeignUtils;
-
 import static java.lang.foreign.MemoryLayout.*;
 import static java.lang.foreign.MemoryLayout.PathElement.*;
 import static java.lang.foreign.ValueLayout.*;
@@ -68,7 +66,7 @@ public final class BpFilter implements AutoCloseable {
 				JAVA_INT, // Padded on 64-bit ABIs
 				ADDRESS.withName("bf_insns")
 
-		).withBitAlignment(JAVA_LONG.bitSize());
+				).withByteAlignment(JAVA_LONG.byteSize());
 
 		private static final VarHandle BF_LEN = LAYOUT.varHandle(groupElement("bf_len"));
 		private static final VarHandle BF_INSNS = LAYOUT.varHandle(groupElement("bf_insns"));
@@ -78,7 +76,7 @@ public final class BpFilter implements AutoCloseable {
 		StructBpfProgram(Arena arena) {
 			mseg = arena.allocate(
 					LAYOUT.byteSize(),
-					LAYOUT.bitAlignment());
+					LAYOUT.byteAlignment());
 			mseg.fill((byte) 0);
 		}
 
@@ -96,10 +94,9 @@ public final class BpFilter implements AutoCloseable {
 
 		@SuppressWarnings("unused")
 		public long[] toArray() {
-			try (var arena = Arena.openShared()) {
+			try (var arena = Arena.ofShared()) {
 
-				MemorySegment insns_mseg = ForeignUtils.reinterpret(
-						bf_insns(),
+				MemorySegment insns_mseg = bf_insns().reinterpret(
 						bf_len() * JAVA_LONG.byteSize());
 
 				return insns_mseg.toArray(JAVA_LONG);
@@ -119,7 +116,7 @@ public final class BpFilter implements AutoCloseable {
 	 */
 	BpFilter(String filterString) {
 		this.filterString = Objects.requireNonNull(filterString, "filterString");
-		this.arena = Arena.openShared();
+		this.arena = Arena.ofShared();
 		this.program = new StructBpfProgram(arena);
 	}
 

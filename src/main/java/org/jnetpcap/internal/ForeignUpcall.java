@@ -17,10 +17,10 @@
  */
 package org.jnetpcap.internal;
 
+import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.SegmentScope;
 import java.lang.invoke.MethodHandle;
 
 /**
@@ -59,27 +59,19 @@ public class ForeignUpcall<T> {
 					: new RuntimeException(message, cause);
 	}
 
-	public MemorySegment virtualStubPointer(T target) {
-		return virtualStubPointer(target, SegmentScope.auto());
-	}
-
-	public MemorySegment virtualStubPointer(T target, SegmentScope scope) {
+	public MemorySegment virtualStubPointer(T target, Arena arena) {
 		throwIfErrors();
 
 		MethodHandle handle = this.handle.bindTo(target);
 
 		return C_LINKER
-				.upcallStub(handle, descriptor, scope);
+				.upcallStub(handle, descriptor, arena);
 
 	}
 
-	public MemorySegment staticStubPointer() {
-		return staticStubPointer(SegmentScope.auto());
-	}
-
-	public MemorySegment staticStubPointer(SegmentScope scope) {
+	public MemorySegment staticStubPointer(Arena arena) {
 		throwIfErrors();
 
-		return C_LINKER.upcallStub(handle, descriptor, scope);
+		return C_LINKER.upcallStub(handle, descriptor, arena);
 	}
 }

@@ -17,7 +17,7 @@
  */
 package org.jnetpcap.internal;
 
-import static java.lang.foreign.ValueLayout.ADDRESS;
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * Platforms native ABI (Application Binary Interface, CPU/Instruction set).
@@ -41,7 +41,7 @@ public enum NativeABI {
 	static {
 		ARCH = System.getProperty("os.arch");
 		OS = System.getProperty("os.name");
-		ADDRESS_SIZE = ADDRESS.bitSize();
+		ADDRESS_SIZE = ADDRESS.byteSize() * 8;
 
 		// might be running in a 32-bit VM on a 64-bit platform.
 		// addressSize will be correctly 32

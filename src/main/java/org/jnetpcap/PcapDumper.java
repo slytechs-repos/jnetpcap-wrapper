@@ -88,7 +88,7 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	PcapDumper(MemorySegment pcap_dumper, String fname) {
 		this.pcap_dumper_ptr = pcap_dumper;
 		this.fname = fname;
-		this.arena = Arena.openShared();
+		this.arena = Arena.ofShared();
 	}
 
 	/**
