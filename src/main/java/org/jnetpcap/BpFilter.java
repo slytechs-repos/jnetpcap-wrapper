@@ -17,12 +17,6 @@
  */
 package org.jnetpcap;
 
-import static java.lang.foreign.MemoryLayout.structLayout;
-import static java.lang.foreign.MemoryLayout.PathElement.groupElement;
-import static java.lang.foreign.ValueLayout.ADDRESS;
-import static java.lang.foreign.ValueLayout.JAVA_INT;
-import static java.lang.foreign.ValueLayout.JAVA_LONG;
-
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
@@ -30,6 +24,10 @@ import java.lang.foreign.MemorySession;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
 import java.util.Objects;
+
+import static java.lang.foreign.MemoryLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * A Berkley Packet Filter program. BpFilter is applied to captured packets and
@@ -119,7 +117,7 @@ public final class BpFilter implements AutoCloseable {
 	 *
 	 * @param filterString the filter string that makes up this BP filter program
 	 */
-	public BpFilter(String filterString) {
+	BpFilter(String filterString) {
 		this.filterString = Objects.requireNonNull(filterString, "filterString");
 		this.scope = MemorySession.openShared();
 		this.program = new StructBpfProgram(scope);

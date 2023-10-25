@@ -1,25 +1,26 @@
 /*
- * Apache License, Version 2.0
+ * Sly Technologies Free License
  * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Sly Technologies Free License (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ * http://www.slytechs.com/free-license-text
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.jnetpcap;
 
 import static java.util.Objects.*;
 
 import java.io.File;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.foreign.Addressable;
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 import org.jnetpcap.Pcap0_4.PcapSupplier;
 import org.jnetpcap.constant.PcapCode;
@@ -245,6 +247,40 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * @see #SYSTEM_PROPERTY_SO_IGNORE_LOAD_ERRORS
 		 */
 		String DEFAULT_SO_IGNORE_LOAD_ERRORS = "true";
+
+		/**
+		 * The default java library path made up of many common paths on different
+		 * platforms where libpcap is typically installed.
+		 */
+		String DEFAULT_JAVA_LIBRARY_PATH = ""
+				+ "C:\\Windows\\SysWOW64;"
+				+ "C:\\Windows\\System32;"
+				+ "C:\\Program Files;"
+				+ "/usr/lib/x86_64-linux-gnu;"
+				+ "/usr/local/Cellar/libpcap/1.10.4/lib;"
+				+ "/usr/local/Cellar/libpcap/1.10.3/lib;"
+				+ "/usr/local/Cellar/libpcap/1.10.2/lib;"
+				+ "/usr/local/Cellar/libpcap/1.10.1/lib;"
+				+ "/usr/local/Cellar/libpcap/1.10.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.9.1/lib;"
+				+ "/usr/local/Cellar/libpcap/1.9.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.8.1/lib;"
+				+ "/usr/local/Cellar/libpcap/1.8.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.7.4/lib;"
+				+ "/usr/local/Cellar/libpcap/1.7.3/lib;"
+				+ "/usr/local/Cellar/libpcap/1.7.2/lib;"
+				+ "/usr/local/Cellar/libpcap/1.6.2/lib;"
+				+ "/usr/local/Cellar/libpcap/1.5.3/lib;"
+				+ "/usr/local/Cellar/libpcap/1.4.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.3.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.2.0/lib;"
+				+ "/usr/local/Cellar/libpcap/1.1.1/lib;"
+				+ "/usr/local/Cellar/libpcap/1.0.0/lib;"
+				+ "/usr/local/Cellar/libpcap/0.9.8/lib;"
+				+ "/opt/local/lib;"
+				+ "/opt/napatech3/lib;"
+				+ "/lib;"
+				+ "/usr/lib";
 
 		/**
 		 * The Constant which defines the default logging output which discards all of
@@ -1639,34 +1675,36 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * network, with the options that were set on the handle being in effect.
 	 * </p>
 	 *
-	 * @throws PcapException The possible error values are:
-	 *                       <dl>
-	 *                       <dt>PCAP_ERROR_ACTIVATED</dt>
-	 *                       <dd>The handle has already been activated</dd>
-	 *                       <dt>PCAP_ERROR_NO_SUCH_DEVICE</dt>
-	 *                       <dd>e capture source specified when the handle was
-	 *                       created doesn't exist</dd>
-	 *                       <dt>PCAP_ERROR_PERM_DENIED</dt>
-	 *                       <dd>The process doesn't have permission to open the
-	 *                       capture source</dd>
-	 *                       <dt>PCAP_ERROR_PROMISC_PERM_DENIED</dt>
-	 *                       <dd>The process has permission to open the capture
-	 *                       source but doesn't have permission to put it into
-	 *                       promiscuous mode</dd>
-	 *                       <dt>PCAP_ERROR_RFMON_NOTSUP</dt>
-	 *                       <dd>Monitor mode was specified but the capture source
-	 *                       doesn't support monitor mode</dd>
-	 *                       <dt>PCAP_ERROR_IFACE_NOT_UP</dt>
-	 *                       <dd>The capture source device is not up</dd>
-	 *                       <dt>PCAP_ERROR</dt>
-	 *                       <dd>Another error occurred</dd>
-	 *                       </dl>
+	 * @throws PcapActivatedException thrown if this pcap handle is already
+	 *                                activated
+	 * @throws PcapException          The possible error values are:
+	 *                                <dl>
+	 *                                <dt>PCAP_ERROR_ACTIVATED</dt>
+	 *                                <dd>The handle has already been activated</dd>
+	 *                                <dt>PCAP_ERROR_NO_SUCH_DEVICE</dt>
+	 *                                <dd>e capture source specified when the handle
+	 *                                was created doesn't exist</dd>
+	 *                                <dt>PCAP_ERROR_PERM_DENIED</dt>
+	 *                                <dd>The process doesn't have permission to
+	 *                                open the capture source</dd>
+	 *                                <dt>PCAP_ERROR_PROMISC_PERM_DENIED</dt>
+	 *                                <dd>The process has permission to open the
+	 *                                capture source but doesn't have permission to
+	 *                                put it into promiscuous mode</dd>
+	 *                                <dt>PCAP_ERROR_RFMON_NOTSUP</dt>
+	 *                                <dd>Monitor mode was specified but the capture
+	 *                                source doesn't support monitor mode</dd>
+	 *                                <dt>PCAP_ERROR_IFACE_NOT_UP</dt>
+	 *                                <dd>The capture source device is not up</dd>
+	 *                                <dt>PCAP_ERROR</dt>
+	 *                                <dd>Another error occurred</dd>
+	 *                                </dl>
 	 * @see <a href=
 	 *      "https://man7.org/linux/man-pages/man3/pcap_activate.3pcap.html">int
 	 *      pcap_activate(pcap_t *)</a>
 	 * @since libpcap 1.0
 	 */
-	public void activate() throws PcapException {
+	public void activate() throws PcapActivatedException, PcapException {
 		throw new UnsupportedOperationException(minApi("Pcap1_0", "libpcap 1.0"));
 	}
 
@@ -3576,5 +3614,29 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 */
 	public PcapHeaderABI getPcapHeaderABI() {
 		return pcapHeaderABI;
+	}
+
+	/**
+	 * Sets the uncaught exception handler for {@link #loop} and {@link #dispatch}
+	 * methods. Any exception thrown within the user callback methods, will be
+	 * caught and sent to the specified user exception handler.
+	 *
+	 * @param exceptionHandler the exception handler
+	 * @return this pcap
+	 */
+	public Pcap setUncaughtExceptionHandler(Consumer<? super Throwable> exceptionHandler) {
+		return setUncaughtExceptionHandler((t, e) -> exceptionHandler.accept(e));
+	}
+
+	/**
+	 * Sets the uncaught exception handler for {@link #loop} and {@link #dispatch}
+	 * methods. Any exception thrown within the user callback methods, will be
+	 * caught and sent to the specified user exception handler.
+	 *
+	 * @param exceptionHandler the exception handler
+	 * @return this pcap
+	 */
+	public Pcap setUncaughtExceptionHandler(UncaughtExceptionHandler exceptionHandler) {
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

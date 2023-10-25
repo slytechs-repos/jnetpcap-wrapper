@@ -239,11 +239,14 @@
  * 
  */
 module org.jnetpcap {
+
+	/* Public API */
 	exports org.jnetpcap;
 	exports org.jnetpcap.windows;
 	exports org.jnetpcap.constant;
 	exports org.jnetpcap.util;
 
+	/* Private API */
 	exports org.jnetpcap.internal to
-			com.slytechs.jnet.jnetpcap.pro;
+			com.slytechs.jnetpcap.pro;
 }

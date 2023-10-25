@@ -21,6 +21,7 @@ import static java.util.Objects.*;
 import static org.jnetpcap.constant.PcapConstants.*;
 import static org.jnetpcap.internal.UnsafePcapHandle.*;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.foreign.Addressable;
 import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
@@ -473,7 +474,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * pcap_loop and pcap_dispatch native calls. Other dispatchers may perform
 	 * additional processing on packets before dispatching to callback handlers.
 	 */
-	private PcapDispatcher dispatcher;
+	protected PcapDispatcher dispatcher;
 
 	/**
 	 * Instantiates a new pcap 0 4.
@@ -483,7 +484,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 */
 	protected Pcap0_4(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
-		this.dispatcher = new StandardPcapDispatcher(getPcapHandle(), this::breakloop);
+		this.dispatcher = new StandardPcapDispatcher(getPcapHandle(), abi, this::breakloop);
 	}
 
 	protected void setDispatcher(PcapDispatcher newDispatcher) {
@@ -499,7 +500,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @see org.jnetpcap.Pcap#close()
 	 */
 	@Override
-	public final void close() {
+	public void close() {
 		pcap_close.invokeVoid(getPcapHandle());
 		dispatcher.close();
 
@@ -803,14 +804,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @see org.jnetpcap.Pcap#next()
 	 */
 	@Override
-	public final PcapPacketRef next() throws PcapException {
-
-		MemorySegment hdr = PCAP0_4_HEADER_BUFFER;
-		MemoryAddress pkt = pcap_next.invokeObj(this::geterr, getPcapHandle(), hdr);
-
-		return (pkt == null) || (pkt == NULL)
-				? null
-				: new PcapPacketRef(super.pcapHeaderABI, hdr, pkt);
+	public PcapPacketRef next() throws PcapException {
+		return dispatcher.next();
 	}
 
 	/**
@@ -855,5 +850,20 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 			return PcapStatRecord.ofMemoryPlatformDependent(mseg);
 		}
+	}
+
+	/**
+	 * Sets the uncaught exception handler for {@link #loop} and {@link #dispatch}
+	 * methods. Any exception thrown within the user callback methods, will be
+	 * caught and sent to the specified user exception handler.
+	 *
+	 * @param exceptionHandler the exception handler
+	 * @return this pcap
+	 */
+	@Override
+	public Pcap setUncaughtExceptionHandler(UncaughtExceptionHandler exceptionHandler) {
+		dispatcher.setUncaughtExceptionHandler(exceptionHandler);
+
+		return this;
 	}
 }
