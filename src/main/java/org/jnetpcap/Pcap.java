@@ -895,6 +895,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @return the compiled filter
 	 * @throws PcapException any errors
 	 */
+	@Deprecated(since = "libpcap 1.11.0 API, jNetPcap 2.1.0")
 	public static BpFilter compileNoPcap(
 			int snaplen,
 			PcapDlt pcapDlt,
