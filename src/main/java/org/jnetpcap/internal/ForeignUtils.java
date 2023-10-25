@@ -17,39 +17,82 @@
  */
 package org.jnetpcap.internal;
 
-import java.lang.foreign.Addressable;
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
+import java.lang.invoke.VarHandle;
+import java.util.function.Consumer;
 
 /**
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
- * @author mark
- *
  */
 public final class ForeignUtils {
 
-	public static MemoryAddress toAddress(Object value) {
-		return (MemoryAddress) value;
+	private final static long DEFAULT_MAX_STRING_LEN = 64 * 1024;
+
+	public static String toJavaString(Object memorySegment) {
+		return toJavaString(((MemorySegment) memorySegment));
 	}
 
-	public static String toJavaString(Object value) {
-		return toJavaString(((Addressable) value).address());
+	public static boolean isNullAddress(MemorySegment address) {
+		return (address == null) || (address.address() == 0);
 	}
 
-	public static MemorySegment toUtf8String(String str, MemorySession scope) {
-		MemorySegment mseg = MemorySegment.allocateNative(str.length() + 1, scope);
-		mseg.setUtf8String(0, str);
-
-		return mseg;
+	public static MemorySegment addOffset(MemorySegment address, long offset) {
+		if (address.byteSize() == 0) {
+			return MemorySegment.ofAddress(address.address() + offset, 0, address.scope());
+		} else
+			return MemorySegment.ofAddress(address.address() + offset, address.byteSize() - offset, address.scope());
 	}
 
-	public static String toJavaString(MemoryAddress addr) {
-		if ((addr == null) || (addr == MemoryAddress.NULL))
+	public static MemorySegment addOffset(MemorySegment address, long offset, long newLength) {
+		if (address.byteSize() == 0) {
+			return MemorySegment.ofAddress(address.address() + offset, newLength, address.scope());
+		} else
+			return MemorySegment.ofAddress(address.address() + offset, newLength, address.scope());
+	}
+
+	public final static MemorySegment reinterpret(MemorySegment address, long newSize) {
+		// TODO: in JDK21 change to addr.reinterpret(...)
+		return MemorySegment.ofAddress(address.address(), newSize);
+	}
+
+	public final static MemorySegment reinterpret(long address, long newSize, Arena arena) {
+		// TODO: in JDK21 change to addr.reinterpret(...)
+		return MemorySegment.ofAddress(address, newSize, arena.scope());
+	}
+
+	public static MemorySegment reinterpret(MemorySegment address, long newSize, Arena arena) {
+		// TODO: in JDK21 change to addr.reinterpret(...)
+		return MemorySegment.ofAddress(address.address(), newSize, arena.scope());
+	}
+
+	public final static MemorySegment reinterpret(MemorySegment address, long newSize, Arena arena,
+			Consumer<MemorySegment> cleanup) {
+		// TODO: in JDK21 change to addr.reinterpret(...)
+		return MemorySegment.ofAddress(address.address(), newSize, arena.scope(), () -> cleanup.accept(address));
+	}
+
+	public final static MemorySegment reinterpret(MemorySegment mseg, Arena arena,
+			Consumer<MemorySegment> cleanup) {
+		// TODO: in JDK21 change to addr.reinterpret(...)
+		return MemorySegment.ofAddress(mseg.address(), mseg.byteSize(), arena.scope(), () -> cleanup.accept(mseg));
+	}
+
+	public static String toJavaString(MemorySegment addr) {
+		if (ForeignUtils.isNullAddress(addr))
 			return null;
 
-		return addr.getUtf8String(0);
+		if (addr.byteSize() == 0)
+			addr = reinterpret(addr, DEFAULT_MAX_STRING_LEN);
+
+		String str = addr.getUtf8String(0);
+		return str;
+	}
+
+	public static MemorySegment readAddress(VarHandle handle, MemorySegment addressAt) {
+		var read = (MemorySegment) handle.get(addressAt);
+		return read;
 	}
 
 	private ForeignUtils() {

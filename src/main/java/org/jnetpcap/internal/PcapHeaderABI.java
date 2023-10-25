@@ -20,7 +20,6 @@ package org.jnetpcap.internal;
 import static java.nio.ByteOrder.*;
 
 import java.io.IOException;
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout.OfInt;
 import java.nio.ByteBuffer;
@@ -278,14 +277,6 @@ public enum PcapHeaderABI {
 		return validateLength(buffer.order(order).getInt(captureLengthOffset) & BITMASK16);
 	}
 
-	public int captureLength(MemoryAddress address) {
-		return validateLength(address.get(layout, captureLengthOffset) & BITMASK16);
-	}
-
-	public void captureLength(MemoryAddress address, int newLength) {
-		address.set(layout, captureLengthOffset, newLength & BITMASK16);
-	}
-
 	public int captureLength(MemorySegment mseg) {
 		return validateLength(mseg.get(layout, captureLengthOffset) & BITMASK16);
 	}
@@ -311,14 +302,6 @@ public enum PcapHeaderABI {
 		return this.order;
 	}
 
-	public long tvSec(MemoryAddress address) {
-		return Integer.toUnsignedLong(address.get(layout, tvSecOffset));
-	}
-
-	public void tvSec(MemoryAddress address, long newTvSec) {
-		address.set(layout, tvSecOffset, (int) newTvSec);
-	}
-
 	public long tvSec(MemorySegment mseg) {
 		return Integer.toUnsignedLong(mseg.get(layout, tvSecOffset));
 	}
@@ -329,14 +312,6 @@ public enum PcapHeaderABI {
 
 	public int tvSecOffset() {
 		return tvSecOffset;
-	}
-
-	public long tvUsec(MemoryAddress address) {
-		return Integer.toUnsignedLong(address.get(layout, tvUsecOffset));
-	}
-
-	public void tvUsec(MemoryAddress address, long newTvUsec) {
-		address.set(layout, tvUsecOffset, (int) newTvUsec);
 	}
 
 	public long tvUsec(MemorySegment mseg) {
@@ -363,14 +338,6 @@ public enum PcapHeaderABI {
 
 	public int wireLength(ByteBuffer buffer) {
 		return validateLength(buffer.order(order).getInt(wireLengthOffset) & BITMASK16);
-	}
-
-	public int wireLength(MemoryAddress address) {
-		return validateLength(address.get(layout, wireLengthOffset) & BITMASK16);
-	}
-
-	public void wireLength(MemoryAddress address, int newLength) {
-		address.set(layout, wireLengthOffset, newLength & BITMASK16);
 	}
 
 	public int wireLength(MemorySegment mseg) {

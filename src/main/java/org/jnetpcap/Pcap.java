@@ -21,10 +21,9 @@ import static java.util.Objects.*;
 
 import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.foreign.Addressable;
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
+import java.lang.foreign.SegmentScope;
 import java.lang.foreign.ValueLayout;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -49,8 +48,6 @@ import org.jnetpcap.util.NetIp4Address;
 import org.jnetpcap.util.PcapPacketRef;
 import org.jnetpcap.util.PcapVersionException;
 
-import static java.lang.foreign.MemorySegment.*;
-import static java.lang.foreign.MemorySession.*;
 import static java.lang.foreign.ValueLayout.*;
 
 /**
@@ -482,7 +479,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * used for creating a pcap_t structure to use when calling the other functions
 		 * in libpcap. It is typically used when just using libpcap for compiling BPF
 		 * full; it can also be used if using {@code #dumpOpen(String)},
-		 * {@link PcapDumper#dump(MemoryAddress, MemoryAddress)}, and
+		 * {@link PcapDumper#dump(MemorySegment, MemorySegment)}, and
 		 * {@link PcapDumper#close()} to write a savefile if there is no pcap_t that
 		 * supplies the packets to be written.
 		 * </p>
@@ -567,7 +564,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * @param pcapHandle the pcap handle
 		 * @param name       the name
 		 */
-		Linux(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		Linux(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 			super(pcapHandle, name, abi);
 		}
 
@@ -711,7 +708,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * used for creating a pcap_t structure to use when calling the other functions
 		 * in libpcap. It is typically used when just using libpcap for compiling BPF
 		 * full; it can also be used if using {@code #dumpOpen(String)},
-		 * {@link PcapDumper#dump(MemoryAddress, MemoryAddress)}, and
+		 * {@link PcapDumper#dump(MemorySegment, MemorySegment)}, and
 		 * {@link PcapDumper#close()} to write a savefile if there is no pcap_t that
 		 * supplies the packets to be written.
 		 * </p>
@@ -796,7 +793,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 * @param pcapHandle the pcap handle
 		 * @param name       the name
 		 */
-		Unix(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+		Unix(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 			super(pcapHandle, name, abi);
 		}
 
@@ -1308,7 +1305,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @param scope the scope
 	 * @return the list
 	 */
-	protected static List<PcapIf> listAllPcapIf(MemoryAddress next, MemorySession scope) {
+	protected static List<PcapIf> listAllPcapIf(MemorySegment next, Arena scope) {
 		return PcapIf.listAll(next, scope);
 	}
 
@@ -1399,7 +1396,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @return the string
 	 */
 	private static String minApi(String pcapVersion, String libpcapVersion) {
-		return PcapMessages.getString("pcap.api.min.1").formatted(pcapVersion, libpcapVersion); //$NON-NLS-1$
+		return PcapErrorHandler.getString("pcap.api.min.1").formatted(pcapVersion, libpcapVersion); //$NON-NLS-1$
 	}
 
 	/**
@@ -1407,8 +1404,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 *
 	 * @return the memory session
 	 */
-	protected static MemorySession newScope() {
-		return MemorySession.openShared();
+	protected static Arena newArena() {
+		return Arena.openShared();
 	}
 
 	/**
@@ -1427,7 +1424,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @return true, if filter matched packet otherwise false
 	 * @since Pcap 1.0
 	 */
-	public static boolean offlineFilter(BpFilter bpFilter, Addressable pktHdr, Addressable pktData) {
+	public static boolean offlineFilter(BpFilter bpFilter, MemorySegment pktHdr, MemorySegment pktData) {
 		return Pcap1_0.offlineFilter(bpFilter, pktHdr, pktData);
 	}
 
@@ -1472,7 +1469,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * used for creating a pcap_t structure to use when calling the other functions
 	 * in libpcap. It is typically used when just using libpcap for compiling BPF
 	 * full; it can also be used if using {@code #dumpOpen(String)},
-	 * {@link PcapDumper#dump(MemoryAddress, MemoryAddress)}, and
+	 * {@link PcapDumper#dump(MemorySegment, MemorySegment)}, and
 	 * {@link PcapDumper#close()} to write a savefile if there is no pcap_t that
 	 * supplies the packets to be written.
 	 * </p>
@@ -1634,16 +1631,16 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	}
 
 	/** The pointer to pointer1. */
-	protected final MemorySegment POINTER_TO_POINTER1 = allocateNative(ADDRESS, openImplicit());
+	protected final MemorySegment POINTER_TO_POINTER1 = MemorySegment.allocateNative(ADDRESS, SegmentScope.auto());
 
 	/** The pointer to pointer2. */
-	protected final MemorySegment POINTER_TO_POINTER2 = allocateNative(ADDRESS, openImplicit());
+	protected final MemorySegment POINTER_TO_POINTER2 = MemorySegment.allocateNative(ADDRESS, SegmentScope.auto());
 
 	/** The pointer to pointer3. */
-	protected final MemorySegment POINTER_TO_POINTER3 = allocateNative(ADDRESS, openImplicit());
+	protected final MemorySegment POINTER_TO_POINTER3 = MemorySegment.allocateNative(ADDRESS, SegmentScope.auto());
 
 	/** The pcap handle or pcap_t * address. */
-	private final MemoryAddress pcapHandle;
+	private final MemorySegment pcapHandle;
 
 	/**
 	 * flag which indicates open/closed status, if true, the pcap address is not
@@ -1662,7 +1659,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @param pcapHandle the pcap handle or pcap_t * address.
 	 * @param name       the name of this pcap handle.
 	 */
-	protected Pcap(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+	protected Pcap(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		this.name = name;
 		this.pcapHeaderABI = abi;
 		this.pcapHandle = requireNonNull(pcapHandle, "pcapHandle"); //$NON-NLS-1$
@@ -2084,7 +2081,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 *         available in a ``savefile.''
 	 * @since libpcap 0.4
 	 */
-	public int dispatch(int count, PcapHandler.NativeCallback handler, MemoryAddress user) {
+	public int dispatch(int count, PcapHandler.NativeCallback handler, MemorySegment user) {
 		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -2361,7 +2358,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 *
 	 * @return the pcap handle
 	 */
-	protected MemoryAddress getPcapHandle() {
+	protected MemorySegment getPcapHandle() {
 		if (closed)
 			throw new IllegalStateException("already closed");
 
@@ -2423,7 +2420,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @throws PcapException the pcap exception
 	 * @since libpcap 0.9
 	 */
-	public int inject(Addressable packet, int length) throws PcapException {
+	public int inject(MemorySegment packet, int length) throws PcapException {
 		throw new UnsupportedOperationException(minApi("Pcap0_9", "0.9"));
 	}
 
@@ -2504,12 +2501,12 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @throws PcapException the pcap exception
 	 */
 	public final int inject(byte[] array, int offset, int length) throws PcapException {
-		try (var scope = newScope()) {
+		try (var scope = newArena()) {
 			MemorySegment mseg = scope.allocate(length);
 
 			MemorySegment.copy(array, offset, mseg, ValueLayout.JAVA_BYTE, 0, length);
 
-			return inject(mseg.address(), length);
+			return inject(mseg, length);
 		}
 	}
 
@@ -2733,7 +2730,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 *         pcap_breakloop() before any packets were processed
 	 * @since libpcap 0.4
 	 */
-	public <U> int loop(int count, PcapHandler.NativeCallback handler, MemoryAddress user) {
+	public <U> int loop(int count, PcapHandler.NativeCallback handler, MemorySegment user) {
 		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -3074,7 +3071,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @throws PcapException the pcap exception
 	 * @since libpcap 0.8
 	 */
-	public void sendPacket(Addressable packet, int length) throws PcapException {
+	public void sendPacket(MemorySegment packet, int length) throws PcapException {
 		throw new UnsupportedOperationException(minApi("Pcap0_8", "0.8")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -3143,12 +3140,12 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @since libpcap 0.8
 	 */
 	public final void sendPacket(final byte[] buf, int offset, int length) throws PcapException {
-		try (var scope = newScope()) {
+		try (var scope = newArena()) {
 			MemorySegment mseg = scope.allocate(length);
 
 			MemorySegment.copy(buf, offset, mseg, ValueLayout.JAVA_BYTE, 0, length);
 
-			sendPacket(mseg.address(), length);
+			sendPacket(mseg, length);
 		}
 	}
 

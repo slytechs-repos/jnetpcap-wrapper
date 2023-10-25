@@ -17,7 +17,6 @@
  */
 package org.jnetpcap.internal;
 
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.MethodHandle;
 import java.util.Objects;
@@ -190,7 +189,7 @@ public class ForeignDowncall<E extends Throwable> {
 	public String invokeString(Object... args) {
 
 		try {
-			MemoryAddress address = (MemoryAddress) handle().invokeWithArguments(args);
+			MemorySegment address = (MemorySegment) handle().invokeWithArguments(args);
 
 			return ForeignUtils.toJavaString(address);
 		} catch (RuntimeException e) { // VarHandle could throw this
@@ -203,9 +202,9 @@ public class ForeignDowncall<E extends Throwable> {
 
 	public String invokeString(Supplier<String> messageFactory, Object... args) throws E {
 
-		MemoryAddress address;
+		MemorySegment address;
 		try {
-			address = (MemoryAddress) handle().invokeWithArguments(args);
+			address = (MemorySegment) handle().invokeWithArguments(args);
 
 		} catch (RuntimeException e) { // VarHandle could throw this
 			throw e;
@@ -236,8 +235,8 @@ public class ForeignDowncall<E extends Throwable> {
 		return handle != null;
 	}
 
-	public MemoryAddress address() {
-		return symbolAddress.address();
+	public MemorySegment address() {
+		return symbolAddress;
 	}
 
 	public String symbolName() {
@@ -265,7 +264,7 @@ public class ForeignDowncall<E extends Throwable> {
 	}
 
 	protected void validateObj(Object obj, Supplier<String> errorFactory) throws E {
-		if (obj == null || (obj instanceof MemoryAddress addr) && addr == MemoryAddress.NULL)
+		if (obj == null || (obj instanceof MemorySegment addr) && ForeignUtils.isNullAddress(addr))
 			throw exceptionFactory.apply(errorFactory.get());
 	}
 

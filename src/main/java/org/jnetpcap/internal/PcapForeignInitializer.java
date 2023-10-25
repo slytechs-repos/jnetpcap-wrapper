@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.jnetpcap.Pcap.LibraryPolicy;
 import org.jnetpcap.PcapException;
-import org.jnetpcap.PcapMessages;
+import org.jnetpcap.PcapErrorHandler;
 
 /**
  * Pcap specific {@code ForeignInitializer} used to facilitate loading native
@@ -64,15 +64,15 @@ public class PcapForeignInitializer extends ForeignInitializer<PcapForeignDownca
 			List<String> up) throws NoSuchMethodError, IOException {
 
 		if (!down.isEmpty())
-			loggingOutput.append(PcapMessages.getString("pcap.initializer.policy.downcalls") //$NON-NLS-1$
+			loggingOutput.append(PcapErrorHandler.getString("pcap.initializer.policy.downcalls") //$NON-NLS-1$
 					.formatted(down, initializerName));
 
 		if (!up.isEmpty())
-			loggingOutput.append(PcapMessages.getString("pcap.initializer.policy.upcalls") //$NON-NLS-1$
+			loggingOutput.append(PcapErrorHandler.getString("pcap.initializer.policy.upcalls") //$NON-NLS-1$
 					.formatted(up, initializerName));
 
 		if (!up.isEmpty())
-			throw new NoSuchMethodError(PcapMessages.getString("pcap.initiazlier.policy.failure") //$NON-NLS-1$
+			throw new NoSuchMethodError(PcapErrorHandler.getString("pcap.initiazlier.policy.failure") //$NON-NLS-1$
 					.formatted(up, initializerName));
 	}
 

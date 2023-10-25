@@ -15,26 +15,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.jnetpcap.internal;
+package org.jnetpcap.spi;
 
-import java.lang.foreign.MemorySegment;
-
-import org.jnetpcap.Pcap1_10;
+import java.util.spi.ResourceBundleProvider;
 
 /**
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
- * @author Mark Bednarczyk
  *
  */
-public non-sealed class NonSealedPcap extends Pcap1_10 {
-
-	/**
-	 * @param pcapHandle
-	 * @param name
-	 */
-	protected NonSealedPcap(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
-		super(pcapHandle, name, abi);
-	}
+public interface PcapMessagesProvider extends ResourceBundleProvider {
 
 }

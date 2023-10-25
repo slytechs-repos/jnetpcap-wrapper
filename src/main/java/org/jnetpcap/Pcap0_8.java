@@ -17,8 +17,6 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.Addressable;
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.util.Collections;
 import java.util.List;
@@ -195,8 +193,8 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 * @since libpcap 0.8
 	 */
 	public static PcapDlt datalinkNameToVal(String name) {
-		try (var scope = newScope()) {
-			MemorySegment mseg = ForeignUtils.toUtf8String(name, scope);
+		try (var arena = newArena()) {
+			MemorySegment mseg = arena.allocateUtf8String(name);
 
 			return PcapDlt.valueOf(pcap_datalink_name_to_val.invokeInt(mseg));
 		}
@@ -364,7 +362,7 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap0_8(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+	protected Pcap0_8(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 
@@ -450,17 +448,17 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	@Override
 	public final List<PcapDlt> listDataLinks() throws PcapException {
 
-		try (var scope = newScope()) {
+		try (var arena = newArena()) {
 
 			/* int pcap_list_datalinks(pcap_t *p, int **dlt_buf) */
 			int count = pcap_list_datalinks.invokeInt(this::getErrorString, getPcapHandle(), super.POINTER_TO_POINTER1);
-			MemorySegment dltBuf = MemorySegment
-					.ofAddress(POINTER_TO_POINTER1.get(ADDRESS, 0), JAVA_INT.byteAlignment() * count, scope);
+			MemorySegment dltBuf = ForeignUtils.reinterpret(POINTER_TO_POINTER1.get(ADDRESS, 0), JAVA_INT
+					.byteAlignment() * count, arena);
 
 			int[] dlts = dltBuf.toArray(JAVA_INT);
 
 			/* void pcap_free_datalinks(int *dlt_list) */
-			pcap_free_datalinks.invokeVoid(dltBuf.address());
+			pcap_free_datalinks.invokeVoid(dltBuf);
 
 			// Convert to Integer[] from int[] and collect as List<Integer>
 			var list = IntStream.of(dlts)
@@ -481,10 +479,10 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	}
 
 	/**
-	 * @see org.jnetpcap.Pcap#sendPacket(java.lang.foreign.Addressable, int)
+	 * @see org.jnetpcap.Pcap#sendPacket(java.lang.foreign.MemorySegment, int)
 	 */
 	@Override
-	public void sendPacket(Addressable packet, int length) throws PcapException {
+	public void sendPacket(MemorySegment packet, int length) throws PcapException {
 		pcap_sendpacket.invokeInt(this::getErrorString, getPcapHandle(), packet, length);
 	}
 

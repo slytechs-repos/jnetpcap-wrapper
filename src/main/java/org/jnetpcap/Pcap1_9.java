@@ -17,7 +17,7 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.MemorySegment;
 import java.util.concurrent.TimeUnit;
 
 import org.jnetpcap.constant.PcapDlt;
@@ -232,7 +232,7 @@ public sealed class Pcap1_9 extends Pcap1_5 permits Pcap1_10 {
 	 * @param pcapHandle
 	 * @throws PcapException
 	 */
-	Pcap1_9(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+	Pcap1_9(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 

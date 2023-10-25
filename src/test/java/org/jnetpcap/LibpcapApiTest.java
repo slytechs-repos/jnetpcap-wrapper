@@ -23,9 +23,8 @@ import static org.jnetpcap.constant.PcapConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -373,7 +372,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 	/**
 	 * Test method for
-	 * {@link org.jnetpcap.Pcap#dispatchRaw(int, org.jnetpcap.PcapHandler.OfRawPacket, MemoryAddress)}.
+	 * {@link org.jnetpcap.Pcap#dispatchRaw(int, org.jnetpcap.PcapHandler.OfRawPacket, MemorySegment)}.
 	 */
 	@Test
 	@Tag("offline-capture")
@@ -389,7 +388,7 @@ class LibpcapApiTest extends AbstractTestBase {
 				.dispatchWithAccessToRawPacket(
 						PACKET_COUNT,
 						HANDLER,
-						MemoryAddress.NULL));
+						MemorySegment.NULL));
 	}
 
 	/**
@@ -502,7 +501,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 	/**
 	 * Test method for
-	 * {@link org.jnetpcap.Pcap#inject(java.lang.foreign.Addressable, int)}.
+	 * {@link org.jnetpcap.Pcap#inject(java.lang.foreign.MemorySegment, int)}.
 	 * 
 	 * We create two test pcap handles, one for transmit and one for capture. We
 	 * capture on the OUT bound direction only, should be the packet we're
@@ -556,7 +555,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = MemorySession.openShared()) {
+					var pcapScope = Arena.openShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -615,7 +614,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = MemorySession.openShared()) {
+					var pcapScope = Arena.openShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -680,7 +679,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = MemorySession.openShared()) {
+					var pcapScope = Arena.openShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -738,7 +737,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = MemorySession.openShared()) {
+					var pcapScope = Arena.openShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -797,7 +796,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = MemorySession.openShared()) {
+					var pcapScope = Arena.openShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -938,7 +937,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 	/**
 	 * Test method for
-	 * {@link org.jnetpcap.Pcap#loopRaw(int, org.jnetpcap.PcapHandler.OfRawPacket, MemoryAddress)}.
+	 * {@link org.jnetpcap.Pcap#loopRaw(int, org.jnetpcap.PcapHandler.OfRawPacket, MemorySegment)}.
 	 */
 	@Test
 	@Tag("offline-capture")
@@ -1012,7 +1011,7 @@ class LibpcapApiTest extends AbstractTestBase {
 	@Test
 	@Tag("offline-capture")
 	@Tag("user-permission")
-	void testNext_OfflineHandle() throws PcapException {
+	void testNext_OfflineHandle() throws PcapException { 
 		var pcap = pcapOpenOfflineTestHandle();
 
 		PcapPacketRef PACKET_REF = pcap.next();
@@ -1035,13 +1034,13 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		PcapPacketRef ref = pcap.nextEx();
 
-		assertNotEquals(MemoryAddress.NULL, ref.header());
-		assertNotEquals(MemoryAddress.NULL, ref.data());
+		assertNotEquals(MemorySegment.NULL, ref.header());
+		assertNotEquals(MemorySegment.NULL, ref.data());
 	}
 
 	/**
 	 * Test method for
-	 * {@link org.jnetpcap.Pcap#offlineFilter(org.jnetpcap.BpFilter, java.lang.foreign.MemoryAddress, java.lang.foreign.MemoryAddress)}.
+	 * {@link org.jnetpcap.Pcap#offlineFilter(org.jnetpcap.BpFilter, java.lang.foreign.MemorySegment, java.lang.foreign.MemorySegment)}.
 	 * 
 	 * @throws PcapException
 	 */
@@ -1061,10 +1060,10 @@ class LibpcapApiTest extends AbstractTestBase {
 		 * native memory managed by BpFilter class)
 		 */
 		try (BpFilter filter = Pcap.compileNoPcap(SNAPLEN, DLT, FILTER_STR, OPTIMIZE, NETMASK);
-				var scope = MemorySession.openShared()) {
+				var arena = Arena.openShared()) {
 			var abi = PcapHeaderABI.selectDeadAbi();
 
-			final TestPacket packet = templates.tcpPacket(abi, scope);
+			final TestPacket packet = templates.tcpPacket(abi, arena);
 			final MemorySegment HEADER = packet.header();
 			final MemorySegment PACKET = packet.data();
 
@@ -1175,7 +1174,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 	/**
 	 * Test method for
-	 * {@link org.jnetpcap.Pcap#sendPacket(java.lang.foreign.Addressable, int)}.
+	 * {@link org.jnetpcap.Pcap#sendPacket(java.lang.foreign.MemorySegment, int)}.
 	 * 
 	 * @throws PcapException
 	 * @throws ExecutionException
@@ -1213,7 +1212,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = MemorySession.openShared()) {
+					var pcapScope = Arena.openShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -1273,7 +1272,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = MemorySession.openShared()) {
+					var pcapScope = Arena.openShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -1338,7 +1337,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = MemorySession.openShared()) {
+					var pcapScope = Arena.openShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -1398,7 +1397,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = MemorySession.openShared()) {
+					var pcapScope = Arena.openShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -1461,7 +1460,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = MemorySession.openShared()) {
+					var pcapScope = Arena.openShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);

@@ -17,7 +17,6 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
 
@@ -105,7 +104,7 @@ public interface PcapHandler {
 		 * @param header libpcap header
 		 * @param packet packet data
 		 */
-		void nativeCallback(MemoryAddress user, MemoryAddress header, MemoryAddress packet);
+		void nativeCallback(MemorySegment user, MemorySegment header, MemorySegment packet);
 
 	}
 

@@ -19,14 +19,14 @@ package org.jnetpcap;
 
 import static org.jnetpcap.internal.PcapHeaderABI.*;
 
-import java.lang.foreign.MemoryAddress;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.MemorySession;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 
 import org.jnetpcap.Pcap.LibraryPolicy;
 import org.jnetpcap.PcapHeaderException.OutOfRangeException;
+import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapHeaderABI;
 
 /**
@@ -392,9 +392,9 @@ public final class PcapHeader {
 	 * @param headerAddress the header address
 	 * @param session       the session
 	 */
-	PcapHeader(PcapHeaderABI abi, MemoryAddress headerAddress, MemorySession session) {
+	PcapHeader(PcapHeaderABI abi, MemorySegment headerAddress, Arena session) {
 		this.abi = abi;
-		this.buffer = MemorySegment.ofAddress(headerAddress, HEADER_LEN_MAX, session)
+		this.buffer = ForeignUtils.reinterpret(headerAddress, HEADER_LEN_MAX, session)
 				.asByteBuffer()
 				.order(abi.order());
 	}
@@ -417,8 +417,8 @@ public final class PcapHeader {
 	 *
 	 * @return the memory address
 	 */
-	public MemoryAddress asMemoryReference() {
-		return asMemorySegment().address();
+	public MemorySegment asMemoryReference() {
+		return asMemorySegment();
 	}
 
 	/**

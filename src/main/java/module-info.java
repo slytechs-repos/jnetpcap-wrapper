@@ -233,10 +233,8 @@
  * </dd>
  * </dl>
  * 
- * @author Mark Bednarczyk
  * @author Sly Technologies Inc.
  * @author repos@slytechs.com
- * 
  */
 module org.jnetpcap {
 
@@ -245,6 +243,9 @@ module org.jnetpcap {
 	exports org.jnetpcap.windows;
 	exports org.jnetpcap.constant;
 	exports org.jnetpcap.util;
+	exports org.jnetpcap.spi;
+	
+	uses org.jnetpcap.spi.PcapMessagesProvider;
 
 	/* Private API */
 	exports org.jnetpcap.internal to

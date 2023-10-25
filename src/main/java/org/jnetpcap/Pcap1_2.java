@@ -17,7 +17,6 @@
  */
 package org.jnetpcap;
 
-import java.lang.foreign.MemoryAddress;
 import java.lang.foreign.MemorySegment;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +25,7 @@ import java.util.stream.IntStream;
 
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapTstampType;
+import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.internal.PcapHeaderABI;
@@ -220,7 +220,7 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
 	 */
-	protected Pcap1_2(MemoryAddress pcapHandle, String name, PcapHeaderABI abi) {
+	protected Pcap1_2(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 
@@ -230,14 +230,14 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 	@Override
 	public final List<PcapTstampType> listTstampTypes() throws PcapException {
 
-		try (var scope = newScope()) {
+		try (var arena = newArena()) {
 
 			/* Pcap allocates space to hold int[] natively */
 			int len = pcap_list_tstamp_types.invokeInt(this::getErrorString, getPcapHandle(), POINTER_TO_POINTER1);
 
 			/* Dereference to int[] address */
-			MemoryAddress arrayAddress = POINTER_TO_POINTER1.get(ADDRESS, 0);
-			int[] array = MemorySegment.ofAddress(arrayAddress, JAVA_INT.byteSize() * len, scope)
+			MemorySegment arrayAddress = POINTER_TO_POINTER1.get(ADDRESS, 0);
+			int[] array = ForeignUtils.reinterpret(arrayAddress, JAVA_INT.byteSize() * len, arena)
 					.toArray(JAVA_INT);
 
 			/* Copy from native int[] to java int[] */
