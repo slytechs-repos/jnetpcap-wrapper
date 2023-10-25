@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,30 +21,74 @@ package org.jnetpcap;
 @SuppressWarnings("unused")
 class BpFilterFormatter {
 
+	/** The Constant F_LD_. */
 	private static final String F_LD_ = "(%03d) %-8s %-16s";
+	
+	/** The Constant F_ST_. */
 	private static final String F_ST_ = "(%03d) %-8s %-16s";
+	
+	/** The Constant F_LDX. */
 	private static final String F_LDX = "(%03d) %-8s %-16s";
+	
+	/** The Constant F_STX. */
 	private static final String F_STX = "(%03d) %-8s %-16s";
+	
+	/** The Constant F_J__. */
 	private static final String F_J__ = "(%03d) %-8s %-16s jt %-4d jf %-4d";
+	
+	/** The Constant F_RET. */
 	private static final String F_RET = "(%03d) %-8s %-16s";
+	
+	/** The Constant F_UNK. */
 	private static final String F_UNK = "(%03d) %-8s %-16s jt %-4d jf %-4d";
 
+	/** The b. */
 	StringBuilder b = new StringBuilder();
+	
+	/** The pc. */
 	private int pc;
+	
+	/** The code. */
 	private int code;
+	
+	/** The jt. */
 	private int jt;
+	
+	/** The jf. */
 	private int jf;
+	
+	/** The k. */
 	private long k;
 
+	/**
+	 * Aa.
+	 *
+	 * @return the string
+	 */
 	private String aa() {
 		return "4*(" + formatSrc() + "&0xf)";
 	}
 
+	/**
+	 * Fmt.
+	 *
+	 * @param fmt the fmt
+	 * @param op  the op
+	 * @param r   the r
+	 * @return the string
+	 */
 	public String fmt(String fmt, String op, String r) {
 		return String.format(fmt, pc, op, r, jt + pc + 1, jf + pc + 1, jt, jf);
 //			return String.format("[0x%02X] " + fmt + " k=%7$d", full, pc, op, r, jt + pc + 1, jf + pc + 1, jt, jf);
 	}
 
+	/**
+	 * Format.
+	 *
+	 * @param index the index
+	 * @param i     the i
+	 * @return the string
+	 */
 	public String format(int index, BpFilterInstruction i) {
 		reset();
 
@@ -59,10 +101,21 @@ class BpFilterFormatter {
 		return instClass();
 	}
 
+	/**
+	 * Format hex.
+	 *
+	 * @return the string
+	 */
 	private String formatHex() {
 		return String.format("#0x%x", k);
 	}
 
+	/**
+	 * Format jmp.
+	 *
+	 * @param prefix the prefix
+	 * @return the string
+	 */
 	private String formatJmp(String prefix) {
 		return prefix + switch (code & 0xf0) {
 		case 0x00 -> "a";
@@ -74,6 +127,11 @@ class BpFilterFormatter {
 		};
 	}
 
+	/**
+	 * Format mode.
+	 *
+	 * @return the string
+	 */
 	private String formatMode() {
 		int mode = code & 0xe0;
 		return switch (mode) {
@@ -89,6 +147,11 @@ class BpFilterFormatter {
 
 	}
 
+	/**
+	 * Format rval.
+	 *
+	 * @return the string
+	 */
 	private String formatRval() {
 		return switch (code & 0x18) {
 		case 0x10 -> "[x + " + k + "]";
@@ -97,6 +160,11 @@ class BpFilterFormatter {
 
 	}
 
+	/**
+	 * Format src.
+	 *
+	 * @return the string
+	 */
 	private String formatSrc() {
 		return switch (code & 0x08) {
 //			case 0x00 -> "[" + k + "]";
@@ -106,6 +174,11 @@ class BpFilterFormatter {
 
 	}
 
+	/**
+	 * Inst class.
+	 *
+	 * @return the string
+	 */
 	private synchronized String instClass() {
 
 		switch (code & 0x07) {
@@ -129,6 +202,9 @@ class BpFilterFormatter {
 		return b.toString();
 	}
 
+	/**
+	 * Reset.
+	 */
 	public void reset() {
 		b.setLength(0);
 		pc = 0;
@@ -138,6 +214,12 @@ class BpFilterFormatter {
 		k = 0;
 	}
 
+	/**
+	 * Size modifier.
+	 *
+	 * @param prefix the prefix
+	 * @return the string
+	 */
 	private String sizeModifier(String prefix) {
 		return prefix + switch (code & 0x18) {
 		case 0x00 -> "w";
@@ -147,6 +229,9 @@ class BpFilterFormatter {
 		};
 	}
 
+	/**
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		return b.toString();

@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,10 +40,14 @@ import static java.lang.foreign.ValueLayout.*;
  */
 public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 
-	/** Symbol container for lazy initialization */
+	/**
+	 * Symbol container for lazy initialization.
+	 */
 	protected static class Unix0_8 {
 
 		/**
+		 * The Constant pcap_get_selectable_fd.
+		 *
 		 * @see {@code int pcap_get_selectable_fd(pcap_t *p);}
 		 * @since libpcap 1.8 (Unix only)
 		 */
@@ -102,24 +104,32 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	}
 
 	/**
+	 * The Constant pcap_breakloop.
+	 *
 	 * @see {@code void pcap_breakloop(pcap_t *p)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_breakloop;
 
 	/**
+	 * The Constant pcap_datalink_val_to_name.
+	 *
 	 * @see {@code const char *pcap_datalink_val_to_name(int dlt)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_datalink_val_to_name;
 
 	/**
+	 * The Constant pcap_datalink_val_to_description.
+	 *
 	 * @see {@code const char *pcap_datalink_val_to_description(int dlt)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_datalink_val_to_description;
 
 	/**
+	 * The Constant pcap_next_ex.
+	 *
 	 * @see {@code int pcap_next_ex (pcap_t *p, struct pcap_pkthdr **pkt_header,
 	 *      const u_char **pkt_data)}
 	 * @since libpcap 0.8
@@ -127,36 +137,48 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	private static final PcapForeignDowncall pcap_next_ex;
 
 	/**
+	 * The Constant pcap_list_datalinks.
+	 *
 	 * @see {@code int pcap_list_datalinks(pcap_t *p, int **dlt_buf)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_list_datalinks;
 
 	/**
+	 * The Constant pcap_free_datalinks.
+	 *
 	 * @see {@code void pcap_free_datalinks(int *dlt_list)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_free_datalinks;
 
 	/**
+	 * The Constant pcap_sendpacket.
+	 *
 	 * @see {@code int pcap_sendpacket(pcap_t *p, const u_char *buf, int size)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_sendpacket;
 
 	/**
+	 * The Constant pcap_set_datalink.
+	 *
 	 * @see {@code int pcap_set_datalink(pcap_t *p, int dlt)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_set_datalink;
 
 	/**
+	 * The Constant pcap_datalink_name_to_val.
+	 *
 	 * @see {@code int pcap_datalink_name_to_val(const char *name)}
 	 * @since libpcap 0.8
 	 */
 	private static final PcapForeignDowncall pcap_datalink_name_to_val;
 
 	/**
+	 * The Constant pcap_lib_version.
+	 *
 	 * @see {@code const char *pcap_lib_version(void)}
 	 * @since libpcap 0.8
 	 */
@@ -360,12 +382,15 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 *
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
+	 * @param abi        the abi
 	 */
 	protected Pcap0_8(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 
 	/**
+	 * Breakloop.
+	 *
 	 * @see org.jnetpcap.Pcap#breakloop()
 	 */
 	@Override
@@ -442,6 +467,10 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	}
 
 	/**
+	 * List data links.
+	 *
+	 * @return the list
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#listDataLinks()
 	 */
 	@Override
@@ -470,6 +499,11 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	}
 
 	/**
+	 * Next ex.
+	 *
+	 * @return the pcap packet ref
+	 * @throws PcapException    the pcap exception
+	 * @throws TimeoutException the timeout exception
 	 * @see org.jnetpcap.Pcap#nextEx()
 	 */
 	@Override
@@ -478,6 +512,11 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	}
 
 	/**
+	 * Send packet.
+	 *
+	 * @param packet the packet
+	 * @param length the length
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#sendPacket(java.lang.foreign.MemorySegment, int)
 	 */
 	@Override
@@ -486,6 +525,11 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	}
 
 	/**
+	 * Sets the datalink.
+	 *
+	 * @param dlt the dlt
+	 * @return the pcap 0 8
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap0_4#setDatalink(int)
 	 */
 	@Override

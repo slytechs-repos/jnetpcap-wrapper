@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,18 +40,24 @@ import static java.lang.foreign.ValueLayout.*;
 public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 
 	/**
+	 * The Constant pcap_list_tstamp_types.
+	 *
 	 * @see {@code int pcap_list_tstamp_types(pcap_t *p, int **tstamp_typesp)}
 	 * @since libpcap 1.2
 	 */
 	private static final PcapForeignDowncall pcap_list_tstamp_types;
 
 	/**
+	 * The Constant pcap_free_tstamp_types.
+	 *
 	 * @see {@code void pcap_free_tstamp_types(int *tstamp_types)}
 	 * @since libpcap 1.2
 	 */
 	private static final PcapForeignDowncall pcap_free_tstamp_types;
 
 	/**
+	 * The Constant pcap_set_tstamp_type.
+	 *
 	 * @see {@code int pcap_set_tstamp_type(pcap_t *p, int tstamp_type)}
 	 * @since libpcap 1.2
 	 */
@@ -218,12 +222,17 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 	 *
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
+	 * @param abi        the abi
 	 */
 	protected Pcap1_2(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 
 	/**
+	 * List tstamp types.
+	 *
+	 * @return the list
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#listTstampTypes()
 	 */
 	@Override
@@ -252,6 +261,11 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 	}
 
 	/**
+	 * Sets the tstamp type.
+	 *
+	 * @param type the type
+	 * @return the pcap
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#setTstampType(org.jnetpcap.constant.PcapTstampType)
 	 */
 	@Override

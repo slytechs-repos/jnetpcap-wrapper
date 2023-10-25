@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,24 +42,32 @@ import static java.lang.foreign.ValueLayout.*;
 public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 
 	/**
+	 * The Constant pcap_findalldevs.
+	 *
 	 * @see {@code int pcap_findalldevs(pcap_if_t **alldevsp, char *errbuf)}
 	 * @since libpcap 0.7
 	 */
 	private final static PcapForeignDowncall pcap_findalldevs;
 
 	/**
+	 * The Constant pcap_freealldevs.
+	 *
 	 * @see {@code void pcap_freealldevs(pcap_if_t *alldevs)}
 	 * @since libpcap 0.7
 	 */
 	private final static PcapForeignDowncall pcap_freealldevs;
 
 	/**
+	 * The Constant pcap_getnonblock.
+	 *
 	 * @see {@code int pcap_getnonblock(pcap_t *, char *)}
 	 * @since libpcap 0.7
 	 */
 	private static final PcapForeignDowncall pcap_getnonblock;
 
 	/**
+	 * The Constant pcap_setnonblock.
+	 *
 	 * @see {@code int pcap_setnonblock(pcap_t *p, int nonblock, char *errbuf)}
 	 * @since libpcap 0.7
 	 */
@@ -328,12 +334,17 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	 *
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
+	 * @param abi        the abi
 	 */
 	protected Pcap0_7(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 
 	/**
+	 * Gets the non block.
+	 *
+	 * @return the non block
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#getNonBlock()
 	 */
 	@Override
@@ -345,6 +356,11 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 	}
 
 	/**
+	 * Sets the non block.
+	 *
+	 * @param b the b
+	 * @return the pcap 0 7
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#setNonBlock(boolean)
 	 */
 	@Override

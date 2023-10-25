@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,13 +51,17 @@ public final class BpFilter implements AutoCloseable {
 
 	/**
 	 * <pre>
-		struct bpf_program {
-		     unsigned int bf_len;
-		     struct bpf_insn *bf_insns;
-		 };
+	 * 		struct bpf_program {
+	 * 		     unsigned int bf_len;
+	 * 		     struct bpf_insn *bf_insns;
+	 * 		 };
 	 * </pre>
+	 * 
+	 * .
 	 */
 	private class StructBpfProgram {
+		
+		/** The Constant LAYOUT. */
 		private static final MemoryLayout LAYOUT = structLayout(
 
 				JAVA_INT.withName("bf_len"),
@@ -68,11 +70,20 @@ public final class BpFilter implements AutoCloseable {
 
 				).withByteAlignment(JAVA_LONG.byteSize());
 
+		/** The Constant BF_LEN. */
 		private static final VarHandle BF_LEN = LAYOUT.varHandle(groupElement("bf_len"));
+		
+		/** The Constant BF_INSNS. */
 		private static final VarHandle BF_INSNS = LAYOUT.varHandle(groupElement("bf_insns"));
 
+		/** The mseg. */
 		private final MemorySegment mseg;
 
+		/**
+		 * Instantiates a new struct bpf program.
+		 *
+		 * @param arena the arena
+		 */
 		StructBpfProgram(Arena arena) {
 			mseg = arena.allocate(
 					LAYOUT.byteSize(),
@@ -80,18 +91,38 @@ public final class BpFilter implements AutoCloseable {
 			mseg.fill((byte) 0);
 		}
 
+		/**
+		 * Address.
+		 *
+		 * @return the memory segment
+		 */
 		public MemorySegment address() {
 			return mseg;
 		}
 
+		/**
+		 * Bf insns.
+		 *
+		 * @return the memory segment
+		 */
 		public MemorySegment bf_insns() {
 			return (MemorySegment) BF_INSNS.get(ValueLayout.ADDRESS);
 		}
 
+		/**
+		 * Bf len.
+		 *
+		 * @return the int
+		 */
 		public int bf_len() {
 			return (int) BF_LEN.get(mseg);
 		}
 
+		/**
+		 * To array.
+		 *
+		 * @return the long[]
+		 */
 		@SuppressWarnings("unused")
 		public long[] toArray() {
 			try (var arena = Arena.ofShared()) {
@@ -104,9 +135,13 @@ public final class BpFilter implements AutoCloseable {
 		}
 	}
 
+	/** The filter string. */
 	private final String filterString;
 
+	/** The program. */
 	private final StructBpfProgram program;
+	
+	/** The arena. */
 	private final Arena arena;
 
 	/**
@@ -120,6 +155,11 @@ public final class BpFilter implements AutoCloseable {
 		this.program = new StructBpfProgram(arena);
 	}
 
+	/**
+	 * Address.
+	 *
+	 * @return the memory segment
+	 */
 	MemorySegment address() {
 		if (!arena.scope().isAlive())
 			throw new IllegalStateException("filter not allocated");
@@ -152,6 +192,9 @@ public final class BpFilter implements AutoCloseable {
 		return program.bf_len();
 	}
 
+	/**
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		return filterString;
@@ -161,10 +204,10 @@ public final class BpFilter implements AutoCloseable {
 	 * Deallocates a native BPF program.
 	 *
 	 * @param bpFilter the bpf
-	 * @since libpcap 0.6
 	 * @see Pcap#compile(String, boolean, int)
 	 * @see <a href=
 	 *      "https://man7.org/linux/man-pages/man3/pcap_freecode.3pcap.html">pcap_freecode</a>
+	 * @since libpcap 0.6
 	 */
 	public static void freeCode(BpFilter bpFilter) {
 		bpFilter.close();

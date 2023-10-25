@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,12 +34,16 @@ import org.jnetpcap.internal.PcapHeaderABI;
 public sealed class Pcap0_6 extends Pcap0_5 permits Pcap0_7 {
 
 	/**
+	 * The Constant pcap_open_dead.
+	 *
 	 * @see {@code pcap_t *pcap_open_dead(int linktype, int snaplen)}
 	 * @since libpcap 0.6
 	 */
 	private final static PcapForeignDowncall pcap_open_dead;
 
 	/**
+	 * The Constant pcap_freecode.
+	 *
 	 * @see {@code void pcap_freecode(struct bpf_program *)}
 	 * @since libpcap 0.6
 	 */
@@ -204,6 +206,7 @@ public sealed class Pcap0_6 extends Pcap0_5 permits Pcap0_7 {
 	 *
 	 * @param pcapHandle the pcap handle
 	 * @param name       the name
+	 * @param abi        the abi
 	 */
 	protected Pcap0_6(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);

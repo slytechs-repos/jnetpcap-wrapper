@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,6 +67,7 @@ import org.jnetpcap.windows.WinPcap;
 public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long sent, long netdrop) implements
 		PcapStat {
 
+	/** The Constant LAYOUT. */
 	private static final MemoryLayout LAYOUT = structLayout(
 			JAVA_INT.withName("ps_recv"),
 			JAVA_INT.withName("ps_drop"),
@@ -78,13 +77,30 @@ public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long 
 			JAVA_INT.withName("ps_netdrop") // WIN32
 	);
 
+	/** The Constant ps_recv. */
 	private static final VarHandle ps_recv = LAYOUT.varHandle(groupElement("ps_recv"));
+	
+	/** The Constant ps_drop. */
 	private static final VarHandle ps_drop = LAYOUT.varHandle(groupElement("ps_drop"));
+	
+	/** The Constant ps_ifdrop. */
 	private static final VarHandle ps_ifdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+	
+	/** The Constant ps_capt. */
 	private static final VarHandle ps_capt = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+	
+	/** The Constant ps_sent. */
 	private static final VarHandle ps_sent = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+	
+	/** The Constant ps_netdrop. */
 	private static final VarHandle ps_netdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
 
+	/**
+	 * Of memory platform dependent.
+	 *
+	 * @param mseg the mseg
+	 * @return the pcap stat
+	 */
 	public static PcapStat ofMemoryPlatformDependent(MemorySegment mseg) {
 		if (WinPcap.isSupported())
 			return ofMemoryOnWin32(mseg);
@@ -96,6 +112,12 @@ public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long 
 				0, 0, 0);
 	}
 
+	/**
+	 * Of memory on win 32.
+	 *
+	 * @param mseg the mseg
+	 * @return the pcap stat
+	 */
 	private static PcapStat ofMemoryOnWin32(MemorySegment mseg) {
 		return new PcapStatRecord(
 				toUnsignedLong((int) ps_recv.get(mseg)),

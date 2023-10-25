@@ -1,19 +1,17 @@
 /*
- * Sly Technologies Free License
- * 
- * Copyright 2023 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
- * Licensed under the Sly Technologies Free License (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.slytechs.com/free-license-text
- * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jnetpcap;
 
@@ -562,6 +560,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 *
 		 * @param pcapHandle the pcap handle
 		 * @param name       the name
+		 * @param abi        the abi
 		 */
 		Linux(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 			super(pcapHandle, name, abi);
@@ -791,6 +790,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		 *
 		 * @param pcapHandle the pcap handle
 		 * @param name       the name
+		 * @param abi        the abi
 		 */
 		Unix(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 			super(pcapHandle, name, abi);
@@ -1650,6 +1650,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	/** The name of this pcap handle. */
 	private final String name;
 
+	/** The pcap header ABI. */
 	protected final PcapHeaderABI pcapHeaderABI;
 
 	/**
@@ -1657,6 +1658,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 *
 	 * @param pcapHandle the pcap handle or pcap_t * address.
 	 * @param name       the name of this pcap handle.
+	 * @param abi        the abi
 	 */
 	protected Pcap(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		this.name = name;
@@ -3606,6 +3608,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	}
 
 	/**
+	 * Gets the pcap header ABI.
+	 *
 	 * @return the pcapHeaderABI
 	 */
 	public PcapHeaderABI getPcapHeaderABI() {

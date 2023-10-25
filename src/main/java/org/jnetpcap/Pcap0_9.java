@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,10 +33,14 @@ import org.jnetpcap.internal.PcapHeaderABI;
  */
 public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 
-	/** Symbol container for lazy initialization */
+	/**
+	 * Symbol container for lazy initialization.
+	 */
 	protected static class Linux0_9 {
 
 		/**
+		 * The Constant pcap_set_protocol_linux.
+		 *
 		 * @see {@code int pcap_set_protocol_linux(pcap_t *, int)}
 		 * @since libpcap 1.9 (Linux only)
 		 */
@@ -88,12 +90,16 @@ public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 	}
 
 	/**
+	 * The Constant pcap_inject.
+	 *
 	 * @see {@code int pcap_inject(pcap_t *p, const void *buf, size_t size)}
 	 * @since libpcap 1.9
 	 */
 	private static final PcapForeignDowncall pcap_inject;
 
 	/**
+	 * The Constant pcap_setdirection.
+	 *
 	 * @see {@code int pcap_setdirection(pcap_t *p, pcap_direction_t d)}
 	 * @since libpcap 1.9
 	 */
@@ -111,6 +117,11 @@ public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 	}
 
 	/**
+	 * Sets the direction.
+	 *
+	 * @param dir the dir
+	 * @return the pcap 0 9
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#setDirection(int)
 	 */
 	@Override
@@ -223,12 +234,19 @@ public sealed class Pcap0_9 extends Pcap0_8 permits Pcap1_0 {
 	 *
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
+	 * @param abi        the abi
 	 */
 	protected Pcap0_9(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 
 	/**
+	 * Inject.
+	 *
+	 * @param packet the packet
+	 * @param length the length
+	 * @return the int
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#inject(java.lang.foreign.MemorySegment, int)
 	 */
 	@Override

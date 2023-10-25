@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,21 +19,42 @@ import java.lang.foreign.MemorySegment;
 import java.lang.invoke.VarHandle;
 
 /**
+ * The Class ForeignUtils.
+ *
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  */
 public final class ForeignUtils {
 
+	/** The Constant DEFAULT_MAX_STRING_LEN. */
 	private final static long DEFAULT_MAX_STRING_LEN = 64 * 1024;
 
+	/**
+	 * To java string.
+	 *
+	 * @param memorySegment the memory segment
+	 * @return the string
+	 */
 	public static String toJavaString(Object memorySegment) {
 		return toJavaString(((MemorySegment) memorySegment));
 	}
 
+	/**
+	 * Checks if is null address.
+	 *
+	 * @param address the address
+	 * @return true, if is null address
+	 */
 	public static boolean isNullAddress(MemorySegment address) {
 		return (address == null) || (address.address() == 0);
 	}
 
+	/**
+	 * To java string.
+	 *
+	 * @param addr the addr
+	 * @return the string
+	 */
 	public static String toJavaString(MemorySegment addr) {
 		if (ForeignUtils.isNullAddress(addr))
 			return null;
@@ -47,11 +66,21 @@ public final class ForeignUtils {
 		return str;
 	}
 
+	/**
+	 * Read address.
+	 *
+	 * @param handle    the handle
+	 * @param addressAt the address at
+	 * @return the memory segment
+	 */
 	public static MemorySegment readAddress(VarHandle handle, MemorySegment addressAt) {
 		var read = (MemorySegment) handle.get(addressAt);
 		return read;
 	}
 
+	/**
+	 * Instantiates a new foreign utils.
+	 */
 	private ForeignUtils() {
 	}
 

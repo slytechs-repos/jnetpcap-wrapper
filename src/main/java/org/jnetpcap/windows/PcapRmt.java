@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,11 +37,6 @@ public sealed interface PcapRmt permits PcapRmt.Source, PcapRmt.Auth {
 
 	/**
 	 * Remote RPCAP source string.
-	 * 
-	 * @param type source string type
-	 * @param host host part of the source string
-	 * @param port port on the the host to connect to
-	 * @param name name part of the source string
 	 */
 	public record Source(int type, String host, String port, String name) implements PcapRmt {
 
@@ -59,20 +52,22 @@ public sealed interface PcapRmt permits PcapRmt.Source, PcapRmt.Auth {
 
 	/**
 	 * Remote RPCAP authentication structure.
-	 * 
-	 * @param type     authentication type
-	 * @param username the credential username
-	 * @param password crediential password
 	 */
 	public record Auth(int type, String username, String password) implements PcapRmt {
 
+		/** The layout. */
 		private static MemoryLayout LAYOUT = MemoryLayout.structLayout(
 				JAVA_INT.withName("type"),
 				ADDRESS.withName("username").withByteAlignment(JAVA_INT.byteSize()),
 				ADDRESS.withName("password").withByteAlignment(JAVA_INT.byteSize()));
 
+		/** The Constant rmtauth_type. */
 		private static final VarHandle rmtauth_type = LAYOUT.varHandle(PathElement.groupElement("type"));
+		
+		/** The Constant rmtauth_username. */
 		private static final VarHandle rmtauth_username = LAYOUT.varHandle(PathElement.groupElement("username"));
+		
+		/** The Constant rmtauth_password. */
 		private static final VarHandle rmtauth_password = LAYOUT.varHandle(PathElement.groupElement("password"));
 
 		/**

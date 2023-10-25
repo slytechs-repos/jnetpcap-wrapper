@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,18 +37,24 @@ import org.jnetpcap.internal.PcapHeaderABI;
 public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 
 	/**
+	 * The Constant pcap_create.
+	 *
 	 * @see {@code pcap_t *pcap_create(const char *source, char *errbuf)}
 	 * @since libpcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_create;
 
 	/**
+	 * The Constant pcap_activate.
+	 *
 	 * @see {@code int pcap_activate(pcap_t *p)}
 	 * @since libpcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_activate;
 
 	/**
+	 * The Constant pcap_offline_filter.
+	 *
 	 * @see {@code int pcap_offline_filter(const struct bpf_program *fp, const
 	 *      struct pcap_pkthdr *h, const u_char *pkt)}
 	 * @since libpcap 1.0
@@ -58,54 +62,72 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	private static final PcapForeignDowncall pcap_offline_filter;
 
 	/**
+	 * The Constant pcap_set_buffer_size.
+	 *
 	 * @see {@code int pcap_set_buffer_size(pcap_t *p, int buffer_size)}
 	 * @since libpcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_set_buffer_size;
 
 	/**
+	 * The Constant pcap_can_set_rfmon.
+	 *
 	 * @see {@code int pcap_can_set_rfmon(pcap_t *p)}
 	 * @since libpcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_can_set_rfmon;
 
 	/**
+	 * The Constant pcap_set_rfmon.
+	 *
 	 * @see {@code int pcap_set_rfmon(pcap_t *, int)}
 	 * @since libpcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_set_rfmon;
 
 	/**
+	 * The Constant pcap_set_promisc.
+	 *
 	 * @see {@code int pcap_set_promisc(pcap_t *, int)}
 	 * @since libpcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_set_promisc;
 
 	/**
+	 * The Constant pcap_set_snaplen.
+	 *
 	 * @see {@code int pcap_set_snaplen(pcap_t *, int)}
 	 * @since libpcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_set_snaplen;
 
 	/**
+	 * The Constant pcap_statustostr.
+	 *
 	 * @see {@code const char * pcap_statustostr(int)}
 	 * @since libpcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_statustostr;
 
 	/**
+	 * The Constant pcap_set_timeout.
+	 *
 	 * @see {@code int pcap_set_timeout(pcap_t *, int)}
 	 * @since libpcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_set_timeout;
 
 	/**
+	 * The Constant pcap_datalink_ext.
+	 *
 	 * @see {@code int pcap_datalink_ext(pcap_t *)}
 	 * @since libpcap 1.0
 	 */
 	private static final PcapForeignDowncall pcap_datalink_ext;
 
 	/**
+	 * The Constant pcap_init.
+	 *
 	 * @see {@code int pcap_init(unsigned int opts, char *errbuf)}
 	 * @since libpcap 1.0
 	 */
@@ -399,12 +421,17 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	 *
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
+	 * @param abi        the abi
 	 */
 	protected Pcap1_0(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 
 	/**
+	 * Activate.
+	 *
+	 * @throws PcapActivatedException the pcap activated exception
+	 * @throws PcapException          the pcap exception
 	 * @see org.jnetpcap.Pcap#activate()
 	 */
 	@Override
@@ -417,6 +444,10 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	}
 
 	/**
+	 * Can set rfmon.
+	 *
+	 * @return true, if successful
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#canSetRfmon()
 	 */
 	@Override
@@ -425,6 +456,10 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	}
 
 	/**
+	 * Data link ext.
+	 *
+	 * @return the pcap dlt
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#dataLinkExt()
 	 */
 	@Override
@@ -432,6 +467,9 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 		return PcapDlt.valueOf(pcap_datalink_ext.invokeInt(this::getErrorString, getPcapHandle()));
 	}
 
+	/**
+	 * @see org.jnetpcap.Pcap#setBufferSize(int)
+	 */
 	@Override
 	public final Pcap1_0 setBufferSize(int bufferSize) throws PcapException {
 		pcap_set_buffer_size.invokeInt(this::getErrorString, getPcapHandle(), bufferSize);
@@ -440,6 +478,11 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	}
 
 	/**
+	 * Sets the promisc.
+	 *
+	 * @param b the b
+	 * @return the pcap 1 0
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#setPromisc(boolean)
 	 */
 	@Override
@@ -467,6 +510,11 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	}
 
 	/**
+	 * Sets the rfmon.
+	 *
+	 * @param enableRfmon the enable rfmon
+	 * @return the pcap 1 0
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#setRfmon(boolean)
 	 */
 	@Override
@@ -495,6 +543,11 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	}
 
 	/**
+	 * Sets the snaplen.
+	 *
+	 * @param snaplen the snaplen
+	 * @return the pcap 1 0
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#setSnaplen(int)
 	 */
 	@Override
@@ -505,6 +558,11 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 	}
 
 	/**
+	 * Sets the timeout.
+	 *
+	 * @param timeout the timeout
+	 * @return the pcap 1 0
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#setTimeout(int)
 	 */
 	@Override
