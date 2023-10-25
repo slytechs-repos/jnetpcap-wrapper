@@ -1,13 +1,38 @@
 # jNetPcap version 2
 **jNetPcap** is a [*libpcap*][libpcap] java library. This is **version 2** release of the popular **jNetPcap** library, previously hosted on [*SourceForge.net*][sf.net].
 
+## See Also
+If you are looking for protocol enabled version of this library, please see [**jNetPcap Pro**][jnetpcap-pro] extension or for advanced functionality the [**jNetWorks**][jnetworks] library.
+
 ## Overview
-**jNetPcap** provides out of the box [*libpcap*][libpcap] library in *Java*. By using [*Foreign Function*][jep424] features of *Java 19* or above, **jNetPcap** can bind directly to the native *libpcap* library. All native *libpcap* functions are accessible through easy to use [*Java API*][javadocs]. In addition, the latest [*Npcap*][npcap] and legacy [*WinPcap*][winpcap] tools and their API extensions on *Microsoft Windows* platforms are supported as well. 
+**jNetPcap** is a Java library that provides access to libpcap, a low-level network monitoring library. The library allows Java developers to write applications that can capture, read, and manipulate network packets in real-time. 
+
+To use JNetPcap, you need to download and install the library and add it to your Java project's classpath. Once you have done that, you can use the Java API provided by *jNetPcap** to interact with network packets.
+
+The library includes a set of classes and methods that allow you to capture network packets, filter and search through them, extract and analyze packet data, and ultimately write custom network analysis applications. 
+
+To begin capturing packets, you can create an instance of the `Pcap` class, which represents a network interface that the library will use to capture packets. Then you can create a `PcapPacketHandler` instance to process each packet as it is captured. 
+
+**jNetPcap** also includes functionality for creating filters to capture only the packets that match certain criteria, such as a specific port, protocol, or IP address.
 
 ## Documentation
 See [*Wiki pages*][wiki] for user guides and examples.
 
 See [*Javadocs*][javadocs] reference documentation.
+
+## Where are the protocols found in v1?
+If you are looking for protocol support, same as it was available in v1, this functionality has been moved to other modules. In this way, **jnetpcap** module's functionality is focused on providing accurate modeling of native *libpcap* APIs in java. 
+
+For protocols and familiar v1 APIs such as
+```
+Packet pack = ...;
+Ip4 ip4 = new Ip4();
+if (packet.hasHeader(ip4))
+  System.out.printf("IPv4.version=%d%n", ip4.version());
+```
+please use [**jnetpcap-pro**][jnetpcap-pro] module which extends that basic **jnetpcap** module API (ie. `PcapPro extends Pcap`) by providing additional protocol level features and API. Click here to download [**jNetPcap Pro + Protocols bundle**][download-bundle].
+
+> **Note:** The protocol definitions are in their own modules called [**protocol packs**][protocol-packs], starting with [**core-protocols**][core-protocols] protocol pack.
 
 ## Examples
 To get started lets take a look at a couple of examples.
@@ -184,3 +209,8 @@ So everyone is on the same page, we follow the following [branching model][git-b
 [jep424]: <https://openjdk.org/jeps/424> "Foreign Function & Memory API (Preview)"
 [git-branch-model]: <https://nvie.com/posts/a-successful-git-branching-model>
 [why-master-deprecated]: <https://www.theserverside.com/feature/Why-GitHub-renamed-its-master-branch-to-main>
+[jnetpcap-pro]: <https://github.com/slytechs-repos/jnetpcap-pro>
+[core-protocols]: <https://github.com/slytechs-repos/core-protocols>
+[download-bundle]: <https://github.com/slytechs-repos/slytechs-repos/releases>
+[protocol-packs]: <https://github.com/slytechs-repos/jnetpcap-pro/wiki#about-protocol-packs>
+[jnetworks]: http://slytechs.com/jnetworks
