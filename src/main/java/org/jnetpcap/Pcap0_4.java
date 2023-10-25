@@ -22,8 +22,8 @@ import static org.jnetpcap.constant.PcapConstants.*;
 import static org.jnetpcap.internal.UnsafePcapHandle.*;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.SegmentScope;
 import java.lang.foreign.ValueLayout;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -463,8 +463,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * The pcap header buffer for use with next() call. Header and packet references
 	 * are valid only from call to call and then out of pcap arena.
 	 */
-	private final MemorySegment PCAP0_4_HEADER_BUFFER = MemorySegment
-			.allocateNative(PcapHeaderABI.nativeAbi().headerLength(), SegmentScope.auto());
+	private final MemorySegment PCAP0_4_HEADER_BUFFER = Arena.ofAuto()
+			.allocate(PcapHeaderABI.nativeAbi().headerLength());
 
 	/**
 	 * Packet dispatcher implementation. The standard dispatcher just calls
@@ -574,8 +574,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			/* Only valid for duration of this callback */
 			try (var arena = newArena()) {
 
-				MemorySegment mHdr = ForeignUtils.reinterpret(h, hdrlen, arena);
-				MemorySegment mPkt = ForeignUtils.reinterpret(p, caplen, arena);
+				MemorySegment mHdr = h.reinterpret(hdrlen, arena, __ ->{});
+				MemorySegment mPkt = p.reinterpret(caplen, arena, __ ->{});
 
 				/*
 				 * If user value is address we forward the upcall user address.
@@ -627,7 +627,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 				int caplen = hdr.captureLength();
 				assert caplen < PcapConstants.MAX_SNAPLEN : "caplen/wirelen out of range " + caplen;
 
-				byte[] packet = ForeignUtils.reinterpret(bytes, caplen)
+				byte[] packet = bytes.reinterpret(caplen)
 						.toArray(ValueLayout.JAVA_BYTE);
 
 				handler.handleArray(user, hdr, packet);
@@ -744,7 +744,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 				int caplen = hdr.captureLength();
 				assert caplen < PcapConstants.MAX_SNAPLEN : "caplen/wirelen out of range " + caplen;
 
-				byte[] packet = ForeignUtils.reinterpret(bytes, caplen)
+				byte[] packet = bytes.reinterpret(caplen)
 						.toArray(ValueLayout.JAVA_BYTE);
 
 				handler.handleArray(user, hdr, packet);
@@ -763,8 +763,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			/* Only valid for duration of this callback */
 			try (var arena = newArena()) {
 
-				MemorySegment mHdr = ForeignUtils.reinterpret(h, hdrlen);
-				MemorySegment mPkt = ForeignUtils.reinterpret(p, caplen);
+				MemorySegment mHdr = h.reinterpret(hdrlen, arena, __ ->{});
+				MemorySegment mPkt = p.reinterpret(caplen, arena, __ ->{});
 
 				/*
 				 * If user value is address we forward the upcall user address.

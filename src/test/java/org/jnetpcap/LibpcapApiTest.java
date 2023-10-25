@@ -555,7 +555,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = Arena.openShared()) {
+					var pcapScope = Arena.ofShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -614,7 +614,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = Arena.openShared()) {
+					var pcapScope = Arena.ofShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -679,7 +679,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = Arena.openShared()) {
+					var pcapScope = Arena.ofShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -737,7 +737,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = Arena.openShared()) {
+					var pcapScope = Arena.ofShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -796,7 +796,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = Arena.openShared()) {
+					var pcapScope = Arena.ofShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -1060,7 +1060,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		 * native memory managed by BpFilter class)
 		 */
 		try (BpFilter filter = Pcap.compileNoPcap(SNAPLEN, DLT, FILTER_STR, OPTIMIZE, NETMASK);
-				var arena = Arena.openShared()) {
+				var arena = Arena.ofShared()) {
 			var abi = PcapHeaderABI.selectDeadAbi();
 
 			final TestPacket packet = templates.tcpPacket(abi, arena);
@@ -1212,7 +1212,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = Arena.openShared()) {
+					var pcapScope = Arena.ofShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -1272,7 +1272,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = Arena.openShared()) {
+					var pcapScope = Arena.ofShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -1337,7 +1337,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = Arena.openShared()) {
+					var pcapScope = Arena.ofShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -1397,7 +1397,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = Arena.openShared()) {
+					var pcapScope = Arena.ofShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);
@@ -1460,7 +1460,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		int loopCounter = TRANSMIT_RETRIES_COUNT;
 		while (loopCounter-- > 0) {
 			try (var joinOnAutoClose = transmitter.transmitPacketWithDelay(TRANSMIT_DELAY_IN_MILLIS);
-					var pcapScope = Arena.openShared()) {
+					var pcapScope = Arena.ofShared()) {
 
 				/* do capture */
 				var packet = fromPcapPacketRef(abi, captureHandle.next(), pcapScope);

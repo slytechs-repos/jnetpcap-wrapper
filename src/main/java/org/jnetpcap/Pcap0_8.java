@@ -25,7 +25,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 import org.jnetpcap.constant.PcapDlt;
-import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.internal.PcapHeaderABI;
@@ -452,8 +451,8 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 
 			/* int pcap_list_datalinks(pcap_t *p, int **dlt_buf) */
 			int count = pcap_list_datalinks.invokeInt(this::getErrorString, getPcapHandle(), super.POINTER_TO_POINTER1);
-			MemorySegment dltBuf = ForeignUtils.reinterpret(POINTER_TO_POINTER1.get(ADDRESS, 0), JAVA_INT
-					.byteAlignment() * count, arena);
+			MemorySegment dltBuf = POINTER_TO_POINTER1.getAtIndex(ADDRESS, 0)
+					.reinterpret(JAVA_INT.byteAlignment() * count, arena, __ ->{});
 
 			int[] dlts = dltBuf.toArray(JAVA_INT);
 

@@ -35,7 +35,6 @@ import org.jnetpcap.PcapIf;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapSrc;
 import org.jnetpcap.constant.WinPcapMode;
-import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.internal.PcapHeaderABI;
@@ -723,7 +722,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 			MemorySegment sizeIntPtr = arena.allocate(JAVA_INT);
 			MemorySegment pcap_stat_ex_ptr = pcap_stat_ex.invokeObj(this::geterr, getPcapHandle(), sizeIntPtr);
 
-			MemorySegment mseg = ForeignUtils.reinterpret(pcap_stat_ex_ptr, PCAP_STAT_EX_LENGTH, arena);
+			MemorySegment mseg = pcap_stat_ex_ptr.reinterpret(PCAP_STAT_EX_LENGTH, arena, __ ->{});
 			int statStructSize = sizeIntPtr.get(JAVA_INT, 0);
 
 			return new PcapStatExRecord(statStructSize, mseg);

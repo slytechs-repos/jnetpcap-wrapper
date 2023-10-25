@@ -25,7 +25,6 @@ import java.util.stream.IntStream;
 
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapTstampType;
-import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.internal.PcapHeaderABI;
@@ -237,7 +236,7 @@ public sealed class Pcap1_2 extends Pcap1_0 permits Pcap1_5 {
 
 			/* Dereference to int[] address */
 			MemorySegment arrayAddress = POINTER_TO_POINTER1.get(ADDRESS, 0);
-			int[] array = ForeignUtils.reinterpret(arrayAddress, JAVA_INT.byteSize() * len, arena)
+			int[] array = arrayAddress.reinterpret(JAVA_INT.byteSize() * len, arena, __ ->{})
 					.toArray(JAVA_INT);
 
 			/* Copy from native int[] to java int[] */
