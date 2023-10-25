@@ -350,6 +350,73 @@ public enum PcapDlt implements IntSupplier {
 	/** The LINU x_ lapd. */
 	LINUX_LAPD(177),
 
+	/** Event Tracing for Windows messages. */
+	ETW(290),
+
+	/**
+	 * Hilscher Gesellschaft fuer Systemautomation mbH netANALYZER NG hardware and
+	 * software.
+	 *
+	 * The specification for this footer can be found at:
+	 * https://kb.hilscher.com/x/brDJBw
+	 *
+	 * Requested by Jan Adam <jadam@hilscher.com>
+	 */
+	NETANALYZER_NG(291),
+
+	/**
+	 * Serial NCP (Network Co-Processor) protocol for Zigbee stack ZBOSS by DSR.
+	 * ZBOSS NCP protocol description:
+	 * https://cloud.dsr-corporation.com/index.php/s/3isHzaNTTgtJebn Header in pcap
+	 * file: https://cloud.dsr-corporation.com/index.php/s/fiqSDorAAAZrsYB
+	 *
+	 * Requested by Eugene Exarevsky <eugene.exarevsky@dsr-corporation.com>
+	 * 
+	 */
+	ZBOSS_NCP(292),
+
+	/** USB 1.0 packets as transmitted over the cable */
+	USB_2_0_LOW_SPEED(293),
+
+	/** USB 1.1 packets as transmitted over the cable */
+	USB_2_0_FULL_SPEED(294),
+
+	/** USB 2.0 packets as transmitted over the cable */
+	USB_2_0_HIGH_SPEED(295),
+
+	/**
+	 * Auerswald Logger Protocol description is provided on
+	 * https://github.com/Auerswald-GmbH/auerlog/blob/master/auerlog.txt
+	 */
+	AUERSWALD_LOG(296),
+
+	/**
+	 * Z-Wave packets with a TAP meta-data header
+	 * https://gitlab.com/exegin/zwave-g9959-tap requested on tcpdump-workers@
+	 */
+	ZWAVE_TAP(297),
+
+	/** Silicon Labs debug channel protocol */
+	SILABS_DEBUG_CHANNEL(298),
+
+	/**
+	 * Ultra-wideband (UWB) controller interface protocol (UCI). requested by Henri
+	 * Chataing <henrichataing@google.com>
+	 */
+	FIRA_UCI(299),
+
+	/**
+	 * MDB (Multi-Drop Bus) protocol between a vending machine controller and
+	 * peripherals inside the vending machine. See
+	 *
+	 * https://www.kaiser.cx/pcap-mdb.html
+	 *
+	 * for the specification.
+	 *
+	 * Requested by Martin Kaiser <martin@kaiser.cx>.
+	 */
+	MDB(300),
+
 	;
 
 	/** The Constant DLT_NULL. */
@@ -618,6 +685,73 @@ public enum PcapDlt implements IntSupplier {
 
 	/** The Constant DLT_LINUX_LAPD. */
 	public final static int DLT_LINUX_LAPD = 177;
+	
+	/** Event Tracing for Windows messages. */
+	public final static int DLT_ETW = 290;
+
+	/**
+	 * Hilscher Gesellschaft fuer Systemautomation mbH netANALYZER NG hardware and
+	 * software.
+	 *
+	 * The specification for this footer can be found at:
+	 * https://kb.hilscher.com/x/brDJBw
+	 *
+	 * Requested by Jan Adam <jadam@hilscher.com>
+	 */
+	public final static int DLT_NETANALYZER_NG = 291;
+
+	/**
+	 * Serial NCP (Network Co-Processor) protocol for Zigbee stack ZBOSS by DSR.
+	 * ZBOSS NCP protocol description:
+	 * https://cloud.dsr-corporation.com/index.php/s/3isHzaNTTgtJebn Header in pcap
+	 * file: https://cloud.dsr-corporation.com/index.php/s/fiqSDorAAAZrsYB
+	 *
+	 * Requested by Eugene Exarevsky <eugene.exarevsky@dsr-corporation.com>
+	 * 
+	 */
+	public final static int DLT_ZBOSS_NCP = 292;
+
+	/** USB 1.0 packets as transmitted over the cable */
+	public final static int DLT_USB_2_0_LOW_SPEED = 293;
+
+	/** USB 1.1 packets as transmitted over the cable */
+	public final static int DLT_USB_2_0_FULL_SPEED = 294;
+
+	/** USB 2.0 packets as transmitted over the cable */
+	public final static int DLT_USB_2_0_HIGH_SPEED = 295;
+
+	/**
+	 * Auerswald Logger Protocol description is provided on
+	 * https://github.com/Auerswald-GmbH/auerlog/blob/master/auerlog.txt
+	 */
+	public final static int DLT_AUERSWALD_LOG = 296;
+
+	/**
+	 * Z-Wave packets with a TAP meta-data header
+	 * https://gitlab.com/exegin/zwave-g9959-tap requested on tcpdump-workers@
+	 */
+	public final static int DLT_ZWAVE_TAP = 297;
+
+	/** Silicon Labs debug channel protocol */
+	public final static int DLT_SILABS_DEBUG_CHANNEL = 298;
+
+	/**
+	 * Ultra-wideband (UWB) controller interface protocol (UCI). requested by Henri
+	 * Chataing <henrichataing@google.com>
+	 */
+	public final static int DLT_FIRA_UCI = 299;
+
+	/**
+	 * MDB (Multi-Drop Bus) protocol between a vending machine controller and
+	 * peripherals inside the vending machine. See
+	 *
+	 * https://www.kaiser.cx/pcap-mdb.html
+	 *
+	 * for the specification.
+	 *
+	 * Requested by Martin Kaiser <martin@kaiser.cx>.
+	 */
+	public final static int DLT_MDB = 300;
 
 	/**
 	 * Converts an integer value into a PcapDLT constant.
