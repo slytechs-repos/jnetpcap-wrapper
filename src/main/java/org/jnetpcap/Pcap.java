@@ -3606,7 +3606,13 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	}
 
 	/**
-	 * @return the pcapHeaderABI
+	 * Gets the pcap header ABI (Abstract Binary Interface). Pcap ABI is used to
+	 * interpret native structures such as pcap descriptor, correctly on any
+	 * specific hardware platform. The ABI abstracts how native integers and
+	 * primitive types are represented by CPU architecture on a specific platform.
+	 *
+	 * @return the ABI of the pcap header for this pcap handle on this CPU
+	 *         architecture
 	 */
 	public PcapHeaderABI getPcapHeaderABI() {
 		return pcapHeaderABI;

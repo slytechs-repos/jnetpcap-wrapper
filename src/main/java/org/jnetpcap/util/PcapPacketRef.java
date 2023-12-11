@@ -29,9 +29,11 @@ import static java.lang.foreign.ValueLayout.*;
  * packet data. The scope of these addresses is libpcap packet scope and should
  * be used with great care or VM crashes can occur.
  *
+ * @param abi    platform specific ABI (Abstract Binary Interface)
+ * @param header raw pcap header in a memory segment
+ * @param data   raw packet data in a memory segment
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
- * @author mark
  */
 public record PcapPacketRef(Object abi, MemorySegment header, MemorySegment data) {
 

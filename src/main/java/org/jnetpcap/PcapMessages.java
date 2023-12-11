@@ -27,13 +27,14 @@ import java.util.ResourceBundle;
  * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
- * @author mark
- *
  */
 public class PcapMessages extends PropertyResourceBundle {
+	
 	/**
-	 * @param reader
-	 * @throws IOException
+	 * Instantiates a new pcap messages.
+	 *
+	 * @param reader the reader
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public PcapMessages(Reader reader) throws IOException {
 		super(reader);
