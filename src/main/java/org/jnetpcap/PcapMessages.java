@@ -25,8 +25,6 @@ import java.util.ResourceBundle;
  * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
- * @author mark
- *
  */
 public class PcapMessages extends PropertyResourceBundle {
 	

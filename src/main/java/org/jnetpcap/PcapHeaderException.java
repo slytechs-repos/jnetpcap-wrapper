@@ -29,8 +29,6 @@ import org.jnetpcap.internal.PcapHeaderABI;
  * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
- * @author Mark Bednarczyk
- *
  */
 public class PcapHeaderException extends RuntimeException {
 

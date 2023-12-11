@@ -40,7 +40,6 @@ import org.jnetpcap.internal.PcapHeaderABI;
  * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
- * @author Mark Bednarczyk
  * @see LibraryPolicy#SYSTEM_PROPERTY_ABI
  */
 public final class PcapHeader {
@@ -388,7 +387,7 @@ public final class PcapHeader {
 	 *
 	 * @param abi           the abi
 	 * @param headerAddress the header address
-	 * @param arena       the session
+	 * @param arena         the session
 	 */
 	PcapHeader(PcapHeaderABI abi, MemorySegment headerAddress, Arena arena) {
 		this.abi = abi;
@@ -486,10 +485,18 @@ public final class PcapHeader {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Timestamp.
 	 *
 	 * @param nanoTime the nano time
 	 * @return the long
+=======
+	 * Timestamp in either nano or milli second precision.
+	 *
+	 * @param nanoTime if true, timestamp is returned with nano second precision,
+	 *                 otherwise millis is returned
+	 * @return the timestamp value as 64-bit long
+>>>>>>> refs/remotes/origin/bugfix-2.0.0-javadoc-warnings
 	 * @throws PcapHeaderException the pcap header exception
 	 */
 	public long timestamp(boolean nanoTime) throws PcapHeaderException {
@@ -505,7 +512,6 @@ public final class PcapHeader {
 	 * @return the long
 	 * @throws PcapHeaderException the pcap header exception
 	 */
-
 	public long toEpochMilli() throws PcapHeaderException {
 		return toEpochMilli(false);
 	}
