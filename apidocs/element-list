@@ -1,5 +1,6 @@
 module:org.jnetpcap
 org.jnetpcap
 org.jnetpcap.constant
+org.jnetpcap.spi
 org.jnetpcap.util
 org.jnetpcap.windows

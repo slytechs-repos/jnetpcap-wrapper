@@ -1,26 +1,26 @@
 /*
- * Copyright (c) 2013, 2022, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * Copyright (c) 2013, 2023, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 var moduleSearchIndex;
@@ -133,7 +133,9 @@ function toggleGlobal(checkbox, selected, columns) {
                     toggleStyle(elem.classList, isEvenRow, evenRowColor, oddRowColor);
                 }
             });
-        t.parentElement.style.display = visible === 0 ? 'none' : '';
+        var displaySection = visible === 0 ? 'none' : '';
+        t.parentElement.style.display = displaySection;
+        document.querySelector("li#contents-" + id).style.display = displaySection;
     })
 }
 
@@ -200,26 +202,7 @@ function indexFilesLoaded() {
 // Copy the contents of the local snippet to the clipboard
 function copySnippet(button) {
     copyToClipboard(button.nextElementSibling.innerText);
-    switchCopyLabel(button.firstElementChild, button.parentElement);
-}
-// Copy the link to the adjacent header to the clipboard
-function copyUrl(button) {
-    var id;
-    var header = button.parentElement;
-    if (header.hasAttribute("id")) {
-        id = header.getAttribute("id");
-    } else if (header.parentElement.tagName === 'SECTION' && header.parentElement.hasAttribute("id")) {
-        id = header.parentElement.getAttribute("id");
-    } else if (header.firstElementChild && header.firstElementChild.tagName === "A"
-                                        && header.firstElementChild.hasAttribute("id")) {
-        id = header.firstElementChild.getAttribute("id");
-    }
-    var url = document.location.href;
-    if (url.indexOf("#") > -1) {
-        url = url.substring(0, url.indexOf("#"));
-    }
-    copyToClipboard(url + "#" + id);
-    switchCopyLabel(button.lastElementChild, button.parentElement);
+    switchCopyLabel(button, button.firstElementChild);
 }
 function copyToClipboard(content) {
     var textarea = document.createElement("textarea");
@@ -230,15 +213,19 @@ function copyToClipboard(content) {
     document.execCommand("copy");
     document.body.removeChild(textarea);
 }
-function switchCopyLabel(span, parent) {
+function switchCopyLabel(button, span) {
     var copied = span.getAttribute("data-copied");
-    if (span.innerHTML !== copied) {
-        var initialLabel = span.innerHTML;
-        span.innerHTML = copied;
-        parent.onmouseleave = parent.ontouchend = function() {
-            span.innerHTML = initialLabel;
-        };
-    }
+    button.classList.add("visible");
+    var initialLabel = span.innerHTML;
+    span.innerHTML = copied;
+    setTimeout(function() {
+        button.classList.remove("visible");
+        setTimeout(function() {
+            if (initialLabel !== copied) {
+                span.innerHTML = initialLabel;
+            }
+        }, 100);
+    }, 1900);
 }
 // Workaround for scroll position not being included in browser history (8249133)
 document.addEventListener("DOMContentLoaded", function(e) {
