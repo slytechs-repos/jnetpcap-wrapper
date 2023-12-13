@@ -31,8 +31,6 @@ import org.jnetpcap.internal.PcapHeaderABI;
  * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
- * @author Mark Bednarczyk
- *
  */
 public class PcapHeaderException extends RuntimeException {
 
@@ -42,6 +40,7 @@ public class PcapHeaderException extends RuntimeException {
 	 */
 	public static class OutOfRangeException extends PcapHeaderException {
 
+		/** The Constant serialVersionUID. */
 		private static final long serialVersionUID = -1194844250182172809L;
 
 		/**
@@ -53,11 +52,24 @@ public class PcapHeaderException extends RuntimeException {
 		 */
 		public static boolean INCLUDE_POSSIBILITIES = true;
 
+		/** The abi. */
 		private final PcapHeaderABI abi;
+		
+		/** The value. */
 		private final int value;
+		
+		/** The possible values. */
 		private List<String> possibleValues;
+		
+		/** The method name. */
 		private String methodName = "Possibilities";
 
+		/**
+		 * Instantiates a new out of range exception.
+		 *
+		 * @param abi   the abi
+		 * @param value the value
+		 */
 		public OutOfRangeException(PcapHeaderABI abi, int value) {
 			super("invalid length [%d] from PcapHeaderABI [%s]"
 					.formatted(value, abi.name()));
@@ -66,6 +78,8 @@ public class PcapHeaderException extends RuntimeException {
 		}
 
 		/**
+		 * Gets the possiblities.
+		 *
 		 * @return the possibleValues
 		 */
 		public List<String> getPossiblities() {
@@ -73,18 +87,28 @@ public class PcapHeaderException extends RuntimeException {
 		}
 
 		/**
+		 * Gets the value.
+		 *
 		 * @return the value
 		 */
 		public int getValue() {
 			return value;
 		}
 
+		/**
+		 * Sets the possibilities.
+		 *
+		 * @param possibleValues the new possibilities
+		 */
 		public void setPossibilities(List<String> possibleValues) {
 			this.possibleValues = possibleValues;
 		}
 
 		/**
+		 * Sets the possiblities.
+		 *
 		 * @param possibleValues the possibleValues to set
+		 * @return the out of range exception
 		 */
 		public OutOfRangeException setPossiblities(List<String> possibleValues) {
 			this.possibleValues = possibleValues;
@@ -93,6 +117,8 @@ public class PcapHeaderException extends RuntimeException {
 		}
 
 		/**
+		 * Gets the abi.
+		 *
 		 * @return the abi
 		 */
 		public String getAbi() {
@@ -100,6 +126,9 @@ public class PcapHeaderException extends RuntimeException {
 		}
 
 		/**
+		 * Gets the message.
+		 *
+		 * @return the message
 		 * @see java.lang.Throwable#getMessage()
 		 */
 		@Override
@@ -116,6 +145,8 @@ public class PcapHeaderException extends RuntimeException {
 		}
 
 		/**
+		 * Gets the method name.
+		 *
 		 * @return the methodName
 		 */
 		public String getMethodName() {
@@ -123,7 +154,10 @@ public class PcapHeaderException extends RuntimeException {
 		}
 
 		/**
+		 * Sets the method name.
+		 *
 		 * @param methodName the methodName to set
+		 * @return the out of range exception
 		 */
 		public OutOfRangeException setMethodName(String methodName) {
 			this.methodName = methodName;
@@ -132,17 +166,23 @@ public class PcapHeaderException extends RuntimeException {
 
 	}
 
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = -694519865697844153L;
 
 	/**
-	 * @param message
+	 * Instantiates a new pcap header exception.
+	 *
+	 * @param message the message
 	 */
 	public PcapHeaderException(String message) {
 		super(message);
 	}
 
 	/**
-	 * @param message
+	 * Instantiates a new pcap header exception.
+	 *
+	 * @param message the message
+	 * @param cause   the cause
 	 */
 	public PcapHeaderException(String message, Throwable cause) {
 		super(message, cause);

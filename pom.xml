@@ -1,14 +1,16 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.slytechs.jnet</groupId>
 	<artifactId>jnetpcap</artifactId>
 	<!-- mvn versions:set -DnewVersion=_new_version_ -->
-	<version>2.0.0</version>
-	<name>jNetPcap</name>
+	<version>2.0.1+jdk.21</version>
+	<name>jNetPcap OS</name>
 	<description>A Java wrapper for native libpcap library</description>
 	<url>https://www.jnetpcap.org</url>
 	<properties>
-		<jdk.version>22</jdk.version>
+		<jdk.version>21</jdk.version>
 		<project.build.sourceEncoding>${java.encoding}</project.build.sourceEncoding>
 		<maven.compiler.source>${jdk.version}</maven.compiler.source>
 		<maven.compiler.target>${jdk.version}</maven.compiler.target>
@@ -17,6 +19,7 @@
 		<java.native>--enable-native-access=ALL-UNNAMED</java.native>
 		<groups>user-permission</groups>
 		<excludeGroups>windows-api|unix-api|linux-api</excludeGroups>
+		<sign-artifacts>gpg.passphrase</sign-artifacts>
 	</properties>
 	<licenses>
 		<license>
@@ -34,13 +37,23 @@
 		</developer>
 	</developers>
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+		<!--
+		https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-dependency-plugin</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+
+		<!--
+		https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-compiler-plugin</artifactId>
 			<version>3.11.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.junit.platform/junit-platform-suite-api -->
+		<!--
+		https://mvnrepository.com/artifact/org.junit.platform/junit-platform-suite-api -->
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-suite-api</artifactId>
@@ -99,7 +112,8 @@
 					<groups>${groups}</groups>
 					<excludedGroups>${excludeGroups}</excludedGroups>
 					<argLine>
-						${java.library.path.libpcap} ${java.preview} ${java.native}
+						${java.library.path.libpcap} ${java.preview}
+						${java.native}
 					</argLine>
 				</configuration>
 			</plugin>
@@ -109,16 +123,26 @@
 				<version>3.4.1 </version>
 				<configuration>
 					<doctitle>Public API for ${project.name} ${project.version}</doctitle>
-					<windowtitle>Public API for ${project.name} ${project.version}</windowtitle>
+					<windowtitle>Public API for ${project.name}
+						${project.version}</windowtitle>
 					<encoding>${java.encoding}</encoding>
 					<source>${jdk.version}</source>
 					<overview>${basedir}/Overview.html</overview>
 					<additionalOptions>
-								${java.preview}
+						${java.preview}
 					</additionalOptions>
 					<show>public</show>
-          			<excludePackageNames>*.internal</excludePackageNames>
+					<excludePackageNames>*.internal</excludePackageNames>
 				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -128,8 +152,74 @@
 					<scmBranch>gh-pages</scmBranch>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.13</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://s01.oss.sonatype.org</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+						<configuration>
+							<passphraseServerId>${sign-artifacts}</passphraseServerId>
+							<gpgArguments>
+								<arg>--pinentry-mode</arg>
+								<arg>loopback</arg>
+							</gpgArguments>
+						</configuration>
+
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
+	<distributionManagement>
+
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+
+		<repository>
+			<id>ossrh</id>
+			<url>
+				https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+
+		<!-- mvn clean site site:stage scm-publish:publish-scm -->
+		<site>
+			<id>github</id>
+			<url>scm:git:git@github.com:slytechs-repos/jnetpcap.git</url>
+		</site>
+	</distributionManagement>
 	<reporting>
 		<plugins>
 			<plugin>
@@ -148,16 +238,19 @@
 				<version>3.4.1</version>
 				<configuration>
 					<doctitle>Public API for ${project.name} ${project.version}</doctitle>
-					<windowtitle>Public API for ${project.name} ${project.version}</windowtitle>
-					<testDoctitle>Test API for ${project.name} ${project.version}</testDoctitle>
-					<testWindowtitle>Test API for ${project.name} ${project.version}</testWindowtitle>
+					<windowtitle>Public API for ${project.name}
+						${project.version}</windowtitle>
+					<testDoctitle>Test API for ${project.name}
+						${project.version}</testDoctitle>
+					<testWindowtitle>Test API for ${project.name}
+						${project.version}</testWindowtitle>
 					<encoding>${java.encoding}</encoding>
 					<source>${jdk.version}</source>
 					<overview>${basedir}/Overview.html</overview>
 					<additionalOptions>
-								${java.preview}
+						${java.preview}
 					</additionalOptions>
-          			<excludePackageNames>*.internal</excludePackageNames>
+					<excludePackageNames>*.internal</excludePackageNames>
 				</configuration>
 				<reportSets>
 					<reportSet>
@@ -203,7 +296,8 @@
 			</activation>
 			<build></build>
 			<properties>
-				<java.library.path.libpcap.osx>-Djava.library.path=/usr/local/Cellar/libpcap/${libpcap.version}/lib</java.library.path.libpcap.osx>
+				<java.library.path.libpcap.osx>
+					-Djava.library.path=/usr/local/Cellar/libpcap/${libpcap.version}/lib</java.library.path.libpcap.osx>
 				<java.library.path.libpcap>${java.library.path.libpcap.osx}</java.library.path.libpcap>
 				<excludeGroups>windows-api|linux-api</excludeGroups>
 			</properties>
@@ -220,7 +314,8 @@
 				</file>
 			</activation>
 			<properties>
-				<java.library.path.libpcap.osx>-Djava.library.path=/opt/local/lib</java.library.path.libpcap.osx>
+				<java.library.path.libpcap.osx>
+					-Djava.library.path=/opt/local/lib</java.library.path.libpcap.osx>
 				<java.library.path.libpcap>${java.library.path.libpcap.osx}</java.library.path.libpcap>
 				<excludeGroups>windows-api|linux-api</excludeGroups>
 			</properties>
@@ -234,7 +329,8 @@
 				</os>
 			</activation>
 			<properties>
-				<java.library.path.libpcap.linux>-Djava.library.path=/usr/lib/x86-linux-gnu</java.library.path.libpcap.linux>
+				<java.library.path.libpcap.linux>
+					-Djava.library.path=/usr/lib/x86-linux-gnu</java.library.path.libpcap.linux>
 				<java.library.path.libpcap>${java.library.path.libpcap.linux}</java.library.path.libpcap>
 				<excludeGroups>windows-api</excludeGroups>
 			</properties>
@@ -248,7 +344,8 @@
 				</os>
 			</activation>
 			<properties>
-				<java.library.path.libpcap.linux64>-Djava.library.path=/usr/lib/x86_64-linux-gnu</java.library.path.libpcap.linux64>
+				<java.library.path.libpcap.linux64>
+					-Djava.library.path=/usr/lib/x86_64-linux-gnu</java.library.path.libpcap.linux64>
 				<java.library.path.libpcap>${java.library.path.libpcap.linux64}</java.library.path.libpcap>
 				<excludeGroups>windows-api</excludeGroups>
 			</properties>
@@ -262,7 +359,8 @@
 				</os>
 			</activation>
 			<properties>
-				<java.library.path.libpcap.linux64>-Djava.library.path=/usr/lib/x86_64-linux-gnu</java.library.path.libpcap.linux64>
+				<java.library.path.libpcap.linux64>
+					-Djava.library.path=/usr/lib/x86_64-linux-gnu</java.library.path.libpcap.linux64>
 				<java.library.path.libpcap>${java.library.path.libpcap.linux64}</java.library.path.libpcap>
 				<excludeGroups>windows-api</excludeGroups>
 			</properties>
@@ -276,8 +374,10 @@
 				</os>
 			</activation>
 			<properties>
-				<java.library.path.libpcap.windows64>-Djava.library.path="C:\\Windows\\SysWOW64"</java.library.path.libpcap.windows64>
-				<java.library.path.libpcap>${java.library.path.libpcap.windows64}</java.library.path.libpcap>
+				<java.library.path.libpcap.windows64>
+					-Djava.library.path="C:\\Windows\\SysWOW64"</java.library.path.libpcap.windows64>
+				<java.library.path.libpcap>
+					${java.library.path.libpcap.windows64}</java.library.path.libpcap>
 				<excludeGroups>unix-api|linux-api</excludeGroups>
 			</properties>
 		</profile>
@@ -290,7 +390,8 @@
 				</os>
 			</activation>
 			<properties>
-				<java.library.path.libpcap.windows>-Djava.library.path="C:\\Windows\\Program Files"</java.library.path.libpcap.windows>
+				<java.library.path.libpcap.windows>-Djava.library.path="C:\\Windows\\Program
+					Files"</java.library.path.libpcap.windows>
 				<java.library.path.libpcap>${java.library.path.libpcap.windows}</java.library.path.libpcap>
 				<excludeGroups>unix-api|linux-api</excludeGroups>
 			</properties>
@@ -302,14 +403,8 @@
 	</issueManagement>
 	<scm>
 		<connection>scm:git:git://github.com/slytechs-repos/jnetpcap.git</connection>
-		<developerConnection>scm:git:ssh:git://github.com/slytechs-repos/jnetpcap.git</developerConnection>
+		<developerConnection>
+			scm:git:ssh:git://github.com/slytechs-repos/jnetpcap.git</developerConnection>
 		<url>https://github.com/slytechs-repos/jnetpcap</url>
 	</scm>
-	<distributionManagement>
-		<!-- mvn clean site site:stage scm-publish:publish-scm -->
-		<site>
-			<id>github</id>
-			<url>scm:git:git@github.com:slytechs-repos/jnetpcap.git</url>
-		</site>
-	</distributionManagement>
 </project>
