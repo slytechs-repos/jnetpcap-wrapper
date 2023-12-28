@@ -249,5 +249,5 @@ module org.jnetpcap {
 
 	/* Private API */
 	exports org.jnetpcap.internal to
-			com.slytechs.jnetpcap;
+		com.slytechs.jnet.jnetpcap;
 }

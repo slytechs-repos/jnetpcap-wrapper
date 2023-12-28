@@ -35,7 +35,7 @@ import org.jnetpcap.windows.WinPcap;
  * @author mark
  *
  */
-public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafePcapHandle, NonSealedPcap {
+public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafePcapHandle, NonSealedPcap { 
 
 	/**
 	 * The Constant pcap_datalink_val_to_description_or_dlt.
