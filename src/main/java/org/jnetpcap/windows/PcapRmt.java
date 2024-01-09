@@ -37,6 +37,11 @@ public sealed interface PcapRmt permits PcapRmt.Source, PcapRmt.Auth {
 
 	/**
 	 * Remote RPCAP source string.
+	 *
+	 * @param type the type
+	 * @param host the host
+	 * @param port the port
+	 * @param name the name
 	 */
 	public record Source(int type, String host, String port, String name) implements PcapRmt {
 
@@ -52,6 +57,10 @@ public sealed interface PcapRmt permits PcapRmt.Source, PcapRmt.Auth {
 
 	/**
 	 * Remote RPCAP authentication structure.
+	 *
+	 * @param type     the type
+	 * @param username the username
+	 * @param password the password
 	 */
 	public record Auth(int type, String username, String password) implements PcapRmt {
 

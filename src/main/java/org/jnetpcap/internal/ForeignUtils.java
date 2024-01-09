@@ -15,8 +15,10 @@
  */
 package org.jnetpcap.internal;
 
+import java.lang.foreign.MemoryLayout.PathElement;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.VarHandle;
+import java.util.stream.Stream;
 
 /**
  * The Class ForeignUtils.
@@ -77,6 +79,22 @@ public final class ForeignUtils {
 		var read = (MemorySegment) handle.get(addressAt);
 		return read;
 	}
+
+	/**
+	 * Generates an element path for MemoryLayouts based on dot-separated
+	 * MemoryLayout path.
+	 *
+	 * @param path the source path to be parsed
+	 * @return the generated array of path elements
+	 */
+	public static PathElement[] path(String path) {
+		return Stream.of(path.split("\\."))
+				.map(String::trim)
+				.map(PathElement::groupElement)
+				.toArray(PathElement[]::new);
+	}
+
+
 
 	/**
 	 * Instantiates a new foreign utils.
