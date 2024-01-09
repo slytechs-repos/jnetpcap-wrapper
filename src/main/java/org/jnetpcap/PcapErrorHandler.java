@@ -28,18 +28,13 @@
 package org.jnetpcap;
 
 /**
-<<<<<<< HEAD
  * A multi-mudule I8N error handler for all jNetPcap messages.
  * 
-=======
- * Pcap error code and messages handler.
- *
->>>>>>> refs/remotes/origin/bugfix-2.0.0-javadoc-warnings
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  */
 public class PcapErrorHandler {
-	
+
 	/**
 	 * Instantiates a new pcap error handler.
 	 */
@@ -47,11 +42,7 @@ public class PcapErrorHandler {
 	}
 
 	/**
-<<<<<<< HEAD
-	 * Gets the string.
-=======
 	 * Gets the error string.
->>>>>>> refs/remotes/origin/bugfix-2.0.0-javadoc-warnings
 	 *
 	 * @param key the key
 	 * @return the string
