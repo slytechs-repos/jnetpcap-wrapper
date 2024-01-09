@@ -153,4 +153,23 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 		assertEquals(INET6_ADDR_LEN, addrLen, "invalid INET6 family socket address length");
 	}
 
+	/**
+	 * Test PcapIf has a hardware/Mac address and if the address is of valid length
+	 * (6 bytes).
+	 *
+	 * @throws PcapException the pcap exception
+	 */
+	@Test
+	@Tag("sudo-permission")
+	void PcapIfInet4GetHardwareAddress() throws PcapException {
+		List<PcapIf> list = Pcap.findAllDevs();
+
+		PcapIf device = list.stream()
+				.filter(i -> i.addressOfFamily(SockAddrFamily.INET).isPresent())
+				.findAny()
+				.orElseThrow();
+
+		assertTrue(device.getHardwareAddress().isPresent(), "expected a MAC address for pcap interface");
+		assertEquals(MAC_ADDR_LEN, device.getHardwareAddress().get().length, "invalid MAC address length");
+	}
 }

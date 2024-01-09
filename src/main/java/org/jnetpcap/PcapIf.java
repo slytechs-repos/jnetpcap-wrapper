@@ -21,6 +21,7 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.VarHandle;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -505,6 +506,9 @@ public class PcapIf {
 	/** The addresses. */
 	private final List<PcapAddr> addresses;
 
+	/** The hardware/Mac address. */
+	private final Optional<byte[]> hardwareAddress;
+
 	/**
 	 * Instantiates a new pcap if.
 	 *
@@ -519,6 +523,8 @@ public class PcapIf {
 		flags = (int) flagsHandle.get(mseg);
 
 		addresses = PcapAddr.listAll(addrs, scope);
+		hardwareAddress = Optional.ofNullable(unchecked(name(), NetworkInterface::getByName))
+				.map(unchecked(NetworkInterface::getHardwareAddress));
 	}
 
 	/**
@@ -561,6 +567,16 @@ public class PcapIf {
 	 */
 	public int flags() {
 		return flags;
+	}
+
+	/**
+	 * Returns the hardware address (usually MAC) of the interface if it has one and
+	 * if it can be accessed given the current privileges.
+	 * 
+	 * @return an optional byte array containing the address
+	 */
+	public Optional<byte[]> getHardwareAddress() {
+		return hardwareAddress;
 	}
 
 	/**
