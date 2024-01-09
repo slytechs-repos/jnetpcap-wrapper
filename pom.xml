@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.slytechs.jnet.jnetpcap</groupId>
-	<artifactId>jnetpcap-api</artifactId>
+	<artifactId>jnetpcap-wrapper</artifactId>
 	<!-- mvn versions:set -DnewVersion=_new_version_ -->
-	<version>2.0.3-SNAPSHOT</version>
+	<version>2.1.0-SNAPSHOT</version>
 	<name>jNetPcap API</name>
 	<description>A java wrapper for native LIBPCAP library and PCAP API</description>
 	<url>https://www.jnetpcap.org</url>
