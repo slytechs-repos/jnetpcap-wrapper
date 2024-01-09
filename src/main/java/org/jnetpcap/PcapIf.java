@@ -16,6 +16,7 @@
 package org.jnetpcap;
 
 import static org.jnetpcap.internal.ForeignUtils.*;
+import static org.jnetpcap.internal.FunctionThrowable.*;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
@@ -126,6 +127,13 @@ import static java.lang.foreign.ValueLayout.*;
  * @author repos@slytechs.com since libpcap 0.7
  */
 public class PcapIf {
+
+	/**
+	 * System property if set to true, pcap uses BSD style sockaddr structure which
+	 * has the addr_len field. Otherwise the default heuristic are used to determine
+	 * the sock address structure format.
+	 */
+	public static final String SYSTEM_PROPERTY_PCAPIF_SOCKADDR_BSD_STYLE = "org.jnetpcap.sockaddr.bsd";
 
 	/**
 	 * The struct pcap_addr structure containing network interfaces/devices
@@ -267,7 +275,12 @@ public class PcapIf {
 		 * @return true if platform socket structure definition has addr_len field
 		 */
 		private static boolean hasAddressLength() {
-			return (NativeABI.current() == NativeABI.MACOS64);
+			boolean bsdOverride = false;
+			try {
+				bsdOverride = Boolean.parseBoolean(System.getProperty(SYSTEM_PROPERTY_PCAPIF_SOCKADDR_BSD_STYLE));
+			} catch (Throwable e) {}
+
+			return bsdOverride || (NativeABI.current() == NativeABI.MACOS64);
 		}
 
 		/** Maximum sockaddr_t structure address data length. */
@@ -523,7 +536,7 @@ public class PcapIf {
 		flags = (int) flagsHandle.get(mseg);
 
 		addresses = PcapAddr.listAll(addrs, scope);
-		hardwareAddress = Optional.ofNullable(unchecked(name(), NetworkInterface::getByName))
+		hardwareAddress = Optional.ofNullable(applyUnchecked(name(), NetworkInterface::getByName))
 				.map(unchecked(NetworkInterface::getHardwareAddress));
 	}
 
@@ -575,7 +588,7 @@ public class PcapIf {
 	 * 
 	 * @return an optional byte array containing the address
 	 */
-	public Optional<byte[]> getHardwareAddress() {
+	public Optional<byte[]> hardwareAddress() {
 		return hardwareAddress;
 	}
 

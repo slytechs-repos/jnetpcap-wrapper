@@ -169,7 +169,7 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 				.findAny()
 				.orElseThrow();
 
-		assertTrue(device.getHardwareAddress().isPresent(), "expected a MAC address for pcap interface");
-		assertEquals(MAC_ADDR_LEN, device.getHardwareAddress().get().length, "invalid MAC address length");
+		assertTrue(device.hardwareAddress().isPresent(), "expected a MAC address for pcap interface");
+		assertEquals(MAC_ADDR_LEN, device.hardwareAddress().get().length, "invalid MAC address length");
 	}
 }
