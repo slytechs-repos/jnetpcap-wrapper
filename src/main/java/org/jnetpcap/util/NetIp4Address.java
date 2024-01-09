@@ -21,6 +21,8 @@ package org.jnetpcap.util;
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  * @author mark
+ * @param address the address
+ * @param netmask the netmask
  */
 public record NetIp4Address(int address, int netmask) {
 

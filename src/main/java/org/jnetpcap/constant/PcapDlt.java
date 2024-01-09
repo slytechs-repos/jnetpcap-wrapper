@@ -360,7 +360,7 @@ public enum PcapDlt implements IntSupplier {
 	 * The specification for this footer can be found at:
 	 * https://kb.hilscher.com/x/brDJBw
 	 *
-	 * Requested by Jan Adam <jadam@hilscher.com>
+	 * Requested by Jan Adam jadam@hilscher.com
 	 */
 	NETANALYZER_NG(291),
 
@@ -370,7 +370,7 @@ public enum PcapDlt implements IntSupplier {
 	 * https://cloud.dsr-corporation.com/index.php/s/3isHzaNTTgtJebn Header in pcap
 	 * file: https://cloud.dsr-corporation.com/index.php/s/fiqSDorAAAZrsYB
 	 *
-	 * Requested by Eugene Exarevsky <eugene.exarevsky@dsr-corporation.com>
+	 * Requested by Eugene Exarevsky eugene.exarevsky@dsr-corporation.com
 	 * 
 	 */
 	ZBOSS_NCP(292),
@@ -396,12 +396,12 @@ public enum PcapDlt implements IntSupplier {
 	 */
 	ZWAVE_TAP(297),
 
-	/** Silicon Labs debug channel protocol */
+	/** Silicon Labs debug channel protocol. */
 	SILABS_DEBUG_CHANNEL(298),
 
 	/**
 	 * Ultra-wideband (UWB) controller interface protocol (UCI). requested by Henri
-	 * Chataing <henrichataing@google.com>
+	 * Chataing henrichataing@google.com
 	 */
 	FIRA_UCI(299),
 
@@ -413,7 +413,7 @@ public enum PcapDlt implements IntSupplier {
 	 *
 	 * for the specification.
 	 *
-	 * Requested by Martin Kaiser <martin@kaiser.cx>.
+	 * Requested by Martin Kaiser martin@kaiser.cx
 	 */
 	MDB(300),
 
@@ -696,7 +696,7 @@ public enum PcapDlt implements IntSupplier {
 	 * The specification for this footer can be found at:
 	 * https://kb.hilscher.com/x/brDJBw
 	 *
-	 * Requested by Jan Adam <jadam@hilscher.com>
+	 * Requested by Jan Adam jadam@hilscher.com
 	 */
 	public final static int DLT_NETANALYZER_NG = 291;
 
@@ -706,7 +706,7 @@ public enum PcapDlt implements IntSupplier {
 	 * https://cloud.dsr-corporation.com/index.php/s/3isHzaNTTgtJebn Header in pcap
 	 * file: https://cloud.dsr-corporation.com/index.php/s/fiqSDorAAAZrsYB
 	 *
-	 * Requested by Eugene Exarevsky <eugene.exarevsky@dsr-corporation.com>
+	 * Requested by Eugene Exarevsky eugene.exarevsky@dsr-corporation.com
 	 * 
 	 */
 	public final static int DLT_ZBOSS_NCP = 292;
@@ -732,12 +732,12 @@ public enum PcapDlt implements IntSupplier {
 	 */
 	public final static int DLT_ZWAVE_TAP = 297;
 
-	/** Silicon Labs debug channel protocol */
+	/** Silicon Labs debug channel protocol. */
 	public final static int DLT_SILABS_DEBUG_CHANNEL = 298;
 
 	/**
 	 * Ultra-wideband (UWB) controller interface protocol (UCI). requested by Henri
-	 * Chataing <henrichataing@google.com>
+	 * Chataing henrichataing@google.com
 	 */
 	public final static int DLT_FIRA_UCI = 299;
 
@@ -749,7 +749,7 @@ public enum PcapDlt implements IntSupplier {
 	 *
 	 * for the specification.
 	 *
-	 * Requested by Martin Kaiser <martin@kaiser.cx>.
+	 * Requested by Martin Kaiser martin@kaiser.cx.
 	 */
 	public final static int DLT_MDB = 300;
 

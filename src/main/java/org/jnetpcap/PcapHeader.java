@@ -485,18 +485,11 @@ public final class PcapHeader {
 	}
 
 	/**
-<<<<<<< HEAD
-	 * Timestamp.
-	 *
-	 * @param nanoTime the nano time
-	 * @return the long
-=======
 	 * Timestamp in either nano or milli second precision.
 	 *
 	 * @param nanoTime if true, timestamp is returned with nano second precision,
 	 *                 otherwise millis is returned
 	 * @return the timestamp value as 64-bit long
->>>>>>> refs/remotes/origin/bugfix-2.0.0-javadoc-warnings
 	 * @throws PcapHeaderException the pcap header exception
 	 */
 	public long timestamp(boolean nanoTime) throws PcapHeaderException {
