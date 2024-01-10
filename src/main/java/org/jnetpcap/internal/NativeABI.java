@@ -70,6 +70,8 @@ public enum NativeABI {
 		if ((ARCH.equals("amd64") || ARCH.equals("x86_64")) && ADDRESS_SIZE == 64) {
 			if (OS.startsWith("Windows")) {
 				ABI = WIN64;
+			} else if (OS.startsWith("Mac")) {
+				ABI = MACOS64;
 			} else {
 				ABI = SYS_V;
 			}
