@@ -279,7 +279,7 @@ public class PcapIf {
 		}
 
 		/** Maximum sockaddr_t structure address data length. */
-		public final static int MAX_SOCKADDR_ADDRESS_LEN = 16;
+		public final static int MAX_SOCKADDR_ADDRESS_LEN = 255;
 
 		/** The Constant LAYOUT. */
 		private static final MemoryLayout SOCK_ADDR_LAYOUT = structLayout(
