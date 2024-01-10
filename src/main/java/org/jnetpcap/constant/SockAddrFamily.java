@@ -581,7 +581,7 @@ public enum SockAddrFamily implements IntSupplier {
 	 */
 	public static SockAddrFamily valueOf(int family) {
 		return mapUsingAbi(family, NativeABI.current())
-				.orElse(null);
+				.orElseThrow(() -> new IllegalArgumentException("family=%d".formatted(family)));
 	}
 
 	/**

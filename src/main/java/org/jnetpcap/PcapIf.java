@@ -413,12 +413,22 @@ public class PcapIf {
 		}
 
 		/**
-		 * Family.
+		 * Address family value.
 		 *
-		 * @return the int
+		 * @return 8 or 16 bit address family value
 		 */
 		public int family() {
 			return family;
+		}
+		
+		/**
+		 * Gets the family as a constant.
+		 *
+		 * @return the sock addr family constant
+		 * @throws IllegalArgumentException thrown if the constant for the family value is not found.
+		 */
+		public SockAddrFamily familyConstant() {
+			return SockAddrFamily.valueOf(family);
 		}
 
 		/**
@@ -567,8 +577,12 @@ public class PcapIf {
 		var list = addresses();
 
 		return list.stream()
-				.filter(a -> a.addr.family == family.getAsInt())
+				.filter(a -> eq( a.addr.familyConstant(),  family))
 				.findAny();
+	}
+	
+	private static boolean eq(SockAddrFamily f1, SockAddrFamily f2) {
+		return f1 == f2;
 	}
 
 	/**
