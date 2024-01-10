@@ -275,12 +275,7 @@ public class PcapIf {
 		 * @return true if platform socket structure definition has addr_len field
 		 */
 		private static boolean hasAddressLength() {
-			boolean bsdOverride = false;
-			try {
-				bsdOverride = Boolean.parseBoolean(System.getProperty(SYSTEM_PROPERTY_PCAPIF_SOCKADDR_BSD_STYLE));
-			} catch (Throwable e) {}
-
-			return bsdOverride || (NativeABI.current() == NativeABI.MACOS64);
+			return NativeABI.isBsdAbi();
 		}
 
 		/** Maximum sockaddr_t structure address data length. */
