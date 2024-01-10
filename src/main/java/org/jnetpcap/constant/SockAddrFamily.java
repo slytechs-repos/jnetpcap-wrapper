@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.function.IntSupplier;
 
 import org.jnetpcap.internal.NativeABI;
+import org.jnetpcap.internal.SockAddrFunction;
 
 /**
  * The socket address protocol family constants. Each protocol family has a
@@ -34,7 +35,7 @@ public enum SockAddrFamily implements IntSupplier {
 	LOCAL(OsSpecific.Linux.AF_LOCAL, OsSpecific.MacOs.AF_LOCAL),
 
 	/** The inet. */
-	INET(OsSpecific.Linux.AF_INET, OsSpecific.MacOs.AF_INET),
+	INET(OsSpecific.Linux.AF_INET, OsSpecific.MacOs.AF_INET, 4, 4),
 
 	/** The ax25. */
 	AX25(OsSpecific.Linux.AF_AX25, null),
@@ -58,7 +59,7 @@ public enum SockAddrFamily implements IntSupplier {
 	X25(OsSpecific.Linux.AF_AX25, null),
 
 	/** The inet6. */
-	INET6(OsSpecific.Linux.AF_INET6, OsSpecific.MacOs.AF_INET6),
+	INET6(OsSpecific.Linux.AF_INET6, OsSpecific.MacOs.AF_INET6, 8, 16),
 
 	/** The rose. */
 	ROSE(OsSpecific.Linux.AF_ROSE, null),
@@ -233,13 +234,16 @@ public enum SockAddrFamily implements IntSupplier {
 
 	;
 
+	/** The linux. */
 	private final OsSpecific.Linux linux;
+	
+	/** The mac os. */
 	private final OsSpecific.MacOs macOs;
 
 	/**
 	 * The Class OsSpecific.
 	 */
-	private interface OsSpecific extends IntSupplier {
+	private interface OsSpecific {
 
 		/**
 		 * The Enum MacOs.
@@ -366,17 +370,6 @@ public enum SockAddrFamily implements IntSupplier {
 			 */
 			MacOs(int family) {
 				this.family = family;
-			}
-
-			/**
-			 * Gets the as int.
-			 *
-			 * @return the as int
-			 * @see java.util.function.IntSupplier#getAsInt()
-			 */
-			@Override
-			public int getAsInt() {
-				return family;
 			}
 		}
 
@@ -537,17 +530,6 @@ public enum SockAddrFamily implements IntSupplier {
 			Linux(int family) {
 				this.family = family;
 			}
-
-			/**
-			 * Gets the as int.
-			 *
-			 * @return the as int
-			 * @see java.util.function.IntSupplier#getAsInt()
-			 */
-			@Override
-			public int getAsInt() {
-				return family;
-			}
 		}
 	}
 
@@ -560,6 +542,35 @@ public enum SockAddrFamily implements IntSupplier {
 	SockAddrFamily(OsSpecific.Linux linux, OsSpecific.MacOs macOs) {
 		this.linux = linux;
 		this.macOs = macOs;
+
+		SockAddrFunction.SOCKADDR_STRUCT_MAP_TABLE[ordinal()] = (m, l) -> m.asSlice(2);
+	}
+
+	/**
+	 * Instantiates a new sock addr family.
+	 *
+	 * @param linux  the linux
+	 * @param macOs  the mac os
+	 * @param offset the offset
+	 * @param length the length
+	 */
+	SockAddrFamily(OsSpecific.Linux linux, OsSpecific.MacOs macOs, int offset, int length) {
+		this(linux, macOs, (m, l) -> m.asSlice(offset, length));
+	}
+
+	/**
+	 * Instantiates a new sock addr family.
+	 *
+	 * @param linux         the linux
+	 * @param macOs         the mac os
+	 * @param addressMapper the address mapper
+	 */
+	SockAddrFamily(OsSpecific.Linux linux, OsSpecific.MacOs macOs,
+			SockAddrFunction addressMapper) {
+		this.linux = linux;
+		this.macOs = macOs;
+
+		SockAddrFunction.SOCKADDR_STRUCT_MAP_TABLE[ordinal()] = addressMapper;
 	}
 
 	/**

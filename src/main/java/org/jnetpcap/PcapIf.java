@@ -21,6 +21,7 @@ import static org.jnetpcap.internal.FunctionThrowable.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import java.util.OptionalInt;
 import org.jnetpcap.constant.SockAddrFamily;
 import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.NativeABI;
+import org.jnetpcap.internal.SockAddrFunction;
 import org.jnetpcap.util.PcapUtils;
 
 import static java.lang.foreign.MemoryLayout.*;
@@ -355,6 +357,15 @@ public class PcapIf {
 				return Short.toUnsignedInt((short) family16Handle.get(mseg));
 		}
 
+		private static MemorySegment mapAddressSegment(MemorySegment mseg, long len, SockAddrFamily family) {
+			SockAddrFunction func = SockAddrFunction.SOCKADDR_STRUCT_MAP_TABLE[family.ordinal()];
+
+			if (func == null)
+				return mseg;
+
+			return func.mapToAddress(mseg, len);
+		}
+
 		private static int readPortField(MemorySegment mseg) {
 			return Short.toUnsignedInt((short) portHandle.get(mseg));
 
@@ -384,11 +395,12 @@ public class PcapIf {
 			this.family = readFamilyField(mseg);
 			this.addrLen = readAddressLengthField(mseg, family);
 			this.port = readPortField(mseg);
+			
+			long len = this.addrLen.orElse((int) mseg.byteSize());
 
-			this.addr = new byte[addrLen.orElse(MAX_SOCKADDR_ADDRESS_LEN)];
-
-			for (int i = 0; i < this.addr.length; i++)
-				this.addr[i] = (byte) addrHandle.get(mseg, i);
+			/* Remap memory segment over address portion of the structure */
+			MemorySegment addrSegment = mapAddressSegment(mseg, len, SockAddrFamily.valueOf(family));
+			this.addr = addrSegment.toArray(ValueLayout.JAVA_BYTE);
 		}
 
 		/**
