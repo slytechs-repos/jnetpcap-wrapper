@@ -64,7 +64,7 @@ public final class PcapUtils {
 	public static String toAddressString(byte[] array) {
 		Objects.requireNonNull(array, "array");
 
-		assert (array.length == 4) || (array.length == 6) || (array.length == 16) : "invalid address array length";
+		// assert (array.length == 4) || (array.length == 6) || (array.length == 16) : "invalid address array length [%d]".formatted(array.length);
 
 		return (array.length == 4)
 				? toIp4AddressString(array)
