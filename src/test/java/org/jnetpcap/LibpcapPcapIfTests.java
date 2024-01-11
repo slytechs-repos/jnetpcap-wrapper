@@ -26,9 +26,12 @@ package org.jnetpcap;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
+import java.util.OptionalInt;
 
 import org.jnetpcap.PcapIf.PcapAddr;
+import org.jnetpcap.SockAddr.Inet6SockAddr;
 import org.jnetpcap.constant.SockAddrFamily;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -41,9 +44,13 @@ import org.junit.jupiter.api.Test;
 @Tag("libpcap-api")
 class LibpcapPcapIfTests extends AbstractTestBase {
 
-	private static final int INET4_ADDR_LEN = 4;
-	private static final int INET6_ADDR_LEN = 16;
 	private static final int MAC_ADDR_LEN = 6;
+
+	@Test
+	@Tag("sudo-permission")
+	void printAllPcapInterfaces() throws PcapException {
+		Pcap.findAllDevs().forEach(System.out::println);
+	}
 
 	/**
 	 * Test method for {@link org.jnetpcap.Pcap#findAllDevs()}.
@@ -84,7 +91,7 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 				.findAny()
 				.orElseThrow();
 
-		PcapAddr addr = device.addressOfFamily(SockAddrFamily.INET).orElseThrow();
+		PcapAddr<?> addr = device.addressOfFamily(SockAddrFamily.INET).orElseThrow();
 
 		assertEquals(SockAddrFamily.INET.getAsInt(), addr.socketAddress().family(),
 				"expecting INET family socket address type");
@@ -97,7 +104,7 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 	 */
 	@Test
 	@Tag("sudo-permission")
-	void PcapIfInetAddrLen() throws PcapException {
+	void PcapIfInetTotalLen() throws PcapException {
 		List<PcapIf> list = Pcap.findAllDevs();
 
 		PcapIf device = list.stream()
@@ -105,10 +112,13 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 				.findAny()
 				.orElseThrow();
 
-		PcapAddr addr = device.addressOfFamily(SockAddrFamily.INET).orElseThrow();
-		int addrLen = addr.socketAddress().addressLength().orElseThrow();
+		PcapAddr<?> addr = device.addressOfFamily(SockAddrFamily.INET).orElseThrow();
+		OptionalInt addrLen = addr.socketAddress().totalLength();
 
-		assertEquals(INET4_ADDR_LEN, addrLen, "invalid INET family socket address length");
+		if (addrLen.isPresent())
+			assertEquals(16, addrLen.getAsInt(), "invalid INET family socket address length");
+		
+		Assumptions.assumeTrue(addrLen.isPresent(), "totalLen is not available on thsi platform");
 	}
 
 	/**
@@ -126,7 +136,24 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 				.findAny()
 				.orElseThrow();
 
-		PcapAddr addr = device.addressOfFamily(SockAddrFamily.INET6).orElseThrow();
+		PcapAddr<?> addr = device.addressOfFamily(SockAddrFamily.INET6).orElseThrow();
+
+		assertEquals(SockAddrFamily.INET6.getAsInt(), addr.socketAddress().family(),
+				"expecting INET6 family socket address type");
+	}
+
+	@Test
+	@Tag("sudo-permission")
+	void PcapIfInet6Subclass() throws PcapException {
+		List<PcapIf> list = Pcap.findAllDevs();
+
+		PcapIf device = list.stream()
+				.filter(i -> i.address(Inet6SockAddr.class).isPresent())
+				.findAny()
+				.orElseThrow();
+
+		PcapAddr<Inet6SockAddr> addr = device.address(Inet6SockAddr.class)
+				.orElseThrow();
 
 		assertEquals(SockAddrFamily.INET6.getAsInt(), addr.socketAddress().family(),
 				"expecting INET6 family socket address type");
@@ -139,7 +166,7 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 	 */
 	@Test
 	@Tag("sudo-permission")
-	void PcapIfInet6AddrLen() throws PcapException {
+	void PcapIfInet6TotalLen() throws PcapException {
 		List<PcapIf> list = Pcap.findAllDevs();
 
 		PcapIf device = list.stream()
@@ -147,10 +174,14 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 				.findAny()
 				.orElseThrow();
 
-		PcapAddr addr = device.addressOfFamily(SockAddrFamily.INET6).orElseThrow();
-		int addrLen = addr.socketAddress().addressLength().orElseThrow();
+		PcapAddr<?> addr = device.addressOfFamily(SockAddrFamily.INET6).orElseThrow();
+		OptionalInt addrLen = addr.socketAddress().totalLength();
 
-		assertEquals(INET6_ADDR_LEN, addrLen, "invalid INET6 family socket address length");
+
+		if (addrLen.isPresent())
+			assertEquals(28, addrLen.getAsInt(), "invalid INET6 family socket address length");
+		
+		Assumptions.assumeTrue(addrLen.isPresent(), "totalLen is not available on thsi platform");
 	}
 
 	/**
