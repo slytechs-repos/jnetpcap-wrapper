@@ -118,7 +118,7 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 		if (addrLen.isPresent())
 			assertEquals(16, addrLen.getAsInt(), "invalid INET family socket address length");
 		
-		Assumptions.assumeTrue(addrLen.isPresent(), "totalLen is not available on thsi platform");
+		Assumptions.assumeFalse(addrLen.isPresent(), "totalLen is not available on thsi platform");
 	}
 
 	/**
@@ -181,7 +181,7 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 		if (addrLen.isPresent())
 			assertEquals(28, addrLen.getAsInt(), "invalid INET6 family socket address length");
 		
-		Assumptions.assumeTrue(addrLen.isPresent(), "totalLen is not available on thsi platform");
+		Assumptions.assumeFalse(addrLen.isPresent(), "totalLen is not available on thsi platform");
 	}
 
 	/**
