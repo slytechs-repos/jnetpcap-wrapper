@@ -370,10 +370,14 @@ public class PcapIf {
 	public Optional<PcapAddr<?>> addressOfFamily(SockAddrFamily family) {
 
 		var list = addresses();
-
-		return list.stream()
-				.filter(a -> a.addr.familyConstant().get() == family)
-				.findAny();
+		
+		for (PcapAddr<?> a: list) {
+			var af = a.addr.familyConstant().orElse(null);
+			if (af == family)
+				return Optional.of(a);
+		}
+		
+		return Optional.empty();
 	}
 
 	/**

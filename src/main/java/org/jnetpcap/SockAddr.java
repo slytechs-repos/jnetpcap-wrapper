@@ -508,8 +508,8 @@ public class SockAddr {
 	 */
 	@Override
 	public String toString() {
-		return "AF_%s".formatted(familyConstant())
-				+ "[fam=" + SockAddrFamily.lookup(family)
+		return "AF_%s".formatted(familyConstant().orElse(null))
+				+ "[fam=%s(%d)".formatted(SockAddrFamily.lookup(family).orElse(null), family)
 				+ " addr=" + PcapUtils.toAddressString(data) + "]";
 	}
 

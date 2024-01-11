@@ -538,10 +538,10 @@ public enum SockAddrFamily implements IntSupplier {
 		boolean isBsd = NativeABI.isBsdAbi();
 
 		for (SockAddrFamily s : values()) {
-			if (isBsd && (s.macOs != MacOs.UNDEFINED) && (s.macOs == family)) {
+			if (isBsd && (s.macOs == family)) {
 				return Optional.of(s);
 
-			} else if (!isBsd && (s.linux != Linux.UNDEFINED) && (s.linux == family)) {
+			} else if (!isBsd && (s.linux == family)) {
 				return Optional.of(s);
 			}
 
@@ -558,6 +558,9 @@ public enum SockAddrFamily implements IntSupplier {
 	 */
 	@Override
 	public int getAsInt() {
-		return ordinal();
+		boolean isBsd = NativeABI.isBsdAbi();
+		return isBsd 
+			? macOs 
+			: linux;
 	}
 }
