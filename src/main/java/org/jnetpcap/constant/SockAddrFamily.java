@@ -528,7 +528,7 @@ public enum SockAddrFamily implements IntSupplier {
 	}
 
 	/**
-	 * Map using abi.
+	 * Map for platforms specific AF using ABI.
 	 *
 	 * @param family the family
 	 * @param abi    the abi
@@ -538,10 +538,10 @@ public enum SockAddrFamily implements IntSupplier {
 		boolean isBsd = NativeABI.isBsdAbi();
 
 		for (SockAddrFamily s : values()) {
-			if (isBsd && s.macOs != MacOs.UNDEFINED && s.macOs == family) {
+			if (isBsd && (s.macOs != MacOs.UNDEFINED) && (s.macOs == family)) {
 				return Optional.of(s);
 
-			} else if (s.linux != Linux.UNDEFINED && s.linux == family) {
+			} else if (!isBsd && (s.linux != Linux.UNDEFINED) && (s.linux == family)) {
 				return Optional.of(s);
 			}
 
