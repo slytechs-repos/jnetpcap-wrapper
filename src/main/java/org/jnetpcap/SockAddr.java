@@ -282,7 +282,7 @@ public class SockAddr {
 			this.haType = Short.toUnsignedInt((short) SaLayout.AF_PACKET_HATYPE.get(saSegment));
 			this.pktType = (byte) SaLayout.AF_PACKET_PKTTYPE.get(saSegment);
 			this.haLen = (byte) SaLayout.AF_PACKET_HALEN.get(saSegment);
-			this.addr = saSegment.asSlice(12, 8).toArray(JAVA_BYTE);
+			this.addr = saSegment.asSlice(12, this.haLen).toArray(JAVA_BYTE);
 		}
 
 		/**
