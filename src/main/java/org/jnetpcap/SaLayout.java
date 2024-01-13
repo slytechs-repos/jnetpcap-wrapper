@@ -22,6 +22,7 @@ import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemoryLayout.PathElement;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.VarHandle;
+import java.nio.ByteOrder;
 import java.util.stream.Stream;
 
 import static java.lang.foreign.MemoryLayout.*;
@@ -35,7 +36,7 @@ import static java.lang.foreign.ValueLayout.*;
 enum SaLayout {
 
 	/** The family16. */
-	
+
 	/* Shared SA fields */
 	FAMILY16("u1.family16"),
 
@@ -107,6 +108,30 @@ enum SaLayout {
 	/** The af packet addr. */
 	AF_PACKET_ADDR("u2.af_packet.addr", sequenceElement()),
 
+	/**
+	 * The sockaddr_dl structure, used with AF_LINK sockets on macOS to access
+	 * link-layer information.
+	 */
+	AF_LINK("u2.af_link.last"),
+
+	/** The AF_LINK Interface index. */
+	AF_LINK_INDEX("u2.af_link.sdl_index"),
+
+	/** The AF_LINK Link-layer address type. */
+	AF_LINK_TYPE("u2.af_link.sdl_type"),
+
+	/** The AF_LINK Length of interface name. */
+	AF_LINK_NLEN("u2.af_link.sdl_nlen"),
+
+	/** The AF_LINK Length of link-layer address. */
+	AF_LINK_ALEN("u2.af_link.sdl_alen"),
+
+	/** The AF_LINK Length of link-layer selector. */
+	AF_LINK_SLEN("u2.af_link.sdl_slen"),
+
+	/** The AF_LINK Interface name, link-layer address, and selector. */
+	AF_LINK_DATA("u2.af_link.sdl_data", sequenceElement()),
+
 	;
 
 	/**
@@ -135,7 +160,7 @@ enum SaLayout {
 
 						/* AF_INET */
 						structLayout(
-								JAVA_SHORT.withName("port"),
+								JAVA_SHORT.withName("port").withOrder(ByteOrder.BIG_ENDIAN),
 								sequenceLayout(4, JAVA_BYTE).withName("addr"),
 								LAST).withName("af_inet"),
 
@@ -164,6 +189,16 @@ enum SaLayout {
 								sequenceLayout(8, JAVA_BYTE).withName("addr"),
 								LAST).withName("af_packet"),
 
+						/* AF_LINK - non-POSIX/BSD */
+						structLayout(
+								JAVA_SHORT.withName("sdl_index"),
+								JAVA_BYTE.withName("sdl_type"),
+								JAVA_BYTE.withName("sdl_nlen"),
+								JAVA_BYTE.withName("sdl_alen"),
+								JAVA_BYTE.withName("sdl_slen"),
+								sequenceLayout(12 + 18, JAVA_BYTE).withName("sdl_data"),
+								LAST).withName("af_link"),
+
 						/* Generic MIN size sockaddr structure */
 						sequenceLayout(SockAddr.MIM_SOCKADDR_ADDRESS_LEN, JAVA_BYTE).withName("data")
 
@@ -171,7 +206,6 @@ enum SaLayout {
 
 		);
 	}
-
 
 	/**
 	 * Size of.

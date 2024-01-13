@@ -129,7 +129,7 @@ public class PcapIf {
 	 * The struct pcap_addr structure containing network interfaces/devices
 	 * addresses.
 	 *
-	 * @param <T> the generic type
+	 * @param <T> the generic socket address subclass type
 	 */
 	public static class PcapAddr<T extends SockAddr> {
 
@@ -160,18 +160,18 @@ public class PcapIf {
 		private static final VarHandle dstaddrHandle = PCAP_ADDR_LAYOUT.varHandle(groupElement("dstaddr"));
 
 		/**
-		 * List all.
+		 * List all addresses by iterating over the linked list.
 		 *
-		 * @param next  the next
-		 * @param scope the scope
-		 * @return the list
+		 * @param next  the first element of a linked list of addresses
+		 * @param arena the memory scope
+		 * @return a list of all PCAP addresses found in the supplied linked list
 		 */
-		private static List<PcapAddr<?>> listAll(MemorySegment next, Arena scope) {
+		private static List<PcapAddr<? extends SockAddr>> listAll(MemorySegment next, Arena arena) {
 			List<PcapAddr<?>> list = new ArrayList<>();
 
 			while (!ForeignUtils.isNullAddress(next)) {
 				MemorySegment mseg = next.reinterpret(PCAP_ADDR_LAYOUT.byteSize());
-				list.add(new PcapAddr<SockAddr>(mseg, scope));
+				list.add(new PcapAddr<SockAddr>(mseg, arena));
 
 				next = (MemorySegment) nextHandle.get(mseg);
 			}
@@ -179,16 +179,16 @@ public class PcapIf {
 		}
 
 		/** The addr. */
-		private final SockAddr addr;
+		private final T addr;
 
 		/** The netmask. */
-		private final Optional<SockAddr> netmask;
+		private final Optional<T> netmask;
 
 		/** The broadaddr. */
-		private final Optional<SockAddr> broadaddr;
+		private final Optional<T> broadaddr;
 
 		/** The dstaddr. */
-		private final Optional<SockAddr> dstaddr;
+		private final Optional<T> dstaddr;
 
 		/**
 		 * Instantiates a new pcap addr.
@@ -210,7 +210,7 @@ public class PcapIf {
 		 *
 		 * @return optional broadcast address interface
 		 */
-		public Optional<SockAddr> broadcast() {
+		public Optional<T> broadcast() {
 			return broadaddr;
 		}
 
@@ -220,30 +220,31 @@ public class PcapIf {
 		 *
 		 * @return the optional destination address of a point-to-point interface
 		 */
-		public Optional<SockAddr> destination() {
+		public Optional<T> destination() {
 			return dstaddr;
 		}
 
 		/**
-		 * The netmask corresponding to {@link #socketAddress}.
+		 * The netmask corresponding to {@link #socketAddress} if the interface supports
+		 * netmasks.
 		 *
 		 * @return interface's optional netmask address
 		 */
-		public Optional<SockAddr> netmask() {
+		public Optional<T> netmask() {
 			return netmask;
 		}
 
 		/**
-		 * A familty specific socket address for this interface.
+		 * A family specific socket address for this interface.
 		 *
 		 * @return network family specific interface address
 		 */
-		public SockAddr socketAddress() {
+		public T socketAddress() {
 			return addr;
 		}
 
 		/**
-		 * To string.
+		 * String representation of the structure field values.
 		 *
 		 * @return the string
 		 * @see java.lang.Object#toString()

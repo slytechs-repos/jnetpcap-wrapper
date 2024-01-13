@@ -150,7 +150,7 @@ public class SockAddr {
 	}
 
 	/**
-	 * Socket address structure for AF_INET type.
+	 * The structure of <code>sockaddr_in</code>, used for IPv4 sockets.
 	 */
 	public static final class InetSockAddr extends SockAddr {
 
@@ -174,7 +174,7 @@ public class SockAddr {
 		}
 
 		/**
-		 * Address.
+		 * IPv4 address.
 		 *
 		 * @return address field value
 		 */
@@ -183,7 +183,7 @@ public class SockAddr {
 		}
 
 		/**
-		 * Port.
+		 * Port number in network byte order.
 		 *
 		 * @return port field value
 		 */
@@ -205,12 +205,12 @@ public class SockAddr {
 	}
 
 	/**
-	 * Socket address structure for AF_INET type.
+	 * The structure of <code>sockaddr_ipx</code>, used for AF_IPX sockets.
 	 */
 	public static final class IpxSockAddr extends SockAddr {
 
 		/** The addr. */
-		private final byte[] addr;
+		private final byte[] nodenum;
 
 		/** The port. */
 		private final int netnum;
@@ -228,30 +228,30 @@ public class SockAddr {
 			super(SaLayout.AF_IPX.reinterpret(addr, arena), SockAddrFamily.IPX, SockAddrFamily.IPX.totalLength());
 
 			this.netnum = Short.toUnsignedInt((short) SaLayout.AF_IPX_NETNUM.get(saSegment));
-			this.addr = saSegment.asSlice(4, 6).toArray(JAVA_BYTE);
+			this.nodenum = saSegment.asSlice(4, 6).toArray(JAVA_BYTE);
 			this.socket = Short.toUnsignedInt((short) SaLayout.AF_IPX_SOCKET.get(saSegment));
 		}
 
 		/**
-		 * Address.
+		 * IPX node number (MAC address).
 		 *
 		 * @return address field value
 		 */
-		public byte[] address() {
-			return addr;
+		public byte[] nodeNum() {
+			return nodenum;
 		}
 
 		/**
-		 * Port.
+		 * IPX network number.
 		 *
 		 * @return port field value
 		 */
-		public int port() {
+		public int netNum() {
 			return netnum;
 		}
 
 		/**
-		 * Socket.
+		 * IPX socket number.
 		 *
 		 * @return the int
 		 */
@@ -269,14 +269,15 @@ public class SockAddr {
 		public String toString() {
 			return "AF_IPX" + "["
 					+ "port=" + netnum
-					+ ", addr=" + PcapUtils.toAddressString(address())
+					+ ", addr=" + PcapUtils.toAddressString(nodeNum())
 					+ ", socket=" + socket
 					+ "]";
 		}
 	}
 
 	/**
-	 * The Class PacketSockAddr.
+	 * The structure of <code>sockaddr_ll</code>, used with AF_PACKET sockets for
+	 * raw packet access on Linux.
 	 */
 	public static final class PacketSockAddr extends SockAddr {
 
@@ -305,7 +306,8 @@ public class SockAddr {
 		 * @param arena the arena
 		 */
 		PacketSockAddr(MemorySegment addr, Arena arena) {
-			super(SaLayout.AF_PACKET.reinterpret(addr, arena), SockAddrFamily.PACKET, SockAddrFamily.PACKET.totalLength());
+			super(SaLayout.AF_PACKET.reinterpret(addr, arena), SockAddrFamily.PACKET, SockAddrFamily.PACKET
+					.totalLength());
 
 			this.protocol = Short.toUnsignedInt((short) SaLayout.AF_PACKET_PROTOCOL.get(saSegment));
 			this.ifIndex = (int) SaLayout.AF_PACKET_IFINDEX.get(saSegment);
@@ -316,7 +318,7 @@ public class SockAddr {
 		}
 
 		/**
-		 * Address.
+		 * Hardware address.
 		 *
 		 * @return address field value
 		 */
@@ -336,7 +338,7 @@ public class SockAddr {
 		/**
 		 * Hardware type.
 		 *
-		 * @return the int
+		 * @return haType field value
 		 */
 		public int hardwareType() {
 			return haType;
@@ -345,7 +347,7 @@ public class SockAddr {
 		/**
 		 * Interface index.
 		 *
-		 * @return the int
+		 * @return ifIndex field value
 		 */
 		public int interfaceIndex() {
 			return ifIndex;
@@ -354,16 +356,16 @@ public class SockAddr {
 		/**
 		 * Packet type.
 		 *
-		 * @return the int
+		 * @return pktType field value
 		 */
 		public int packetType() {
 			return pktType;
 		}
 
 		/**
-		 * Port.
+		 * Protocol (e.g., ETH_P_ALL, ETH_P_IP) .
 		 *
-		 * @return port field value
+		 * @return protocol field value
 		 */
 		public int protocol() {
 			return protocol;
@@ -383,7 +385,194 @@ public class SockAddr {
 					+ ", haType=" + haType
 					+ ", pktType=" + pktType
 					+ ", haLen=" + haLen
-					+ ", addr=" + PcapUtils.toAddressString(address()) + "]";
+					+ ", addr=" + PcapUtils.toAddressString(address())
+					+ "]";
+		}
+	}
+
+	/**
+	 * The structure of <code>sockaddr_dl</code>, used with AF_LINK sockets on macOS
+	 * to access link-layer information.
+	 */
+	public static final class LinkSockAddr extends SockAddr {
+
+		/** The addr. */
+		private final byte[] data;
+
+		/** The port. */
+		private final int index;
+
+		/** The type. */
+		private final int type;
+
+		/** The nlen. */
+		private final int nlen;
+
+		/** The alen. */
+		private final int alen;
+
+		/** The slen. */
+		private final int slen;
+
+		/** The selector. */
+		private OptionalInt selector;
+
+		/** The name. */
+		private Optional<String> name;
+
+		/** The address. */
+		private byte[] address;
+
+		/**
+		 * Instantiates a new inet sock addr.
+		 *
+		 * @param addr        the addr
+		 * @param arena       the arena
+		 * @param totalLength the total length
+		 */
+		LinkSockAddr(MemorySegment addr, Arena arena, int totalLength) {
+			super(addr.reinterpret(totalLength, arena, __ -> {}), SockAddrFamily.LINK, OptionalInt.of(totalLength));
+
+			this.index = Short.toUnsignedInt((short) SaLayout.AF_LINK_INDEX.get(saSegment));
+			this.type = Byte.toUnsignedInt((byte) SaLayout.AF_LINK_TYPE.get(saSegment));
+			this.nlen = Byte.toUnsignedInt((byte) SaLayout.AF_LINK_NLEN.get(saSegment));
+			this.alen = Byte.toUnsignedInt((byte) SaLayout.AF_LINK_ALEN.get(saSegment));
+			this.slen = Byte.toUnsignedInt((byte) SaLayout.AF_LINK_SLEN.get(saSegment));
+			this.data = saSegment.asSlice(4, 4).toArray(JAVA_BYTE);
+
+			int off = 8; // Keep a running offset
+
+			this.name = (nlen == 0)
+					? Optional.empty()
+					: Optional.of(ForeignUtils.toJavaString(saSegment.asSlice(off, nlen)));
+			off += nlen;
+
+			this.address = saSegment.asSlice(off, alen).toArray(JAVA_BYTE);
+			off += alen;
+
+			this.selector = readNumberByLength(saSegment.asSlice(off, slen), slen);
+		}
+
+		/**
+		 * Read number by length.
+		 *
+		 * @param mseg the mseg
+		 * @param len  the len
+		 * @return the optional int
+		 */
+		private static OptionalInt readNumberByLength(MemorySegment mseg, int len) {
+			return switch (len) {
+			case 1 -> OptionalInt.of(Byte.toUnsignedInt(mseg.get(JAVA_BYTE, 0)));
+			case 2 -> OptionalInt.of(Short.toUnsignedInt(mseg.get(JAVA_SHORT, 0)));
+			case 4 -> OptionalInt.of(mseg.get(JAVA_INT, 0));
+
+			default -> OptionalInt.empty();
+			};
+		}
+
+		/**
+		 * Variable-length data containing, interface name (null-terminated), Link-layer
+		 * address Link-layer and selector (if any).
+		 *
+		 * 
+		 * @return data field value
+		 */
+		@Override
+		public byte[] data() {
+			return data;
+		}
+
+		/**
+		 * Interface index of the network device.
+		 *
+		 * @return index field value
+		 */
+		public int index() {
+			return index;
+		}
+
+		/**
+		 * Link-layer address type (e.g., IFT_ETHER for Ethernet).
+		 *
+		 * @return type field value
+		 */
+		public int addressType() {
+			return type;
+		}
+
+		/**
+		 * Length of the interface name string.
+		 *
+		 * @return nlen field value
+		 */
+		public int nameLength() {
+			return nlen;
+		}
+
+		/**
+		 * Length of the link-layer address in bytes.
+		 *
+		 * @return alen field value
+		 */
+		public int addressLength() {
+			return alen;
+		}
+
+		/**
+		 * Selector length.
+		 *
+		 * @return type field value
+		 */
+		public int selectorLength() {
+			return slen;
+		}
+
+		/**
+		 * Length of the link-layer selector (usually 0).
+		 *
+		 * @return address field value
+		 */
+		public byte[] address() {
+			return address;
+		}
+
+		/**
+		 * interface name.
+		 *
+		 * @return name field value
+		 */
+		public Optional<String> name() {
+			return name;
+		}
+
+		/**
+		 * Link-layer selector.
+		 *
+		 * @return selector field value
+		 */
+		public OptionalInt selector() {
+			return selector;
+		}
+
+		/**
+		 * String representation of the structure field values.
+		 *
+		 * @return the string
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "AF_LINK(len=%d)".formatted(totalLength())
+					+ "["
+					+ "index=" + index
+					+ "type=" + type
+					+ "nlen=" + nlen
+					+ "alen=" + alen
+					+ "slen=" + slen
+					+ (name.isEmpty() ? "" : ", name=" + name.get())
+					+ ", addr=" + PcapUtils.toAddressString(address())
+					+ (selector.isEmpty() ? "" : ", sel=0x%x".formatted(selector.getAsInt()))
+					+ "]";
 		}
 	}
 
@@ -400,33 +589,37 @@ public class SockAddr {
 	 * Factory method call to instantiate a new SockAddr instance based on AF_FAMILY
 	 * type.
 	 *
+	 * @param <T>   the generic type
 	 * @param value the value
 	 * @param arena the scope
 	 * @return the sock addr
 	 */
-	static SockAddr newInstance(Object value, Arena arena) {
+	@SuppressWarnings("unchecked")
+	static <T extends SockAddr> T newInstance(Object value, Arena arena) {
+		
 		MemorySegment addr = (MemorySegment) value;
 		if (ForeignUtils.isNullAddress(addr))
 			return null;
 
 		MemorySegment first2BytesSeg = addr.reinterpret(2); // Enough to read family field
+		
 		int af = readFamilyField(first2BytesSeg);
 		OptionalInt totalLength = readTotalLengthField(first2BytesSeg);
-		SockAddrFamily familyConst = SockAddrFamily.lookup(af)
-				.orElse(null);
+		SockAddrFamily familyConst = SockAddrFamily.lookup(af).orElse(null);
 
 		return switch (familyConst) {
 
-		case INET -> new InetSockAddr(addr, arena);
-		case INET6 -> new Inet6SockAddr(addr, arena);
-		case IPX -> new IpxSockAddr(addr, arena);
-		case PACKET -> new PacketSockAddr(addr, arena);
+		case INET -> (T) new InetSockAddr(addr, arena);
+		case INET6 -> (T) new Inet6SockAddr(addr, arena);
+		case IPX -> (T) new IpxSockAddr(addr, arena);
+		case PACKET -> (T) new PacketSockAddr(addr, arena);
+		case LINK -> (T) new LinkSockAddr(addr, arena, totalLength.getAsInt());
 
 		default -> {
 			if (totalLength.isPresent()) {
-				yield new SockAddr(addr.reinterpret(totalLength.getAsInt(), arena, __ -> {}), af, totalLength);
+				yield (T) new SockAddr(addr.reinterpret(totalLength.getAsInt(), arena, __ -> {}), af, totalLength);
 			} else {
-				yield new SockAddr(addr.reinterpret(MIM_SOCKADDR_STRUCT_LEN, arena, __ -> {}), af, totalLength);
+				yield (T) new SockAddr(addr.reinterpret(MIM_SOCKADDR_STRUCT_LEN, arena, __ -> {}), af, totalLength);
 			}
 		}
 		};
@@ -449,8 +642,7 @@ public class SockAddr {
 	/**
 	 * Read address length field.
 	 *
-	 * @param mseg   the mseg
-	 * @param family the family
+	 * @param mseg the mseg
 	 * @return the optional int
 	 */
 	private static OptionalInt readTotalLengthField(MemorySegment mseg) {
