@@ -128,6 +128,8 @@ public class PcapIf {
 	/**
 	 * The struct pcap_addr structure containing network interfaces/devices
 	 * addresses.
+	 *
+	 * @param <T> the generic type
 	 */
 	public static class PcapAddr<T extends SockAddr> {
 
@@ -323,7 +325,7 @@ public class PcapIf {
 	private final String name;
 
 	/** The description. */
-	private final String description;
+	private final Optional<String> description;
 
 	/** The flags. */
 	private final int flags;
@@ -335,82 +337,84 @@ public class PcapIf {
 	private final Optional<byte[]> hardwareAddress;
 
 	/**
-	 * Instantiates a new pcap if.
+	 * New instanceof PcapIf structure class.
 	 *
-	 * @param mseg  the mseg
-	 * @param scope the scope
+	 * @param mseg  the memory segment containing off heap pcap_if structure
+	 * @param arena the memory scope
 	 */
-	PcapIf(MemorySegment mseg, Arena scope) {
+	PcapIf(MemorySegment mseg, Arena arena) {
 		MemorySegment addrs = (MemorySegment) addrsHandle.get(mseg);
 
 		name = toJavaString(nameHandle.get(mseg));
-		description = toJavaString(descHandle.get(mseg));
+		description = Optional.ofNullable(toJavaString(descHandle.get(mseg)));
 		flags = (int) flagsHandle.get(mseg);
 
-		addresses = PcapAddr.listAll(addrs, scope);
+		addresses = PcapAddr.listAll(addrs, arena);
 		hardwareAddress = Optional.ofNullable(applyUnchecked(name(), NetworkInterface::getByName))
 				.map(unchecked(NetworkInterface::getHardwareAddress));
 	}
 
 	/**
-	 * Addresses.
+	 * Gets a list of all the addresses (PcapAddr) associated with this pcap
+	 * interface.
 	 *
-	 * @return the list
+	 * @return the list of addresses
 	 */
 	public List<PcapAddr<?>> addresses() {
 		return addresses;
 	}
 
 	/**
-	 * Retrieves an optional PCAP address of a specific socket address family type.
+	 * Search for a PCAP address of a specific socket address family type.
 	 *
 	 * @param family the socket address family type
 	 * @return the optional PCAP address if found
 	 */
-	public Optional<PcapAddr<?>> addressOfFamily(SockAddrFamily family) {
+	public Optional<PcapAddr<? extends SockAddr>> findAddressOfFamily(SockAddrFamily family) {
 
 		var list = addresses();
-		
-		for (PcapAddr<?> a: list) {
+
+		for (PcapAddr<?> a : list) {
 			var af = a.addr.familyConstant().orElse(null);
 			if (af == family)
 				return Optional.of(a);
 		}
-		
+
 		return Optional.empty();
 	}
 
 	/**
-	 * Address.
+	 * Finds the first address in the list of PcapAddr addresses, which is of AF
+	 * (Address Family) type represented but the supplied family subclass type.
 	 *
-	 * @param <T>    the generic type
-	 * @param family the family
-	 * @return the optional
+	 * @param <T>             the generic AF subclass type
+	 * @param faimlyClassType the actual AF subclass type
+	 * @return an optional if address represented by the family subclass if found
 	 */
 	@SuppressWarnings({ "unchecked" })
-	public <T extends SockAddr> Optional<PcapAddr<T>> address(Class<T> family) {
+	public <T extends SockAddr> Optional<PcapAddr<T>> findAddressOfType(Class<T> faimlyClassType) {
 
 		var list = addresses();
 
 		return list.stream()
-				.filter(a -> family.isAssignableFrom(a.addr.getClass()))
+				.filter(a -> faimlyClassType.isAssignableFrom(a.addr.getClass()))
 				.map(a -> (PcapAddr<T>) a)
-				.findAny();
+				.findFirst();
 	}
 
 	/**
-	 * Description.
+	 * Optional textual description of the interface.
 	 *
-	 * @return the string
+	 * @return the interface description if available
 	 */
-	public String description() {
+	public Optional<String> description() {
 		return description;
 	}
 
 	/**
-	 * Flags.
+	 * Interface flags (e.g., PCAP_IF_LOOPBACK for loopback interfaces).
 	 *
-	 * @return the int
+	 * @return the interface bitmask of flags
 	 */
 	public int flags() {
 		return flags;
@@ -427,7 +431,7 @@ public class PcapIf {
 	}
 
 	/**
-	 * Name.
+	 * Name of the interface (e.g., "eth0") .
 	 *
 	 * @return the string
 	 */
@@ -436,7 +440,7 @@ public class PcapIf {
 	}
 
 	/**
-	 * To string.
+	 * String representation of the structure field values.
 	 *
 	 * @return the string
 	 * @see java.lang.Object#toString()
@@ -445,8 +449,8 @@ public class PcapIf {
 	public String toString() {
 		return "PcapIf ["
 				+ "name=" + name
-				+ (description == null ? "" : ", description=" + description)
 				+ ", flags=" + flags
+				+ (description.isEmpty() ? "" : ", description=" + description)
 				+ (addresses.isEmpty() ? "" : ", addresses=" + addresses)
 				+ "]";
 	}

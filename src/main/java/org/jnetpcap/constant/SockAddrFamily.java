@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 package org.jnetpcap.constant;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.IntSupplier;
 
+import org.jnetpcap.PcapIf;
 import org.jnetpcap.internal.NativeABI;
 
 /**
@@ -28,221 +30,236 @@ import org.jnetpcap.internal.NativeABI;
 public enum SockAddrFamily implements IntSupplier {
 
 	/** The unspec. */
-	UNSPEC(Linux.AF_UNSPEC, MacOs.AF_UNSPEC),
+	UNSPEC(Posix.AF_UNSPEC, Bsd.AF_UNSPEC),
 
 	/** The local. */
-	LOCAL(Linux.AF_LOCAL, MacOs.AF_LOCAL),
+	LOCAL(Posix.AF_LOCAL, Bsd.AF_LOCAL, Sizeof.LOCAL),
 
 	/** The inet. */
-	INET(Linux.AF_INET, MacOs.AF_INET),
+	INET(Posix.AF_INET, Bsd.AF_INET, Sizeof.INET),
 
 	/** The ax25. */
-	AX25(Linux.AF_AX25, MacOs.UNDEFINED),
+	AX25(Posix.AF_AX25, Bsd.UNDEFINED),
 
 	/** The ipx. */
-	IPX(Linux.AF_IPX, MacOs.AF_IPX),
+	IPX(Posix.AF_IPX, Bsd.AF_IPX, Sizeof.IPX),
 
 	/** The appletalk. */
-	APPLETALK(Linux.AF_APPLETALK, MacOs.AF_APPLETALK),
+	APPLETALK(Posix.AF_APPLETALK, Bsd.AF_APPLETALK),
 
 	/** The netrom. */
-	NETROM(Linux.AF_NETROM, MacOs.UNDEFINED),
+	NETROM(Posix.AF_NETROM, Bsd.UNDEFINED),
 
 	/** The bridge. */
-	BRIDGE(Linux.AF_BRIDGE, MacOs.UNDEFINED),
+	BRIDGE(Posix.AF_BRIDGE, Bsd.UNDEFINED),
 
 	/** The atmpvc. */
-	ATMPVC(Linux.AF_ATMPVC, MacOs.AF_NATM),
+	ATMPVC(Posix.AF_ATMPVC, Bsd.AF_NATM),
 
 	/** The x25. */
-	X25(Linux.AF_AX25, MacOs.UNDEFINED),
+	X25(Posix.AF_AX25, Bsd.UNDEFINED),
 
 	/** The inet6. */
-	INET6(Linux.AF_INET6, MacOs.AF_INET6),
+	INET6(Posix.AF_INET6, Bsd.AF_INET6, Sizeof.INET6),
 
 	/** The rose. */
-	ROSE(Linux.AF_ROSE, MacOs.UNDEFINED),
+	ROSE(Posix.AF_ROSE, Bsd.UNDEFINED),
 
 	/** The decnet. */
-	DECNET(Linux.AF_DECnet, MacOs.AF_DECnet),
+	DECNET(Posix.AF_DECnet, Bsd.AF_DECnet),
 
 	/** The netbeui. */
-	NETBEUI(Linux.AF_NETBEUI, MacOs.UNDEFINED),
+	NETBEUI(Posix.AF_NETBEUI, Bsd.UNDEFINED),
 
 	/** The security. */
-	SECURITY(Linux.AF_SECURITY, MacOs.UNDEFINED),
+	SECURITY(Posix.AF_SECURITY, Bsd.UNDEFINED),
 
 	/** The key. */
-	KEY(Linux.AF_KEY, MacOs.pseudo_AF_KEY),
+	KEY(Posix.AF_KEY, Bsd.pseudo_AF_KEY),
 
 	/** The netlink. */
-	NETLINK(Linux.AF_NETLINK, MacOs.UNDEFINED),
+	NETLINK(Posix.AF_NETLINK, Bsd.UNDEFINED),
 
 	/** The packet. */
-	PACKET(Linux.AF_PACKET, MacOs.UNDEFINED),
+	PACKET(Posix.AF_PACKET, Bsd.UNDEFINED, Sizeof.PACKET),
 
 	/** The ash. */
-	ASH(Linux.AF_ASH, MacOs.UNDEFINED),
+	ASH(Posix.AF_ASH, Bsd.UNDEFINED),
 
 	/** The atmsvc. */
-	ATMSVC(Linux.AF_ATMSVC, MacOs.AF_NATM),
+	ATMSVC(Posix.AF_ATMSVC, Bsd.AF_NATM),
 
 	/** The rds. */
-	RDS(Linux.AF_RDS, MacOs.UNDEFINED),
+	RDS(Posix.AF_RDS, Bsd.UNDEFINED),
 
 	/** The sna. */
-	SNA(Linux.AF_SNA, MacOs.AF_SNA),
+	SNA(Posix.AF_SNA, Bsd.AF_SNA),
 
 	/** The irda. */
-	IRDA(Linux.AF_IRDA, MacOs.UNDEFINED),
+	IRDA(Posix.AF_IRDA, Bsd.UNDEFINED),
 
 	/** The pppox. */
-	PPPOX(Linux.AF_PPPOX, MacOs.UNDEFINED),
+	PPPOX(Posix.AF_PPPOX, Bsd.UNDEFINED),
 
 	/** The wanpipe. */
-	WANPIPE(Linux.AF_WANPIPE, MacOs.UNDEFINED),
+	WANPIPE(Posix.AF_WANPIPE, Bsd.UNDEFINED),
 
 	/** The llc. */
-	LLC(Linux.AF_LLC, MacOs.UNDEFINED),
+	LLC(Posix.AF_LLC, Bsd.UNDEFINED),
 
 	/** The mpls. */
-	MPLS(Linux.AF_MPLS, MacOs.UNDEFINED),
+	MPLS(Posix.AF_MPLS, Bsd.UNDEFINED),
 
 	/** The can. */
-	CAN(Linux.AF_CAN, MacOs.UNDEFINED),
+	CAN(Posix.AF_CAN, Bsd.UNDEFINED),
 
 	/** The tipc. */
-	TIPC(Linux.AF_TIPC, MacOs.UNDEFINED),
+	TIPC(Posix.AF_TIPC, Bsd.UNDEFINED),
 
 	/** The bluetooth. */
-	BLUETOOTH(Linux.AF_BLUETOOTH, MacOs.UNDEFINED),
+	BLUETOOTH(Posix.AF_BLUETOOTH, Bsd.UNDEFINED),
 
 	/** The rxrpc. */
-	RXRPC(Linux.AF_RXRPC, MacOs.UNDEFINED),
+	RXRPC(Posix.AF_RXRPC, Bsd.UNDEFINED),
 
 	/** The isdn. */
-	ISDN(Linux.AF_ISDN, MacOs.AF_ISDN),
+	ISDN(Posix.AF_ISDN, Bsd.AF_ISDN),
 
 	/** The phonet. */
-	PHONET(Linux.AF_PHONET, MacOs.UNDEFINED),
+	PHONET(Posix.AF_PHONET, Bsd.UNDEFINED),
 
 	/** The ieee802154. */
-	IEEE802154(Linux.AF_IEEE802154, MacOs.UNDEFINED),
+	IEEE802154(Posix.AF_IEEE802154, Bsd.UNDEFINED),
 
 	/** The caif. */
-	CAIF(Linux.AF_CAIF, MacOs.UNDEFINED),
+	CAIF(Posix.AF_CAIF, Bsd.UNDEFINED),
 
 	/** The alg. */
-	ALG(Linux.AF_ALG, MacOs.UNDEFINED),
+	ALG(Posix.AF_ALG, Bsd.UNDEFINED),
 
 	/** The nfc. */
-	NFC(Linux.AF_NFC, MacOs.UNDEFINED),
+	NFC(Posix.AF_NFC, Bsd.UNDEFINED),
 
 	/** The vsock. */
-	VSOCK(Linux.AF_VSOCK, MacOs.UNDEFINED),
+	VSOCK(Posix.AF_VSOCK, Bsd.UNDEFINED),
 
 	/** The kcm. */
-	KCM(Linux.AF_KCM, MacOs.UNDEFINED),
+	KCM(Posix.AF_KCM, Bsd.UNDEFINED),
 
 	/** The qipcrtr. */
-	QIPCRTR(Linux.AF_QIPCRTR, MacOs.UNDEFINED),
+	QIPCRTR(Posix.AF_QIPCRTR, Bsd.UNDEFINED),
 
 	/** The smc. */
-	SMC(Linux.AF_SMC, MacOs.UNDEFINED),
+	SMC(Posix.AF_SMC, Bsd.UNDEFINED),
 
 	/** Arpanet imp addresses. */
-	IMPLINK(Linux.UNDEFINED, MacOs.AF_IMPLINK),
+	IMPLINK(Posix.UNDEFINED, Bsd.AF_IMPLINK),
 
 	/** PUP protocols: e.g. BSP. */
-	PUP(Linux.UNDEFINED, MacOs.AF_PUP),
+	PUP(Posix.UNDEFINED, Bsd.AF_PUP),
 
 	/** MIT CHAOS protocols. */
-	CHAOS(Linux.UNDEFINED, MacOs.AF_CHAOS),
+	CHAOS(Posix.UNDEFINED, Bsd.AF_CHAOS),
 
 	/** XEROX NS protocols. */
-	NS(Linux.UNDEFINED, MacOs.AF_NS),
+	NS(Posix.UNDEFINED, Bsd.AF_NS),
 
 	/** ISO protocols. */
-	ISO(Linux.UNDEFINED, MacOs.AF_ISO),
+	ISO(Posix.UNDEFINED, Bsd.AF_ISO),
 
 	/** ISO protocols. */
-	OSI(Linux.UNDEFINED, MacOs.AF_OSI),
+	OSI(Posix.UNDEFINED, Bsd.AF_OSI),
 
 	/** European computer manufacturers. */
-	ECMA(Linux.UNDEFINED, MacOs.AF_ECMA),
+	ECMA(Posix.UNDEFINED, Bsd.AF_ECMA),
 
 	/** Datakit protocols. */
-	DATAKIT(Linux.UNDEFINED, MacOs.AF_DATAKIT),
+	DATAKIT(Posix.UNDEFINED, Bsd.AF_DATAKIT),
 
 	/** CCITT protocols, X.25 etc. */
-	CCITT(Linux.UNDEFINED, MacOs.AF_CCITT),
+	CCITT(Posix.UNDEFINED, Bsd.AF_CCITT),
 
 	/** DECnet. */
-	DECnet(Linux.UNDEFINED, MacOs.AF_DECnet),
+	DECnet(Posix.UNDEFINED, Bsd.AF_DECnet),
 
 	/** DEC Direct data link interface. */
-	DLI(Linux.UNDEFINED, MacOs.AF_DLI),
+	DLI(Posix.UNDEFINED, Bsd.AF_DLI),
 
 	/** LAT. */
-	LAT(Linux.UNDEFINED, MacOs.AF_LAT),
+	LAT(Posix.UNDEFINED, Bsd.AF_LAT),
 
 	/** NSC Hyperchannel. */
-	HYLINK(Linux.UNDEFINED, MacOs.AF_HYLINK),
+	HYLINK(Posix.UNDEFINED, Bsd.AF_HYLINK),
 
 	/** Internal Routing Protocol. */
-	ROUTE(Linux.UNDEFINED, MacOs.AF_ROUTE),
+	ROUTE(Posix.UNDEFINED, Bsd.AF_ROUTE),
 
 	/** Link layer interface. */
-	LINK(Linux.UNDEFINED, MacOs.AF_LINK),
+	LINK(Posix.UNDEFINED, Bsd.AF_LINK),
 
 	/** eXpress Transfer Protocol (no AF). */
-	PSEUDO_XTP(Linux.UNDEFINED, MacOs.pseudo_AF_XTP),
+	PSEUDO_XTP(Posix.UNDEFINED, Bsd.pseudo_AF_XTP),
 
 	/** connection-oriented IP, aka ST II. */
-	COIP(Linux.UNDEFINED, MacOs.AF_COIP),
+	COIP(Posix.UNDEFINED, Bsd.AF_COIP),
 
 	/** Computer Network Technology. */
-	CNT(Linux.UNDEFINED, MacOs.AF_CNT),
+	CNT(Posix.UNDEFINED, Bsd.AF_CNT),
 
 	/** Help Identify RTIP packets. */
-	PSEUDO_RTIP(Linux.UNDEFINED, MacOs.pseudo_AF_RTIP),
+	PSEUDO_RTIP(Posix.UNDEFINED, Bsd.pseudo_AF_RTIP),
 
 	/** Simple Internet Protocol. */
-	SIP(Linux.UNDEFINED, MacOs.AF_SIP),
+	SIP(Posix.UNDEFINED, Bsd.AF_SIP),
 
 	/** Help Identify PIP packets. */
-	PSEUDO_PIP(Linux.UNDEFINED, MacOs.pseudo_AF_PIP),
+	PSEUDO_PIP(Posix.UNDEFINED, Bsd.pseudo_AF_PIP),
 
 	/** Identify packets for Blue Box. */
-	PSEUDO_BLUE(Linux.UNDEFINED, MacOs.pseudo_AF_BLUE),
+	PSEUDO_BLUE(Posix.UNDEFINED, Bsd.pseudo_AF_BLUE),
 
 	/** Network Driver 'raw' access. */
-	NDRV(Linux.UNDEFINED, MacOs.AF_NDRV),
+	NDRV(Posix.UNDEFINED, Bsd.AF_NDRV),
 
 	/** Integrated Services Digital Network. */
-	E164(Linux.UNDEFINED, MacOs.AF_E164),
+	E164(Posix.UNDEFINED, Bsd.AF_E164),
 
 	/** Internal key-management function. */
-	PSEUDO_KEY(Linux.UNDEFINED, MacOs.pseudo_AF_KEY),
+	PSEUDO_KEY(Posix.UNDEFINED, Bsd.pseudo_AF_KEY),
 
 	/** Native ATM access. */
-	NATM(Linux.UNDEFINED, MacOs.AF_NATM),
+	NATM(Posix.UNDEFINED, Bsd.AF_NATM),
 
 	/** Kernel event messages. */
-	SYSTEM(Linux.UNDEFINED, MacOs.AF_SYSTEM),
+	SYSTEM(Posix.UNDEFINED, Bsd.AF_SYSTEM),
 
 	;
 
-	/** The linux AF value. */
-	private final int linux;
+	/**
+	 * Sizeof/total_length/sa_len of native structures.
+	 */
+	private final class Sizeof {
 
-	/** The MacOs/BSD AF value. */
-	private final int macOs;
+		/** Sizeof AF INET sockaddr. */
+		public static final int INET = 16;
+
+		/** Sizeof AF INET6 sockaddr. */
+		public static final int INET6 = 28;
+
+		/** Sizeof AF LOCAL sockaddr. */
+		public static final int LOCAL = 110;
+
+		/** Sizeof AF IPX sockaddr. */
+		public static final int IPX = 12;
+
+		/** Sizeof AF PACKET sockaddr. */
+		public static final int PACKET = 20;
+	}
 
 	/**
 	 * MacOS socket.h AF constants.
 	 */
-	private final class MacOs {
+	private final class Bsd {
 
 		/** Undefined AF. */
 		public static final int UNDEFINED = -1;
@@ -359,9 +376,9 @@ public enum SockAddrFamily implements IntSupplier {
 	}
 
 	/**
-	 * Linux socket.h AF constants.
+	 * POSIX socket.h AF constants.
 	 */
-	private final class Linux {
+	private final class Posix {
 
 		/** Undefined AF. */
 		public static final int UNDEFINED = -1;
@@ -507,17 +524,6 @@ public enum SockAddrFamily implements IntSupplier {
 	}
 
 	/**
-	 * Instantiates a new sock addr family.
-	 *
-	 * @param linux the linux
-	 * @param macOs the mac os
-	 */
-	SockAddrFamily(int linux, int macOs) {
-		this.linux = linux;
-		this.macOs = macOs;
-	}
-
-	/**
 	 * Lookup a constant AF using numerical, platform dependent value.
 	 *
 	 * @param family the AF value
@@ -538,16 +544,63 @@ public enum SockAddrFamily implements IntSupplier {
 		boolean isBsd = NativeABI.isBsdAbi();
 
 		for (SockAddrFamily s : values()) {
-			if (isBsd && (s.macOs == family)) {
+			if (isBsd && (s.bsdId == family)) {
 				return Optional.of(s);
 
-			} else if (!isBsd && (s.linux == family)) {
+			} else if (!isBsd && (s.posixId == family)) {
 				return Optional.of(s);
 			}
 
 		}
 
 		return Optional.empty();
+	}
+
+	/** The linux AF value. */
+	private final int posixId;
+
+	/** The MacOs/BSD AF value. */
+	private final int bsdId;
+
+	/**
+	 * Optional native sa_len field value available on BSD systems or specified in
+	 * manually in this table.
+	 */
+	private final OptionalInt saLen;
+
+	/**
+	 * Instantiates a new sock addr family.
+	 *
+	 * @param posixFamilyId the AF constant assigned for POSIX style sockets
+	 * @param bsdFamilyId   the AF constant assigned for BSD style sockets
+	 */
+	SockAddrFamily(int posixFamilyId, int bsdFamilyId) {
+		this.posixId = posixFamilyId;
+		this.bsdId = bsdFamilyId;
+		this.saLen = OptionalInt.empty();
+	}
+
+	/**
+	 * Instantiates a new sock addr family.
+	 *
+	 * @param posixFamilyId the linux
+	 * @param bsdFamilyId   the mac os
+	 * @param saLen         the sa len
+	 */
+	SockAddrFamily(int posixFamilyId, int bsdFamilyId, int saLen) {
+		this.posixId = posixFamilyId;
+		this.bsdId = bsdFamilyId;
+		this.saLen = OptionalInt.of(saLen);
+	}
+
+	/**
+	 * Check if a PcapIf (pcap device) contains this specific socket AF type.
+	 *
+	 * @param dev the pcap dev
+	 * @return true, if successful
+	 */
+	public boolean checkIfContains(PcapIf dev) {
+		return dev.findAddressOfFamily(this).isPresent();
 	}
 
 	/**
@@ -559,8 +612,41 @@ public enum SockAddrFamily implements IntSupplier {
 	@Override
 	public int getAsInt() {
 		boolean isBsd = NativeABI.isBsdAbi();
-		return isBsd 
-			? macOs 
-			: linux;
+		return isBsd
+				? bsdId
+				: posixId;
+	}
+
+	/**
+	 * Checks if is match.
+	 *
+	 * @param family the family
+	 * @return true, if is match
+	 */
+	public boolean isMatch(int family) {
+		boolean isBsd = NativeABI.isBsdAbi();
+
+		for (SockAddrFamily s : values()) {
+			if (isBsd && (s.bsdId == family)) {
+				return true;
+
+			} else if (!isBsd && (s.posixId == family)) {
+				return true;
+			}
+
+		}
+
+		return false;
+	}
+
+	/**
+	 * The total length of the socket address structure in bytes. The value is only
+	 * returned on certain platforms (BSD style sockets)..
+	 *
+	 * @return the length of the address structure if available on this particular
+	 *         platform
+	 */
+	public OptionalInt totalLength() {
+		return saLen;
 	}
 }

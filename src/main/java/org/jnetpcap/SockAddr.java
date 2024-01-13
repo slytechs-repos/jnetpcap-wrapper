@@ -29,13 +29,43 @@ import org.jnetpcap.util.PcapUtils;
 import static java.lang.foreign.ValueLayout.*;
 
 /**
- * The low level sockaddr structure containing an address of different types,
- * depending on the protocol family value.
+ * The low level <code>sockaddr</code> structure containing an address of
+ * different types, depending on the protocol family value. The class is
+ * extended by specific subclasses which provide additional fields relating to
+ * each protocol address family (AF).
+ *
+ * <p>
+ * BSD style structure
+ * </p>
+ * 
+ * <pre>
+ * <code>
+ * struct sockaddr {
+    u_char sa_len;     // Total length of the structure
+    u_char sa_family;  // Address family (e.g., AF_INET for IPv4)
+    char   sa_data[14]; // Address data (actual size may vary)
+   };
+ * </code>
+ * </pre>
+ * 
+ * <p>
+ * POSIX style structure
+ * </p>
+ * 
+ * <pre>
+ * <code>
+ * struct sockaddr {
+    u_short sa_family;  // Address family (e.g., AF_INET for IPv4)
+    char    sa_data[14]; // Address data (actual size may vary)
+   };
+ * </code>
+ * </pre>
+ * 
  */
 public class SockAddr {
 
 	/**
-	 * The Class Inet6SockAddr.
+	 * The structure of <code>sockaddr_in6</code>, used for IPv6 sockets.
 	 */
 	public static final class Inet6SockAddr extends SockAddr {
 
@@ -58,7 +88,7 @@ public class SockAddr {
 		 * @param arena the arena
 		 */
 		Inet6SockAddr(MemorySegment addr, Arena arena) {
-			super(SaLayout.AF_INET6.reinterpret(addr, arena), SockAddrFamily.INET6, OptionalInt.empty());
+			super(SaLayout.AF_INET6.reinterpret(addr, arena), SockAddrFamily.INET6, SockAddrFamily.INET6.totalLength());
 
 			this.port = Short.toUnsignedInt((short) SaLayout.AF_INET6_PORT.get(saSegment));
 			this.flowInfo = (int) SaLayout.AF_INET6_FLOWINFO.get(saSegment);
@@ -67,7 +97,7 @@ public class SockAddr {
 		}
 
 		/**
-		 * Address.
+		 * IPv6 address.
 		 *
 		 * @return address field value
 		 */
@@ -76,34 +106,34 @@ public class SockAddr {
 		}
 
 		/**
-		 * Flow info.
+		 * IPv6 flow information.
 		 *
-		 * @return the int
+		 * @return 32 bit field value
 		 */
 		public int flowInfo() {
 			return flowInfo;
 		}
 
 		/**
-		 * Port.
+		 * Transport layer port number.
 		 *
-		 * @return port field value
+		 * @return 16 bit port field value
 		 */
 		public int port() {
 			return port;
 		}
 
 		/**
-		 * Scope id.
+		 * Scope ID (interface for link-local addresses).
 		 *
-		 * @return the int
+		 * @return 32 bit scope ID field value
 		 */
 		public int scopeId() {
 			return scopeId;
 		}
 
 		/**
-		 * To string.
+		 * String representation of the structure fields.
 		 *
 		 * @return the string
 		 * @see java.lang.Object#toString()
@@ -137,7 +167,7 @@ public class SockAddr {
 		 * @param arena the arena
 		 */
 		InetSockAddr(MemorySegment addr, Arena arena) {
-			super(SaLayout.AF_INET.reinterpret(addr, arena), SockAddrFamily.INET, OptionalInt.empty());
+			super(SaLayout.AF_INET.reinterpret(addr, arena), SockAddrFamily.INET, SockAddrFamily.INET.totalLength());
 
 			this.port = Short.toUnsignedInt((short) SaLayout.AF_INET_PORT.get(saSegment));
 			this.addr = saSegment.asSlice(4, 4).toArray(JAVA_BYTE);
@@ -162,7 +192,7 @@ public class SockAddr {
 		}
 
 		/**
-		 * To string.
+		 * String representation of the structure field values.
 		 *
 		 * @return the string
 		 * @see java.lang.Object#toString()
@@ -195,7 +225,7 @@ public class SockAddr {
 		 * @param arena the arena
 		 */
 		IpxSockAddr(MemorySegment addr, Arena arena) {
-			super(SaLayout.AF_IPX.reinterpret(addr, arena), SockAddrFamily.IPX, OptionalInt.empty());
+			super(SaLayout.AF_IPX.reinterpret(addr, arena), SockAddrFamily.IPX, SockAddrFamily.IPX.totalLength());
 
 			this.netnum = Short.toUnsignedInt((short) SaLayout.AF_IPX_NETNUM.get(saSegment));
 			this.addr = saSegment.asSlice(4, 6).toArray(JAVA_BYTE);
@@ -230,7 +260,7 @@ public class SockAddr {
 		}
 
 		/**
-		 * To string.
+		 * String representation of the structure field values.
 		 *
 		 * @return the string
 		 * @see java.lang.Object#toString()
@@ -275,7 +305,7 @@ public class SockAddr {
 		 * @param arena the arena
 		 */
 		PacketSockAddr(MemorySegment addr, Arena arena) {
-			super(SaLayout.AF_PACKET.reinterpret(addr, arena), SockAddrFamily.PACKET, OptionalInt.empty());
+			super(SaLayout.AF_PACKET.reinterpret(addr, arena), SockAddrFamily.PACKET, SockAddrFamily.PACKET.totalLength());
 
 			this.protocol = Short.toUnsignedInt((short) SaLayout.AF_PACKET_PROTOCOL.get(saSegment));
 			this.ifIndex = (int) SaLayout.AF_PACKET_IFINDEX.get(saSegment);
@@ -340,7 +370,7 @@ public class SockAddr {
 		}
 
 		/**
-		 * To string.
+		 * String representation of the structure field values.
 		 *
 		 * @return the string
 		 * @see java.lang.Object#toString()
@@ -403,6 +433,20 @@ public class SockAddr {
 	}
 
 	/**
+	 * Read family field.
+	 *
+	 * @param mseg the mseg
+	 * @return the int
+	 */
+	private static int readFamilyField(MemorySegment mseg) {
+
+		if (NativeABI.isBsdAbi())
+			return Byte.toUnsignedInt((byte) SaLayout.FAMILY8.get(mseg));
+		else
+			return Short.toUnsignedInt((short) SaLayout.FAMILY16.get(mseg));
+	}
+
+	/**
 	 * Read address length field.
 	 *
 	 * @param mseg   the mseg
@@ -419,45 +463,42 @@ public class SockAddr {
 		return OptionalInt.of(addrLen);
 	}
 
-	/**
-	 * Read family field.
-	 *
-	 * @param mseg the mseg
-	 * @return the int
-	 */
-	private static int readFamilyField(MemorySegment mseg) {
-
-		if (NativeABI.isBsdAbi())
-			return Byte.toUnsignedInt((byte) SaLayout.FAMILY8.get(mseg));
-		else
-			return Short.toUnsignedInt((short) SaLayout.FAMILY16.get(mseg));
-	}
-
 	/** The family. */
-	private final int family;
+	private final int saFamily;
 
 	/** Minimum 14 bytes of protocol address. */
-	private final byte[] data;
+	private final byte[] saData;
 
-	/** The addr len. */
-	private final OptionalInt totalLength;
+	/**
+	 * (Optional and BSD-specific) The native structure <code>sa_len</code> field is
+	 * primarily found in BSD-derived systems (FreeBSD, OpenBSD, NetBSD). It's not
+	 * present in the POSIX-specified sockaddr structure.
+	 */
+	private final OptionalInt saLen;
 
 	/** The sa segment. */
 	protected final MemorySegment saSegment;
 
 	/**
-	 * Instantiates a new sock addr.
+	 * Sock address base structure containing common and generic fields identifying
+	 * the actual SA type. The subclass is identified by the native
+	 * <code>sa_family</code> structure field.
 	 *
-	 * @param addr  the addr
-	 * @param arena the scope
+	 * @param mseg        the memory segment containing the off-heap
+	 *                    <code>sockaddr</code> structure
+	 * @param family      the SA family type
+	 * @param totalLength the total length in bytes of the entire socket structure
 	 */
 	private SockAddr(MemorySegment mseg, int family, OptionalInt totalLength) {
 		this.saSegment = mseg;
-		this.family = family;
-		this.totalLength = totalLength;
+		this.saFamily = family;
+		this.saLen = totalLength;
 
-		MemorySegment dataSeg = mseg.asSlice(2);
-		this.data = dataSeg.toArray(ValueLayout.JAVA_BYTE);
+		/*
+		 * skip first 2 bytes (1 byte sa_len on BSD system and 1 or 2 bytes sa_field on
+		 * all the rest) and convert the rest to a byte array.
+		 */
+		this.saData = mseg.asSlice(2).toArray(ValueLayout.JAVA_BYTE);
 	}
 
 	/**
@@ -472,56 +513,66 @@ public class SockAddr {
 	}
 
 	/**
-	 * Socket data structure.
+	 * Socket Address data (actual size may vary).
 	 *
-	 * @return the byte[]
+	 * @return the byte array containing socket raw data
 	 */
 	public byte[] data() {
-		return data;
+		return saData;
 	}
 
 	/**
-	 * Address family value.
+	 * Address family (e.g., INET for IPv4)
 	 *
-	 * @return 8 or 16 bit address family value
+	 * @return 8 (BSD sockets) or 16 (Posix sockets) bit address family value
 	 */
 	public int family() {
-		return family;
+		return saFamily;
 	}
 
 	/**
-	 * Gets the family as a constant.
+	 * Gets the AF family value as a constant.
 	 *
 	 * @return the socket address family constant
 	 * @throws IllegalArgumentException thrown if the constant for the family value
 	 *                                  is not found.
 	 */
 	public Optional<SockAddrFamily> familyConstant() {
-		return SockAddrFamily.lookup(family);
+		return SockAddrFamily.lookup(saFamily);
 	}
 
 	/**
-	 * To string.
+	 * Checks if this AF address is of specifc family type.
+	 *
+	 * @param family the AF family type
+	 * @return true, if address is of AF type specified
+	 */
+	public boolean isFamily(SockAddrFamily family) {
+		return family.isMatch(this.saFamily);
+	}
+
+	/**
+	 * String representation of the structure field values.
 	 *
 	 * @return the string
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "AF_%s".formatted(familyConstant().orElse(null))
-				+ "[fam=%s(%d)".formatted(SockAddrFamily.lookup(family).orElse(null), family)
-				+ " addr=" + PcapUtils.toAddressString(data) + "]";
+		return "AF_%s[".formatted(familyConstant().orElse(null))
+				+ "fam=%s(%d)".formatted(SockAddrFamily.lookup(saFamily).orElse(null), saFamily)
+				+ " addr=" + PcapUtils.toAddressString(saData)
+				+ "]";
 	}
 
 	/**
 	 * The total length of the socket address structure in bytes. The value is only
-	 * returned on certain platforms the length can be either calculated or is
-	 * provided (ie. MacOS/Bsd).
+	 * returned on certain platforms (BSD style sockets)..
 	 *
 	 * @return the length of the address structure if available on this particular
 	 *         platform
 	 */
 	public OptionalInt totalLength() {
-		return totalLength;
+		return saLen;
 	}
 }

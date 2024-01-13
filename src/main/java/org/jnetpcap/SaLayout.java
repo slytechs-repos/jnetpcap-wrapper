@@ -35,6 +35,7 @@ import static java.lang.foreign.ValueLayout.*;
 enum SaLayout {
 
 	/** The family16. */
+	
 	/* Shared SA fields */
 	FAMILY16("u1.family16"),
 
