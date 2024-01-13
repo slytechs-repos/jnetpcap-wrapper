@@ -251,6 +251,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 				+ "C:\\Windows\\System32;"
 				+ "C:\\Program Files;"
 				+ "/usr/lib/x86_64-linux-gnu;"
+				+ "/usr/lib/aarch64-linux-gnu/libpcap.so.0.8;" // Raspberry PI
 				+ "/usr/local/Cellar/libpcap/1.10.4/lib;"
 				+ "/usr/local/Cellar/libpcap/1.10.3/lib;"
 				+ "/usr/local/Cellar/libpcap/1.10.2/lib;"
