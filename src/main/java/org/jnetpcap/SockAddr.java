@@ -421,7 +421,7 @@ public class SockAddr {
 		private Optional<String> name;
 
 		/** The address. */
-		private byte[] address;
+		private Optional<byte[]> address;
 
 		/**
 		 * Instantiates a new inet sock addr.
@@ -447,7 +447,9 @@ public class SockAddr {
 					: Optional.of(new String(saSegment.asSlice(off, nlen).toArray(JAVA_BYTE)));
 			off += nlen;
 
-			this.address = saSegment.asSlice(off, alen).toArray(JAVA_BYTE);
+			this.address = (alen == 0)
+					? Optional.empty()
+					: Optional.of(saSegment.asSlice(off, alen).toArray(JAVA_BYTE));
 			off += alen;
 
 			this.selector = readNumberByLength(saSegment.asSlice(off, slen), slen);
@@ -532,7 +534,7 @@ public class SockAddr {
 		 *
 		 * @return address field value
 		 */
-		public byte[] address() {
+		public Optional<byte[]> address() {
 			return address;
 		}
 
@@ -565,7 +567,7 @@ public class SockAddr {
 			return "AF_LINK ["
 					+ "#" + index
 					+ (name.isEmpty() ? "" : ", name=%s".formatted(name.get()))
-					+ ", addr(%d)=".formatted(type, PcapUtils.toAddressString(address()))
+					+ (address.isEmpty() ? "" : ", addr=%s".formatted(PcapUtils.toAddressString(address.get())))
 					+ (selector.isEmpty() ? "" : ", sel=0x%x".formatted(selector.getAsInt()))
 					+ "]";
 		}
