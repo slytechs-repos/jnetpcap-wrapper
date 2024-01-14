@@ -21,6 +21,7 @@ import java.lang.foreign.ValueLayout;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import org.jnetpcap.constant.ArpHdr;
 import org.jnetpcap.constant.SockAddrFamily;
 import org.jnetpcap.internal.ForeignUtils;
 import org.jnetpcap.internal.NativeABI;
@@ -140,10 +141,11 @@ public class SockAddr {
 		 */
 		@Override
 		public String toString() {
-			return "AF_INET6" + "[port=" + port
-					+ " flowInfo=" + flowInfo
-					+ " addr=" + PcapUtils.toAddressString(address())
-					+ " scopeId=" + scopeId
+			return "AF_INET6" + "["
+					+ PcapUtils.toAddressString(address())
+					+ (port == 0 ? "" : ", port=" + port)
+					+ (flowInfo == 0 ? "" : ", flowInfo=" + flowInfo)
+					+ (scopeId == 0 ? "" : ", scopeId=" + scopeId)
 					+ "]";
 		}
 
@@ -199,8 +201,10 @@ public class SockAddr {
 		 */
 		@Override
 		public String toString() {
-			return "AF_INET" + "[port=" + port
-					+ ", addr=" + PcapUtils.toAddressString(address()) + "]";
+			return "AF_INET" + "["
+					+ PcapUtils.toAddressString(address())
+					+ (port == 0 ? "" : "port=" + port)
+					+ "]";
 		}
 	}
 
@@ -268,9 +272,9 @@ public class SockAddr {
 		@Override
 		public String toString() {
 			return "AF_IPX" + "["
-					+ "port=" + netnum
-					+ ", addr=" + PcapUtils.toAddressString(nodeNum())
-					+ ", socket=" + socket
+					+ PcapUtils.toAddressString(nodeNum())
+					+ (netnum == 0 ? "" : ", netnum=" + netnum)
+					+ (socket == 0 ? "" : ", socket=" + socket)
 					+ "]";
 		}
 	}
@@ -380,12 +384,11 @@ public class SockAddr {
 		@Override
 		public String toString() {
 			return "AF_PACKET" + "["
-					+ "protocol=" + protocol
-					+ ", ifIndex=" + ifIndex
-					+ ", haType=" + haType
-					+ ", pktType=" + pktType
-					+ ", haLen=" + haLen
-					+ ", addr=" + PcapUtils.toAddressString(address())
+					+ "#%d".formatted(ifIndex)
+					+ ", " + PcapUtils.toAddressString(address())
+					+ (protocol == 0 ? "" : ", protocol=" + protocol)
+					+ (pktType == 0 ? "" : ", pktType=" + pktType)
+					+ ", haType=%d<%s>".formatted(haType, ArpHdr.toLabel(haType).orElse(""))
 					+ "]";
 		}
 	}
@@ -573,14 +576,8 @@ public class SockAddr {
 		}
 	}
 
-	/** Maximum sockaddr_t structure address data length. */
-	public final static int MIM_SOCKADDR_ADDRESS_LEN = 14;
-
 	/** The Constant MIM_SOCKADDR_STRUCT_LEN. */
-	public final static int MIM_SOCKADDR_STRUCT_LEN = 16;
-
-	/** The Constant MAX_SOCKADDR_ADDRESS_LEN. */
-	public final static int MAX_SOCKADDR_ADDRESS_LEN = 255;
+	private final static int MIM_SOCKADDR_STRUCT_LEN = 16;
 
 	/**
 	 * Factory method call to instantiate a new SockAddr instance based on AF_FAMILY
@@ -602,23 +599,18 @@ public class SockAddr {
 
 		int af = readFamilyField(first2BytesSeg);
 		OptionalInt totalLength = readTotalLengthField(first2BytesSeg);
+		int structLength = totalLength.orElse(MIM_SOCKADDR_STRUCT_LEN);
 		SockAddrFamily familyConst = SockAddrFamily.lookup(af).orElse(null);
 
-		return switch (familyConst) {
+		return (T) switch (familyConst) {
 
-		case INET -> (T) new InetSockAddr(addr, arena);
-		case INET6 -> (T) new Inet6SockAddr(addr, arena);
-		case IPX -> (T) new IpxSockAddr(addr, arena);
-		case PACKET -> (T) new PacketSockAddr(addr, arena);
-		case LINK -> (T) new LinkSockAddr(addr, arena, totalLength.getAsInt());
+		case INET -> new InetSockAddr(addr, arena);
+		case INET6 -> new Inet6SockAddr(addr, arena);
+		case IPX -> new IpxSockAddr(addr, arena);
+		case PACKET -> new PacketSockAddr(addr, arena);
+		case LINK -> new LinkSockAddr(addr, arena, totalLength.getAsInt()); // BSD platforms only
 
-		default -> {
-			if (totalLength.isPresent()) {
-				yield (T) new SockAddr(addr.reinterpret(totalLength.getAsInt(), arena, __ -> {}), af, totalLength);
-			} else {
-				yield (T) new SockAddr(addr.reinterpret(MIM_SOCKADDR_STRUCT_LEN, arena, __ -> {}), af, totalLength);
-			}
-		}
+		default -> new SockAddr(addr.reinterpret(structLength, arena, __ -> {}), af, totalLength);
 		};
 	}
 

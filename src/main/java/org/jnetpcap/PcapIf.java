@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,10 @@ import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.jnetpcap.constant.PcapIfFlag;
 import org.jnetpcap.constant.SockAddrFamily;
 import org.jnetpcap.internal.ForeignUtils;
 
@@ -253,9 +256,12 @@ public class PcapIf {
 		public String toString() {
 			return "PcapAddr ["
 					+ "addr=" + addr
-					+ (netmask.isEmpty() ? "" : ", netmask=" + netmask)
-					+ (broadaddr.isEmpty() ? "" : ", broadaddr=" + broadaddr)
-					+ (dstaddr.isEmpty() ? "" : ", dstaddr=" + dstaddr)
+					+ netmask.map(SockAddr::toString).map(", netmask=%s"::formatted).orElse("")
+					+ broadaddr.map(SockAddr::toString).map(", netmask=%s"::formatted).orElse("")
+					+ dstaddr.map(SockAddr::toString).map(", netmask=%s"::formatted).orElse("")
+//					+ (netmask.isEmpty() ? "" : ", netmask=" + netmask.get())
+//					+ (broadaddr.isEmpty() ? "" : ", broadaddr=" + broadaddr.get())
+//					+ (dstaddr.isEmpty() ? "" : ", dstaddr=" + dstaddr.get())
 					+ "]";
 		}
 	}
@@ -422,6 +428,16 @@ public class PcapIf {
 	}
 
 	/**
+	 * Interface flags (e.g., PCAP_IF_LOOPBACK for loopback interfaces), as an enum
+	 * set.
+	 *
+	 * @return the set containing enum flag constants for each flag bit
+	 */
+	public Set<PcapIfFlag> flagsAsEnumSet() {
+		return PcapIfFlag.toEnumSet(flags);
+	}
+
+	/**
 	 * Returns the hardware address (usually MAC) of the interface if it has one and
 	 * if it can be accessed given the current privileges.
 	 * 
@@ -448,10 +464,17 @@ public class PcapIf {
 	 */
 	@Override
 	public String toString() {
+
+		var set = flagsAsEnumSet();
+		String flagString = set.stream().map(PcapIfFlag::label).collect(Collectors.joining(","));
+
+		if (flagString.isBlank())
+			flagString = "0b%s/0x%X".formatted(Integer.toBinaryString(flags), flags);
+
 		return "PcapIf ["
-				+ "name=" + name
-				+ ", flags=" + flags
-				+ (description.isEmpty() ? "" : ", description=" + description)
+				+ "\"%s\"".formatted(name)
+				+ ", flags=%s<%s>".formatted(flags, flagString)
+				+ (description.isEmpty() ? "" : ", description=\"%s\"".formatted(description.get()))
 				+ (addresses.isEmpty() ? "" : ", addresses=" + addresses)
 				+ "]";
 	}

@@ -200,12 +200,15 @@ enum SaLayout {
 								LAST).withName("af_link"),
 
 						/* Generic MIN size sockaddr structure */
-						sequenceLayout(SockAddr.MIM_SOCKADDR_ADDRESS_LEN, JAVA_BYTE).withName("data")
+						sequenceLayout(MIM_SOCKADDR_ADDRESS_LEN, JAVA_BYTE).withName("data")
 
 				).withName("u2")
 
 		);
 	}
+
+	/** Maximum sockaddr_t structure address data length. */
+	private final static int MIM_SOCKADDR_ADDRESS_LEN = 14;
 
 	/**
 	 * Size of.

@@ -25,7 +25,6 @@ import java.util.OptionalInt;
 import org.jnetpcap.PcapIf.PcapAddr;
 import org.jnetpcap.SockAddr.Inet6SockAddr;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +42,7 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 
 	@Test
 	@Tag("sudo-permission")
-	@Disabled
+//	@Disabled
 	void printAllPcapInterfaces() throws PcapException {
 		Pcap.findAllDevs().forEach(System.out::println);
 	}
