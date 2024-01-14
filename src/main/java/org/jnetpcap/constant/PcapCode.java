@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.jnetpcap.constant;
 
+import java.util.Optional;
 import java.util.function.IntSupplier;
 
 import org.jnetpcap.Pcap;
@@ -29,49 +30,49 @@ public enum PcapCode implements IntSupplier {
 
 	/** ok. */
 	OK(PcapCode.PCAP_OK, "Ok"),
-	
+
 	/** generic error full. */
 	ERROR(PcapCode.PCAP_ERROR),
-	
+
 	/** loop terminated by pcap_breakloop. */
 	ERROR_BREAK(PcapCode.PCAP_ERROR_BREAK),
-	
+
 	/** the capture needs to be activated. */
 	ERROR_NOT_ACTIVATED(PcapCode.PCAP_ERROR_NOT_ACTIVATED),
-	
+
 	/** the operation can't be performed on already activated captures. */
 	ERROR_ACTIVATED(PcapCode.PCAP_ERROR_ACTIVATED),
-	
+
 	/** no such device exists. */
 	ERROR_NO_SUCH_DEVICE(PcapCode.PCAP_ERROR_NO_SUCH_DEVICE),
-	
+
 	/** this device doesn't support rfmon (monitor) mode. */
 	ERROR_RFMON_NOTSUP(PcapCode.PCAP_ERROR_RFMON_NOTSUP),
-	
+
 	/** operation supported only in monitor mode. */
 	ERROR_NOT_RFMON(PcapCode.PCAP_ERROR_NOT_RFMON),
-	
+
 	/** no permission to open the device. */
 	ERROR_PERM_DENIED(PcapCode.PCAP_ERROR_PERM_DENIED),
-	
+
 	/** interface isn't up. */
 	ERROR_IFACE_NOT_UP(PcapCode.PCAP_ERROR_IFACE_NOT_UP),
-	
+
 	/** this device doesn't support setting the time stamp type. */
 	ERROR_CANTSET_TSTAMP_TYPE(PcapCode.PCAP_ERROR_CANTSET_TSTAMP_TYPE),
-	
+
 	/** you don't have permission to capture in promiscuous mode. */
 	ERROR_PROMISC_PERM_DENIED(PcapCode.PCAP_ERROR_PROMISC_PERM_DENIED),
-	
+
 	/** the requested time stamp precision is not supported. */
 	ERROR_TSTAMP_PRECISION_NOTSUP(PcapCode.PCAP_ERROR_TSTAMP_PRECISION_NOTSUP),
 
 	/** generic warning. */
 	WARNING(PcapCode.PCAP_WARNING, "generic warning"),
-	
+
 	/** this device doesn't support promiscuous mode. */
 	WARNING_PROMISC_NOTSUP(PcapCode.PCAP_WARNING_PROMISC_NOTSUP, "this device doesn't support promiscuous mode"),
-	
+
 	/** the requested time stamp type is not supported. */
 	WARNING_TSTAMP_TYPE_NOTSUP(PcapCode.PCAP_WARNING_TSTAMP_TYPE_NOTSUP,
 			"the requested time stamp type is not supported"),
@@ -151,8 +152,9 @@ public enum PcapCode implements IntSupplier {
 	 *
 	 * @param code pcap error code
 	 * @return the matching constant or null if not found
+	 * @throws IllegalArgumentException thrown if not found
 	 */
-	public static PcapCode valueOf(int code) {
+	public static PcapCode valueOf(int code) throws IllegalArgumentException {
 		PcapCode[] constants = values();
 		int len = constants.length;
 
@@ -160,7 +162,24 @@ public enum PcapCode implements IntSupplier {
 			if (constants[i].code == code)
 				return constants[i];
 
-		return null;
+		throw new IllegalArgumentException(Integer.toString(code));
+	}
+
+	/**
+	 * Converts an integer Pcap error code to a constant.
+	 *
+	 * @param code pcap error code
+	 * @return the matching constant or null if not found
+	 */
+	public static Optional<PcapCode> toEnum(int code) {
+		PcapCode[] constants = values();
+		int len = constants.length;
+
+		for (int i = 0; i < len; i++)
+			if (constants[i].code == code)
+				return Optional.of(constants[i]);
+
+		return Optional.empty();
 	}
 
 	/** The code. */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.jnetpcap.constant;
 
+import java.util.Optional;
 import java.util.function.IntSupplier;
 
 import org.jnetpcap.Pcap;
@@ -685,7 +686,7 @@ public enum PcapDlt implements IntSupplier {
 
 	/** The Constant DLT_LINUX_LAPD. */
 	public final static int DLT_LINUX_LAPD = 177;
-	
+
 	/** Event Tracing for Windows messages. */
 	public final static int DLT_ETW = 290;
 
@@ -755,22 +756,38 @@ public enum PcapDlt implements IntSupplier {
 
 	/**
 	 * Converts an integer value into a PcapDLT constant.
-	 * 
-	 * @param value Pcap DLT integer value to convert
+	 *
+	 * @param dlt Pcap DLT integer value to convert
 	 * @return constant assigned to the DLT integer, or null if not found
+	 * @throws IllegalArgumentException thrown if not found
 	 */
-	public static PcapDlt valueOf(int value) {
+	public static PcapDlt valueOf(int dlt) throws IllegalArgumentException {
 		final PcapDlt[] values = values();
 		final int length = values.length;
 
 		for (int i = 0; i < length; i++) {
-			if (values[i].intDlt == value) {
+			if (values[i].intDlt == dlt) {
 				return values[i];
 			}
 
 		}
 
-		return null;
+		throw new IllegalArgumentException(Integer.toString(dlt));
+	}
+
+	/**
+	 * Converts the supplied id to an ArpHdr enum constant.
+	 *
+	 * @param dlt the pcap DLT integer constant
+	 * @return the corresponding enum if found
+	 */
+	public static Optional<PcapDlt> toEnum(int dlt) {
+		for (var c : values()) {
+			if (c.intDlt == dlt)
+				return Optional.of(c);
+		}
+
+		return Optional.empty();
 	}
 
 	/** Integer dlt value assigned by libpcap to this constant. */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.jnetpcap.constant;
 
+import java.util.Optional;
 import java.util.function.IntSupplier;
 
 /**
@@ -43,16 +44,30 @@ public enum PcapDirection implements IntSupplier {
 	public static final int PCAP_DIRECTION_OUT = 2;
 
 	/**
-	 * Converts integer pcap direction value to a constant.
+	 * Converts integer pcap direction value to an enum.
 	 *
-	 * @param intValue the int value
-	 * @return the pcap direction
+	 * @param direction an integer PCAP direction constant
+	 * @return the pcap direction enum
+	 * @throws IllegalArgumentException thrown if not found
 	 */
-	public static PcapDirection valueOf(int intValue) {
-		if (intValue < 0 || intValue >= values().length)
-			throw new IllegalArgumentException("" + intValue);
+	public static PcapDirection valueOf(int direction) throws IllegalArgumentException {
+		if (direction < 0 || direction >= values().length)
+			throw new IllegalArgumentException(Integer.toString(direction));
 
-		return values()[intValue];
+		return values()[direction];
+	}
+
+	/**
+	 * Converts integer pcap direction value to an enum.
+	 *
+	 * @param direction the direction
+	 * @return the optional
+	 */
+	public static Optional<PcapDirection> toEnum(int direction) {
+		if (direction < 0 || direction >= values().length)
+			return Optional.empty();
+
+		return Optional.of(values()[direction]);
 	}
 
 	/**
