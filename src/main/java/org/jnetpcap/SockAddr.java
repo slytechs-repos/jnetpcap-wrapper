@@ -444,7 +444,7 @@ public class SockAddr {
 
 			this.name = (nlen == 0)
 					? Optional.empty()
-					: Optional.of(ForeignUtils.toJavaString(saSegment.asSlice(off, nlen)));
+					: Optional.of(new String(saSegment.asSlice(off, nlen).toArray(JAVA_BYTE)));
 			off += nlen;
 
 			this.address = saSegment.asSlice(off, alen).toArray(JAVA_BYTE);
@@ -562,7 +562,7 @@ public class SockAddr {
 		 */
 		@Override
 		public String toString() {
-			return "AF_LINK(len=%d)".formatted(totalLength())
+			return "AF_LINK(len=%d)".formatted(totalLength().orElse(20))
 					+ "["
 					+ "index=" + index
 					+ "type=" + type
@@ -596,13 +596,13 @@ public class SockAddr {
 	 */
 	@SuppressWarnings("unchecked")
 	static <T extends SockAddr> T newInstance(Object value, Arena arena) {
-		
+
 		MemorySegment addr = (MemorySegment) value;
 		if (ForeignUtils.isNullAddress(addr))
 			return null;
 
 		MemorySegment first2BytesSeg = addr.reinterpret(2); // Enough to read family field
-		
+
 		int af = readFamilyField(first2BytesSeg);
 		OptionalInt totalLength = readTotalLengthField(first2BytesSeg);
 		SockAddrFamily familyConst = SockAddrFamily.lookup(af).orElse(null);
