@@ -1,34 +1,30 @@
 /*
- * MIT License
- * 
- * Copyright (c) 2020 Sly Technologies Inc.
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * Copyright 2023 Sly Technologies Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jnetpcap;
 
+import static org.jnetpcap.constant.SockAddrFamily.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 import org.jnetpcap.PcapIf.PcapAddr;
-import org.jnetpcap.constant.SockAddrFamily;
+import org.jnetpcap.SockAddr.Inet6SockAddr;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -41,9 +37,15 @@ import org.junit.jupiter.api.Test;
 @Tag("libpcap-api")
 class LibpcapPcapIfTests extends AbstractTestBase {
 
-	private static final int INET4_ADDR_LEN = 4;
-	private static final int INET6_ADDR_LEN = 16;
+	/** The Constant MAC_ADDR_LEN. */
 	private static final int MAC_ADDR_LEN = 6;
+
+	@Test
+	@Tag("sudo-permission")
+//	@Disabled
+	void printAllPcapInterfaces() throws PcapException {
+		Pcap.findAllDevs().forEach(System.out::println);
+	}
 
 	/**
 	 * Test method for {@link org.jnetpcap.Pcap#findAllDevs()}.
@@ -80,13 +82,13 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 		List<PcapIf> list = Pcap.findAllDevs();
 
 		PcapIf device = list.stream()
-				.filter(i -> i.addressOfFamily(SockAddrFamily.INET).isPresent())
+				.filter(INET::checkIfContains)
 				.findAny()
 				.orElseThrow();
 
-		PcapAddr addr = device.addressOfFamily(SockAddrFamily.INET).orElseThrow();
+		PcapAddr<?> addr = device.findAddressOfFamily(INET).orElseThrow();
 
-		assertEquals(SockAddrFamily.INET.getAsInt(), addr.socketAddress().family(),
+		assertEquals(Optional.of(INET), addr.socketAddress().familyConstant(),
 				"expecting INET family socket address type");
 	}
 
@@ -97,18 +99,21 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 	 */
 	@Test
 	@Tag("sudo-permission")
-	void PcapIfInetAddrLen() throws PcapException {
+	void PcapIfInetTotalLen() throws PcapException {
 		List<PcapIf> list = Pcap.findAllDevs();
 
 		PcapIf device = list.stream()
-				.filter(i -> i.addressOfFamily(SockAddrFamily.INET).isPresent())
+				.filter(INET::checkIfContains)
 				.findAny()
 				.orElseThrow();
 
-		PcapAddr addr = device.addressOfFamily(SockAddrFamily.INET).orElseThrow();
-		int addrLen = addr.socketAddress().addressLength().orElseThrow();
+		PcapAddr<?> addr = device.findAddressOfFamily(INET).orElseThrow();
+		OptionalInt addrLen = addr.socketAddress().totalLength();
 
-		assertEquals(INET4_ADDR_LEN, addrLen, "invalid INET family socket address length");
+		if (addrLen.isPresent())
+			assertEquals(OptionalInt.of(16), addrLen, "invalid INET family socket address length");
+
+		Assumptions.assumeFalse(addrLen.isPresent(), "totalLen is not available on this platform");
 	}
 
 	/**
@@ -122,13 +127,35 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 		List<PcapIf> list = Pcap.findAllDevs();
 
 		PcapIf device = list.stream()
-				.filter(i -> i.addressOfFamily(SockAddrFamily.INET6).isPresent())
+				.filter(INET6::checkIfContains)
 				.findAny()
 				.orElseThrow();
 
-		PcapAddr addr = device.addressOfFamily(SockAddrFamily.INET6).orElseThrow();
+		PcapAddr<?> addr = device.findAddressOfFamily(INET6).orElseThrow();
 
-		assertEquals(SockAddrFamily.INET6.getAsInt(), addr.socketAddress().family(),
+		assertEquals(Optional.of(INET6), addr.socketAddress().familyConstant(),
+				"expecting INET6 family socket address type");
+	}
+
+	/**
+	 * Pcap if inet 6 subclass.
+	 *
+	 * @throws PcapException the pcap exception
+	 */
+	@Test
+	@Tag("sudo-permission")
+	void PcapIfInet6Subclass() throws PcapException {
+		List<PcapIf> list = Pcap.findAllDevs();
+
+		PcapIf device = list.stream()
+				.filter(INET6::checkIfContains)
+				.findAny()
+				.orElseThrow();
+
+		PcapAddr<Inet6SockAddr> addr = device.findAddressOfType(Inet6SockAddr.class)
+				.orElseThrow();
+
+		assertEquals(Optional.of(INET6), addr.socketAddress().familyConstant(),
 				"expecting INET6 family socket address type");
 	}
 
@@ -139,18 +166,21 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 	 */
 	@Test
 	@Tag("sudo-permission")
-	void PcapIfInet6AddrLen() throws PcapException {
+	void PcapIfInet6TotalLen() throws PcapException {
 		List<PcapIf> list = Pcap.findAllDevs();
 
 		PcapIf device = list.stream()
-				.filter(i -> i.addressOfFamily(SockAddrFamily.INET6).isPresent())
+				.filter(INET6::checkIfContains)
 				.findAny()
 				.orElseThrow();
 
-		PcapAddr addr = device.addressOfFamily(SockAddrFamily.INET6).orElseThrow();
-		int addrLen = addr.socketAddress().addressLength().orElseThrow();
+		PcapAddr<?> addr = device.findAddressOfFamily(INET6).orElseThrow();
+		OptionalInt addrLen = addr.socketAddress().totalLength();
 
-		assertEquals(INET6_ADDR_LEN, addrLen, "invalid INET6 family socket address length");
+		if (addrLen.isPresent())
+			assertEquals(28, addrLen.getAsInt(), "invalid INET6 family socket address length");
+
+		Assumptions.assumeFalse(addrLen.isPresent(), "totalLen is not available on this platform");
 	}
 
 	/**
@@ -165,7 +195,7 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 		List<PcapIf> list = Pcap.findAllDevs();
 
 		PcapIf device = list.stream()
-				.filter(i -> i.addressOfFamily(SockAddrFamily.INET).isPresent())
+				.filter(INET::checkIfContains)
 				.findAny()
 				.orElseThrow();
 

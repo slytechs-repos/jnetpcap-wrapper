@@ -15,6 +15,7 @@
  */
 package org.jnetpcap.constant;
 
+import java.util.Optional;
 import java.util.function.IntSupplier;
 
 /**
@@ -109,19 +110,36 @@ public enum PcapTstampType implements IntSupplier {
 	public static final int PCAP_TSTAMP_HOST_HIPREC_UNSYNCED = 5;
 
 	/**
-	 * Value of.
+	 * Converts numerical TSTAMP_TYPE constant to an enum, if found.
 	 *
-	 * @param type the type
-	 * @return the pcap tstamp type
+	 * @param tstampType the PCAP integer timestamp type constant
+	 * @return the optional enum constant
 	 */
-	public static PcapTstampType valueOf(int type) {
-		return values()[type];
+	public static Optional<PcapTstampType> toEnum(int tstampType) {
+		if (tstampType < 0 || tstampType >= values().length)
+			Optional.empty();
+
+		return Optional.of(values()[tstampType]);
 	}
 
 	/**
-	 * Gets the as int.
+	 * Converts numerical TSTAMP_TYPE constant to an enum.
 	 *
-	 * @return the as int
+	 * @param tstampType the PCAP integer timestamp type constant
+	 * @return the PCAP timestamp type enum constant
+	 * @throws IllegalArgumentException thrown if not found
+	 */
+	public static PcapTstampType valueOf(int tstampType) throws IllegalArgumentException {
+		if (tstampType < 0 || tstampType >= values().length)
+			throw new IllegalArgumentException(Integer.toString(tstampType));
+
+		return values()[tstampType];
+	}
+
+	/**
+	 * Get TSTAMP_TYPE numerical constant.
+	 *
+	 * @return the timestamp type constant
 	 * @see java.util.function.IntSupplier#getAsInt()
 	 */
 	@Override

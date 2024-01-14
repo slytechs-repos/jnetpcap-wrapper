@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
  */
 package org.jnetpcap.constant;
 
+import java.util.Optional;
 import java.util.function.IntSupplier;
 
 /**
  * Options usable with {@code Pcap.init(PcapOption)} call.
  */
 public enum PcapOption implements IntSupplier {
-	
+
 	/** strings are in the local character encoding. */
 	CHAR_ENC_LOCAL,
 
@@ -34,6 +35,33 @@ public enum PcapOption implements IntSupplier {
 
 	/** strings are in UTF-8. */
 	public static final int PCAP_CHAR_ENC_UTF_8 = 0x00000001;
+
+	/**
+	 * Converts an integer value into a PCAP option constant.
+	 *
+	 * @param option the PCAP option numerical constant
+	 * @return the PCAP option enum constant
+	 * @throws IllegalArgumentException thrown if not found
+	 */
+	public static PcapOption valueOf(int option) throws IllegalArgumentException {
+		if (option < 0 || option > 1)
+			throw new IllegalArgumentException(Integer.toString(option));
+
+		return values()[option];
+	}
+
+	/**
+	 * Converts an integer value into a PCAP option constant, if found.
+	 *
+	 * @param option the PCAP option numerical constant
+	 * @return the PCAP option enum constant
+	 */
+	public static Optional<PcapOption> toEnum(int option) {
+		if (option < 0 || option > 1)
+			return Optional.empty();
+
+		return Optional.of(values()[option]);
+	}
 
 	/**
 	 * Pcap option integer value.

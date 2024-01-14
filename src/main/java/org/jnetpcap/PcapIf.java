@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.jnetpcap.constant.PcapIfFlag;
 import org.jnetpcap.constant.SockAddrFamily;
 import org.jnetpcap.internal.ForeignUtils;
-import org.jnetpcap.internal.NativeABI;
-import org.jnetpcap.util.PcapUtils;
 
 import static java.lang.foreign.MemoryLayout.*;
 import static java.lang.foreign.MemoryLayout.PathElement.*;
@@ -129,17 +129,12 @@ import static java.lang.foreign.ValueLayout.*;
 public class PcapIf {
 
 	/**
-	 * System property if set to true, pcap uses BSD style sockaddr structure which
-	 * has the addr_len field. Otherwise the default heuristic are used to determine
-	 * the sock address structure format.
-	 */
-	public static final String SYSTEM_PROPERTY_PCAPIF_SOCKADDR_BSD_STYLE = "org.jnetpcap.sockaddr.bsd";
-
-	/**
 	 * The struct pcap_addr structure containing network interfaces/devices
 	 * addresses.
+	 *
+	 * @param <T> the generic socket address subclass type
 	 */
-	public static class PcapAddr {
+	public static class PcapAddr<T extends SockAddr> {
 
 		/** The Constant LAYOUT. */
 		private static final MemoryLayout PCAP_ADDR_LAYOUT = structLayout(
@@ -168,18 +163,18 @@ public class PcapIf {
 		private static final VarHandle dstaddrHandle = PCAP_ADDR_LAYOUT.varHandle(groupElement("dstaddr"));
 
 		/**
-		 * List all.
+		 * List all addresses by iterating over the linked list.
 		 *
-		 * @param next  the next
-		 * @param scope the scope
-		 * @return the list
+		 * @param next  the first element of a linked list of addresses
+		 * @param arena the memory scope
+		 * @return a list of all PCAP addresses found in the supplied linked list
 		 */
-		private static List<PcapAddr> listAll(MemorySegment next, Arena scope) {
-			List<PcapAddr> list = new ArrayList<>();
+		private static List<PcapAddr<? extends SockAddr>> listAll(MemorySegment next, Arena arena) {
+			List<PcapAddr<?>> list = new ArrayList<>();
 
 			while (!ForeignUtils.isNullAddress(next)) {
 				MemorySegment mseg = next.reinterpret(PCAP_ADDR_LAYOUT.byteSize());
-				list.add(new PcapAddr(mseg, scope));
+				list.add(new PcapAddr<SockAddr>(mseg, arena));
 
 				next = (MemorySegment) nextHandle.get(mseg);
 			}
@@ -187,16 +182,16 @@ public class PcapIf {
 		}
 
 		/** The addr. */
-		private final SockAddr addr;
+		private final T addr;
 
 		/** The netmask. */
-		private final Optional<SockAddr> netmask;
+		private final Optional<T> netmask;
 
 		/** The broadaddr. */
-		private final Optional<SockAddr> broadaddr;
+		private final Optional<T> broadaddr;
 
 		/** The dstaddr. */
-		private final Optional<SockAddr> dstaddr;
+		private final Optional<T> dstaddr;
 
 		/**
 		 * Instantiates a new pcap addr.
@@ -213,42 +208,12 @@ public class PcapIf {
 		}
 
 		/**
-		 * To string.
-		 *
-		 * @return the string
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "PcapAddr [" + "addr=" + addr + ", netmask=" + netmask + ", broadaddr=" + broadaddr + ", dstaddr="
-					+ dstaddr + "]";
-		}
-
-		/**
-		 * A familty specific socket address for this interface.
-		 *
-		 * @return network family specific interface address
-		 */
-		public SockAddr socketAddress() {
-			return addr;
-		}
-
-		/**
-		 * The netmask corresponding to {@link #socketAddress}.
-		 *
-		 * @return interface's optional netmask address
-		 */
-		public Optional<SockAddr> netmask() {
-			return netmask;
-		}
-
-		/**
 		 * The broadcast address corresponding to {@link #socketAddress}, if the
 		 * interface supports broadcasts.
 		 *
 		 * @return optional broadcast address interface
 		 */
-		public Optional<SockAddr> broadcast() {
+		public Optional<T> broadcast() {
 			return broadaddr;
 		}
 
@@ -258,199 +223,55 @@ public class PcapIf {
 		 *
 		 * @return the optional destination address of a point-to-point interface
 		 */
-		public Optional<SockAddr> destination() {
+		public Optional<T> destination() {
 			return dstaddr;
 		}
-	}
-
-	/**
-	 * The low level sockaddr structure containing an address of different types,
-	 * depending on the protocol family value.
-	 */
-	public static class SockAddr {
 
 		/**
-		 * Checks platform type to see how socket types are defined on this platform.
+		 * The netmask corresponding to {@link #socketAddress} if the interface supports
+		 * netmasks.
 		 *
-		 * @return true if platform socket structure definition has addr_len field
+		 * @return interface's optional netmask address
 		 */
-		private static boolean hasAddressLength() {
-			boolean bsdOverride = false;
-			try {
-				bsdOverride = Boolean.parseBoolean(System.getProperty(SYSTEM_PROPERTY_PCAPIF_SOCKADDR_BSD_STYLE));
-			} catch (Throwable e) {}
-
-			return bsdOverride || (NativeABI.current() == NativeABI.MACOS64);
-		}
-
-		/** Maximum sockaddr_t structure address data length. */
-		public final static int MAX_SOCKADDR_ADDRESS_LEN = 16;
-
-		/** The Constant LAYOUT. */
-		private static final MemoryLayout SOCK_ADDR_LAYOUT = structLayout(
-
-				unionLayout(
-
-						JAVA_SHORT.withName("family16"),
-						structLayout(
-
-								JAVA_BYTE.withName("addr_len"),
-								JAVA_BYTE.withName("family8")
-
-						).withName("s1")
-
-				).withName("u1"),
-				JAVA_SHORT.withName("port"),
-				sequenceLayout(MAX_SOCKADDR_ADDRESS_LEN,
-
-						JAVA_BYTE
-
-				).withName("addr")
-
-		);
-
-		/** The Constant familyHandle. */
-		private static final VarHandle family16Handle = SOCK_ADDR_LAYOUT.varHandle(path("u1.family16"));
-		private static final VarHandle family8Handle = SOCK_ADDR_LAYOUT.varHandle(path("u1.s1.family8"));
-		private static final VarHandle addrLenHandle = SOCK_ADDR_LAYOUT.varHandle(path("u1.s1.addr_len"));
-
-		/** The Constant portHandle. */
-		private static final VarHandle portHandle = SOCK_ADDR_LAYOUT.varHandle(path("port"));
-
-		/** The Constant addrHandle. */
-		private static final VarHandle addrHandle = SOCK_ADDR_LAYOUT.varHandle(groupElement("addr"), sequenceElement());
-
-		/**
-		 * New instance.
-		 *
-		 * @param value the value
-		 * @param scope the scope
-		 * @return the sock addr
-		 */
-		static SockAddr newInstance(Object value, Arena scope) {
-			MemorySegment addr = (MemorySegment) value;
-			if (ForeignUtils.isNullAddress(addr))
-				return null;
-
-			return new SockAddr(addr, scope);
-		}
-
-		private static OptionalInt readAddressLengthField(MemorySegment mseg, int family) {
-
-			if (!hasAddressLength()) {
-				return switch (family) {
-
-				case 2 -> OptionalInt.of(4);
-				case 10 -> OptionalInt.of(16);
-				default -> OptionalInt.empty();
-
-				};
-			}
-
-			int addrLen = Byte.toUnsignedInt((byte) addrLenHandle.get(mseg));
-
-			return OptionalInt.of(addrLen);
-		}
-
-		private static int readFamilyField(MemorySegment mseg) {
-
-			if (hasAddressLength())
-				return Byte.toUnsignedInt((byte) family8Handle.get(mseg));
-			else
-				return Short.toUnsignedInt((short) family16Handle.get(mseg));
-		}
-
-		private static int readPortField(MemorySegment mseg) {
-			return Short.toUnsignedInt((short) portHandle.get(mseg));
-
-		}
-
-		/** The family. */
-		private final int family;
-
-		/** The port. */
-		private final int port;
-
-		/** The addr. */
-		private final byte[] addr;
-
-		/** The addr len. */
-		private final OptionalInt addrLen;
-
-		/**
-		 * Instantiates a new sock addr.
-		 *
-		 * @param addr  the addr
-		 * @param arena the scope
-		 */
-		SockAddr(MemorySegment addr, Arena arena) {
-			MemorySegment mseg = addr.reinterpret(SOCK_ADDR_LAYOUT.byteSize(), arena, __ -> {});
-
-			this.family = readFamilyField(mseg);
-			this.addrLen = readAddressLengthField(mseg, family);
-			this.port = readPortField(mseg);
-
-			this.addr = new byte[addrLen.orElse(MAX_SOCKADDR_ADDRESS_LEN)];
-
-			for (int i = 0; i < this.addr.length; i++)
-				this.addr[i] = (byte) addrHandle.get(mseg, i);
+		public Optional<T> netmask() {
+			return netmask;
 		}
 
 		/**
-		 * Socket address structure bytes.
+		 * A family specific socket address for this interface.
 		 *
-		 * @return the byte[]
+		 * @return network family specific interface address
 		 */
-		public byte[] addressBytes() {
+		public T socketAddress() {
 			return addr;
 		}
 
 		/**
-		 * Family.
-		 *
-		 * @return the int
-		 */
-		public int family() {
-			return family;
-		}
-
-		/**
-		 * The length of the address structure in bytes. The value is only returned on
-		 * certain platforms the length can be either calculated or is provided (ie.
-		 * MacOS/Bsd).
-		 *
-		 * @return the length of the address structure if available on this particular
-		 *         platform
-		 */
-		public OptionalInt addressLength() {
-			return addrLen;
-		}
-
-		/**
-		 * Port.
-		 *
-		 * @return the int
-		 */
-		public int port() {
-			return port;
-		}
-
-		/**
-		 * To string.
+		 * String representation of the structure field values.
 		 *
 		 * @return the string
 		 * @see java.lang.Object#toString()
 		 */
 		@Override
 		public String toString() {
-//			if (family != SockAddrFamily.INET.ordinal() && family != SockAddrFamily.INET6.ordinal())
-//				return "family(" + SockAddrFamily.valueOf(family) + ")";
-
-			return "SockAddr " + "[fam=" + SockAddrFamily.valueOf(family)
-//					+ " port=" + port
-					+ " addr=" + PcapUtils.toAddressString(addr) + "]";
+			return "PcapAddr ["
+					+ "addr=" + addr
+					+ netmask.map(SockAddr::toString).map(", netmask=%s"::formatted).orElse("")
+					+ broadaddr.map(SockAddr::toString).map(", netmask=%s"::formatted).orElse("")
+					+ dstaddr.map(SockAddr::toString).map(", netmask=%s"::formatted).orElse("")
+//					+ (netmask.isEmpty() ? "" : ", netmask=" + netmask.get())
+//					+ (broadaddr.isEmpty() ? "" : ", broadaddr=" + broadaddr.get())
+//					+ (dstaddr.isEmpty() ? "" : ", dstaddr=" + dstaddr.get())
+					+ "]";
 		}
 	}
+
+	/**
+	 * System property if set to true, pcap uses BSD style sockaddr structure which
+	 * has the addr_len field. Otherwise the default heuristic are used to determine
+	 * the sock address structure format.
+	 */
+	public static final String SYSTEM_PROPERTY_PCAPIF_SOCKADDR_BSD_STYLE = "org.jnetpcap.sockaddr.bsd";
 
 	/** The Constant LAYOUT. */
 	private static final MemoryLayout PCAP_IF_LAYOUT = structLayout(
@@ -511,75 +332,109 @@ public class PcapIf {
 	private final String name;
 
 	/** The description. */
-	private final String description;
+	private final Optional<String> description;
 
 	/** The flags. */
 	private final int flags;
 
 	/** The addresses. */
-	private final List<PcapAddr> addresses;
+	private final List<PcapAddr<?>> addresses;
 
 	/** The hardware/Mac address. */
 	private final Optional<byte[]> hardwareAddress;
 
 	/**
-	 * Instantiates a new pcap if.
+	 * New instanceof PcapIf structure class.
 	 *
-	 * @param mseg  the mseg
-	 * @param scope the scope
+	 * @param mseg  the memory segment containing off heap pcap_if structure
+	 * @param arena the memory scope
 	 */
-	PcapIf(MemorySegment mseg, Arena scope) {
+	PcapIf(MemorySegment mseg, Arena arena) {
 		MemorySegment addrs = (MemorySegment) addrsHandle.get(mseg);
 
 		name = toJavaString(nameHandle.get(mseg));
-		description = toJavaString(descHandle.get(mseg));
+		description = Optional.ofNullable(toJavaString(descHandle.get(mseg)));
 		flags = (int) flagsHandle.get(mseg);
 
-		addresses = PcapAddr.listAll(addrs, scope);
+		addresses = PcapAddr.listAll(addrs, arena);
 		hardwareAddress = Optional.ofNullable(applyUnchecked(name(), NetworkInterface::getByName))
 				.map(unchecked(NetworkInterface::getHardwareAddress));
 	}
 
 	/**
-	 * Addresses.
+	 * Gets a list of all the addresses (PcapAddr) associated with this pcap
+	 * interface.
 	 *
-	 * @return the list
+	 * @return the list of addresses
 	 */
-	public List<PcapAddr> addresses() {
+	public List<PcapAddr<?>> addresses() {
 		return addresses;
 	}
 
 	/**
-	 * Retrieves an optional PCAP address of a specific socket address family type.
+	 * Search for a PCAP address of a specific socket address family type.
 	 *
 	 * @param family the socket address family type
 	 * @return the optional PCAP address if found
 	 */
-	public Optional<PcapAddr> addressOfFamily(SockAddrFamily family) {
+	public Optional<PcapAddr<? extends SockAddr>> findAddressOfFamily(SockAddrFamily family) {
+
+		var list = addresses();
+
+		for (PcapAddr<?> a : list) {
+			var af = a.addr.familyConstant().orElse(null);
+			if (af == family)
+				return Optional.of(a);
+		}
+
+		return Optional.empty();
+	}
+
+	/**
+	 * Finds the first address in the list of PcapAddr addresses, which is of AF
+	 * (Address Family) type represented but the supplied family subclass type.
+	 *
+	 * @param <T>             the generic AF subclass type
+	 * @param faimlyClassType the actual AF subclass type
+	 * @return an optional if address represented by the family subclass if found
+	 */
+	@SuppressWarnings({ "unchecked" })
+	public <T extends SockAddr> Optional<PcapAddr<T>> findAddressOfType(Class<T> faimlyClassType) {
 
 		var list = addresses();
 
 		return list.stream()
-				.filter(a -> a.addr.family == family.getAsInt())
-				.findAny();
+				.filter(a -> faimlyClassType.isAssignableFrom(a.addr.getClass()))
+				.map(a -> (PcapAddr<T>) a)
+				.findFirst();
 	}
 
 	/**
-	 * Description.
+	 * Optional textual description of the interface.
 	 *
-	 * @return the string
+	 * @return the interface description if available
 	 */
-	public String description() {
+	public Optional<String> description() {
 		return description;
 	}
 
 	/**
-	 * Flags.
+	 * Interface flags (e.g., PCAP_IF_LOOPBACK for loopback interfaces).
 	 *
-	 * @return the int
+	 * @return the interface bitmask of flags
 	 */
 	public int flags() {
 		return flags;
+	}
+
+	/**
+	 * Interface flags (e.g., PCAP_IF_LOOPBACK for loopback interfaces), as an enum
+	 * set.
+	 *
+	 * @return the set containing enum flag constants for each flag bit
+	 */
+	public Set<PcapIfFlag> flagsAsEnumSet() {
+		return PcapIfFlag.toEnumSet(flags);
 	}
 
 	/**
@@ -593,7 +448,7 @@ public class PcapIf {
 	}
 
 	/**
-	 * Name.
+	 * Name of the interface (e.g., "eth0") .
 	 *
 	 * @return the string
 	 */
@@ -602,15 +457,26 @@ public class PcapIf {
 	}
 
 	/**
-	 * To string.
+	 * String representation of the structure field values.
 	 *
 	 * @return the string
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "PcapIf [" + "name=" + name + ", description=" + description + ", flags=" + flags + ", addresses="
-				+ addresses + "]";
+
+		var set = flagsAsEnumSet();
+		String flagString = set.stream().map(PcapIfFlag::label).collect(Collectors.joining(","));
+
+		if (flagString.isBlank())
+			flagString = "0b%s/0x%X".formatted(Integer.toBinaryString(flags), flags);
+
+		return "PcapIf ["
+				+ "\"%s\"".formatted(name)
+				+ ", flags=%s<%s>".formatted(flags, flagString)
+				+ (description.isEmpty() ? "" : ", description=\"%s\"".formatted(description.get()))
+				+ (addresses.isEmpty() ? "" : ", addresses=" + addresses)
+				+ "]";
 	}
 
 }

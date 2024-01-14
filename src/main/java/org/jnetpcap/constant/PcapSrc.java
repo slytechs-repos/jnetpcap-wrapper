@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.jnetpcap.constant;
 
+import java.util.Optional;
 import java.util.function.IntSupplier;
 
 /**
@@ -49,13 +50,31 @@ public enum PcapSrc implements IntSupplier {
 	public static final int PCAP_SRC_IFREMOTE = 4;
 
 	/**
-	 * Value of int to PcapSrc constant.
+	 * Converts PCAP src numerical constant to an enum constant.
 	 *
-	 * @param value the value
-	 * @return the pcap src
+	 * @param src the PCAP src numerical constant
+	 * @return the PCAP src enum constant
+	 * @throws IllegalArgumentException thrown if not found
 	 */
-	public static PcapSrc valueOf(int value) {
-		return values()[value];
+	public static PcapSrc valueOf(int src) throws IllegalArgumentException {
+		if (src < 0 || src > 2)
+			throw new IllegalArgumentException(Integer.toString(src));
+
+		return values()[src];
+	}
+
+	/**
+	 * Converts PCAP src numerical constant to an enum constant, if found.
+	 *
+	 * @param src the PCAP src numerical constant
+	 * @return the PCAP src enum constant
+	 * @throws IllegalArgumentException thrown if not found
+	 */
+	public static Optional<PcapSrc> toEnum(int src) throws IllegalArgumentException {
+		if (src < 0 || src > 2)
+			return Optional.empty();
+
+		return Optional.of(values()[src]);
 	}
 
 	/**

@@ -15,6 +15,8 @@
  */
 package org.jnetpcap.internal;
 
+import org.jnetpcap.PcapIf;
+
 import static java.lang.foreign.ValueLayout.*;
 
 /**
@@ -26,28 +28,35 @@ import static java.lang.foreign.ValueLayout.*;
  *
  */
 public enum NativeABI {
-	
+
 	/** The sys v. */
 	SYS_V,
-	
+
 	/** The win64. */
 	WIN64,
-	
+
 	/** The linux64. */
 	LINUX64,
-	
+
 	/** The macos64. */
 	MACOS64;
 
+	/**
+	 * System property if set to true, pcap uses BSD style sockaddr structure which
+	 * has the addr_len field. Otherwise the default heuristic are used to determine
+	 * the sock address structure format.
+	 */
+	public static final String SYSTEM_PROPERTY_NATIVE_ABI_BSD = "org.jnetpcap.abi.bsd";
+
 	/** The Constant ABI. */
 	private static final NativeABI ABI;
-	
+
 	/** The Constant ARCH. */
 	private static final String ARCH;
-	
+
 	/** The Constant OS. */
 	private static final String OS;
-	
+
 	/** The Constant ADDRESS_SIZE. */
 	private static final long ADDRESS_SIZE;
 
@@ -61,6 +70,8 @@ public enum NativeABI {
 		if ((ARCH.equals("amd64") || ARCH.equals("x86_64")) && ADDRESS_SIZE == 64) {
 			if (OS.startsWith("Windows")) {
 				ABI = WIN64;
+			} else if (OS.startsWith("Mac")) {
+				ABI = MACOS64;
 			} else {
 				ABI = SYS_V;
 			}
@@ -106,5 +117,20 @@ public enum NativeABI {
 					"Unsupported os, arch, or address size: " + OS + ", " + ARCH + ", " + ADDRESS_SIZE);
 		}
 		return ABI;
+	}
+
+	/**
+	 * Checks if is bsd abi.
+	 *
+	 * @return true, if is bsd abi
+	 */
+	public static boolean isBsdAbi() {
+		boolean bsdOverride = false;
+		try {
+			bsdOverride = Boolean.parseBoolean(System.getProperty(PcapIf.SYSTEM_PROPERTY_PCAPIF_SOCKADDR_BSD_STYLE,
+					"false"));
+		} catch (Throwable e) {}
+
+		return bsdOverride || (NativeABI.current() == NativeABI.MACOS64);
 	}
 }
