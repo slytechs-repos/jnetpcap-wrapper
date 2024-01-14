@@ -569,8 +569,8 @@ public class SockAddr {
 		public String toString() {
 			return "AF_LINK ["
 					+ "#" + index
-					+ (name.isEmpty() ? "" : ", name=%s".formatted(name.get()))
-					+ (address.isEmpty() ? "" : ", addr=%s".formatted(PcapUtils.toAddressString(address.get())))
+					+ (name.isEmpty() ? "" : ", \"%s\"".formatted(name.get()))
+					+ (address.isEmpty() ? "" : ", %s".formatted(PcapUtils.toAddressString(address.get())))
 					+ (selector.isEmpty() ? "" : ", sel=0x%x".formatted(selector.getAsInt()))
 					+ "]";
 		}
@@ -741,8 +741,8 @@ public class SockAddr {
 	@Override
 	public String toString() {
 		return "AF_%s[".formatted(familyConstant().orElse(null))
+				+ PcapUtils.toAddressString(saData)
 				+ "fam=%s(%d)".formatted(SockAddrFamily.lookup(saFamily).orElse(null), saFamily)
-				+ " addr=" + PcapUtils.toAddressString(saData)
 				+ "]";
 	}
 
