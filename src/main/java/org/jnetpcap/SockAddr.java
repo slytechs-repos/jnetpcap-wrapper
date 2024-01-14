@@ -565,10 +565,10 @@ public class SockAddr {
 			return "AF_LINK(len=%d)".formatted(totalLength().orElse(20))
 					+ "["
 					+ "index=" + index
-					+ "type=" + type
-					+ "nlen=" + nlen
-					+ "alen=" + alen
-					+ "slen=" + slen
+					+ ", type=" + type
+					+ ", nlen=" + nlen
+					+ ", alen=" + alen
+					+ ", slen=" + slen
 					+ (name.isEmpty() ? "" : ", name=" + name.get())
 					+ ", addr=" + PcapUtils.toAddressString(address())
 					+ (selector.isEmpty() ? "" : ", sel=0x%x".formatted(selector.getAsInt()))
