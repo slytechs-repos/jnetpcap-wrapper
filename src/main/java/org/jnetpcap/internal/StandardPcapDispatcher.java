@@ -103,10 +103,10 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 
 	/** The pcap callback stub. */
 	private final MemorySegment pcapCallbackStub;
-	
+
 	/** The pcap handle. */
 	private final MemorySegment pcapHandle;
-	
+
 	/** The user sink. */
 	private NativeCallback userSink;
 
@@ -115,13 +115,13 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 
 	/** The uncaught exception handler. */
 	private UncaughtExceptionHandler uncaughtExceptionHandler;
-	
+
 	/** The uncaught exception. */
 	private RuntimeException uncaughtException;
-	
+
 	/** The interrupted. */
 	private boolean interrupted = false;
-	
+
 	/** The interrupt on errors. */
 	@SuppressWarnings("unused")
 	private boolean interruptOnErrors = true;
@@ -180,7 +180,9 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
-	 * @see org.jnetpcap.internal.PcapDispatcher#dispatchNative(int, org.jnetpcap.PcapHandler.NativeCallback, java.lang.foreign.MemorySegment)
+	 * @see org.jnetpcap.internal.PcapDispatcher#dispatchNative(int,
+	 *      org.jnetpcap.PcapHandler.NativeCallback,
+	 *      java.lang.foreign.MemorySegment)
 	 */
 	@Override
 	public final int dispatchNative(int count, NativeCallback handler, MemorySegment user) {
@@ -259,7 +261,9 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
-	 * @see org.jnetpcap.internal.PcapDispatcher#loopNative(int, org.jnetpcap.PcapHandler.NativeCallback, java.lang.foreign.MemorySegment)
+	 * @see org.jnetpcap.internal.PcapDispatcher#loopNative(int,
+	 *      org.jnetpcap.PcapHandler.NativeCallback,
+	 *      java.lang.foreign.MemorySegment)
 	 */
 	@Override
 	public final int loopNative(int count, NativeCallback handler, MemorySegment user) {
@@ -306,7 +310,14 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	public final void nativeCallback(MemorySegment user, MemorySegment header, MemorySegment packet) {
 		this.uncaughtException = null; // Reset any previous unclaimed exceptions
 
-		try {
+		try (var arena = Arena.ofShared()) {
+
+			int hdrlen = abi.headerLength();
+			header = header.reinterpret(hdrlen, arena, ForeignUtils.EMPTY_CLEANUP);
+
+			int caplen = abi.captureLength(header);
+			packet = packet.reinterpret(caplen, arena, ForeignUtils.EMPTY_CLEANUP);
+
 			this.userSink.nativeCallback(user, header, packet);
 		} catch (RuntimeException e) {
 			onNativeCallbackException(e);
@@ -356,10 +367,10 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 
 	/** The pointer to pointer1. */
 	private final MemorySegment POINTER_TO_POINTER1 = Arena.ofAuto().allocate(ADDRESS);
-	
+
 	/** The pointer to pointer2. */
 	private final MemorySegment POINTER_TO_POINTER2 = Arena.ofAuto().allocate(ADDRESS);
-	
+
 	/** The pcap header buffer. */
 	private final MemorySegment PCAP_HEADER_BUFFER = Arena.ofAuto().allocate(PcapHeaderABI.nativeAbi().headerLength());
 
