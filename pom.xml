@@ -2,12 +2,12 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.slytechs.jnet</groupId>
-	<artifactId>jnetpcap</artifactId>
+	<groupId>com.slytechs.jnet.jnetpcap</groupId>
+	<artifactId>jnetpcap-wrapper</artifactId>
 	<!-- mvn versions:set -DnewVersion=_new_version_ -->
-	<version>2.0.1+jdk.21</version>
-	<name>jNetPcap OS</name>
-	<description>A Java wrapper for native libpcap library</description>
+	<version>2.0.1</version>
+	<name>jNetPcap Wrapper</name>
+	<description>A java wrapper for native LIBPCAP library and PCAP API</description>
 	<url>https://www.jnetpcap.org</url>
 	<properties>
 		<jdk.version>21</jdk.version>
@@ -37,23 +37,11 @@
 		</developer>
 	</developers>
 	<dependencies>
-		<!--
-		https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
-		<dependency>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-dependency-plugin</artifactId>
-			<version>3.6.1</version>
-		</dependency>
-
-		<!--
-		https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-compiler-plugin</artifactId>
 			<version>3.11.0</version>
 		</dependency>
-		<!--
-		https://mvnrepository.com/artifact/org.junit.platform/junit-platform-suite-api -->
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-suite-api</artifactId>
@@ -201,25 +189,6 @@
 
 		</plugins>
 	</build>
-	<distributionManagement>
-
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-
-		<repository>
-			<id>ossrh</id>
-			<url>
-				https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-
-		<!-- mvn clean site site:stage scm-publish:publish-scm -->
-		<site>
-			<id>github</id>
-			<url>scm:git:git@github.com:slytechs-repos/jnetpcap.git</url>
-		</site>
-	</distributionManagement>
 	<reporting>
 		<plugins>
 			<plugin>
@@ -407,4 +376,20 @@
 			scm:git:ssh:git://github.com/slytechs-repos/jnetpcap.git</developerConnection>
 		<url>https://github.com/slytechs-repos/jnetpcap</url>
 	</scm>
+	<distributionManagement>
+		<!-- mvn clean site site:stage scm-publish:publish-scm -->
+		<site>
+			<id>github</id>
+			<url>scm:git:git@github.com:slytechs-repos/jnetpcap.git</url>
+		</site>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>
+				https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
 </project>
