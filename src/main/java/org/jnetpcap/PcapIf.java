@@ -22,6 +22,7 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.VarHandle;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +30,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jnetpcap.SockAddr.Inet6SockAddr;
+import org.jnetpcap.SockAddr.InetSockAddr;
 import org.jnetpcap.constant.PcapIfFlag;
 import org.jnetpcap.constant.SockAddrFamily;
 import org.jnetpcap.internal.ForeignUtils;
+import org.jnetpcap.util.PcapUtils;
 
 import static java.lang.foreign.MemoryLayout.*;
 import static java.lang.foreign.MemoryLayout.PathElement.*;
@@ -357,10 +361,41 @@ public class PcapIf {
 		flags = (int) flagsHandle.get(mseg);
 
 		addresses = PcapAddr.listAll(addrs, arena);
-		hardwareAddress = Optional.ofNullable(applyUnchecked(name(), NetworkInterface::getByName))
-				.map(unchecked(NetworkInterface::getHardwareAddress));
+		hardwareAddress = Optional.ofNullable(selectJavaNetInterface());
 	}
-
+	
+	private byte[] selectJavaNetInterface() {
+		
+		/* 1 - select by name */
+		try {
+			return NetworkInterface.getByName(name()).getHardwareAddress();
+		} catch(Throwable e) {}
+		
+		/* 2 - select by IPv4/INET address */
+		try {
+			var ip4 = findAddressOfType(InetSockAddr.class)
+					.map(PcapAddr::socketAddress)
+					.map(InetSockAddr::address)
+					.orElseThrow();
+			
+			String str = PcapUtils.toAddressString(ip4);
+			
+			return NetworkInterface.getByInetAddress(InetAddress.getByAddress(ip4)).getHardwareAddress();
+		} catch(Throwable e) {}
+		
+		/* 3 - select by IPv6/INET6 address */
+		try {
+			var ip6 = findAddressOfType(Inet6SockAddr.class)
+					.map(PcapAddr::socketAddress)
+					.map(Inet6SockAddr::address)
+					.orElseThrow();
+			
+			return NetworkInterface.getByInetAddress(InetAddress.getByAddress(ip6)).getHardwareAddress();
+		} catch(Throwable e) {}
+		
+		return null;
+	}
+	
 	/**
 	 * Gets a list of all the addresses (PcapAddr) associated with this pcap
 	 * interface.
