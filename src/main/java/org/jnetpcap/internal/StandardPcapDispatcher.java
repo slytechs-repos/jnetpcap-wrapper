@@ -1,19 +1,17 @@
 /*
- * Sly Technologies Free License
- * 
- * Copyright 2023 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
- * Licensed under the Sly Technologies Free License (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.slytechs.com/free-license-text
- * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jnetpcap.internal;
 
@@ -35,12 +33,16 @@ import static java.lang.foreign.ValueLayout.*;
 public class StandardPcapDispatcher implements PcapDispatcher {
 
 	/**
+	 * The Constant pcap_geterr.
+	 *
 	 * @see {@code char *pcap_geterr(pcap_t *p)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_geterr;
 
 	/**
+	 * The Constant pcap_dispatch.
+	 *
 	 * @see {@code int pcap_dispatch(pcap_t *p, int cnt, pcap_handler callback,
 	 *      u_char *user)}
 	 * @since libpcap 0.4
@@ -67,12 +69,16 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	static final ForeignUpcall<NativeCallback> pcap_handler;
 
 	/**
+	 * The Constant pcap_next.
+	 *
 	 * @see {@code const u_char *pcap_next(pcap_t *p, struct pcap_pkthdr *h)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_next;
 
 	/**
+	 * The Constant pcap_next_ex.
+	 *
 	 * @see {@code int pcap_next_ex (pcap_t *p, struct pcap_pkthdr **pkt_header,
 	 *      const u_char **pkt_data)}
 	 * @since libpcap 0.8
@@ -95,22 +101,44 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		}
 	}
 
+	/** The pcap callback stub. */
 	private final MemorySegment pcapCallbackStub;
+
+	/** The pcap handle. */
 	private final MemorySegment pcapHandle;
+
+	/** The user sink. */
 	private NativeCallback userSink;
 
+	/** The arena. */
 	protected final Arena arena;
 
+	/** The uncaught exception handler. */
 	private UncaughtExceptionHandler uncaughtExceptionHandler;
+
+	/** The uncaught exception. */
 	private RuntimeException uncaughtException;
+
+	/** The interrupted. */
 	private boolean interrupted = false;
+
+	/** The interrupt on errors. */
 	@SuppressWarnings("unused")
 	private boolean interruptOnErrors = true;
 
+	/** The break dispatch. */
 	private final Runnable breakDispatch;
 
+	/** The abi. */
 	private final PcapHeaderABI abi;
 
+	/**
+	 * Instantiates a new standard pcap dispatcher.
+	 *
+	 * @param pcapHandle    the pcap handle
+	 * @param abi           the abi
+	 * @param breakDispatch the break dispatch
+	 */
 	public StandardPcapDispatcher(MemorySegment pcapHandle, PcapHeaderABI abi, Runnable breakDispatch) {
 		this.pcapHandle = pcapHandle;
 		this.abi = abi;
@@ -129,6 +157,10 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
+	 * Capture length.
+	 *
+	 * @param headerAddress the header address
+	 * @return the int
 	 * @see org.jnetpcap.internal.PcapDispatcher#captureLength(java.lang.foreign.MemorySegment)
 	 */
 	@Override
@@ -137,6 +169,8 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
+	 * Close.
+	 *
 	 * @see java.lang.AutoCloseable#close()
 	 */
 	@Override
@@ -145,6 +179,11 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 			arena.close();
 	}
 
+	/**
+	 * @see org.jnetpcap.internal.PcapDispatcher#dispatchNative(int,
+	 *      org.jnetpcap.PcapHandler.NativeCallback,
+	 *      java.lang.foreign.MemorySegment)
+	 */
 	@Override
 	public final int dispatchNative(int count, NativeCallback handler, MemorySegment user) {
 		this.userSink = handler;
@@ -156,9 +195,12 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
-	 * @param count
-	 * @param callbackFunc
-	 * @param userData
+	 * Dispatch raw.
+	 *
+	 * @param count        the count
+	 * @param callbackFunc the callback func
+	 * @param userData     the user data
+	 * @return the int
 	 */
 	@Override
 	public final int dispatchRaw(int count, MemorySegment callbackFunc, MemorySegment userData) {
@@ -175,6 +217,8 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
+	 * Gets the uncaught exception.
+	 *
 	 * @return the uncaughtException
 	 */
 	@Override
@@ -182,6 +226,11 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		return uncaughtException;
 	}
 
+	/**
+	 * Handle interrupt.
+	 *
+	 * @throws RuntimeException the runtime exception
+	 */
 	private final void handleInterrupt() throws RuntimeException {
 		interrupted = false; // Reset flag
 
@@ -191,6 +240,10 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
+	 * Header length.
+	 *
+	 * @param headerAddress the header address
+	 * @return the int
 	 * @see org.jnetpcap.internal.PcapDispatcher#headerLength(java.lang.foreign.MemorySegment)
 	 */
 	@Override
@@ -198,12 +251,20 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		return abi.headerLength();
 	}
 
+	/**
+	 * @see org.jnetpcap.internal.PcapDispatcher#interrupt()
+	 */
 	@Override
 	public final void interrupt() {
 		this.breakDispatch.run();
 		this.interrupted = true;
 	}
 
+	/**
+	 * @see org.jnetpcap.internal.PcapDispatcher#loopNative(int,
+	 *      org.jnetpcap.PcapHandler.NativeCallback,
+	 *      java.lang.foreign.MemorySegment)
+	 */
 	@Override
 	public final int loopNative(int count, NativeCallback handler, MemorySegment user) {
 		this.userSink = handler;
@@ -215,9 +276,12 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
-	 * @param count
-	 * @param callbackFunc
-	 * @param userData
+	 * Loop raw.
+	 *
+	 * @param count        the count
+	 * @param callbackFunc the callback func
+	 * @param userData     the user data
+	 * @return the int
 	 */
 	@Override
 	public final int loopRaw(int count, MemorySegment callbackFunc, MemorySegment userData) {
@@ -234,6 +298,11 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
+	 * Native callback.
+	 *
+	 * @param user   the user
+	 * @param header the header
+	 * @param packet the packet
 	 * @see org.jnetpcap.Pcap0_4.MemorySegmentCallback#nativeCallback(java.lang.foreign.MemorySegment,
 	 *      java.lang.foreign.MemorySegment, java.lang.foreign.MemorySegment)
 	 */
@@ -241,7 +310,14 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	public final void nativeCallback(MemorySegment user, MemorySegment header, MemorySegment packet) {
 		this.uncaughtException = null; // Reset any previous unclaimed exceptions
 
-		try {
+		try (var arena = Arena.ofShared()) {
+
+			int hdrlen = abi.headerLength();
+			header = header.reinterpret(hdrlen, arena, ForeignUtils.EMPTY_CLEANUP);
+
+			int caplen = abi.captureLength(header);
+			packet = packet.reinterpret(caplen, arena, ForeignUtils.EMPTY_CLEANUP);
+
 			this.userSink.nativeCallback(user, header, packet);
 		} catch (RuntimeException e) {
 			onNativeCallbackException(e);
@@ -270,12 +346,18 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		}
 	}
 
+	/**
+	 * @see org.jnetpcap.internal.PcapDispatcher#setUncaughtExceptionHandler(java.lang.Thread.UncaughtExceptionHandler)
+	 */
 	@Override
 	public final void setUncaughtExceptionHandler(UncaughtExceptionHandler exceptionHandler) {
 		this.uncaughtExceptionHandler = exceptionHandler;
 	}
 
 	/**
+	 * Pcap header ABI.
+	 *
+	 * @return the pcap header ABI
 	 * @see org.jnetpcap.internal.PcapDispatcher#pcapHeaderABI()
 	 */
 	@Override
@@ -283,8 +365,13 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 		return this.abi;
 	}
 
+	/** The pointer to pointer1. */
 	private final MemorySegment POINTER_TO_POINTER1 = Arena.ofAuto().allocate(ADDRESS);
+
+	/** The pointer to pointer2. */
 	private final MemorySegment POINTER_TO_POINTER2 = Arena.ofAuto().allocate(ADDRESS);
+
+	/** The pcap header buffer. */
 	private final MemorySegment PCAP_HEADER_BUFFER = Arena.ofAuto().allocate(PcapHeaderABI.nativeAbi().headerLength());
 
 	/**
@@ -301,6 +388,11 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
+	 * Next ex.
+	 *
+	 * @return the pcap packet ref
+	 * @throws PcapException    the pcap exception
+	 * @throws TimeoutException the timeout exception
 	 * @see org.jnetpcap.internal.PcapDispatcher#nextEx()
 	 */
 	@Override
@@ -324,6 +416,10 @@ public class StandardPcapDispatcher implements PcapDispatcher {
 	}
 
 	/**
+	 * Next.
+	 *
+	 * @return the pcap packet ref
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.internal.PcapDispatcher#next()
 	 */
 	@Override

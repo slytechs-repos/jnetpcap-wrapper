@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,6 +51,11 @@ import static java.lang.foreign.ValueLayout.*;
  */
 public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
+	/**
+	 * The Interface PcapSupplier.
+	 *
+	 * @param <T> the generic type
+	 */
 	protected interface PcapSupplier<T extends Pcap> {
 
 		/**
@@ -68,6 +71,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * The Constant pcap_open_live.
+	 *
 	 * @see {@code pcap_t *pcap_open_live (const char *device, int snaplen, int
 	 *      promisc, int to_ms, char *errbuf)}
 	 * @since libpcap 0.4
@@ -75,30 +80,40 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	private static final PcapForeignDowncall pcap_open_live;
 
 	/**
+	 * The Constant pcap_open_offline.
+	 *
 	 * @see {@code pcap_t *pcap_open_offline(const char *fname, char *errbuf)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_open_offline;
 
 	/**
+	 * The Constant pcap_close.
+	 *
 	 * @see {@code void pcap_close(pcap_t *p)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_close;
 
 	/**
+	 * The Constant pcap_datalink.
+	 *
 	 * @see {@code int pcap_datalink(pcap_t *p)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_datalink;
 
 	/**
+	 * The Constant pcap_geterr.
+	 *
 	 * @see {@code char *pcap_geterr(pcap_t *p)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_geterr;
 
 	/**
+	 * The Constant pcap_compile.
+	 *
 	 * @see {@code int pcap_compile (pcap_t *p, struct bpf_program *fp, const char
 	 *      *str, int optimize, bpf_u_int32 netmask)}
 	 * @since libpcap 0.4
@@ -106,36 +121,48 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	private static final PcapForeignDowncall pcap_compile;
 
 	/**
+	 * The Constant pcap_setfilter.
+	 *
 	 * @see {@code int pcap_setfilter(pcap_t *p, struct bpf_program *fp)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_setfilter;
 
 	/**
+	 * The Constant pcap_is_swapped.
+	 *
 	 * @see {@code int pcap_is_swapped(pcap_t *p)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_is_swapped;
 
 	/**
+	 * The Constant pcap_stats.
+	 *
 	 * @see {@code int pcap_stats(pcap_t *, struct pcap_stat *)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_stats;
 
 	/**
+	 * The Constant pcap_next.
+	 *
 	 * @see {@code const u_char *pcap_next(pcap_t *p, struct pcap_pkthdr *h)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_next;
 
 	/**
+	 * The Constant pcap_perror.
+	 *
 	 * @see {@code void pcap_perror(pcap_t *, const char *)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_perror;
 
 	/**
+	 * The Constant pcap_lookupnet.
+	 *
 	 * @see {@code int pcap_lookupnet(const char *device, bpf_u_int32 *netp,
 	 *      bpf_u_int32 *maskp, char *errbuf)}
 	 * @since libpcap 0.4
@@ -151,42 +178,56 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	private static final PcapForeignDowncall pcap_snapshot;
 
 	/**
+	 * The Constant pcap_major_version.
+	 *
 	 * @see {@code int pcap_major_version(pcap_t *p)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_major_version;
 
 	/**
+	 * The Constant pcap_minor_version.
+	 *
 	 * @see {@code int pcap_major_version(pcap_t *p)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_minor_version;
 
 	/**
+	 * The Constant pcap_file.
+	 *
 	 * @see {@code FILE *pcap_file(pcap_t *p)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_file;
 
 	/**
+	 * The Constant pcap_fileno.
+	 *
 	 * @see {@code int pcap_fileno(pcap_t *p)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_fileno;
 
 	/**
+	 * The Constant pcap_dump_open.
+	 *
 	 * @see {@code pcap_dumper_t *pcap_dump_open(pcap_t *p, const char *fname)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_dump_open;
 
 	/**
+	 * The Constant pcap_lookupdev.
+	 *
 	 * @see {@code [DEPRECATED] char *pcap_lookupdev(char *errbuf)}
 	 * @since libpcap 0.4
 	 */
 	private static final PcapForeignDowncall pcap_lookupdev;
 
 	/**
+	 * The Constant pcap_strerror.
+	 *
 	 * @see {@code const char *pcap_strerror(int)}
 	 * @since libpcap 0.4
 	 */
@@ -478,22 +519,35 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 *
 	 * @param pcapHandle the pcap handle
 	 * @param name       the name
+	 * @param abi        the abi
 	 */
 	protected Pcap0_4(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 		this.dispatcher = new StandardPcapDispatcher(getPcapHandle(), abi, this::breakloop);
 	}
 
+	/**
+	 * Sets the packet dispatcher implementation.
+	 *
+	 * @param newDispatcher the new packet dispatcher implementation
+	 */
 	protected void setDispatcher(PcapDispatcher newDispatcher) {
 		this.dispatcher.close(); // Close old dispatcher
 		this.dispatcher = Objects.requireNonNull(newDispatcher, "dispatcher");
 	}
 
+	/**
+	 * Gets the packet dispatcher implementation.
+	 *
+	 * @return the packet dispatcher implementation
+	 */
 	protected PcapDispatcher getDispatcher() {
 		return dispatcher;
 	}
 
 	/**
+	 * Close.
+	 *
 	 * @see org.jnetpcap.Pcap#close()
 	 */
 	@Override
@@ -505,6 +559,13 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Compile.
+	 *
+	 * @param str      the str
+	 * @param optimize the optimize
+	 * @param netmask  the netmask
+	 * @return the bp filter
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#compile(java.lang.String, boolean, int)
 	 */
 	@Override
@@ -523,6 +584,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Datalink.
+	 *
+	 * @return the pcap dlt
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#datalink()
 	 */
 	@Override
@@ -559,6 +624,14 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Dispatch.
+	 *
+	 * @param <U>     the generic type
+	 * @param count   the count
+	 * @param handler the handler
+	 * @param user    the user
+	 * @return the int
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#dispatch(int,
 	 *      org.jnetpcap.PcapHandler.OfMemorySegment, java.lang.Object)
 	 */
@@ -593,6 +666,11 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Dispatch.
+	 *
+	 * @param count      the count
+	 * @param pcapDumper the pcap dumper
+	 * @return the int
 	 * @see org.jnetpcap.Pcap#dispatch(int, org.jnetpcap.PcapDumper)
 	 */
 	@Override
@@ -607,12 +685,22 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 		}
 	}
 
+	/**
+	 * @see org.jnetpcap.Pcap#dispatch(int, org.jnetpcap.PcapHandler.NativeCallback, java.lang.foreign.MemorySegment)
+	 */
 	@Override
 	public int dispatch(int count, PcapHandler.NativeCallback handler, MemorySegment user) {
 		return dispatcher.dispatchNative(count, handler, user);
 	}
 
 	/**
+	 * Dispatch.
+	 *
+	 * @param <U>     the generic type
+	 * @param count   the count
+	 * @param handler the handler
+	 * @param user    the user
+	 * @return the int
 	 * @see org.jnetpcap.Pcap#dispatch(int, org.jnetpcap.PcapHandler.OfArray,
 	 *      java.lang.Object)
 	 */
@@ -636,6 +724,11 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Dump open.
+	 *
+	 * @param fname the fname
+	 * @return the pcap dumper
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#dumpOpen(java.lang.String)
 	 */
 	@Override
@@ -692,6 +785,9 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Gets the err.
+	 *
+	 * @return the err
 	 * @see org.jnetpcap.Pcap#geterr()
 	 */
 	@Override
@@ -700,6 +796,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Checks if is swapped.
+	 *
+	 * @return true, if is swapped
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#isSwapped()
 	 */
 	@Override
@@ -710,6 +810,11 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Loop.
+	 *
+	 * @param count      the count
+	 * @param pcapDumper the pcap dumper
+	 * @return the int
 	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapDumper)
 	 */
 	@Override
@@ -724,12 +829,22 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 		}
 	}
 
+	/**
+	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.NativeCallback, java.lang.foreign.MemorySegment)
+	 */
 	@Override
 	public int loop(int count, PcapHandler.NativeCallback handler, MemorySegment user) {
 		return dispatcher.loopNative(count, handler, user);
 	}
 
 	/**
+	 * Loop.
+	 *
+	 * @param <U>     the generic type
+	 * @param count   the count
+	 * @param handler the handler
+	 * @param user    the user
+	 * @return the int
 	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.OfArray,
 	 *      java.lang.Object)
 	 */
@@ -752,6 +867,9 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 		}, aUser);
 	}
 
+	/**
+	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.OfMemorySegment, java.lang.Object)
+	 */
 	@Override
 	public <U> int loop(int count, PcapHandler.OfMemorySegment<U> handler, U user) {
 		MemorySegment aUser = (user instanceof MemorySegment addr) ? addr : NULL;
@@ -782,6 +900,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Major version.
+	 *
+	 * @return the int
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#majorVersion()
 	 */
 	@Override
@@ -790,6 +912,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Minor version.
+	 *
+	 * @return the int
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#minorVersion()
 	 */
 	@Override
@@ -798,6 +924,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Next.
+	 *
+	 * @return the pcap packet ref
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#next()
 	 */
 	@Override
@@ -806,6 +936,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Perror.
+	 *
+	 * @param prefix the prefix
+	 * @return the pcap 0 4
 	 * @see org.jnetpcap.Pcap#perror(java.lang.String)
 	 */
 	@Override
@@ -818,6 +952,11 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Sets the filter.
+	 *
+	 * @param bpfProgram the bpf program
+	 * @return the pcap 0 4
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#setFilter(org.jnetpcap.BpFilter)
 	 */
 	@Override
@@ -828,6 +967,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Snapshot.
+	 *
+	 * @return the int
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#snapshot()
 	 */
 	@Override
@@ -836,6 +979,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
+	 * Stats.
+	 *
+	 * @return the pcap stat
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#stats()
 	 */
 	@Override

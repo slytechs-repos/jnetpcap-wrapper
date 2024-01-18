@@ -18,13 +18,13 @@
 package org.jnetpcap;
 
 /**
- * Pcap error code and messages handler.
- *
+ * A multi-mudule I8N error handler for all jNetPcap messages.
+ * 
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  */
 public class PcapErrorHandler {
-	
+
 	/**
 	 * Instantiates a new pcap error handler.
 	 */

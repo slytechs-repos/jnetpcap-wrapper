@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.jnetpcap.AbstractTestBase.TestPacket.PacketTemplates;
@@ -57,6 +58,30 @@ import org.junit.jupiter.api.TestInfo;
  */
 @SuppressWarnings("exports")
 abstract class AbstractTestBase {
+
+	/**
+	 * Execution interface which allows exceptions to be thrown and/or discarded.
+	 */
+	public interface TestExec {
+
+		/**
+		 * Executes and silently discards any errors
+		 *
+		 * @param exec the execution code
+		 */
+		static boolean discardErrors(TestExec exec) {
+			try {
+				exec.execute();
+				
+				return true;
+			} catch (Throwable e) {
+				return false;
+			}
+		}
+
+		void execute() throws Throwable;
+	}
+
 	/**
 	 * A private packet container using in unit testing with 2 simple fields, header
 	 * and data.
@@ -126,8 +151,7 @@ abstract class AbstractTestBase {
 			int WIRELEN = length;
 
 			/* lets make our native header structure from values */
-			final MemorySegment HEADER = new PcapHeader(TV_SEC, TV_USEC, CAPLEN, WIRELEN)
-					.asMemorySegment();
+			final MemorySegment HEADER = new PcapHeader(TV_SEC, TV_USEC, CAPLEN, WIRELEN).asMemorySegment();
 
 			return HEADER;
 		}
@@ -136,8 +160,7 @@ abstract class AbstractTestBase {
 			return fromArray(abi, packetData, 0, packetData.length, arena);
 		}
 
-		public static TestPacket fromArray(PcapHeaderABI abi, byte[] packetData, int offset, int length,
-				Arena arena) {
+		public static TestPacket fromArray(PcapHeaderABI abi, byte[] packetData, int offset, int length, Arena arena) {
 			MemorySegment packetSegment = arena.allocate(length);
 			MemorySegment.copy(packetData, offset, packetSegment, ValueLayout.JAVA_BYTE, 0, length);
 
@@ -151,7 +174,8 @@ abstract class AbstractTestBase {
 				return null;
 
 			var hdr = new PcapHeader(abi, ref.header(), arena);
-			var pkt = ref.data().reinterpret(hdr.captureLength(), arena, __ ->{});
+			var pkt = ref.data().reinterpret(hdr.captureLength(), arena, __ -> {
+			});
 
 			return new TestPacket(abi, hdr.asMemorySegment(), pkt);
 		}
@@ -323,9 +347,7 @@ abstract class AbstractTestBase {
 
 		} catch (Throwable e) {
 			throw new IllegalStateException(
-					"%s: cleanup action threw an error, this should not happen"
-							.formatted(info.getDisplayName()),
-					e);
+					"%s: cleanup action threw an error, this should not happen".formatted(info.getDisplayName()), e);
 		} finally {
 			/* Reset cleanup */
 			cleanupAction = null;
@@ -345,8 +367,7 @@ abstract class AbstractTestBase {
 	 * @return the test transmitter
 	 */
 	protected TestTransmitter setupPacketTransmitter(PcapHeaderABI abi,
-			BiFunction<PcapHeaderABI, Arena, TestPacket> packetFactory,
-			BiConsumer<MemorySegment, Integer> sendAction) {
+			BiFunction<PcapHeaderABI, Arena, TestPacket> packetFactory, BiConsumer<MemorySegment, Integer> sendAction) {
 		final Arena arena = Arena.ofShared();
 		final TestPacket packetToSend = packetFactory.apply(abi, arena);
 
@@ -439,14 +460,11 @@ abstract class AbstractTestBase {
 	}
 
 	protected static final Random RANDOM = new Random();
-	protected static final String TEST_RUN_ID = "%x"
-			.formatted(System.currentTimeMillis() / 1000);
+	protected static final String TEST_RUN_ID = "%x".formatted(System.currentTimeMillis() / 1000);
 
 	protected File tempFile(TestInfo info, String suffix) throws IOException {
-		final String PREFIX = "%s_%s"
-				.formatted(
-						info.getTestMethod().orElseThrow().getName(),
-						info.getTestClass().orElseThrow().getSimpleName());
+		final String PREFIX = "%s_%s".formatted(info.getTestMethod().orElseThrow().getName(),
+				info.getTestClass().orElseThrow().getSimpleName());
 		final Path DIR_PATH = Path.of("target/test_tmp_files");
 		final File DIR_FILE = DIR_PATH.toFile();
 		final String FILENAME = "test_%s-%s.%s".formatted(TEST_RUN_ID, PREFIX, suffix);

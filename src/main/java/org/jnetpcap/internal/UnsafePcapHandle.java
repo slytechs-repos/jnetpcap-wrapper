@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,14 +33,33 @@ import org.jnetpcap.constant.PcapDlt;
  *
  */
 public non-sealed class UnsafePcapHandle extends Pcap1_10 {
+	
+	/**
+	 * Make dead handle name.
+	 *
+	 * @param dlt the dlt
+	 * @return the string
+	 */
 	public static String makeDeadHandleName(PcapDlt dlt) {
 		return "dead-" + dlt.name().toLowerCase();
 	}
 
+	/**
+	 * Make live handle name.
+	 *
+	 * @param device the device
+	 * @return the string
+	 */
 	public static String makeLiveHandleName(String device) {
 		return device;
 	}
 
+	/**
+	 * Make offline handle name.
+	 *
+	 * @param fname the fname
+	 * @return the string
+	 */
 	public static String makeOfflineHandleName(String fname) {
 		return fname;
 	}
@@ -93,12 +110,21 @@ public non-sealed class UnsafePcapHandle extends Pcap1_10 {
 	}
 
 	/**
-	 * @param pcapHandle
+	 * Instantiates a new unsafe pcap handle.
+	 *
+	 * @param pcapHandle the pcap handle
+	 * @param name       the name
+	 * @param abi        the abi
 	 */
 	protected UnsafePcapHandle(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 
+	/**
+	 * Address.
+	 *
+	 * @return the memory segment
+	 */
 	public MemorySegment address() {
 		return getPcapHandle();
 	}
@@ -256,6 +282,12 @@ public non-sealed class UnsafePcapHandle extends Pcap1_10 {
 	}
 
 	/**
+	 * Inject.
+	 *
+	 * @param packet the packet
+	 * @param length the length
+	 * @return the int
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap0_9#inject(java.lang.foreign.MemorySegment, int)
 	 */
 	@Override
@@ -264,6 +296,11 @@ public non-sealed class UnsafePcapHandle extends Pcap1_10 {
 	}
 
 	/**
+	 * Send packet.
+	 *
+	 * @param packet the packet
+	 * @param length the length
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap0_8#sendPacket(java.lang.foreign.MemorySegment, int)
 	 */
 	@Override

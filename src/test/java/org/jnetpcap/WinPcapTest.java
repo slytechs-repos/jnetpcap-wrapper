@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.io.IOException;
 
+import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapSrc;
 import org.jnetpcap.windows.WinPcap;
@@ -166,13 +167,16 @@ class WinPcapTest extends AbstractTestBase {
 	@Tag("offline-capture")
 	@Tag("libpcap-dumper-api")
 	@Tag("windows")
+	@Disabled // No supported by NPCAP - doesn't support kernel dump mode
 	void testLiveDump(TestInfo info) throws PcapException, IOException {
 		final File tempDumpFile = cleanup(super.tempDumpFile(info), File::delete);
 		final String filename = tempDumpFile.getCanonicalPath();
 		final int MAX_BYTE_SIZE = 10 * 1024;
 		final int MAX_PACKET_COUNT = 10;
+		
+		PcapIf dev = Pcap.findAllDevs().get(0);
 
-		try (var pcap = WinPcap.openOffline(OFFLINE_FILE)) {
+		try (var pcap = WinPcap.openLive(dev.name(), PcapConstants.MAX_SNAPLEN, true, 0, null)) {
 
 			/* Async operation */
 			pcap.liveDump(filename, MAX_BYTE_SIZE, MAX_PACKET_COUNT);

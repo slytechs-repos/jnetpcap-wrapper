@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,6 +22,7 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import org.jnetpcap.Pcap;
 import org.jnetpcap.Pcap0_4;
@@ -371,6 +370,36 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	protected static Arena newArena() {
 		return Pcap.newArena();
 	}
+	
+	/**
+	 * Open a device for capturing.
+	 * 
+	 * <p>
+	 * {@code openLive} is used to obtain a packet capture handle to look at packets
+	 * on the network. device is a string that specifies the network device to open;
+	 * on Linux systems with 2.2 or later kernels, a device argument of "any" or
+	 * NULL can be used to capture packets from all interfaces.
+	 * </p>
+	 *
+	 * @param device  the device name
+	 * @param snaplen specifies the snapshot length to be set on the handle
+	 * @param promisc specifies whether the interface is to be put into promiscuous
+	 *                mode. If promisc is non-zero, promiscuous mode will be set,
+	 *                otherwise it will not be set
+	 * @param timeout the packet buffer timeout, as a non-negative value, in units
+	 * @param unit    time timeout unit
+	 * @return the pcap handle
+	 * @throws PcapException any errors
+	 * @since libpcap 0.4
+	 */
+	public static WinPcap openLive(String device,
+			int snaplen,
+			boolean promisc,
+			long timeout,
+			TimeUnit unit) throws PcapException {
+
+		return Pcap0_4.openLive(WinPcap::new, device, snaplen, promisc, timeout, unit);
+	}
 
 	/**
 	 * Open a fake pcap_t for compiling filters or opening a capture for output.
@@ -498,6 +527,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 *
 	 * @param pcapHandle the pcap handle
 	 * @param name       the name
+	 * @param abi        the abi
 	 */
 	WinPcap(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
@@ -557,7 +587,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	public void liveDump(String filename, int maxsize, int maxpacks) throws PcapException {
 		try (var arena = newArena()) {
 			MemorySegment c_filename = arena.allocateUtf8String(filename);
-			pcap_live_dump.invokeInt(this::geterr, c_filename, maxsize, maxpacks);
+			pcap_live_dump.invokeInt(this::geterr,  getPcapHandle(), c_filename, maxsize, maxpacks);
 		}
 	}
 

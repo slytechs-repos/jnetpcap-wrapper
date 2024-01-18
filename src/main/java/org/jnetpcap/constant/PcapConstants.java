@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,49 +45,49 @@ public final class PcapConstants {
 	 */
 	public static final int PCAP_CHAR_ENC_UTF_8 = 0x00000001;
 
-	/** use timestamps with microsecond precision, default */
+	/** use timestamps with microsecond precision, default. */
 	public static final int PCAP_TSTAMP_PRECISION_MICRO = 0;
 
-	/** use timestamps with nanosecond precision */
+	/** use timestamps with nanosecond precision. */
 	public static final int PCAP_TSTAMP_PRECISION_NANO = 1;
 
-	/** loop terminated by pcap_breakloop */
+	/** loop terminated by pcap_breakloop. */
 	public static final int PCAP_ERROR_BREAK = -2;
 
-	/** generic warning full */
+	/** generic warning full. */
 	public static final int PCAP_WARNING = 1;
 
-	/** this device doesn't support promiscuous mode */
+	/** this device doesn't support promiscuous mode. */
 	public static final int PCAP_WARNING_PROMISC_NOTSUP = 2;
 
-	/** the requested time stamp type is not supported */
+	/** the requested time stamp type is not supported. */
 	public static final int PCAP_WARNING_TSTAMP_TYPE_NOTSUP = 3;
 
-	/** interface is loopback */
+	/** interface is loopback. */
 	public static final int PCAP_IF_LOOPBACK = 0x00000001;
 
-	/** interface is up */
+	/** interface is up. */
 	public static final int PCAP_IF_UP = 0x00000002;
 
-	/** interface is running */
+	/** interface is running. */
 	public static final int PCAP_IF_RUNNING = 0x00000004;
 
-	/** interface is wireless (*NOT* necessarily Wi-Fi!) */
+	/** interface is wireless (*NOT* necessarily Wi-Fi!). */
 	public static final int PCAP_IF_WIRELESS = 0x00000008;
 
-	/** connection status: */
+	/** connection status:. */
 	public static final int PCAP_IF_CONNECTION_STATUS = 0x00000030;
 
-	/** unknown */
+	/** unknown. */
 	public static final int PCAP_IF_CONNECTION_STATUS_UNKNOWN = 0x00000000;
 
-	/** connected */
+	/** connected. */
 	public static final int PCAP_IF_CONNECTION_STATUS_CONNECTED = 0x00000010;
 
-	/** disconnected */
+	/** disconnected. */
 	public static final int PCAP_IF_CONNECTION_STATUS_DISCONNECTED = 0x00000020;
 
-	/** not applicable */
+	/** not applicable. */
 	public static final int PCAP_IF_CONNECTION_STATUS_NOT_APPLICABLE = 0x00000030;
 
 	/** The Constant PCAP_ERRBUF_SIZE. */
@@ -110,6 +108,9 @@ public final class PcapConstants {
 	 */
 	public static final int PCAP_NEXT_EX_TIMEOUT = 0;
 
+	/**
+	 * Instantiates a new pcap constants.
+	 */
 	private PcapConstants() {
 	}
 }

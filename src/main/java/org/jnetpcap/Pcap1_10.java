@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,9 +35,11 @@ import org.jnetpcap.windows.WinPcap;
  * @author mark
  *
  */
-public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafePcapHandle, NonSealedPcap {
+public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafePcapHandle, NonSealedPcap { 
 
 	/**
+	 * The Constant pcap_datalink_val_to_description_or_dlt.
+	 *
 	 * @see const char *pcap_datalink_val_to_description_or_dlt(int)}
 	 * @since libpcap 1.9
 	 */
@@ -214,6 +214,7 @@ public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafeP
 	 *
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
+	 * @param abi        the abi
 	 */
 	protected Pcap1_10(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);

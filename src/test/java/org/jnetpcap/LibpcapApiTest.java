@@ -18,6 +18,7 @@
 package org.jnetpcap;
 
 import static java.util.concurrent.TimeUnit.*;
+import static org.jnetpcap.AbstractTestBase.TestExec.discardErrors;
 import static org.jnetpcap.AbstractTestBase.TestPacket.*;
 import static org.jnetpcap.constant.PcapConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,8 +33,11 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 import org.jnetpcap.Pcap.LibraryPolicy;
+import org.jnetpcap.SockAddr.InetSockAddr;
+import org.jnetpcap.constant.PcapCode;
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDirection;
 import org.jnetpcap.constant.PcapDlt;
@@ -43,6 +47,7 @@ import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.util.NetIp4Address;
 import org.jnetpcap.util.PcapPacketRef;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -533,7 +538,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
-		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		discardErrors(() -> captureHandle.setDirection(PcapDirection.DIRECTION_OUT));
 
 		var abi = captureHandle.getPcapHeaderABI();
 
@@ -596,7 +601,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
-		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		discardErrors(() -> captureHandle.setDirection(PcapDirection.DIRECTION_OUT));
 
 		var abi = captureHandle.getPcapHeaderABI();
 
@@ -661,7 +666,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
-		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		discardErrors(() -> captureHandle.setDirection(PcapDirection.DIRECTION_OUT));
 
 		var abi = captureHandle.getPcapHeaderABI();
 
@@ -720,7 +725,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
-		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		discardErrors(() -> captureHandle.setDirection(PcapDirection.DIRECTION_OUT));
 		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
@@ -779,7 +784,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
-		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		discardErrors(() -> captureHandle.setDirection(PcapDirection.DIRECTION_OUT));
 		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
@@ -905,9 +910,13 @@ class LibpcapApiTest extends AbstractTestBase {
 	@Test
 	@Tag("user-permission")
 	void testLookupNet() throws PcapException {
-		String firstDevice = Pcap.findAllDevs().get(0).name();
+		String firstInetCapableDevice = Pcap.findAllDevs().stream()
+				.filter(dev -> dev.findAddressOfType(InetSockAddr.class).isPresent())
+				.map(PcapIf::name)
+				.findAny()
+				.get();
 
-		NetIp4Address ipAddress = Pcap.lookupNet(firstDevice);
+		NetIp4Address ipAddress = Pcap.lookupNet(firstInetCapableDevice);
 
 		final int IP4_ADDRESS = ipAddress.address();
 		final int IP4_NETMAKS = ipAddress.netmask();
@@ -1191,7 +1200,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
-		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		discardErrors(() -> captureHandle.setDirection(PcapDirection.DIRECTION_OUT));
 		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
@@ -1255,7 +1264,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
-		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		discardErrors(() -> captureHandle.setDirection(PcapDirection.DIRECTION_OUT));
 		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
@@ -1320,7 +1329,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
-		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		discardErrors(() -> captureHandle.setDirection(PcapDirection.DIRECTION_OUT));
 		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
@@ -1380,7 +1389,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
-		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		discardErrors(() -> captureHandle.setDirection(PcapDirection.DIRECTION_OUT));
 		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
@@ -1443,7 +1452,7 @@ class LibpcapApiTest extends AbstractTestBase {
 
 		var captureHandle = super.pcapCreateTestHandle();
 		captureHandle.setTimeout(1000).activate();
-		captureHandle.setDirection(PcapDirection.DIRECTION_OUT);
+		discardErrors(() -> captureHandle.setDirection(PcapDirection.DIRECTION_OUT));
 		var abi = captureHandle.getPcapHeaderABI();
 
 		var transmitHandle = super.pcapCreateTestHandle();
@@ -1543,12 +1552,23 @@ class LibpcapApiTest extends AbstractTestBase {
 	@Test
 	@Tag("live-capture")
 	@Tag("sudo-permission")
+	@Tag("unix")
 	void testSetDirection() throws PcapException {
 		var pcap = super.pcapCreateTestHandle();
-
+		
 		pcap.activate();
 
 		final PcapDirection DIRECTION = PcapDirection.DIRECTION_IN;
+		
+		try {
+			pcap.setDirection(DIRECTION);
+		} catch(PcapException e) {
+			int c = e.getCode();
+			if (e.getCode() == PcapCode.PCAP_ERROR && e.toString().contains("direction")) {
+				Assumptions.abort("interface does not support setting DIRECTION");
+				return;
+			}
+		}
 
 		assertDoesNotThrow(() -> pcap.setDirection(DIRECTION));
 	}

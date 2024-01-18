@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +15,7 @@
  */
 package org.jnetpcap.constant;
 
+import java.util.Optional;
 import java.util.function.IntSupplier;
 
 import org.jnetpcap.Pcap;
@@ -29,89 +28,103 @@ import org.jnetpcap.Pcap;
  */
 public enum PcapCode implements IntSupplier {
 
-	/** ok */
+	/** ok. */
 	OK(PcapCode.PCAP_OK, "Ok"),
-	/** generic error full */
+
+	/** generic error full. */
 	ERROR(PcapCode.PCAP_ERROR),
-	/** loop terminated by pcap_breakloop */
+
+	/** loop terminated by pcap_breakloop. */
 	ERROR_BREAK(PcapCode.PCAP_ERROR_BREAK),
-	/** the capture needs to be activated */
+
+	/** the capture needs to be activated. */
 	ERROR_NOT_ACTIVATED(PcapCode.PCAP_ERROR_NOT_ACTIVATED),
-	/** the operation can't be performed on already activated captures */
+
+	/** the operation can't be performed on already activated captures. */
 	ERROR_ACTIVATED(PcapCode.PCAP_ERROR_ACTIVATED),
-	/** no such device exists */
+
+	/** no such device exists. */
 	ERROR_NO_SUCH_DEVICE(PcapCode.PCAP_ERROR_NO_SUCH_DEVICE),
-	/** this device doesn't support rfmon (monitor) mode */
+
+	/** this device doesn't support rfmon (monitor) mode. */
 	ERROR_RFMON_NOTSUP(PcapCode.PCAP_ERROR_RFMON_NOTSUP),
-	/** operation supported only in monitor mode */
+
+	/** operation supported only in monitor mode. */
 	ERROR_NOT_RFMON(PcapCode.PCAP_ERROR_NOT_RFMON),
-	/** no permission to open the device */
+
+	/** no permission to open the device. */
 	ERROR_PERM_DENIED(PcapCode.PCAP_ERROR_PERM_DENIED),
-	/** interface isn't up */
+
+	/** interface isn't up. */
 	ERROR_IFACE_NOT_UP(PcapCode.PCAP_ERROR_IFACE_NOT_UP),
-	/** this device doesn't support setting the time stamp type */
+
+	/** this device doesn't support setting the time stamp type. */
 	ERROR_CANTSET_TSTAMP_TYPE(PcapCode.PCAP_ERROR_CANTSET_TSTAMP_TYPE),
-	/** you don't have permission to capture in promiscuous mode */
+
+	/** you don't have permission to capture in promiscuous mode. */
 	ERROR_PROMISC_PERM_DENIED(PcapCode.PCAP_ERROR_PROMISC_PERM_DENIED),
-	/** the requested time stamp precision is not supported */
+
+	/** the requested time stamp precision is not supported. */
 	ERROR_TSTAMP_PRECISION_NOTSUP(PcapCode.PCAP_ERROR_TSTAMP_PRECISION_NOTSUP),
 
-	/** generic warning */
+	/** generic warning. */
 	WARNING(PcapCode.PCAP_WARNING, "generic warning"),
-	/** this device doesn't support promiscuous mode */
+
+	/** this device doesn't support promiscuous mode. */
 	WARNING_PROMISC_NOTSUP(PcapCode.PCAP_WARNING_PROMISC_NOTSUP, "this device doesn't support promiscuous mode"),
-	/** the requested time stamp type is not supported */
+
+	/** the requested time stamp type is not supported. */
 	WARNING_TSTAMP_TYPE_NOTSUP(PcapCode.PCAP_WARNING_TSTAMP_TYPE_NOTSUP,
 			"the requested time stamp type is not supported"),
 
 	;
 
-	/** ok */
+	/** ok. */
 	public final static int PCAP_OK = 0;
 
-	/** generic error full */
+	/** generic error full. */
 	public final static int PCAP_ERROR = -1;
 
-	/** loop terminated by pcap_breakloop */
+	/** loop terminated by pcap_breakloop. */
 	public final static int PCAP_ERROR_BREAK = -2;
 
-	/** the capture needs to be activated */
+	/** the capture needs to be activated. */
 	public final static int PCAP_ERROR_NOT_ACTIVATED = -3;
 
-	/** the operation can't be performed on already activated captures */
+	/** the operation can't be performed on already activated captures. */
 	public final static int PCAP_ERROR_ACTIVATED = -4;
 
-	/** no such device exists */
+	/** no such device exists. */
 	public final static int PCAP_ERROR_NO_SUCH_DEVICE = -5;
 
-	/** this device doesn't support rfmon (monitor) mode */
+	/** this device doesn't support rfmon (monitor) mode. */
 	public final static int PCAP_ERROR_RFMON_NOTSUP = -6;
 
-	/** operation supported only in monitor mode */
+	/** operation supported only in monitor mode. */
 	public final static int PCAP_ERROR_NOT_RFMON = -7;
 
-	/** no permission to open the device */
+	/** no permission to open the device. */
 	public final static int PCAP_ERROR_PERM_DENIED = -8;
 
-	/** interface isn't up */
+	/** interface isn't up. */
 	public final static int PCAP_ERROR_IFACE_NOT_UP = -9;
 
-	/** this device doesn't support setting the time stamp type */
+	/** this device doesn't support setting the time stamp type. */
 	public final static int PCAP_ERROR_CANTSET_TSTAMP_TYPE = -10;
 
-	/** you don't have permission to capture in promiscuous mode */
+	/** you don't have permission to capture in promiscuous mode. */
 	public final static int PCAP_ERROR_PROMISC_PERM_DENIED = -11;
 
-	/** the requested time stamp precision is not supported */
+	/** the requested time stamp precision is not supported. */
 	public final static int PCAP_ERROR_TSTAMP_PRECISION_NOTSUP = -12;
 
-	/** generic warning */
+	/** generic warning. */
 	public final static int PCAP_WARNING = 1;
 
-	/** this device doesn't support promiscuous mode */
+	/** this device doesn't support promiscuous mode. */
 	public final static int PCAP_WARNING_PROMISC_NOTSUP = 2;
 
-	/** the requested time stamp type is not supported */
+	/** the requested time stamp type is not supported. */
 	public final static int PCAP_WARNING_TSTAMP_TYPE_NOTSUP = 3;
 
 	/**
@@ -139,8 +152,9 @@ public enum PcapCode implements IntSupplier {
 	 *
 	 * @param code pcap error code
 	 * @return the matching constant or null if not found
+	 * @throws IllegalArgumentException thrown if not found
 	 */
-	public static PcapCode valueOf(int code) {
+	public static PcapCode valueOf(int code) throws IllegalArgumentException {
 		PcapCode[] constants = values();
 		int len = constants.length;
 
@@ -148,24 +162,57 @@ public enum PcapCode implements IntSupplier {
 			if (constants[i].code == code)
 				return constants[i];
 
-		return null;
+		throw new IllegalArgumentException(Integer.toString(code));
 	}
 
+	/**
+	 * Converts an integer Pcap error code to a constant.
+	 *
+	 * @param code pcap error code
+	 * @return the matching constant or null if not found
+	 */
+	public static Optional<PcapCode> toEnum(int code) {
+		PcapCode[] constants = values();
+		int len = constants.length;
+
+		for (int i = 0; i < len; i++)
+			if (constants[i].code == code)
+				return Optional.of(constants[i]);
+
+		return Optional.empty();
+	}
+
+	/** The code. */
 	private final int code;
 
+	/** The message. */
 	private final String message;
 
+	/**
+	 * Instantiates a new pcap code.
+	 *
+	 * @param code the code
+	 */
 	PcapCode(int code) {
 		this.code = code;
 		this.message = toString();
 	}
 
+	/**
+	 * Instantiates a new pcap code.
+	 *
+	 * @param code        the code
+	 * @param description the description
+	 */
 	PcapCode(int code, String description) {
 		this.code = code;
 		this.message = description;
 	}
 
 	/**
+	 * Gets the as int.
+	 *
+	 * @return the as int
 	 * @see java.util.function.IntSupplier#getAsInt()
 	 */
 	@Override
@@ -183,7 +230,7 @@ public enum PcapCode implements IntSupplier {
 	}
 
 	/**
-	 * Looks up the error message for a give code
+	 * Looks up the error message for a give code.
 	 *
 	 * @param code the pcap code to lookup
 	 * @return the error code message

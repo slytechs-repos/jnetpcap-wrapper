@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +14,8 @@
  * limitations under the License.
  */
 package org.jnetpcap.constant;
+
+import java.util.Optional;
 
 /**
  * Pcap live capture mode flags.
@@ -50,15 +50,29 @@ public enum PcapMode {
 	public static final int PCAP_MODE_PROMISCUOUS = 1;
 
 	/**
-	 * Value of.
+	 * Converts numerical PCAP_MODE constant to an enum.
 	 *
-	 * @param intValue the int value
-	 * @return the pcap mode
+	 * @param mode the PCAP integer mode constant
+	 * @return the pcap mode constant
+	 * @throws IllegalArgumentException thrown if not found
 	 */
-	public static PcapMode valueOf(int intValue) {
-		if (intValue < 0 || intValue >= values().length)
-			throw new IllegalArgumentException("" + intValue);
+	public static PcapMode valueOf(int mode) throws IllegalArgumentException {
+		if (mode < 0 || mode >= values().length)
+			throw new IllegalArgumentException(Integer.toString(mode));
 
-		return values()[intValue];
+		return values()[mode];
+	}
+
+	/**
+	 * Converts numerical PCAP_MODE constant to an enum, if found.
+	 *
+	 * @param mode the PCAP integer mode constant
+	 * @return the optional enum constant
+	 */
+	public static Optional<PcapMode> toEnum(int mode) {
+		if (mode < 0 || mode >= values().length)
+			Optional.empty();
+
+		return Optional.of(values()[mode]);
 	}
 }

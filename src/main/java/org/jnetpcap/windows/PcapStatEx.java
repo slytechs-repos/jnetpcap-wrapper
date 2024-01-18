@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,36 +40,54 @@ public sealed interface PcapStatEx extends PcapStat permits PcapStatExRecord {
 	int size();
 
 	/**
+	 * Recv.
+	 *
+	 * @return the long
 	 * @see org.jnetpcap.PcapStat#recv()
 	 */
 	@Override
 	long recv();
 
 	/**
+	 * Drop.
+	 *
+	 * @return the long
 	 * @see org.jnetpcap.PcapStat#drop()
 	 */
 	@Override
 	long drop();
 
 	/**
+	 * Ifdrop.
+	 *
+	 * @return the long
 	 * @see org.jnetpcap.PcapStat#ifdrop()
 	 */
 	@Override
 	long ifdrop();
 
 	/**
+	 * Capt.
+	 *
+	 * @return the long
 	 * @see org.jnetpcap.PcapStat#capt()
 	 */
 	@Override
 	long capt();
 
 	/**
+	 * Sent.
+	 *
+	 * @return the long
 	 * @see org.jnetpcap.PcapStat#sent()
 	 */
 	@Override
 	long sent();
 
 	/**
+	 * Netdrop.
+	 *
+	 * @return the long
 	 * @see org.jnetpcap.PcapStat#netdrop()
 	 */
 	@Override

@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,14 +23,33 @@ import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
+/**
+ * The Class ForeignDowncall.
+ *
+ * @param <E> the element type
+ */
 public class ForeignDowncall<E extends Throwable> {
 
+	/** The handle. */
 	private final MethodHandle handle;
+	
+	/** The cause. */
 	private final Throwable cause;
+	
+	/** The exception factory. */
 	private final Function<String, E> exceptionFactory;
+	
+	/** The symbol name. */
 	private final String symbolName;
+	
+	/** The symbol address. */
 	private final MemorySegment symbolAddress;
 
+	/**
+	 * Instantiates a new foreign downcall.
+	 *
+	 * @param symbolName the symbol name
+	 */
 	public ForeignDowncall(String symbolName) {
 		this.handle = null;
 		this.cause = null;
@@ -41,6 +58,14 @@ public class ForeignDowncall<E extends Throwable> {
 		this.symbolAddress = null;
 	}
 
+	/**
+	 * Instantiates a new foreign downcall.
+	 *
+	 * @param symbolName       the symbol name
+	 * @param symbolAddress    the symbol address
+	 * @param handle           the handle
+	 * @param exceptionFactory the exception factory
+	 */
 	public ForeignDowncall(String symbolName, MemorySegment symbolAddress, MethodHandle handle,
 			Function<String, E> exceptionFactory) {
 		this.symbolName = symbolName;
@@ -50,6 +75,12 @@ public class ForeignDowncall<E extends Throwable> {
 		this.cause = null;
 	}
 
+	/**
+	 * Instantiates a new foreign downcall.
+	 *
+	 * @param symbolName the symbol name
+	 * @param cause      the cause
+	 */
 	public ForeignDowncall(String symbolName, Throwable cause) {
 		this.cause = Objects.requireNonNull(cause, "cause");
 		this.handle = null;
@@ -58,6 +89,11 @@ public class ForeignDowncall<E extends Throwable> {
 		this.symbolAddress = null;
 	}
 
+	/**
+	 * Handle.
+	 *
+	 * @return the method handle
+	 */
 	public MethodHandle handle() {
 		if (handle == null)
 			throw new IllegalStateException(
@@ -67,6 +103,14 @@ public class ForeignDowncall<E extends Throwable> {
 		return handle;
 	}
 
+	/**
+	 * Invoke int.
+	 *
+	 * @param messageFactory the message factory
+	 * @param args           the args
+	 * @return the int
+	 * @throws E the e
+	 */
 	public int invokeInt(IntFunction<String> messageFactory, Object... args) throws E {
 		int result;
 
@@ -84,6 +128,12 @@ public class ForeignDowncall<E extends Throwable> {
 		return result;
 	}
 
+	/**
+	 * Invoke int.
+	 *
+	 * @param args the args
+	 * @return the int
+	 */
 	public int invokeInt(Object... args) {
 
 		try {
@@ -93,6 +143,14 @@ public class ForeignDowncall<E extends Throwable> {
 		}
 	}
 
+	/**
+	 * Invoke int.
+	 *
+	 * @param messageFactory the message factory
+	 * @param args           the args
+	 * @return the int
+	 * @throws E the e
+	 */
 	@SuppressWarnings("unchecked")
 	public int invokeInt(Supplier<String> messageFactory, Object... args) throws E {
 		int result;
@@ -111,6 +169,14 @@ public class ForeignDowncall<E extends Throwable> {
 		return result;
 	}
 
+	/**
+	 * Invoke long.
+	 *
+	 * @param messageFactory the message factory
+	 * @param args           the args
+	 * @return the long
+	 * @throws E the e
+	 */
 	@SuppressWarnings("unchecked")
 	public long invokeLong(LongFunction<String> messageFactory, Object... args) throws E {
 		long result;
@@ -129,6 +195,12 @@ public class ForeignDowncall<E extends Throwable> {
 		return result;
 	}
 
+	/**
+	 * Invoke long.
+	 *
+	 * @param args the args
+	 * @return the long
+	 */
 	public long invokeLong(Object... args) {
 
 		try {
@@ -141,6 +213,14 @@ public class ForeignDowncall<E extends Throwable> {
 		}
 	}
 
+	/**
+	 * Invoke long.
+	 *
+	 * @param messageFactory the message factory
+	 * @param args           the args
+	 * @return the long
+	 * @throws E the e
+	 */
 	@SuppressWarnings("unchecked")
 	public long invokeLong(Supplier<String> messageFactory, Object... args) throws E {
 		long result;
@@ -159,6 +239,13 @@ public class ForeignDowncall<E extends Throwable> {
 		return result;
 	}
 
+	/**
+	 * Invoke obj.
+	 *
+	 * @param <U>  the generic type
+	 * @param args the args
+	 * @return the u
+	 */
 	@SuppressWarnings("unchecked")
 	public <U> U invokeObj(Object... args) {
 		try {
@@ -169,6 +256,15 @@ public class ForeignDowncall<E extends Throwable> {
 
 	}
 
+	/**
+	 * Invoke obj.
+	 *
+	 * @param <U>            the generic type
+	 * @param messageFactory the message factory
+	 * @param args           the args
+	 * @return the u
+	 * @throws E the e
+	 */
 	@SuppressWarnings("unchecked")
 	public <U> U invokeObj(Supplier<String> messageFactory, Object... args) throws E {
 		U result;
@@ -186,6 +282,12 @@ public class ForeignDowncall<E extends Throwable> {
 		return result;
 	}
 
+	/**
+	 * Invoke string.
+	 *
+	 * @param args the args
+	 * @return the string
+	 */
 	public String invokeString(Object... args) {
 
 		try {
@@ -200,6 +302,14 @@ public class ForeignDowncall<E extends Throwable> {
 		}
 	}
 
+	/**
+	 * Invoke string.
+	 *
+	 * @param messageFactory the message factory
+	 * @param args           the args
+	 * @return the string
+	 * @throws E the e
+	 */
 	public String invokeString(Supplier<String> messageFactory, Object... args) throws E {
 
 		MemorySegment address;
@@ -219,6 +329,11 @@ public class ForeignDowncall<E extends Throwable> {
 
 	}
 
+	/**
+	 * Invoke void.
+	 *
+	 * @param args the args
+	 */
 	public void invokeVoid(Object... args) {
 
 		try {
@@ -231,44 +346,97 @@ public class ForeignDowncall<E extends Throwable> {
 		}
 	}
 
+	/**
+	 * Checks if is native symbol resolved.
+	 *
+	 * @return true, if is native symbol resolved
+	 */
 	public boolean isNativeSymbolResolved() {
 		return handle != null;
 	}
 
+	/**
+	 * Address.
+	 *
+	 * @return the memory segment
+	 */
 	public MemorySegment address() {
 		return symbolAddress;
 	}
 
+	/**
+	 * Symbol name.
+	 *
+	 * @return the string
+	 */
 	public String symbolName() {
 		return symbolName;
 	}
 
+	/**
+	 * Validate int.
+	 *
+	 * @param value        the value
+	 * @param errorFactory the error factory
+	 * @throws E the e
+	 */
 	protected void validateInt(int value, IntFunction<String> errorFactory) throws E {
 		if (value < 0)
 			throw exceptionFactory.apply(errorFactory.apply(value));
 	}
 
+	/**
+	 * Validate int.
+	 *
+	 * @param value        the value
+	 * @param errorFactory the error factory
+	 * @throws E the e
+	 */
 	protected void validateInt(int value, Supplier<String> errorFactory) throws E {
 		if (value < 0)
 			throw exceptionFactory.apply(errorFactory.get());
 	}
 
+	/**
+	 * Validate long.
+	 *
+	 * @param value        the value
+	 * @param errorFactory the error factory
+	 * @throws E the e
+	 */
 	protected void validateLong(long value, LongFunction<String> errorFactory) throws E {
 		if (value < 0)
 			throw exceptionFactory.apply(errorFactory.apply(value));
 	}
 
+	/**
+	 * Validate long.
+	 *
+	 * @param value        the value
+	 * @param errorFactory the error factory
+	 * @throws E the e
+	 */
 	protected void validateLong(long value, Supplier<String> errorFactory) throws E {
 		if (value < 0)
 			throw exceptionFactory.apply(errorFactory.get());
 	}
 
+	/**
+	 * Validate obj.
+	 *
+	 * @param obj          the obj
+	 * @param errorFactory the error factory
+	 * @throws E the e
+	 */
 	protected void validateObj(Object obj, Supplier<String> errorFactory) throws E {
 		if (obj == null || (obj instanceof MemorySegment addr) && ForeignUtils.isNullAddress(addr))
 			throw exceptionFactory.apply(errorFactory.get());
 	}
 
 	/**
+	 * To string.
+	 *
+	 * @return the string
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

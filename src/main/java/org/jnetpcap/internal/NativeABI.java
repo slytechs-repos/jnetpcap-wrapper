@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +14,8 @@
  * limitations under the License.
  */
 package org.jnetpcap.internal;
+
+import org.jnetpcap.PcapIf;
 
 import static java.lang.foreign.ValueLayout.*;
 
@@ -28,14 +28,36 @@ import static java.lang.foreign.ValueLayout.*;
  *
  */
 public enum NativeABI {
+
+	/** The sys v. */
 	SYS_V,
+
+	/** The win64. */
 	WIN64,
+
+	/** The linux64. */
 	LINUX64,
+
+	/** The macos64. */
 	MACOS64;
 
+	/**
+	 * System property if set to true, pcap uses BSD style sockaddr structure which
+	 * has the addr_len field. Otherwise the default heuristic are used to determine
+	 * the sock address structure format.
+	 */
+	public static final String SYSTEM_PROPERTY_NATIVE_ABI_BSD = "org.jnetpcap.abi.bsd";
+
+	/** The Constant ABI. */
 	private static final NativeABI ABI;
+
+	/** The Constant ARCH. */
 	private static final String ARCH;
+
+	/** The Constant OS. */
 	private static final String OS;
+
+	/** The Constant ADDRESS_SIZE. */
 	private static final long ADDRESS_SIZE;
 
 	static {
@@ -48,6 +70,8 @@ public enum NativeABI {
 		if ((ARCH.equals("amd64") || ARCH.equals("x86_64")) && ADDRESS_SIZE == 64) {
 			if (OS.startsWith("Windows")) {
 				ABI = WIN64;
+			} else if (OS.startsWith("Mac")) {
+				ABI = MACOS64;
 			} else {
 				ABI = SYS_V;
 			}
@@ -64,19 +88,49 @@ public enum NativeABI {
 		}
 	}
 
+	/**
+	 * Checks if is 64 bit.
+	 *
+	 * @return true, if is 64 bit
+	 */
 	public static boolean is64bit() {
 		return ADDRESS_SIZE == 64;
 	}
 
+	/**
+	 * Checks if is 32 bit.
+	 *
+	 * @return true, if is 32 bit
+	 */
 	public static boolean is32bit() {
 		return ADDRESS_SIZE == 32;
 	}
 
+	/**
+	 * Current.
+	 *
+	 * @return the native ABI
+	 */
 	public static NativeABI current() {
 		if (ABI == null) {
 			throw new UnsupportedOperationException(
 					"Unsupported os, arch, or address size: " + OS + ", " + ARCH + ", " + ADDRESS_SIZE);
 		}
 		return ABI;
+	}
+
+	/**
+	 * Checks if is bsd abi.
+	 *
+	 * @return true, if is bsd abi
+	 */
+	public static boolean isBsdAbi() {
+		boolean bsdOverride = false;
+		try {
+			bsdOverride = Boolean.parseBoolean(System.getProperty(PcapIf.SYSTEM_PROPERTY_PCAPIF_SOCKADDR_BSD_STYLE,
+					"false"));
+		} catch (Throwable e) {}
+
+		return bsdOverride || (NativeABI.current() == NativeABI.MACOS64);
 	}
 }

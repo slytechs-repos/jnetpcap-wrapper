@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +15,7 @@
  */
 package org.jnetpcap.constant;
 
+import java.util.Optional;
 import java.util.function.IntSupplier;
 
 import org.jnetpcap.Pcap;
@@ -352,6 +351,73 @@ public enum PcapDlt implements IntSupplier {
 	/** The LINU x_ lapd. */
 	LINUX_LAPD(177),
 
+	/** Event Tracing for Windows messages. */
+	ETW(290),
+
+	/**
+	 * Hilscher Gesellschaft fuer Systemautomation mbH netANALYZER NG hardware and
+	 * software.
+	 *
+	 * The specification for this footer can be found at:
+	 * https://kb.hilscher.com/x/brDJBw
+	 *
+	 * Requested by Jan Adam jadam@hilscher.com
+	 */
+	NETANALYZER_NG(291),
+
+	/**
+	 * Serial NCP (Network Co-Processor) protocol for Zigbee stack ZBOSS by DSR.
+	 * ZBOSS NCP protocol description:
+	 * https://cloud.dsr-corporation.com/index.php/s/3isHzaNTTgtJebn Header in pcap
+	 * file: https://cloud.dsr-corporation.com/index.php/s/fiqSDorAAAZrsYB
+	 *
+	 * Requested by Eugene Exarevsky eugene.exarevsky@dsr-corporation.com
+	 * 
+	 */
+	ZBOSS_NCP(292),
+
+	/** USB 1.0 packets as transmitted over the cable */
+	USB_2_0_LOW_SPEED(293),
+
+	/** USB 1.1 packets as transmitted over the cable */
+	USB_2_0_FULL_SPEED(294),
+
+	/** USB 2.0 packets as transmitted over the cable */
+	USB_2_0_HIGH_SPEED(295),
+
+	/**
+	 * Auerswald Logger Protocol description is provided on
+	 * https://github.com/Auerswald-GmbH/auerlog/blob/master/auerlog.txt
+	 */
+	AUERSWALD_LOG(296),
+
+	/**
+	 * Z-Wave packets with a TAP meta-data header
+	 * https://gitlab.com/exegin/zwave-g9959-tap requested on tcpdump-workers@
+	 */
+	ZWAVE_TAP(297),
+
+	/** Silicon Labs debug channel protocol. */
+	SILABS_DEBUG_CHANNEL(298),
+
+	/**
+	 * Ultra-wideband (UWB) controller interface protocol (UCI). requested by Henri
+	 * Chataing henrichataing@google.com
+	 */
+	FIRA_UCI(299),
+
+	/**
+	 * MDB (Multi-Drop Bus) protocol between a vending machine controller and
+	 * peripherals inside the vending machine. See
+	 *
+	 * https://www.kaiser.cx/pcap-mdb.html
+	 *
+	 * for the specification.
+	 *
+	 * Requested by Martin Kaiser martin@kaiser.cx
+	 */
+	MDB(300),
+
 	;
 
 	/** The Constant DLT_NULL. */
@@ -621,24 +687,107 @@ public enum PcapDlt implements IntSupplier {
 	/** The Constant DLT_LINUX_LAPD. */
 	public final static int DLT_LINUX_LAPD = 177;
 
+	/** Event Tracing for Windows messages. */
+	public final static int DLT_ETW = 290;
+
+	/**
+	 * Hilscher Gesellschaft fuer Systemautomation mbH netANALYZER NG hardware and
+	 * software.
+	 *
+	 * The specification for this footer can be found at:
+	 * https://kb.hilscher.com/x/brDJBw
+	 *
+	 * Requested by Jan Adam jadam@hilscher.com
+	 */
+	public final static int DLT_NETANALYZER_NG = 291;
+
+	/**
+	 * Serial NCP (Network Co-Processor) protocol for Zigbee stack ZBOSS by DSR.
+	 * ZBOSS NCP protocol description:
+	 * https://cloud.dsr-corporation.com/index.php/s/3isHzaNTTgtJebn Header in pcap
+	 * file: https://cloud.dsr-corporation.com/index.php/s/fiqSDorAAAZrsYB
+	 *
+	 * Requested by Eugene Exarevsky eugene.exarevsky@dsr-corporation.com
+	 * 
+	 */
+	public final static int DLT_ZBOSS_NCP = 292;
+
+	/** USB 1.0 packets as transmitted over the cable */
+	public final static int DLT_USB_2_0_LOW_SPEED = 293;
+
+	/** USB 1.1 packets as transmitted over the cable */
+	public final static int DLT_USB_2_0_FULL_SPEED = 294;
+
+	/** USB 2.0 packets as transmitted over the cable */
+	public final static int DLT_USB_2_0_HIGH_SPEED = 295;
+
+	/**
+	 * Auerswald Logger Protocol description is provided on
+	 * https://github.com/Auerswald-GmbH/auerlog/blob/master/auerlog.txt
+	 */
+	public final static int DLT_AUERSWALD_LOG = 296;
+
+	/**
+	 * Z-Wave packets with a TAP meta-data header
+	 * https://gitlab.com/exegin/zwave-g9959-tap requested on tcpdump-workers@
+	 */
+	public final static int DLT_ZWAVE_TAP = 297;
+
+	/** Silicon Labs debug channel protocol. */
+	public final static int DLT_SILABS_DEBUG_CHANNEL = 298;
+
+	/**
+	 * Ultra-wideband (UWB) controller interface protocol (UCI). requested by Henri
+	 * Chataing henrichataing@google.com
+	 */
+	public final static int DLT_FIRA_UCI = 299;
+
+	/**
+	 * MDB (Multi-Drop Bus) protocol between a vending machine controller and
+	 * peripherals inside the vending machine. See
+	 *
+	 * https://www.kaiser.cx/pcap-mdb.html
+	 *
+	 * for the specification.
+	 *
+	 * Requested by Martin Kaiser martin@kaiser.cx.
+	 */
+	public final static int DLT_MDB = 300;
+
 	/**
 	 * Converts an integer value into a PcapDLT constant.
-	 * 
-	 * @param value Pcap DLT integer value to convert
+	 *
+	 * @param dlt Pcap DLT integer value to convert
 	 * @return constant assigned to the DLT integer, or null if not found
+	 * @throws IllegalArgumentException thrown if not found
 	 */
-	public static PcapDlt valueOf(int value) {
+	public static PcapDlt valueOf(int dlt) throws IllegalArgumentException {
 		final PcapDlt[] values = values();
 		final int length = values.length;
 
 		for (int i = 0; i < length; i++) {
-			if (values[i].intDlt == value) {
+			if (values[i].intDlt == dlt) {
 				return values[i];
 			}
 
 		}
 
-		return null;
+		throw new IllegalArgumentException(Integer.toString(dlt));
+	}
+
+	/**
+	 * Converts the supplied id to an ArpHdr enum constant.
+	 *
+	 * @param dlt the pcap DLT integer constant
+	 * @return the corresponding enum if found
+	 */
+	public static Optional<PcapDlt> toEnum(int dlt) {
+		for (var c : values()) {
+			if (c.intDlt == dlt)
+				return Optional.of(c);
+		}
+
+		return Optional.empty();
 	}
 
 	/** Integer dlt value assigned by libpcap to this constant. */

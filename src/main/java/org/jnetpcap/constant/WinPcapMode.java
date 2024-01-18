@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +15,7 @@
  */
 package org.jnetpcap.constant;
 
+import java.util.Optional;
 import java.util.function.IntSupplier;
 
 /**
@@ -48,9 +47,36 @@ public enum WinPcapMode implements IntSupplier {
 	public static final int MODE_MON = 2;
 
 	/**
-	 * Gets the as int.
+	 * Converts numerical WinPcap mode constant to an enum.
 	 *
-	 * @return the as int
+	 * @param mode the PCAP integer mode constant
+	 * @return the pcap mode constant
+	 * @throws IllegalArgumentException thrown if not found
+	 */
+	public static WinPcapMode valueOf(int mode) throws IllegalArgumentException {
+		if (mode < 0 || mode >= values().length)
+			throw new IllegalArgumentException(Integer.toString(mode));
+
+		return values()[mode];
+	}
+
+	/**
+	 * Converts numerical WinPcap mode constant to an enum, if found.
+	 *
+	 * @param mode the WinPcap mode constant
+	 * @return the optional enum constant
+	 */
+	public static Optional<WinPcapMode> toEnum(int mode) {
+		if (mode < 0 || mode >= values().length)
+			Optional.empty();
+
+		return Optional.of(values()[mode]);
+	}
+
+	/**
+	 * Gets WinPcap mode as numerical constant.
+	 *
+	 * @return the WinPcap mode numerical constant
 	 * @see java.util.function.IntSupplier#getAsInt()
 	 */
 	@Override

@@ -1,14 +1,12 @@
 /*
- * Apache License, Version 2.0
- * 
- * Copyright 2013-2022 Sly Technologies Inc.
+ * Copyright 2023 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,6 +37,8 @@ import org.jnetpcap.internal.PcapHeaderABI;
 public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 
 	/**
+	 * The Constant pcap_open_dead_with_tstamp_precision.
+	 *
 	 * @see {@code pcap_t *pcap_open_dead_with_tstamp_precision(int linktype, int
 	 *      snaplen, u_int precision)}
 	 * @since libpcap 1.5
@@ -46,18 +46,24 @@ public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 	private final static PcapForeignDowncall pcap_open_dead_with_tstamp_precision;
 
 	/**
+	 * The Constant pcap_set_immediate_mode.
+	 *
 	 * @see {@code int pcap_set_immediate_mode(pcap_t *p, int immediate_mode)}
 	 * @since libpcap 1.5
 	 */
 	private final static PcapForeignDowncall pcap_set_immediate_mode;
 
 	/**
+	 * The Constant pcap_set_tstamp_precision.
+	 *
 	 * @see {@code int pcap_set_tstamp_precision(pcap_t *p, int tstamp_precision)}
 	 * @since libpcap 1.5
 	 */
 	private final static PcapForeignDowncall pcap_set_tstamp_precision;
 
 	/**
+	 * The Constant pcap_get_tstamp_precision.
+	 *
 	 * @see {@code int pcap_get_tstamp_precision(pcap_t *p)}
 	 * @since libpcap 1.5
 	 */
@@ -298,12 +304,17 @@ public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 	 *
 	 * @param pcapHandle the pcap handle
 	 * @param name       the handle name
+	 * @param abi        the abi
 	 */
 	protected Pcap1_5(MemorySegment pcapHandle, String name, PcapHeaderABI abi) {
 		super(pcapHandle, name, abi);
 	}
 
 	/**
+	 * Gets the tstamp precision.
+	 *
+	 * @return the tstamp precision
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#getTstampPrecision()
 	 */
 	@Override
@@ -312,6 +323,11 @@ public sealed class Pcap1_5 extends Pcap1_2 permits Pcap1_9 {
 	}
 
 	/**
+	 * Sets the immediate mode.
+	 *
+	 * @param enable the enable
+	 * @return the pcap 1 5
+	 * @throws PcapException the pcap exception
 	 * @see org.jnetpcap.Pcap#setImmediateMode(boolean)
 	 */
 	@Override
