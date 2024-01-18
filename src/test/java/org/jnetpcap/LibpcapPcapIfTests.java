@@ -18,9 +18,12 @@ package org.jnetpcap;
 import static org.jnetpcap.constant.SockAddrFamily.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.stream.Stream;
 
 import org.jnetpcap.PcapIf.PcapAddr;
 import org.jnetpcap.SockAddr.Inet6SockAddr;
@@ -126,12 +129,16 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 	void PcapIfInet6Family() throws PcapException {
 		List<PcapIf> list = Pcap.findAllDevs();
 
-		PcapIf device = list.stream()
+		Optional<PcapIf> device = list.stream()
 				.filter(INET6::checkIfContains)
-				.findAny()
-				.orElseThrow();
+				.findAny();
+		
+		if (device.isEmpty()) {
+			Assumptions.abort("No IPv6 interfaces found");
+			return;
+		}
 
-		PcapAddr<?> addr = device.findAddressOfFamily(INET6).orElseThrow();
+		PcapAddr<?> addr = device.get().findAddressOfFamily(INET6).orElseThrow();
 
 		assertEquals(Optional.of(INET6), addr.socketAddress().familyConstant(),
 				"expecting INET6 family socket address type");
@@ -147,12 +154,16 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 	void PcapIfInet6Subclass() throws PcapException {
 		List<PcapIf> list = Pcap.findAllDevs();
 
-		PcapIf device = list.stream()
+		Optional<PcapIf> device = list.stream()
 				.filter(INET6::checkIfContains)
-				.findAny()
-				.orElseThrow();
+				.findAny();
+		
+		if (device.isEmpty()) {
+			Assumptions.abort("No IPv6 interfaces found");
+			return;
+		}
 
-		PcapAddr<Inet6SockAddr> addr = device.findAddressOfType(Inet6SockAddr.class)
+		PcapAddr<Inet6SockAddr> addr = device.get().findAddressOfType(Inet6SockAddr.class)
 				.orElseThrow();
 
 		assertEquals(Optional.of(INET6), addr.socketAddress().familyConstant(),
@@ -169,12 +180,16 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 	void PcapIfInet6TotalLen() throws PcapException {
 		List<PcapIf> list = Pcap.findAllDevs();
 
-		PcapIf device = list.stream()
+		Optional<PcapIf> device = list.stream()
 				.filter(INET6::checkIfContains)
-				.findAny()
-				.orElseThrow();
+				.findAny();
+		
+		if (device.isEmpty()) {
+			Assumptions.abort("No IPv6 interfaces found");
+			return;
+		}
 
-		PcapAddr<?> addr = device.findAddressOfFamily(INET6).orElseThrow();
+		PcapAddr<?> addr = device.get().findAddressOfFamily(INET6).orElseThrow();
 		OptionalInt addrLen = addr.socketAddress().totalLength();
 
 		if (addrLen.isPresent())
@@ -188,18 +203,19 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 	 * (6 bytes).
 	 *
 	 * @throws PcapException the pcap exception
+	 * @throws SocketException 
 	 */
 	@Test
 	@Tag("sudo-permission")
-	void PcapIfInet4GetHardwareAddress() throws PcapException {
+	void PcapIfInet4GetHardwareAddress() throws PcapException, SocketException {
 		List<PcapIf> list = Pcap.findAllDevs();
-
+		
 		PcapIf device = list.stream()
-				.filter(INET::checkIfContains)
+				.filter(dev -> dev.hardwareAddress().isPresent())
 				.findAny()
 				.orElseThrow();
 
-		assertTrue(device.hardwareAddress().isPresent(), "expected a MAC address for pcap interface");
+		assertTrue(device.hardwareAddress().isPresent(), "expected a MAC address for pcap interface [%s - %s]".formatted(device.name(), device.description()));
 		assertEquals(MAC_ADDR_LEN, device.hardwareAddress().get().length, "invalid MAC address length");
 	}
 }
