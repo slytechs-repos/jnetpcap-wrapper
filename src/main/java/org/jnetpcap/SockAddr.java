@@ -28,6 +28,7 @@ import org.jnetpcap.internal.NativeABI;
 import org.jnetpcap.util.PcapUtils;
 
 import static java.lang.foreign.ValueLayout.*;
+import static org.jnetpcap.internal.ForeignUtils.EMPTY_CLEANUP;
 
 /**
  * The low level <code>sockaddr</code> structure containing an address of
@@ -575,6 +576,55 @@ public class SockAddr {
 					+ "]";
 		}
 	}
+	
+	/**
+	 * The structure of <code>sockaddr_irda</code>, used with AF_IRDA sockets on
+	 * windows (winsock2.h) to access link-layer information.
+	 */
+	public static final class IrdaSockAddr extends SockAddr {
+		private static final int SOCK_ADDR_IRDA_LEN = 31;
+
+		private final byte[] irdaDeviceID;
+		private final String irdaServiceName;
+
+		IrdaSockAddr(MemorySegment addr, Arena arena) {
+			super(addr.reinterpret(SOCK_ADDR_IRDA_LEN, arena,	EMPTY_CLEANUP), SockAddrFamily.IRDA,	OptionalInt.of(SOCK_ADDR_IRDA_LEN));
+
+			this.irdaDeviceID = saSegment.asSlice(2, 4).toArray(JAVA_BYTE);
+			this.irdaServiceName = saSegment.getUtf8String(6);
+		}
+
+		/**
+		 * String specifying the service name.
+		 *
+		 * @return service name
+		 */
+		public String serviceName() {
+			return irdaServiceName;
+		}
+
+		/**
+		 * A 4-byte device identifier for the IrDA device.
+		 *
+		 * @return device id
+		 */
+		public byte[] deviceId() {
+			return irdaDeviceID;
+		}
+
+		/**
+		 * String representation of the structure field values.
+		 *
+		 * @return the string
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "AF_IRDA ["
+					+ "id=" + PcapUtils.toAddressString(irdaDeviceID)
+					+ (irdaServiceName.isBlank() ? "" : ", \"%s\"".formatted(irdaServiceName))
+					+ "]";		}
+	}
 
 	/** The Constant MIM_SOCKADDR_STRUCT_LEN. */
 	private final static int MIM_SOCKADDR_STRUCT_LEN = 16;
@@ -609,6 +659,7 @@ public class SockAddr {
 		case IPX -> new IpxSockAddr(addr, arena);
 		case PACKET -> new PacketSockAddr(addr, arena);
 		case LINK -> new LinkSockAddr(addr, arena, totalLength.getAsInt()); // BSD platforms only
+		case IRDA -> new IrdaSockAddr(addr, arena);
 
 		default -> new SockAddr(addr.reinterpret(structLength, arena, __ -> {}), af, totalLength);
 		};

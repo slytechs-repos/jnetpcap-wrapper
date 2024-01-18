@@ -132,6 +132,16 @@ enum SaLayout {
 	/** The AF_LINK Interface name, link-layer address, and selector. */
 	AF_LINK_DATA("u2.af_link.sdl_data", sequenceElement()),
 
+	/**
+	 * AF_IRDA definition (winsock2.h)
+	 */
+	AF_IRDA("u2.af_irda.last"),
+
+	/** 4-byte device identifier for the IrDA device */
+	AF_IRDA_DEVICE_ID("u2.af_irda.irdaDeviceID", sequenceElement()),
+
+	/** null-terminated string specifying the service name */
+	AF_IRDA_SERVICE_NAME("u2.af_irda.irdaServiceName", sequenceElement()),
 	;
 
 	/**
@@ -198,6 +208,12 @@ enum SaLayout {
 								JAVA_BYTE.withName("sdl_slen"),
 								sequenceLayout(12 + 18, JAVA_BYTE).withName("sdl_data"),
 								LAST).withName("af_link"),
+
+						/* AF_IRDA - POSIX/Windows (winsock2.h) */
+						structLayout(
+								sequenceLayout(4, JAVA_BYTE).withName("irdaDeviceID"),
+								sequenceLayout(25, JAVA_BYTE).withName("irdaServiceName"),
+								LAST).withName("af_irda"),
 
 						/* Generic MIN size sockaddr structure */
 						sequenceLayout(MIM_SOCKADDR_ADDRESS_LEN, JAVA_BYTE).withName("data")
