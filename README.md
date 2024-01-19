@@ -1,7 +1,7 @@
 ![Maven Central](https://img.shields.io/maven-central/v/com.slytechs.jnet.jnetpcap/jnetpcap-wrapper)
 
-# jNetPcap Wrapper - a **libpcap** native library java wrapper
-**jNetPcap** is a [*libpcap*][libpcap] java library. This is **version 2** release of the popular **jNetPcap** library, previously hosted on [*SourceForge.net*][sf.net].
+# jNetPcap Wrapper
+**jNetPcap Wrapper** is a [*libpcap*][libpcap] java library. This is **version 2** release of the popular **jNetPcap** library, previously hosted on [*SourceForge.net*][sf.net].
 
 ## See Also
 If you are looking for protocol enabled version of this library, please see the full [**jNetPcap SDK**][jnetpcap-sdk] or for advanced functionality the [**jNetWorks SDK**][jnetworks-sdk] library.
