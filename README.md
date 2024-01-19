@@ -1,19 +1,21 @@
-# jNetPcap version 2
+![Maven Central](https://img.shields.io/maven-central/v/com.slytechs.jnet.jnetpcap/jnetpcap-wrapper)
+
+# jNetPcap Wrapper - a **libpcap** native library java wrapper
 **jNetPcap** is a [*libpcap*][libpcap] java library. This is **version 2** release of the popular **jNetPcap** library, previously hosted on [*SourceForge.net*][sf.net].
 
 ## See Also
-If you are looking for protocol enabled version of this library, please see [**jNetPcap Pro**][jnetpcap-pro] extension or for advanced functionality the [**jNetWorks**][jnetworks] library.
+If you are looking for protocol enabled version of this library, please see the full [**jNetPcap SDK**][jnetpcap-sdk] or for advanced functionality the [**jNetWorks SDK**][jnetworks-sdk] library.
 
 ## Overview
-**jNetPcap** is a Java library that provides access to libpcap, a low-level network monitoring library. The library allows Java developers to write applications that can capture, read, and manipulate network packets in real-time. 
+**jNetPcap Wrapper** is a Java library that provides access to libpcap, a low-level network monitoring library. The library allows Java developers to write applications that can capture, read, and manipulate network packets in real-time. 
 
-To use JNetPcap, you need to download and install the library and add it to your Java project's classpath. Once you have done that, you can use the Java API provided by *jNetPcap** to interact with network packets.
+To use **jNetPcap Wrapper**, you need to add it to your `pom.xml` file as a dependency [![Maven Central](https://img.shields.io/maven-central/v/com.slytechs.jnet.jnetpcap/jnetpcap-wrapper)](https://mvnrepository.com/artifact/com.slytechs.jnet) or  download and install the library and add it to your Java project's classpath.  Once you have done that, you can use the Java API provided by **jNetPcap Wrapper** to interact with network packets.
 
 The library includes a set of classes and methods that allow you to capture network packets, filter and search through them, extract and analyze packet data, and ultimately write custom network analysis applications. 
 
 To begin capturing packets, you can create an instance of the `Pcap` class, which represents a network interface that the library will use to capture packets. Then you can create a `PcapPacketHandler` instance to process each packet as it is captured. 
 
-**jNetPcap** also includes functionality for creating filters to capture only the packets that match certain criteria, such as a specific port, protocol, or IP address.
+**jNetPcap Wrapper** also includes functionality for creating filters to capture only the packets that match certain criteria, such as a specific port, protocol, or IP address.
 
 ## Documentation
 See [*Wiki pages*][wiki] for user guides and examples.
@@ -167,12 +169,13 @@ Here are several methods for installing **jNetPcap** software.
 	
 ```
 <dependency>
-    <groupId>com.slytechs.jnet</groupId>
-    <artifactId>jnetpcap</artifactId>
-    <version>2.0.0-alpha.1</version>
+    <groupId>com.slytechs.jnet.jnetpcap</groupId>
+    <artifactId>jnetpcap-wrapper</artifactId>
+    <version>2.1.0</version>
 </dependency>
 ```
-> **Note** Maven artifacts have not been deployed yet to *central maven2* repository. Currently this is work in progress. As a work around, download the binary packages manually from github, of the [*Latest Release*][release].
+> Using the latest version number released to [Maven Central][jnetpcap-maven-central]
+> 
 ### Download Release Package
 Latest release: [*download link*][release]
 
@@ -209,8 +212,9 @@ So everyone is on the same page, we follow the following [branching model][git-b
 [jep424]: <https://openjdk.org/jeps/424> "Foreign Function & Memory API (Preview)"
 [git-branch-model]: <https://nvie.com/posts/a-successful-git-branching-model>
 [why-master-deprecated]: <https://www.theserverside.com/feature/Why-GitHub-renamed-its-master-branch-to-main>
-[jnetpcap-pro]: <https://github.com/slytechs-repos/jnetpcap-pro>
-[core-protocols]: <https://github.com/slytechs-repos/core-protocols>
+[jnetpcap-api]: <https://github.com/slytechs-repos/jnetpcap-api>
+[protocol-pack-sdk]: <https://github.com/slytechs-repos/protocol-pack-sdk>
 [download-bundle]: <https://github.com/slytechs-repos/slytechs-repos/releases>
 [protocol-packs]: <https://github.com/slytechs-repos/jnetpcap-pro/wiki#about-protocol-packs>
-[jnetworks]: http://slytechs.com/jnetworks
+[jnetworks-sdk]: http://slytechs.com/jnetworks-sdk
+[jnetpcap-maven-central]: <https://mvnrepository.com/artifact/com.slytechs.jnet>
