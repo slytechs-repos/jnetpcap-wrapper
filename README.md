@@ -1,21 +1,38 @@
 ![Maven Central](https://img.shields.io/maven-central/v/com.slytechs.jnet.jnetpcap/jnetpcap-wrapper?link=https%3A%2F%2Fmvnrepository.com%2Fartifact%2Fcom.slytechs.jnet.jnetpcap%2Fjnetpcap-wrapper)
 
 # jNetPcap Wrapper
+Unlock Network Packet Analysis in Java with **jNetPcap Wrapper**
+
 **jNetPcap Wrapper** is a [*libpcap*][libpcap] java library. This is **version 2** release of the popular **jNetPcap** library, previously hosted on [*SourceForge.net*][sf.net].
+
+## Overview
+Harness the power of libpcap within your Java applications using jNetPcap Wrapper, a bridge that grants you seamless access to low-level network monitoring capabilities.
+
+Key Features:
+
+* Capture and Analyze Network Traffic: Intercept packets in real-time, delving into their contents for in-depth analysis and insights.
+* Streamlined Integration: Effortlessly incorporate the library into your projects using dependency managers like Maven or by manually adding it to your classpath.
+* Intuitive Java API: Interact with network data through a familiar Java interface, eliminating the need for complex native code.
+* Packet Capture and Handling: Employ the Pcap class to initiate packet capture on a chosen network interface, and utilize PcapPacketHandler to process captured packets efficiently.
+* Precise Packet Filtering: Implement granular filters to isolate specific packets based on criteria such as port numbers, protocols, or IP addresses, refining your analysis.
+* 
+Key Steps to Get Started:
+
+* Installation: Add jNetPcap Wrapper as a dependency in your Maven project's pom.xml file or download and manually integrate it into your classpath.
+* Interface Selection: Instantiate a Pcap object, representing the network interface you intend to monitor.
+* Packet Handling: Create a PcapPacketHandler instance to process captured packets as they arrive.
+* Filtering (Optional): Craft filters to narrow down captured packets based on specific constraints using the library's filtering capabilities.
+
+Unlock a Realm of Network Analysis Possibilities:
+
+* Construct custom network monitoring tools.
+* Develop sophisticated packet analyzers.
+* Implement intrusion detection systems.
+* Design network forensic tools.
+* Conduct comprehensive network troubleshooting and optimization.
 
 ## See Also
 If you are looking for protocol enabled version of this library, please see the full [**jNetPcap SDK**][jnetpcap-sdk] or for advanced functionality the [**jNetWorks SDK**][jnetworks-sdk] library.
-
-## Overview
-**jNetPcap Wrapper** is a Java library that provides access to libpcap, a low-level network monitoring library. The library allows Java developers to write applications that can capture, read, and manipulate network packets in real-time. 
-
-To use **jNetPcap Wrapper**, you need to add it to your `pom.xml` file as a dependency [![Maven Central](https://img.shields.io/maven-central/v/com.slytechs.jnet.jnetpcap/jnetpcap-wrapper)](https://mvnrepository.com/artifact/com.slytechs.jnet) or  download and install the library and add it to your Java project's classpath.  Once you have done that, you can use the Java API provided by **jNetPcap Wrapper** to interact with network packets.
-
-The library includes a set of classes and methods that allow you to capture network packets, filter and search through them, extract and analyze packet data, and ultimately write custom network analysis applications. 
-
-To begin capturing packets, you can create an instance of the `Pcap` class, which represents a network interface that the library will use to capture packets. Then you can create a `PcapPacketHandler` instance to process each packet as it is captured. 
-
-**jNetPcap Wrapper** also includes functionality for creating filters to capture only the packets that match certain criteria, such as a specific port, protocol, or IP address.
 
 ## Documentation
 See [*Wiki pages*][wiki] for user guides and examples.
