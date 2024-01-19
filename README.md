@@ -23,7 +23,7 @@ See [*Wiki pages*][wiki] for user guides and examples.
 See [*Javadocs*][javadocs] reference documentation.
 
 ## Where are the protocols found in v1?
-If you are looking for protocol support, same as it was available in v1, this functionality has been moved to other modules. In this way, **jnetpcap** module's functionality is focused on providing accurate modeling of native *libpcap* APIs in java. 
+If you are looking for protocol support, same as it was available in v1, this functionality has been moved to other modules. In this way, **jNetPcap Wrapper** module's functionality is focused on providing accurate modeling of native *libpcap* APIs in java. 
 
 For protocols and familiar v1 APIs such as
 ```
@@ -32,9 +32,9 @@ Ip4 ip4 = new Ip4();
 if (packet.hasHeader(ip4))
   System.out.printf("IPv4.version=%d%n", ip4.version());
 ```
-please use [**jnetpcap-pro**][jnetpcap-pro] module which extends that basic **jnetpcap** module API (ie. `PcapPro extends Pcap`) by providing additional protocol level features and API. Click here to download [**jNetPcap Pro + Protocols bundle**][download-bundle].
+please use [**jnetpcap-sdk**][jnetpcap-sdk] module which extends that basic **jNetPcap Wrapper** API (ie. `NetPcap extends Pcap`) by providing additional protocol level features and API.
 
-> **Note:** The protocol definitions are in their own modules called [**protocol packs**][protocol-packs], starting with [**core-protocols**][core-protocols] protocol pack.
+> **Note:** The protocol definitions are in their own modules called **protocol packs** found in [**protocol-pack-sdk**][protocol-pack-sdk] repository and maven artifacts.
 
 ## Examples
 To get started lets take a look at a couple of examples.
@@ -212,7 +212,7 @@ So everyone is on the same page, we follow the following [branching model][git-b
 [jep424]: <https://openjdk.org/jeps/424> "Foreign Function & Memory API (Preview)"
 [git-branch-model]: <https://nvie.com/posts/a-successful-git-branching-model>
 [why-master-deprecated]: <https://www.theserverside.com/feature/Why-GitHub-renamed-its-master-branch-to-main>
-[jnetpcap-api]: <https://github.com/slytechs-repos/jnetpcap-api>
+[jnetpcap-sdk]: <https://github.com/slytechs-repos/jnetpcap-sdk>
 [protocol-pack-sdk]: <https://github.com/slytechs-repos/protocol-pack-sdk>
 [download-bundle]: <https://github.com/slytechs-repos/slytechs-repos/releases>
 [protocol-packs]: <https://github.com/slytechs-repos/jnetpcap-pro/wiki#about-protocol-packs>
