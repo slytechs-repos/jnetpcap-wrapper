@@ -113,7 +113,7 @@ public enum ArpHdr implements IntSupplier {
 	/** Cisco HDLC. */
 	ARPHDR_CISCO(513, "CISCO"),
 
-	/** */
+	/** HDLC */
 	ARPHRD_HDLC(513, "CISCO"),
 
 	/** LAPB. */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,6 +116,12 @@ public enum PcapIfFlag implements IntSupplier {
 		return set;
 	}
 
+	/**
+	 * To a set of PcapIf flags..
+	 *
+	 * @param flags the bitmask of flags
+	 * @return the set of enum constants
+	 */
 	public static Set<String> toLabelSet(int flags) {
 		return toEnumSet(flags).stream()
 				.map(PcapIfFlag::label)
