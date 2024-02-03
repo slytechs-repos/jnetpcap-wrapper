@@ -39,7 +39,7 @@ import org.jnetpcap.constant.PcapOption;
 import org.jnetpcap.constant.PcapSrc;
 import org.jnetpcap.constant.PcapTStampPrecision;
 import org.jnetpcap.constant.PcapTstampType;
-import org.jnetpcap.internal.DelegatePcap;
+import org.jnetpcap.internal.DeputyPcap;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.internal.PcapHeaderABI;
 import org.jnetpcap.util.NetIp4Address;
@@ -55,7 +55,7 @@ import static java.lang.foreign.ValueLayout.*;
  * @author Sly Technologies
  * @author repos@slytechs.com
  */
-public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, DelegatePcap {
+public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, DeputyPcap {
 
 	/**
 	 * An interface which provides a hook into Pcap initialization process. Any

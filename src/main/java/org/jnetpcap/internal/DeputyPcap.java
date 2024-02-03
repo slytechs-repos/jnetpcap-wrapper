@@ -44,18 +44,18 @@ import org.jnetpcap.util.PcapPacketRef;
  * @author repos@slytechs.com
  * @author Mark Bednarczyk
  */
-public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
+public non-sealed class DeputyPcap<T extends Pcap> extends Pcap {
 
-	private final Pcap pcap;
+	private final Pcap delegatePcap;
 
 	/**
 	 * Instantiates a new non sealed pcap.
 	 *
 	 * @param pcapHandle the pcap handle
 	 */
-	protected DelegatePcap(Pcap pcap) {
+	protected DeputyPcap(Pcap pcap) {
 		super(pcap);
-		this.pcap = pcap;
+		this.delegatePcap = pcap;
 	}
 
 	/**
@@ -65,7 +65,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public void activate() throws PcapActivatedException, PcapException {
-		pcap.activate();
+		delegatePcap.activate();
 	}
 
 	/**
@@ -74,7 +74,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public void breakloop() {
-		pcap.breakloop();
+		delegatePcap.breakloop();
 	}
 
 	/**
@@ -84,7 +84,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public boolean canSetRfmon() throws PcapException {
-		return pcap.canSetRfmon();
+		return delegatePcap.canSetRfmon();
 	}
 
 	/**
@@ -93,7 +93,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public void close() {
-		pcap.close();
+		delegatePcap.close();
 	}
 
 	/**
@@ -105,7 +105,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public BpFilter compile(String str, boolean optimize) throws PcapException {
-		return pcap.compile(str, optimize);
+		return delegatePcap.compile(str, optimize);
 	}
 
 	/**
@@ -118,7 +118,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public BpFilter compile(String str, boolean optimize, int netmask) throws PcapException {
-		return pcap.compile(str, optimize, netmask);
+		return delegatePcap.compile(str, optimize, netmask);
 	}
 
 	/**
@@ -128,7 +128,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public PcapDlt datalink() throws PcapException {
-		return pcap.datalink();
+		return delegatePcap.datalink();
 	}
 
 	/**
@@ -138,7 +138,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public PcapDlt dataLinkExt() throws PcapException {
-		return pcap.dataLinkExt();
+		return delegatePcap.dataLinkExt();
 	}
 
 	/**
@@ -151,7 +151,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public int dispatch(int count, NativeCallback handler, MemorySegment user) {
-		return pcap.dispatch(count, handler, user);
+		return delegatePcap.dispatch(count, handler, user);
 	}
 
 	/**
@@ -166,7 +166,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public <U> int dispatch(int count, OfArray<U> handler, U user) throws PcapException {
-		return pcap.dispatch(count, handler, user);
+		return delegatePcap.dispatch(count, handler, user);
 	}
 
 	/**
@@ -181,7 +181,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public <U> int dispatch(int count, OfMemorySegment<U> handler, U user) throws PcapException {
-		return pcap.dispatch(count, handler, user);
+		return delegatePcap.dispatch(count, handler, user);
 	}
 
 	/**
@@ -194,7 +194,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public <U> int dispatch(int count, PcapDumper pcapDumper) throws PcapException {
-		return pcap.dispatch(count, pcapDumper);
+		return delegatePcap.dispatch(count, pcapDumper);
 	}
 
 	/**
@@ -205,7 +205,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public PcapDumper dumpOpen(String fname) throws PcapException {
-		return pcap.dumpOpen(fname);
+		return delegatePcap.dumpOpen(fname);
 	}
 
 	/**
@@ -215,7 +215,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		return pcap.equals(obj);
+		return delegatePcap.equals(obj);
 	}
 
 	/**
@@ -224,7 +224,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public String geterr() {
-		return pcap.geterr();
+		return delegatePcap.geterr();
 	}
 
 	/**
@@ -234,7 +234,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public boolean getNonBlock() throws PcapException {
-		return pcap.getNonBlock();
+		return delegatePcap.getNonBlock();
 	}
 
 	/**
@@ -243,7 +243,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public PcapHeaderABI getPcapHeaderABI() {
-		return pcap.getPcapHeaderABI();
+		return delegatePcap.getPcapHeaderABI();
 	}
 
 	/**
@@ -253,7 +253,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public PcapTStampPrecision getTstampPrecision() throws PcapException {
-		return pcap.getTstampPrecision();
+		return delegatePcap.getTstampPrecision();
 	}
 
 	/**
@@ -262,7 +262,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public int hashCode() {
-		return pcap.hashCode();
+		return delegatePcap.hashCode();
 	}
 
 	/**
@@ -274,7 +274,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public int inject(MemorySegment packet, int length) throws PcapException {
-		return pcap.inject(packet, length);
+		return delegatePcap.inject(packet, length);
 	}
 
 	/**
@@ -284,7 +284,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public boolean isSwapped() throws PcapException {
-		return pcap.isSwapped();
+		return delegatePcap.isSwapped();
 	}
 
 	/**
@@ -294,7 +294,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public List<PcapDlt> listDataLinks() throws PcapException {
-		return pcap.listDataLinks();
+		return delegatePcap.listDataLinks();
 	}
 
 	/**
@@ -304,7 +304,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public List<PcapTstampType> listTstampTypes() throws PcapException {
-		return pcap.listTstampTypes();
+		return delegatePcap.listTstampTypes();
 	}
 
 	/**
@@ -318,7 +318,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public <U> int loop(int count, NativeCallback handler, MemorySegment user) {
-		return pcap.loop(count, handler, user);
+		return delegatePcap.loop(count, handler, user);
 	}
 
 	/**
@@ -333,7 +333,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public <U> int loop(int count, OfArray<U> handler, U user) throws PcapException {
-		return pcap.loop(count, handler, user);
+		return delegatePcap.loop(count, handler, user);
 	}
 
 	/**
@@ -347,7 +347,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public <U> int loop(int count, OfMemorySegment<U> handler, U user) {
-		return pcap.loop(count, handler, user);
+		return delegatePcap.loop(count, handler, user);
 	}
 
 	/**
@@ -360,7 +360,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public <U> int loop(int count, PcapDumper pcapDumper) throws PcapException {
-		return pcap.loop(count, pcapDumper);
+		return delegatePcap.loop(count, pcapDumper);
 	}
 
 	/**
@@ -370,7 +370,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public int majorVersion() throws PcapException {
-		return pcap.majorVersion();
+		return delegatePcap.majorVersion();
 	}
 
 	/**
@@ -380,7 +380,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public int minorVersion() throws PcapException {
-		return pcap.minorVersion();
+		return delegatePcap.minorVersion();
 	}
 
 	/**
@@ -390,7 +390,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public PcapPacketRef next() throws PcapException {
-		return pcap.next();
+		return delegatePcap.next();
 	}
 
 	/**
@@ -401,7 +401,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public PcapPacketRef nextEx() throws PcapException, TimeoutException {
-		return pcap.nextEx();
+		return delegatePcap.nextEx();
 	}
 
 	/**
@@ -411,7 +411,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T perror(String prefix) {
-		pcap.perror(prefix);
+		delegatePcap.perror(prefix);
 		return us();
 	}
 
@@ -423,7 +423,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public void sendPacket(MemorySegment packet, int length) throws PcapException {
-		pcap.sendPacket(packet, length);
+		delegatePcap.sendPacket(packet, length);
 	}
 
 	/**
@@ -434,7 +434,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setBufferSize(int bufferSize) throws PcapException {
-		return delegate1(pcap::setBufferSize, bufferSize);
+		return delegate1(delegatePcap::setBufferSize, bufferSize);
 	}
 
 	/**
@@ -445,7 +445,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setDatalink(int dlt) throws PcapException {
-		return delegate1(pcap::setDatalink, dlt);
+		return delegate1(delegatePcap::setDatalink, dlt);
 	}
 
 	/**
@@ -456,7 +456,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setDatalink(Optional<PcapDlt> dlt) throws PcapException {
-		return delegate1(pcap::setDatalink, dlt);
+		return delegate1(delegatePcap::setDatalink, dlt);
 	}
 
 	/**
@@ -467,7 +467,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setDatalink(PcapDlt dlt) throws PcapException {
-		return delegate1(pcap::setDatalink, dlt);
+		return delegate1(delegatePcap::setDatalink, dlt);
 	}
 
 	/**
@@ -478,7 +478,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setDirection(int dir) throws PcapException {
-		return delegate1(pcap::setDirection, dir);
+		return delegate1(delegatePcap::setDirection, dir);
 	}
 
 	/**
@@ -489,7 +489,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setDirection(Optional<PcapDirection> dir) throws PcapException {
-		return delegate1(pcap::setDirection, dir);
+		return delegate1(delegatePcap::setDirection, dir);
 	}
 
 	/**
@@ -500,7 +500,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setDirection(PcapDirection dir) throws PcapException {
-		return delegate1(pcap::setDirection, dir);
+		return delegate1(delegatePcap::setDirection, dir);
 	}
 
 	/**
@@ -511,7 +511,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setFilter(BpFilter bpfProgram) throws PcapException {
-		return delegate1(pcap::setFilter, bpfProgram);
+		return delegate1(delegatePcap::setFilter, bpfProgram);
 	}
 
 	/**
@@ -522,7 +522,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setFilter(Optional<BpFilter> bpfProgram) throws PcapException {
-		return delegate1(pcap::setFilter, bpfProgram);
+		return delegate1(delegatePcap::setFilter, bpfProgram);
 	}
 
 	/**
@@ -533,7 +533,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setImmediateMode(boolean enable) throws PcapException {
-		return delegate1(pcap::setImmediateMode, enable);
+		return delegate1(delegatePcap::setImmediateMode, enable);
 	}
 
 	/**
@@ -544,7 +544,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setNonBlock(boolean blockMode) throws PcapException {
-		return delegate1(pcap::setNonBlock, blockMode);
+		return delegate1(delegatePcap::setNonBlock, blockMode);
 	}
 
 	/**
@@ -555,7 +555,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setPromisc(boolean promiscousMode) throws PcapException {
-		return delegate1(pcap::setPromisc, promiscousMode);
+		return delegate1(delegatePcap::setPromisc, promiscousMode);
 	}
 
 	/**
@@ -566,7 +566,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setRfmon(boolean rfMonitor) throws PcapException {
-		return delegate1(pcap::setRfmon, rfMonitor);
+		return delegate1(delegatePcap::setRfmon, rfMonitor);
 	}
 
 	/**
@@ -577,7 +577,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setSnaplen(int snaplen) throws PcapException {
-		return delegate1(pcap::setSnaplen, snaplen);
+		return delegate1(delegatePcap::setSnaplen, snaplen);
 	}
 
 	/**
@@ -588,7 +588,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setTimeout(int timeoutInMillis) throws PcapException {
-		return delegate1(pcap::setTimeout, timeoutInMillis);
+		return delegate1(delegatePcap::setTimeout, timeoutInMillis);
 	}
 
 	/**
@@ -599,7 +599,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setTstampPrecision(PcapTStampPrecision precision) throws PcapException {
-		return delegate1(pcap::setTstampPrecision, precision);
+		return delegate1(delegatePcap::setTstampPrecision, precision);
 	}
 
 	/**
@@ -610,7 +610,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setTstampType(PcapTstampType type) throws PcapException {
-		return delegate1(pcap::setTstampType, type);
+		return delegate1(delegatePcap::setTstampType, type);
 	}
 
 	/**
@@ -620,7 +620,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setUncaughtExceptionHandler(Consumer<? super Throwable> exceptionHandler) {
-		pcap.setUncaughtExceptionHandler(exceptionHandler);
+		delegatePcap.setUncaughtExceptionHandler(exceptionHandler);
 		return us();
 	}
 
@@ -631,7 +631,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public T setUncaughtExceptionHandler(UncaughtExceptionHandler exceptionHandler) {
-		pcap.setUncaughtExceptionHandler(exceptionHandler);
+		delegatePcap.setUncaughtExceptionHandler(exceptionHandler);
 		return us();
 	}
 
@@ -642,7 +642,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public int snapshot() throws PcapException {
-		return pcap.snapshot();
+		return delegatePcap.snapshot();
 	}
 
 	/**
@@ -652,7 +652,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public PcapStat stats() throws PcapException {
-		return pcap.stats();
+		return delegatePcap.stats();
 	}
 
 	/**
@@ -661,7 +661,7 @@ public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 	 */
 	@Override
 	public String toString() {
-		return pcap.toString();
+		return delegatePcap.toString();
 	}
 
 	/**
