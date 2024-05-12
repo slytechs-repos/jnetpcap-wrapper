@@ -29,12 +29,12 @@ import static java.lang.foreign.ValueLayout.*;
 /**
  * A Berkley Packet Filter program. BpFilter is applied to captured packets and
  * only the packets that match the filter program are reported.
- * 
+ *
  * <p>
  * Each 64-bit instruction is the long int representation of the following bpf
  * structure found in C header file "pcap/bpf.h":
  * </p>
- * 
+ *
  * <pre>
  * struct bpf_insn {
  *		u_short	full;
@@ -43,7 +43,7 @@ import static java.lang.foreign.ValueLayout.*;
  *		bpf_u_int32 k;
  * };
  * </pre>
- * 
+ *
  * @author Sly Technologies
  * @author repos@slytechs.com
  */
@@ -56,11 +56,11 @@ public final class BpFilter implements AutoCloseable {
 	 * 		     struct bpf_insn *bf_insns;
 	 * 		 };
 	 * </pre>
-	 * 
+	 *
 	 * .
 	 */
 	private class StructBpfProgram {
-		
+
 		/** The Constant LAYOUT. */
 		private static final MemoryLayout LAYOUT = structLayout(
 
@@ -72,7 +72,7 @@ public final class BpFilter implements AutoCloseable {
 
 		/** The Constant BF_LEN. */
 		private static final VarHandle BF_LEN = LAYOUT.varHandle(groupElement("bf_len"));
-		
+
 		/** The Constant BF_INSNS. */
 		private static final VarHandle BF_INSNS = LAYOUT.varHandle(groupElement("bf_insns"));
 
@@ -106,7 +106,7 @@ public final class BpFilter implements AutoCloseable {
 		 * @return the memory segment
 		 */
 		public MemorySegment bf_insns() {
-			return (MemorySegment) BF_INSNS.get(ValueLayout.ADDRESS);
+			return (MemorySegment) BF_INSNS.get(this.mseg, 0L);
 		}
 
 		/**
@@ -115,7 +115,7 @@ public final class BpFilter implements AutoCloseable {
 		 * @return the int
 		 */
 		public int bf_len() {
-			return (int) BF_LEN.get(mseg);
+			return (int) BF_LEN.get(mseg, 0L);
 		}
 
 		/**
@@ -140,7 +140,7 @@ public final class BpFilter implements AutoCloseable {
 
 	/** The program. */
 	private final StructBpfProgram program;
-	
+
 	/** The arena. */
 	private final Arena arena;
 

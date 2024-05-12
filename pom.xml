@@ -9,12 +9,12 @@
 	<url>https://www.jnetpcap.org</url>
 	<properties>
 		<parent.project>${project.artifactId}</parent.project>
-		
-		<jdk.version>21</jdk.version>
+
+		<jdk.version>22</jdk.version>
 		<project.build.sourceEncoding>${java.encoding}</project.build.sourceEncoding>
 		<maven.compiler.source>${jdk.version}</maven.compiler.source>
 		<maven.compiler.target>${jdk.version}</maven.compiler.target>
-		<java.preview>--enable-preview</java.preview>
+		<java.preview/>
 		<java.encoding>UTF-8</java.encoding>
 		<java.native>--enable-native-access=ALL-UNNAMED</java.native>
 		<groups>user-permission</groups>
@@ -44,7 +44,7 @@
 			<artifactId>maven-compiler-plugin</artifactId>
 			<version>3.11.0</version>
 		</dependency>
-		<!-- 
+		<!--
 		https://mvnrepository.com/artifact/org.junit.platform/junit-platform-suite-api  -->
 		<dependency>
 			<groupId>org.junit.platform</groupId>
@@ -83,7 +83,7 @@
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>
 					<release>${jdk.version}</release>
-					<enablePreview>true</enablePreview>
+					<enablePreview>false</enablePreview>
 				</configuration>
 			</plugin>
 			<plugin>

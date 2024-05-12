@@ -249,14 +249,14 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 			MemorySegment c_source = arena.allocate(PCAP_BUF_SIZE);
 			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
-			MemorySegment c_host = (host != null) ? arena.allocateUtf8String(host) : NULL;
-			MemorySegment c_port = (port != null) ? arena.allocateUtf8String(port) : NULL;
-			MemorySegment c_name = (name != null) ? arena.allocateUtf8String(name) : NULL;
+			MemorySegment c_host = (host != null) ? arena.allocateFrom(host, java.nio.charset.StandardCharsets.UTF_8) : NULL;
+			MemorySegment c_port = (port != null) ? arena.allocateFrom(port, java.nio.charset.StandardCharsets.UTF_8) : NULL;
+			MemorySegment c_name = (name != null) ? arena.allocateFrom(name, java.nio.charset.StandardCharsets.UTF_8) : NULL;
 
 			int result = pcap_createsrcstr.invokeInt(c_source, type.getAsInt(), c_host, c_port, c_name, errbuf);
-			PcapException.throwIfNotOk(result, () -> errbuf.getUtf8String(0));
+			PcapException.throwIfNotOk(result, () -> errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
 
-			return c_source.getUtf8String(0);
+			return c_source.getString(0, java.nio.charset.StandardCharsets.UTF_8);
 		}
 	}
 
@@ -314,13 +314,13 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 		password = password == null ? "" : password;
 
 		try (var arena = newArena()) {
-			MemorySegment c_source = arena.allocateUtf8String(source);
+			MemorySegment c_source = arena.allocateFrom(source, java.nio.charset.StandardCharsets.UTF_8);
 			MemorySegment c_alldevsp = arena.allocate(ADDRESS);
 			MemorySegment c_rmtauth = new PcapRmt.Auth(type, username, password).allocateNative(arena);
 			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
 			int result = pcap_findalldevs_ex.invokeInt(c_source, c_rmtauth, c_alldevsp, errbuf);
-			PcapException.throwIfNotOk(result, () -> errbuf.getUtf8String(0));
+			PcapException.throwIfNotOk(result, () -> errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
 
 			return listAllPcapIf(c_alldevsp.get(ADDRESS, 0), arena);
 		}
@@ -487,19 +487,19 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 		try (var arena = newArena()) {
 			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
-			MemorySegment c_source = arena.allocateUtf8String(source);
+			MemorySegment c_source = arena.allocateFrom(source, java.nio.charset.StandardCharsets.UTF_8);
 			MemorySegment c_type = arena.allocate(JAVA_INT);
 			MemorySegment c_host = arena.allocate( PCAP_BUF_SIZE);
 			MemorySegment c_port = arena.allocate(PCAP_BUF_SIZE);
 			MemorySegment c_name = arena.allocate(PCAP_BUF_SIZE);
 
 			int result = pcap_parsesrcstr.invokeInt(c_source, c_type, c_host, c_port, c_name, errbuf);
-			PcapException.throwIfNotOk(result, () -> errbuf.getUtf8String(0));
+			PcapException.throwIfNotOk(result, () -> errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
 
 			int type = c_type.get(JAVA_INT, 0);
-			String host = c_host.getUtf8String(0);
-			String port = c_port.getUtf8String(0);
-			String name = c_name.getUtf8String(0);
+			String host = c_host.getString(0, java.nio.charset.StandardCharsets.UTF_8);
+			String port = c_port.getString(0, java.nio.charset.StandardCharsets.UTF_8);
+			String name = c_name.getString(0, java.nio.charset.StandardCharsets.UTF_8);
 
 			PcapRmt.Source srcString = new PcapRmt.Source(type, host, port, name);
 
@@ -586,7 +586,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 */
 	public void liveDump(String filename, int maxsize, int maxpacks) throws PcapException {
 		try (var arena = newArena()) {
-			MemorySegment c_filename = arena.allocateUtf8String(filename);
+			MemorySegment c_filename = arena.allocateFrom(filename, java.nio.charset.StandardCharsets.UTF_8);
 			pcap_live_dump.invokeInt(this::geterr,  getPcapHandle(), c_filename, maxsize, maxpacks);
 		}
 	}
