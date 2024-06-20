@@ -325,7 +325,7 @@ public class ForeignDowncall<E extends Throwable> {
 
 		validateObj(address, messageFactory);
 
-		return address.getUtf8String(0);
+		return address.getString(0, java.nio.charset.StandardCharsets.UTF_8);
 
 	}
 
