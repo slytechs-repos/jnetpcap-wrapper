@@ -278,7 +278,7 @@ enum SaLayout {
 		if (varHandle == null)
 			throw new IllegalStateException("Not a value constant");
 
-		return varHandle.get(mseg);
+		return varHandle.get(mseg, 0L);
 	}
 
 	/**

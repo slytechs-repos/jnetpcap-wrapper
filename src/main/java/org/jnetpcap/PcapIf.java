@@ -43,7 +43,7 @@ import static java.lang.foreign.ValueLayout.*;
 
 /**
  * Native Type pcap_if_t has the following members.
- * 
+ *
  * <dl>
  * <dt>next</dt>
  * <dd>if not NULL, a pointer to the next element in the list; NULL for the last
@@ -58,7 +58,7 @@ import static java.lang.foreign.ValueLayout.*;
  * <dd>a pointer to the first element of a list of network addresses for the
  * device, or NULL if the device has no addresses</dd>
  * </dl>
- * 
+ *
  * <dl>
  * <dt>flags</dt>
  * <dd>device flags:
@@ -73,7 +73,7 @@ import static java.lang.foreign.ValueLayout.*;
  * radio-based networks such as IEEE 802.15.4 and IEEE 802.11, so it doesn't
  * just mean Wi-Fi</dd>
  * </dl>
- * 
+ *
  * <dl>
  * <dt>PCAP_IF_CONNECTION_STATUS</dt>
  * <dd>a bitmask for an indication of whether the adapter is connected or not;
@@ -88,12 +88,12 @@ import static java.lang.foreign.ValueLayout.*;
  * <dd>the notion of "connected" and "disconnected" don't apply to this
  * interface; for example, it doesn't apply to a loopback device</dd>
  * </dl>
- * 
+ *
  * <p>
  * Each element of the list of addresses is of type pcap_addr_t, and has the
  * following members:
  * </p>
- * 
+ *
  * <dl>
  * <dt>next</dt>
  * <dd>if not NULL, a pointer to the next element in the list; NULL for the last
@@ -112,7 +112,7 @@ import static java.lang.foreign.ValueLayout.*;
  * address corresponding to the address pointed to by addr; may be null if the
  * device isn't a point-to-point interface</dd>
  * </dl>
- * 
+ *
  * <p>
  * Note that the addresses in the list of addresses might be IPv4 addresses,
  * IPv6 addresses, or some other type of addresses, so you must check the
@@ -126,7 +126,7 @@ import static java.lang.foreign.ValueLayout.*;
  * interpreted as if it pointed to a struct sockaddr_in; for IPv6 addresses, it
  * can be interpreted as if it pointed to a struct sockaddr_in6.
  * </p>
- * 
+ *
  * @author Sly Technologies
  * @author repos@slytechs.com since libpcap 0.7
  */
@@ -180,7 +180,7 @@ public class PcapIf {
 				MemorySegment mseg = next.reinterpret(PCAP_ADDR_LAYOUT.byteSize());
 				list.add(new PcapAddr<SockAddr>(mseg, arena));
 
-				next = (MemorySegment) nextHandle.get(mseg);
+				next = (MemorySegment) nextHandle.get(mseg, 0L);
 			}
 			return list;
 		}
@@ -326,7 +326,7 @@ public class PcapIf {
 			MemorySegment mseg = next.reinterpret(PCAP_IF_LAYOUT.byteSize(), arena, __ -> {});
 			list.add(new PcapIf(mseg, arena));
 
-			next = (MemorySegment) nextHandle.get(mseg);
+			next = (MemorySegment) nextHandle.get(mseg, 0L);
 		}
 
 		return list;
@@ -354,48 +354,48 @@ public class PcapIf {
 	 * @param arena the memory scope
 	 */
 	PcapIf(MemorySegment mseg, Arena arena) {
-		MemorySegment addrs = (MemorySegment) addrsHandle.get(mseg);
+		MemorySegment addrs = (MemorySegment) addrsHandle.get(mseg, 0L);
 
-		name = toJavaString(nameHandle.get(mseg));
-		description = Optional.ofNullable(toJavaString(descHandle.get(mseg)));
-		flags = (int) flagsHandle.get(mseg);
+		name = toJavaString(nameHandle.get(mseg, 0L));
+		description = Optional.ofNullable(toJavaString(descHandle.get(mseg, 0L)));
+		flags = (int) flagsHandle.get(mseg, 0L);
 
 		addresses = PcapAddr.listAll(addrs, arena);
 		hardwareAddress = Optional.ofNullable(selectJavaNetInterface());
 	}
-	
+
 	private byte[] selectJavaNetInterface() {
-		
+
 		/* 1 - select by name */
 		try {
 			return NetworkInterface.getByName(name()).getHardwareAddress();
 		} catch(Throwable e) {}
-		
+
 		/* 2 - select by IPv4/INET address */
 		try {
 			var ip4 = findAddressOfType(InetSockAddr.class)
 					.map(PcapAddr::socketAddress)
 					.map(InetSockAddr::address)
 					.orElseThrow();
-			
+
 			String str = PcapUtils.toAddressString(ip4);
-			
+
 			return NetworkInterface.getByInetAddress(InetAddress.getByAddress(ip4)).getHardwareAddress();
 		} catch(Throwable e) {}
-		
+
 		/* 3 - select by IPv6/INET6 address */
 		try {
 			var ip6 = findAddressOfType(Inet6SockAddr.class)
 					.map(PcapAddr::socketAddress)
 					.map(Inet6SockAddr::address)
 					.orElseThrow();
-			
+
 			return NetworkInterface.getByInetAddress(InetAddress.getByAddress(ip6)).getHardwareAddress();
 		} catch(Throwable e) {}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Gets a list of all the addresses (PcapAddr) associated with this pcap
 	 * interface.
@@ -475,7 +475,7 @@ public class PcapIf {
 	/**
 	 * Returns the hardware address (usually MAC) of the interface if it has one and
 	 * if it can be accessed given the current privileges.
-	 * 
+	 *
 	 * @return an optional byte array containing the address
 	 */
 	public Optional<byte[]> hardwareAddress() {
