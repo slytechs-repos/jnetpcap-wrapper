@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,47 @@ import java.nio.ByteBuffer;
 public interface PcapHandler {
 
 	/**
+	 * A native pcap callback which is called with packets captured using the
+	 * {@link Pcap#loop} or {@link Pcap#dispatch} calls.
+	 */
+	@FunctionalInterface
+	public interface NativeCallback extends PcapHandler {
+
+		/**
+		 * Wrap array.
+		 *
+		 * @param array the array
+		 * @return the native callback
+		 */
+		static NativeCallback wrapArray(NativeCallback[] array) {
+			return (u, h, p) -> {
+				for (var a : array)
+					a.nativeCallback(u, h, p);
+			};
+		}
+
+		/**
+		 * Receive native packets.
+		 *
+		 * @param user   user opaque data
+		 * @param header libpcap header
+		 * @param packet packet data
+		 */
+		void nativeCallback(MemorySegment user, MemorySegment header, MemorySegment packet);
+
+		/**
+		 * Wrap user.
+		 *
+		 * @param newUser the new user
+		 * @return the native callback
+		 */
+		default NativeCallback wrapUser(MemorySegment newUser) {
+			return (u, h, p) -> nativeCallback(newUser, h, p);
+		}
+
+	}
+
+	/**
 	 * A safe packet handler which receives copies of packets in a byte array.
 	 *
 	 * @param <U> the generic user type
@@ -43,6 +84,17 @@ public interface PcapHandler {
 		 * @param packet the packet
 		 */
 		void handleArray(U user, PcapHeader header, byte[] packet);
+
+		/**
+		 * Creates a new handler that passes on new user data to the old handler. The
+		 * original user data supplied is ignored.
+		 *
+		 * @param newUser the new userdata to supply
+		 * @return new handler which overrides the original user data
+		 */
+		default OfArray<U> wrapUser(U newUser) {
+			return (u, h, p) -> handleArray(newUser, h, p);
+		}
 	}
 
 	/**
@@ -55,6 +107,20 @@ public interface PcapHandler {
 	public interface OfByteBuffer<U> extends PcapHandler {
 
 		/**
+		 * Wrap array.
+		 *
+		 * @param <U>   the generic type
+		 * @param array the array
+		 * @return the of memory segment
+		 */
+		static <U> OfByteBuffer<U> wrapArray(OfByteBuffer<U>[] array) {
+			return (u, h, p) -> {
+				for (var a : array)
+					a.handleByteBuffer(u, h, p);
+			};
+		}
+
+		/**
 		 * Packet handler method. This method get called to handle or consume a pcap
 		 * packet.
 		 *
@@ -63,6 +129,17 @@ public interface PcapHandler {
 		 * @param packet the packet
 		 */
 		void handleByteBuffer(U user, PcapHeader header, ByteBuffer packet);
+
+		/**
+		 * Creates a new handler that passes on new user data to the old handler. The
+		 * original user data supplied is ignored.
+		 *
+		 * @param newUser the new userdata to supply
+		 * @return new packet handler which overrides the original user data
+		 */
+		default OfByteBuffer<U> wrapUser(U newUser) {
+			return (u, h, p) -> handleByteBuffer(newUser, h, p);
+		}
 	}
 
 	/**
@@ -78,32 +155,39 @@ public interface PcapHandler {
 	public interface OfMemorySegment<U> extends PcapHandler {
 
 		/**
+		 * Wrap array.
+		 *
+		 * @param <U>   the generic type
+		 * @param array the array
+		 * @return the of memory segment
+		 */
+		static <U> OfMemorySegment<U> wrapArray(OfMemorySegment<U>[] array) {
+			return (u, h, p) -> {
+				for (var a : array)
+					a.handleSegment(u, h, p);
+			};
+		}
+
+		/**
 		 * Packet handler method. This method get called to handle or consume a pcap
 		 * packet.
 		 *
 		 * @param user   the user
 		 * @param header the header
-		 * @param Packet the packet
+		 * @param packet the packet
 		 */
-		void handleSegment(U user, MemorySegment header, MemorySegment Packet);
-	}
-
-	/**
-	 * A native pcap callback which is called with packets captured using the
-	 * {@link Pcap#loop} or {@link Pcap#dispatch} calls.
-	 */
-	@FunctionalInterface
-	public interface NativeCallback extends PcapHandler {
+		void handleSegment(U user, MemorySegment header, MemorySegment packet);
 
 		/**
-		 * Receive native packets.
+		 * Creates a new handler that passes on new user data to the old handler. The
+		 * original user data supplied is ignored.
 		 *
-		 * @param user   user opaque data
-		 * @param header libpcap header
-		 * @param packet packet data
+		 * @param newUser the new userdata to supply
+		 * @return new packet handler which overrides the original user data
 		 */
-		void nativeCallback(MemorySegment user, MemorySegment header, MemorySegment packet);
-
+		default OfMemorySegment<U> wrapUser(U newUser) {
+			return (u, h, p) -> handleSegment(newUser, h, p);
+		}
 	}
 
 }

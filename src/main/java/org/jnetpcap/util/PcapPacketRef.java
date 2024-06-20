@@ -35,6 +35,10 @@ import static java.lang.foreign.ValueLayout.*;
  */
 public record PcapPacketRef(Object abi, MemorySegment header, MemorySegment data) {
 
+	public interface PcapPacketRefHandler {
+		void handlePcapPacketRef(PcapPacketRef ref);
+	}
+
 	/**
 	 * Returns byte[] representation of the entire packet.
 	 *
