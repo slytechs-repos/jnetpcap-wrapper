@@ -1,9 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.slytechs.jnet.jnetpcap</groupId>
 	<artifactId>jnetpcap-wrapper</artifactId>
 	<!--  mvn versions:set -DnewVersion=_new_version_  -->
-	<version>2.1.0</version>
+	<version>2.2.0</version>
 	<name>jNetPcap Wrapper</name>
 	<description>A java wrapper for native LIBPCAP library and PCAP API</description>
 	<url>https://www.jnetpcap.org</url>
@@ -14,7 +16,7 @@
 		<project.build.sourceEncoding>${java.encoding}</project.build.sourceEncoding>
 		<maven.compiler.source>${jdk.version}</maven.compiler.source>
 		<maven.compiler.target>${jdk.version}</maven.compiler.target>
-		<java.preview/>
+		<java.preview />
 		<java.encoding>UTF-8</java.encoding>
 		<java.native>--enable-native-access=ALL-UNNAMED</java.native>
 		<groups>user-permission</groups>
@@ -58,6 +60,7 @@
 			<version>5.9.1</version>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 	<build>
 		<resources>
@@ -152,17 +155,17 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.13</version>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.5.0</version>
 				<extensions>true</extensions>
 				<configuration>
-					<serverId>ossrh</serverId>
-					<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+					<publishingServerId>central</publishingServerId>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
@@ -195,7 +198,7 @@
 		<repository>
 			<id>ossrh</id>
 			<url>
-				https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+				https://central.sonatype.com/api/v1/publisher/deployments/download</url>
 		</repository>
 		<!--  mvn clean site site:stage scm-publish:publish-scm  -->
 		<site>
@@ -388,6 +391,6 @@
 		<developerConnection>
 			scm:git:ssh:git://github.com/slytechs-repos/${parent.project}.git</developerConnection>
 		<url>https://github.com/slytechs-repos/${parent.project}</url>
-	  <tag>jnetpcap-wrapper-2.1.0</tag>
-  </scm>
+		<tag>jnetpcap-wrapper-2.1.0</tag>
+	</scm>
 </project>
