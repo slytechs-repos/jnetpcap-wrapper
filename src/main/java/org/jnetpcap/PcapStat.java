@@ -45,6 +45,7 @@ import org.jnetpcap.windows.PcapStatEx;
  * <p>
  * Note that the behavior of these statistics may vary across different
  * platforms:
+ * </p>
  * <ul>
  * <li>{@code recv()} might count all packets, whether they pass any filter set
  * with {@code pcap_setfilter(3PCAP)} or not, or only those that pass the
@@ -60,7 +61,6 @@ import org.jnetpcap.windows.PcapStatEx;
  * zero, it might indicate either that no packets were dropped by the interface
  * or that the statistic is unavailable.</li>
  * </ul>
- * </p>
  * 
  * <p>
  * Implementations of this interface are provided by {@link PcapStatRecord} and
