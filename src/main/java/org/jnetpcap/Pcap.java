@@ -24,6 +24,7 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -812,7 +813,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	}
 
 	/** The jNetPcap API version. */
-	public static final String VERSION = "2.0.0";
+	public static final String VERSION = "2.3.0";
 
 	static {
 		LibraryPolicy policy = LibraryPolicy.getDefault();
@@ -1556,6 +1557,36 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 			TimeUnit unit) throws PcapException {
 
 		return Pcap0_4.openLive(latest(), device, snaplen, promisc, timeout, unit);
+	}
+
+	/**
+	 * Open a device for capturing.
+	 * 
+	 * <p>
+	 * {@code openLive} is used to obtain a packet capture handle to look at packets
+	 * on the network. device is a string that specifies the network device to open;
+	 * on Linux systems with 2.2 or later kernels, a device argument of "any" or
+	 * NULL can be used to capture packets from all interfaces.
+	 * </p>
+	 *
+	 * @param device  the device name
+	 * @param snaplen specifies the snapshot length to be set on the handle
+	 * @param promisc specifies whether the interface is to be put into promiscuous
+	 *                mode. If promisc is non-zero, promiscuous mode will be set,
+	 *                otherwise it will not be set
+	 * @param timeout the packet buffer timeout, as a non-negative duration
+	 * @return the pcap handle
+	 * @throws PcapException any errors
+	 * @since libpcap 0.4
+	 */
+	public static Pcap openLive(String device,
+			int snaplen,
+			boolean promisc,
+			Duration timeout) throws PcapException {
+
+		long nanos = timeout.toMillis();
+
+		return Pcap0_4.openLive(latest(), device, snaplen, promisc, nanos, TimeUnit.NANOSECONDS);
 	}
 
 	/**
