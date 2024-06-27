@@ -391,6 +391,6 @@
 		<developerConnection>
 			scm:git:ssh:git://github.com/slytechs-repos/${parent.project}.git</developerConnection>
 		<url>https://github.com/slytechs-repos/${parent.project}</url>
-		<tag>jnetpcap-wrapper-2.1.0</tag>
+		<tag>jnetpcap-wrapper-${project.version}</tag>
 	</scm>
 </project>
