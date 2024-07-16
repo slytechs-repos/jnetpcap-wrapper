@@ -27,7 +27,7 @@ import static java.lang.foreign.ValueLayout.*;
 
 /**
  * Remote RPCAP authentication and source string marker interface.
- * 
+ *
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  * @author mark
@@ -72,10 +72,10 @@ public sealed interface PcapRmt permits PcapRmt.Source, PcapRmt.Auth {
 
 		/** The Constant rmtauth_type. */
 		private static final VarHandle rmtauth_type = LAYOUT.varHandle(PathElement.groupElement("type"));
-		
+
 		/** The Constant rmtauth_username. */
 		private static final VarHandle rmtauth_username = LAYOUT.varHandle(PathElement.groupElement("username"));
-		
+
 		/** The Constant rmtauth_password. */
 		private static final VarHandle rmtauth_password = LAYOUT.varHandle(PathElement.groupElement("password"));
 
@@ -99,12 +99,12 @@ public sealed interface PcapRmt permits PcapRmt.Source, PcapRmt.Auth {
 		MemorySegment allocateNative(Arena arena) {
 			MemorySegment mseg = arena.allocate(LAYOUT.byteSize());
 
-			MemorySegment c_username = arena.allocateUtf8String(username);
-			MemorySegment c_password = arena.allocateUtf8String(password);
+			MemorySegment c_username = arena.allocateFrom(username, java.nio.charset.StandardCharsets.UTF_8);
+			MemorySegment c_password = arena.allocateFrom(password, java.nio.charset.StandardCharsets.UTF_8);
 
-			rmtauth_type.set(mseg, type);
-			rmtauth_username.set(mseg, c_username);
-			rmtauth_password.set(mseg, c_password);
+			rmtauth_type.set(mseg, 0L, type);
+			rmtauth_username.set(mseg, 0L, c_username);
+			rmtauth_password.set(mseg, 0L, c_password);
 
 			return mseg;
 		}

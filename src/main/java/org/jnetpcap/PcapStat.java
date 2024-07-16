@@ -19,84 +19,110 @@ import org.jnetpcap.internal.PcapStatRecord;
 import org.jnetpcap.windows.PcapStatEx;
 
 /**
- * Packet statistics from the start of the pcap run to the time of the call.
+ * Provides packet statistics from the start of the pcap run to the time of the
+ * call.
  * 
  * <p>
- * A struct pcap_stat has the following members:
+ * The {@code PcapStat} interface models the packet statistics similar to the
+ * {@code struct pcap_stat} in the libpcap library. The statistics include:
  * </p>
  * <dl>
- * <dt>ps_recv</dt>
- * <dd>number of packets received;</dd>
- * <dt>ps_drop</dt>
- * <dd>number of packets dropped because there was no room in the operating
- * system's buffer when they arrived, because packets weren't being read fast
- * enough;</dd>
- * <dt>ps_ifdrop</dt>
- * <dd>number of packets dropped by the network interface or its driver.</dd>
+ * <dt>recv()</dt>
+ * <dd>Number of packets received.</dd>
+ * <dt>drop()</dt>
+ * <dd>Number of packets dropped because there was no room in the operating
+ * system's buffer when they arrived, or because packets weren't being read fast
+ * enough.</dd>
+ * <dt>ifdrop()</dt>
+ * <dd>Number of packets dropped by the network interface or its driver.</dd>
+ * <dt>netdrop()</dt>
+ * <dd>Number of packets dropped by the network.</dd>
+ * <dt>capt()</dt>
+ * <dd>Number of packets captured.</dd>
+ * <dt>sent()</dt>
+ * <dd>Number of packets sent.</dd>
  * </dl>
  * <p>
- * The statistics do not behave the same way on all platforms. ps_recv might
- * count packets whether they passed any filter set with pcap_setfilter(3PCAP)
- * or not, or it might count only packets that pass the filter. It also might,
- * or might not, count packets dropped because there was no room in the
- * operating system's buffer when they arrived. ps_drop is not available on all
- * platforms; it is zero on platforms where it's not available. If packet
- * filtering is done in libpcap, rather than in the operating system, it would
- * count packets that don't pass the filter. Both ps_recv and ps_drop might, or
- * might not, count packets not yet read from the operating system and thus not
- * yet seen by the application. ps_ifdrop might, or might not, be implemented;
- * if it's zero, that might mean that no packets were dropped by the interface,
- * or it might mean that the statistic is unavailable, so it should not be
- * treated as an indication that the interface did not drop any packets.
+ * Note that the behavior of these statistics may vary across different
+ * platforms:
+ * </p>
+ * <ul>
+ * <li>{@code recv()} might count all packets, whether they pass any filter set
+ * with {@code pcap_setfilter(3PCAP)} or not, or only those that pass the
+ * filter. It might also include packets dropped because there was no room in
+ * the operating system's buffer.</li>
+ * <li>{@code drop()} is not available on all platforms and may return zero on
+ * platforms where it is not available. It might count packets that don't pass
+ * the filter if packet filtering is done in libpcap rather than the operating
+ * system.</li>
+ * <li>Both {@code recv()} and {@code drop()} might include packets not yet read
+ * from the operating system and thus not yet seen by the application.</li>
+ * <li>{@code ifdrop()} might not be implemented on all platforms; if it returns
+ * zero, it might indicate either that no packets were dropped by the interface
+ * or that the statistic is unavailable.</li>
+ * </ul>
+ * 
+ * <p>
+ * Implementations of this interface are provided by {@link PcapStatRecord} and
+ * {@link PcapStatEx}.
  * </p>
  * 
- * @author Sly Technologies Inc
- * @author repos@slytechs.com
- * @author mark
- *
+ * @see PcapStatRecord
+ * @see PcapStatEx
+ * @see <a href="https://www.tcpdump.org/manpages/pcap.3pcap.html">pcap(3PCAP)
+ *      man page</a>
+ * @see <a href=
+ *      "https://www.tcpdump.org/manpages/pcap_setfilter.3pcap.html">pcap_setfilter(3PCAP)
+ *      man page</a>
+ * @see <a href="http://www.slytechs.com/free-license-text">Sly Technologies
+ *      Free License</a>
+ * 
+ * @since 1.0
+ * 
  */
 public sealed interface PcapStat permits PcapStatRecord, PcapStatEx {
 
 	/**
-	 * Capt.
+	 * Gets the number of packets captured.
 	 *
-	 * @return the long
+	 * @return the number of packets captured
 	 */
 	long capt();
 
 	/**
-	 * number of packets dropped because there was no room in the operating system's
-	 * buffer when they arrived, because packets weren't being read fast enough.
+	 * Gets the number of packets dropped because there was no room in the operating
+	 * system's buffer when they arrived, or because packets weren't being read fast
+	 * enough.
 	 *
-	 * @return the long
+	 * @return the number of packets dropped
 	 */
 	long drop();
 
 	/**
-	 * number of packets dropped by the network interface or its driver.
+	 * Gets the number of packets dropped by the network interface or its driver.
 	 *
-	 * @return the long
+	 * @return the number of packets dropped by the network interface or its driver
 	 */
 	long ifdrop();
 
 	/**
-	 * Netdrop.
+	 * Gets the number of packets dropped by the network.
 	 *
-	 * @return the long
+	 * @return the number of packets dropped by the network
 	 */
 	long netdrop();
 
 	/**
-	 * number of packets received.
+	 * Gets the number of packets received.
 	 *
-	 * @return the long
+	 * @return the number of packets received
 	 */
 	long recv();
 
 	/**
-	 * Sent.
+	 * Gets the number of packets sent.
 	 *
-	 * @return the long
+	 * @return the number of packets sent
 	 */
 	long sent();
 }

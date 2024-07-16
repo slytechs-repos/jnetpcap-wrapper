@@ -30,11 +30,11 @@ import java.lang.invoke.VarHandle;
  * BpFilter program instruction. Instructions are processed in binary mode but
  * for text formatting purposes or program analysis, this class decodes each
  * instruction.
- * 
+ *
  * <p>
  * Each 64-bit instruction is the long int representation of the following bpf
  * structure found in C header file "pcap/bpf.h":
- * 
+ *
  * <pre>
  * struct bpf_insn {
  *		u_short	full;
@@ -57,13 +57,13 @@ record BpFilterInstruction(int code, int jt, int jf, long k) {
 
 	/** The Constant CODE. */
 	private static final VarHandle CODE = LAYOUT.varHandle(sequenceElement(), groupElement("full"));
-	
+
 	/** The Constant JT. */
 	private static final VarHandle JT = LAYOUT.varHandle(sequenceElement(), groupElement("jt"));
-	
+
 	/** The Constant JF. */
 	private static final VarHandle JF = LAYOUT.varHandle(sequenceElement(), groupElement("jf"));
-	
+
 	/** The Constant K. */
 	private static final VarHandle K = LAYOUT.varHandle(sequenceElement(), groupElement("k"));
 
@@ -76,10 +76,10 @@ record BpFilterInstruction(int code, int jt, int jf, long k) {
 	 */
 	static BpFilterInstruction instructionAt(MemorySegment seg, int index) {
 		return new BpFilterInstruction(
-				Short.toUnsignedInt((short) CODE.get(seg, index)),
-				Byte.toUnsignedInt((byte) JT.get(seg, index)),
-				Byte.toUnsignedInt((byte) JF.get(seg, index)),
-				Integer.toUnsignedLong((int) K.get(seg, index)));
+				Short.toUnsignedInt((short) CODE.get(seg, 0L, index)),
+				Byte.toUnsignedInt((byte) JT.get(seg, 0L, index)),
+				Byte.toUnsignedInt((byte) JF.get(seg, 0L, index)),
+				Integer.toUnsignedLong((int) K.get(seg, 0L, index)));
 	}
 
 	/**

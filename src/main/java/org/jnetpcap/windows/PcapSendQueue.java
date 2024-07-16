@@ -30,7 +30,7 @@ import org.jnetpcap.internal.PcapForeignInitializer;
 /**
  * A queue of raw packets that will be sent to the network with {@code transmit}
  * on Microsoft Windows platforms.
- * 
+ *
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  * @author mark
@@ -39,12 +39,12 @@ public class PcapSendQueue implements AutoCloseable {
 
 	/**
 	 * The Class Struct.
-	 * 
+	 *
 	 * <pre>
 	struct pcap_send_queue {
 		u_int maxlen;	// Maximum size of the queue, in bytes. This variable contains the size of the buffer field.
 		u_int len;	// Current size of the queue, in bytes.
-		char *buffer;	// Buffer containing the packets to be sent. 
+		char *buffer;	// Buffer containing the packets to be sent.
 	};
 	 * </pre>
 	 */
@@ -127,7 +127,7 @@ public class PcapSendQueue implements AutoCloseable {
 	 * </p>
 	 * Use pcap_sendqueue_queue() to insert packets in the queue.
 	 * </p>
-	 * 
+	 *
 	 * @param capacity maximum size of the send queue in bytes
 	 * @return address of the allocated sendqueue
 	 */
@@ -181,7 +181,7 @@ public class PcapSendQueue implements AutoCloseable {
 
 	/**
 	 * Add a packet to a send queue.
-	 * 
+	 *
 	 * <p>
 	 * pcap_sendqueue_queue() adds a packet at the end of the send queue pointed by
 	 * the queue parameter. pkt_header points to a pcap_pkthdr structure with the
@@ -207,7 +207,7 @@ public class PcapSendQueue implements AutoCloseable {
 
 	/**
 	 * Add a packet to a send queue.
-	 * 
+	 *
 	 * <p>
 	 * pcap_sendqueue_queue() adds a packet at the end of the send queue pointed by
 	 * the queue parameter. pkt_header points to a pcap_pkthdr structure with the
@@ -287,7 +287,7 @@ public class PcapSendQueue implements AutoCloseable {
 	 * @return the maxlen or capacity, in bytes, of this send queue
 	 */
 	public int maxlen() {
-		return (int) Struct.MAXLEN.get(queue_ptr);
+		return (int) Struct.MAXLEN.get(queue_ptr, 0L);
 	}
 
 	/**
@@ -296,6 +296,6 @@ public class PcapSendQueue implements AutoCloseable {
 	 * @return the length or current size, in bytes, of this send queue
 	 */
 	public int len() {
-		return (int) Struct.LEN.get(queue_ptr);
+		return (int) Struct.LEN.get(queue_ptr, 0L);
 	}
 }

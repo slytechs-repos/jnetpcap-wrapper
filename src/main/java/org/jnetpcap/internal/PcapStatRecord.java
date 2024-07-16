@@ -29,7 +29,7 @@ import org.jnetpcap.windows.WinPcap;
 
 /**
  * Packet statistics from the start of the pcap run to the time of the call.
- * 
+ *
  * <p>
  * A struct pcap_stat has the following members:
  * <dl>
@@ -58,7 +58,7 @@ import org.jnetpcap.windows.WinPcap;
  * or it might mean that the statistic is unavailable, so it should not be
  * treated as an indication that the interface did not drop any packets.
  * </p>
- * 
+ *
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  * @author mark
@@ -79,19 +79,19 @@ public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long 
 
 	/** The Constant ps_recv. */
 	private static final VarHandle ps_recv = LAYOUT.varHandle(groupElement("ps_recv"));
-	
+
 	/** The Constant ps_drop. */
 	private static final VarHandle ps_drop = LAYOUT.varHandle(groupElement("ps_drop"));
-	
+
 	/** The Constant ps_ifdrop. */
 	private static final VarHandle ps_ifdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
-	
+
 	/** The Constant ps_capt. */
 	private static final VarHandle ps_capt = LAYOUT.varHandle(groupElement("ps_ifdrop"));
-	
+
 	/** The Constant ps_sent. */
 	private static final VarHandle ps_sent = LAYOUT.varHandle(groupElement("ps_ifdrop"));
-	
+
 	/** The Constant ps_netdrop. */
 	private static final VarHandle ps_netdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
 
@@ -106,9 +106,9 @@ public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long 
 			return ofMemoryOnWin32(mseg);
 
 		return new PcapStatRecord(
-				toUnsignedLong((int) ps_recv.get(mseg)),
-				toUnsignedLong((int) ps_drop.get(mseg)),
-				toUnsignedLong((int) ps_ifdrop.get(mseg)),
+				toUnsignedLong((int) ps_recv.get(mseg, 0L)),
+				toUnsignedLong((int) ps_drop.get(mseg, 0L)),
+				toUnsignedLong((int) ps_ifdrop.get(mseg, 0L)),
 				0, 0, 0);
 	}
 
@@ -120,12 +120,12 @@ public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long 
 	 */
 	private static PcapStat ofMemoryOnWin32(MemorySegment mseg) {
 		return new PcapStatRecord(
-				toUnsignedLong((int) ps_recv.get(mseg)),
-				toUnsignedLong((int) ps_drop.get(mseg)),
-				toUnsignedLong((int) ps_ifdrop.get(mseg)),
-				toUnsignedLong((int) ps_capt.get(mseg)),
-				toUnsignedLong((int) ps_sent.get(mseg)),
-				toUnsignedLong((int) ps_netdrop.get(mseg)));
+				toUnsignedLong((int) ps_recv.get(mseg, 0L)),
+				toUnsignedLong((int) ps_drop.get(mseg, 0L)),
+				toUnsignedLong((int) ps_ifdrop.get(mseg, 0L)),
+				toUnsignedLong((int) ps_capt.get(mseg, 0L)),
+				toUnsignedLong((int) ps_sent.get(mseg, 0L)),
+				toUnsignedLong((int) ps_netdrop.get(mseg, 0L)));
 	}
 
 }

@@ -321,7 +321,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 			String dev = pcap_lookupdev.invokeString(errbuf);
 			if (dev == null)
-				throw new PcapException(errbuf.getUtf8String(0));
+				throw new PcapException(errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
 
 			return dev;
 		}
@@ -344,10 +344,10 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			MemorySegment pTop1 = arena.allocate(ADDRESS);
 			MemorySegment pTop2 = arena.allocate(ADDRESS);
 			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
-			MemorySegment dev = arena.allocateUtf8String(device);
+			MemorySegment dev = arena.allocateFrom(device, java.nio.charset.StandardCharsets.UTF_8);
 
 			int code = pcap_lookupnet.invokeInt(dev, pTop1, pTop2, errbuf);
-			PcapException.throwIfNotOk(code, () -> errbuf.getUtf8String(0));
+			PcapException.throwIfNotOk(code, () -> errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
 
 			int address = pTop1.get(ValueLayout.JAVA_INT, 0);
 			int netmask = pTop2.get(ValueLayout.JAVA_INT, 0);
@@ -376,7 +376,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			throws PcapException {
 
 		try (var arena = newArena()) {
-			MemorySegment c_device = arena.allocateUtf8String(requireNonNull(device, "device"));
+			MemorySegment c_device = arena.allocateFrom(requireNonNull(device, "device"), java.nio.charset.StandardCharsets.UTF_8);
 			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
 			int c_snaplen = snaplen;
@@ -387,7 +387,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 					errbuf);
 
 			if (ForeignUtils.isNullAddress(pcapPointer))
-				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getUtf8String(0));
+				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
 
 			var abi = PcapHeaderABI.selectLiveAbi();
 
@@ -450,13 +450,13 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 		Objects.requireNonNull(fname, "fname"); //$NON-NLS-1$
 
 		try (var arena = newArena()) {
-			MemorySegment c_fname = arena.allocateUtf8String(fname);
+			MemorySegment c_fname = arena.allocateFrom(fname, java.nio.charset.StandardCharsets.UTF_8);
 			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
 			MemorySegment pcapPointer = pcap_open_offline.invokeObj(c_fname, errbuf);
 
 			if (ForeignUtils.isNullAddress(pcapPointer))
-				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getUtf8String(0));
+				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
 
 			boolean isSwapped = pcap_is_swapped
 					.invokeInt(pcapPointer) == 1;
@@ -575,7 +575,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 		try (var arena = newArena()) {
 			BpFilter bpFilter = new BpFilter(str);
 
-			MemorySegment c_filter = arena.allocateUtf8String(str);
+			MemorySegment c_filter = arena.allocateFrom(str, java.nio.charset.StandardCharsets.UTF_8);
 
 			pcap_compile.invokeInt(this::getErrorString, getPcapHandle(), bpFilter.address(), c_filter, opt, netmask);
 
@@ -734,7 +734,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	@Override
 	public final PcapDumper dumpOpen(String fname) throws PcapException {
 		try (var arena = newArena()) {
-			MemorySegment c_file = arena.allocateUtf8String(fname);
+			MemorySegment c_file = arena.allocateFrom(fname, java.nio.charset.StandardCharsets.UTF_8);
 
 			MemorySegment pcap_dumper_ptr = pcap_dump_open.invokeObj(this::geterr, getPcapHandle(), c_file);
 
@@ -945,7 +945,7 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	@Override
 	public final Pcap0_4 perror(String prefix) {
 		try (var arena = newArena()) {
-			pcap_perror.invokeVoid(getPcapHandle(), arena.allocateUtf8String(prefix));
+			pcap_perror.invokeVoid(getPcapHandle(), arena.allocateFrom(prefix), java.nio.charset.StandardCharsets.UTF_8);
 
 			return this;
 		}

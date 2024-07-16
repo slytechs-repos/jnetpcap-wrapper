@@ -591,7 +591,7 @@ public class SockAddr {
 			super(addr.reinterpret(SOCK_ADDR_IRDA_LEN, arena,	EMPTY_CLEANUP), SockAddrFamily.IRDA,	OptionalInt.of(SOCK_ADDR_IRDA_LEN));
 
 			this.irdaDeviceID = saSegment.asSlice(2, 4).toArray(JAVA_BYTE);
-			this.irdaServiceName = saSegment.getUtf8String(6);
+			this.irdaServiceName = saSegment.getString(6, java.nio.charset.StandardCharsets.UTF_8);
 		}
 
 		/**
