@@ -5,7 +5,7 @@
 	<groupId>com.slytechs.jnet.jnetpcap</groupId>
 	<artifactId>jnetpcap-wrapper</artifactId>
 	<!--  mvn versions:set -DnewVersion=_new_version_  -->
-	<version>2.3.0-SNAPSHOT</version>
+	<version>2.2.1-SNAPSHOT</version>
 	<name>jNetPcap Wrapper</name>
 	<description>A java wrapper for native LIBPCAP library and PCAP API</description>
 	<url>https://www.jnetpcap.org</url>
@@ -26,15 +26,14 @@
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
 		</license>
 	</licenses>
 	<developers>
 		<developer>
-			<id>markb</id>
 			<name>Mark Bednarczyk</name>
 			<email>mark@slytechs.com</email>
-			<organization>Sly Technlogies</organization>
+			<organization>Sly Technlogies Inc</organization>
 			<organizationUrl>http://slytechs.com</organizationUrl>
 		</developer>
 	</developers>
@@ -157,12 +156,14 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.sonatype.central</groupId>
-				<artifactId>central-publishing-maven-plugin</artifactId>
-				<version>0.5.0</version>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
 				<extensions>true</extensions>
 				<configuration>
-					<publishingServerId>central</publishingServerId>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
 				</configuration>
 			</plugin>
 
@@ -198,7 +199,7 @@
 		<repository>
 			<id>ossrh</id>
 			<url>
-				https://central.sonatype.com/api/v1/publisher/deployments/download</url>
+				https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 		<!--  mvn clean site site:stage scm-publish:publish-scm  -->
 		<site>
