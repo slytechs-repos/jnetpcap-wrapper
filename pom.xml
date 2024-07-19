@@ -5,7 +5,7 @@
 	<groupId>com.slytechs.jnet.jnetpcap</groupId>
 	<artifactId>jnetpcap-wrapper</artifactId>
 	<!--  mvn versions:set -DnewVersion=_new_version_  -->
-	<version>2.2.1</version>
+	<version>2.2.2-SNAPSHOT</version>
 	<name>jNetPcap Wrapper</name>
 	<description>A java wrapper for native LIBPCAP library and PCAP API</description>
 	<url>https://www.jnetpcap.org</url>
@@ -22,6 +22,7 @@
 		<groups>user-permission</groups>
 		<excludeGroups>windows-api|unix-api|linux-api</excludeGroups>
 		<gpg.keyname>0xD6D487A5</gpg.keyname>
+		<javadoc.skipErrors>false</javadoc.skipErrors>
 	</properties>
 	<licenses>
 		<license>
@@ -236,6 +237,7 @@
 					<overview>${basedir}/Overview.html</overview>
 					<additionalOptions> ${java.preview} </additionalOptions>
 					<excludePackageNames>*.internal</excludePackageNames>
+					<failOnError>${javadoc.skipErrors}</failOnError>
 				</configuration>
 				<reportSets>
 					<reportSet>
