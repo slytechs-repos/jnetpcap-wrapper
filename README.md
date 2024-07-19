@@ -184,15 +184,50 @@ Here are several methods for installing **jNetPcap** software.
 
 ### Maven Artifact Config
 	
-```
+```xml
 <dependency>
     <groupId>com.slytechs.jnet.jnetpcap</groupId>
     <artifactId>jnetpcap-wrapper</artifactId>
-    <version>2.1.0</version>
+    <version>X.Y.Z</version>
 </dependency>
 ```
+Latest production version: 
+![Maven Central Version](https://img.shields.io/maven-central/v/com.slytechs.jnet.jnetpcap/jnetpcap-wrapper)
+
 > Using the latest version number released to [Maven Central][jnetpcap-maven-central]
-> 
+
+### Using latest SNAPSHOT releases
+Snapshot releases are more frequent development releases in between production releases. For stable code, we recommend not using snapshots, but if you want to checkout the latest updates, snapshots are available as well.
+
+To access the latest SNAPSHOT release, add the following repository to your maven POM configuration:
+```xml
+<project>
+  ...
+  <repositories>
+    <repository>
+      <id>sonatype-snapshots</id>
+      <name>Sonatype Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  ...
+</project>
+```
+then simply use the latest release with `-SNAPSHOT` appended to the version. This will download the latest SNAPSHOT release from the snapshot hosted on  `sonatype` servers
+
+```xml
+<dependency>
+    <groupId>com.slytechs.jnet.jnetpcap</groupId>
+    <artifactId>jnetpcap-wrapper</artifactId>
+    <version>X.Y.Z-SNAPSHOT</version>
+</dependency>
+```
+Latest SNAPSHOT version:
+![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.slytechs.jnet.jnetpcap/jnetpcap-wrapper?server=https%3A%2F%2Fs01.oss.sonatype.org%2F)
+
 ### Download Release Package
 Latest release: [*download link*][release]
 
@@ -234,4 +269,4 @@ So everyone is on the same page, we follow the following [branching model][git-b
 [download-bundle]: <https://github.com/slytechs-repos/slytechs-repos/releases>
 [protocol-packs]: <https://github.com/slytechs-repos/jnetpcap-pro/wiki#about-protocol-packs>
 [jnetworks-sdk]: http://slytechs.com/jnetworks-sdk
-[jnetpcap-maven-central]: <https://mvnrepository.com/artifact/com.slytechs.jnet>
+[jnetpcap-maven-central]: <https://mvnrepository.com/artifact/com.slytechs.jnet.jnetpcap/jnetpcap-wrapper>
