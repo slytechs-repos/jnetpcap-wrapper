@@ -1978,11 +1978,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * </p>
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @return link-layer header type
@@ -2055,11 +2054,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * 
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param <U>        the generic type
@@ -2133,11 +2131,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * 
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param count   maximum number of packets to process before returning
@@ -2209,11 +2206,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * 
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param <U>     the generic type
@@ -2289,11 +2285,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * 
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param <U>     the generic type
@@ -2715,11 +2710,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * </p>
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param <U>        the generic user data type
@@ -2783,11 +2777,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * </p>
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param <U>     the generic user data type
@@ -2850,11 +2843,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * </p>
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 * 
 	 * @param <U>     the generic user data type
@@ -2987,11 +2979,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * 
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @return a pointer to the packet data on success, and returns NULL if no
@@ -3059,11 +3050,11 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * 
 	 * <p>
 	 * Note: Do NOT assume that the packets will have any given link-layer header
-	 * type, such as DLT_EN10MB for Ethernet. For example, the "any" device on Linux
-	 * will have a link-layer header type of DLT_LINUX_SLL or DLT_LINUX_SLL2 even if
-	 * all devices on the system at the time the "any" device is opened have some
-	 * other data link type. Always check the link-layer type with
-	 * {@link #datalink()} before interpreting the packet data.
+	 * type, such as EN10MB for Ethernet. For example, the "any" device on Linux
+	 * will have a link-layer header type of LINUX_SLL or LINUX_SLL2 even if all
+	 * devices on the system at the time the "any" device is opened have some other
+	 * data link type. Always check the link-layer type with {@link #datalink()}
+	 * before interpreting the packet data.
 	 * </p>
 	 *
 	 * @return a native pcap packet reference or null if packets are being read from
@@ -3352,10 +3343,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * ones include:
 	 * </p>
 	 * <ul>
-	 * <li>1 (DLT_EN10MB): Ethernet (10Mb, 100Mb, 1000Mb, and up)</li>
-	 * <li>105 (DLT_IEEE802_11): IEEE 802.11 wireless LAN</li>
-	 * <li>12 (DLT_RAW): Raw IP (no link-layer header)</li>
-	 * <li>113 (DLT_LINUX_SLL): Linux "cooked" capture encapsulation</li>
+	 * <li>1 (EN10MB): Ethernet (10Mb, 100Mb, 1000Mb, and up)</li>
+	 * <li>105 (IEEE802_11): IEEE 802.11 wireless LAN</li>
+	 * <li>12 (RAW): Raw IP (no link-layer header)</li>
+	 * <li>113 (LINUX_SLL): Linux "cooked" capture encapsulation</li>
 	 * </ul>
 	 * It's recommended to use the {@link PcapDlt} enum and the
 	 * {@link #setDatalink(PcapDlt)} method instead of this raw integer method when
@@ -3373,7 +3364,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * 
 	 * <pre>{@code
 	 * try (Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS)) {
-	 * 	// Set datalink type to Ethernet (DLT_EN10MB)
+	 * 	// Set datalink type to Ethernet (EN10MB)
 	 * 	pcap.setDatalink(1);
 	 * 	System.out.println("Set datalink type to Ethernet");
 	 * 
@@ -3441,11 +3432,11 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * {@link PcapDlt} enum, which includes values such as:
 	 * </p>
 	 * <ul>
-	 * <li>{@link PcapDlt#DLT_EN10MB}: Ethernet (10Mb, 100Mb, 1000Mb, and up)</li>
-	 * <li>{@link PcapDlt#DLT_IEEE802_11}: IEEE 802.11 wireless LAN</li>
-	 * <li>{@link PcapDlt#DLT_RAW}: Raw IP (no link-layer header)</li>
-	 * <li>{@link PcapDlt#DLT_LINUX_SLL}: Linux "cooked" capture encapsulation</li>
-	 * <!-- Add other relevant PcapDlt values as needed -->
+	 * <li>{@link PcapDlt#EN10MB}: Ethernet (10Mb, 100Mb, 1000Mb, and up)</li>
+	 * <li>{@link PcapDlt#IEEE802_11}: IEEE 802.11 wireless LAN</li>
+	 * <li>{@link PcapDlt#RAW}: Raw IP (no link-layer header)</li>
+	 * <li>{@link PcapDlt#LINUX_SLL}: Linux "cooked" capture encapsulation</li> <!-- Add
+	 * other relevant PcapDlt values as needed -->
 	 * </ul>
 	 * 
 	 * <p>
@@ -3465,8 +3456,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * 	System.out.println("Supported datalink types: " + supportedTypes);
 	 * 
 	 * 	// Set datalink type to Ethernet if supported
-	 * 	if (supportedTypes.contains(PcapDlt.DLT_EN10MB)) {
-	 * 		pcap.setDatalink(Optional.of(PcapDlt.DLT_EN10MB));
+	 * 	if (supportedTypes.contains(PcapDlt.EN10MB)) {
+	 * 		pcap.setDatalink(Optional.of(PcapDlt.EN10MB));
 	 * 		System.out.println("Set datalink type to Ethernet");
 	 * 	} else {
 	 * 		// Keep the current datalink type
@@ -3542,11 +3533,11 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * includes values such as:
 	 * </p>
 	 * <ul>
-	 * <li>{@link PcapDlt#DLT_EN10MB}: Ethernet (10Mb, 100Mb, 1000Mb, and up)</li>
-	 * <li>{@link PcapDlt#DLT_IEEE802_11}: IEEE 802.11 wireless LAN</li>
-	 * <li>{@link PcapDlt#DLT_RAW}: Raw IP (no link-layer header)</li>
-	 * <li>{@link PcapDlt#DLT_LINUX_SLL}: Linux "cooked" capture encapsulation</li>
-	 * <!-- Add other relevant PcapDlt values as needed -->
+	 * <li>{@link PcapDlt#EN10MB}: Ethernet (10Mb, 100Mb, 1000Mb, and up)</li>
+	 * <li>{@link PcapDlt#IEEE802_11}: IEEE 802.11 wireless LAN</li>
+	 * <li>{@link PcapDlt#RAW}: Raw IP (no link-layer header)</li>
+	 * <li>{@link PcapDlt#LINUX_SLL}: Linux "cooked" capture encapsulation</li> <!--
+	 * Add other relevant PcapDlt values as needed -->
 	 * </ul>
 	 * 
 	 * <p>
@@ -3566,8 +3557,8 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * 	System.out.println("Supported datalink types: " + supportedTypes);
 	 * 
 	 * 	// Set datalink type to Ethernet if supported
-	 * 	if (supportedTypes.contains(PcapDlt.DLT_EN10MB)) {
-	 * 		pcap.setDatalink(PcapDlt.DLT_EN10MB);
+	 * 	if (supportedTypes.contains(PcapDlt.EN10MB)) {
+	 * 		pcap.setDatalink(PcapDlt.EN10MB);
 	 * 		System.out.println("Set datalink type to Ethernet");
 	 * 	} else {
 	 * 		System.out.println("Ethernet datalink type not supported, using default");

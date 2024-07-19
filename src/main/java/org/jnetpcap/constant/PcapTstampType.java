@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,125 +19,109 @@ import java.util.Optional;
 import java.util.function.IntSupplier;
 
 /**
- * Time stamp types. Not all systems and interfaces will necessarily support all
- * of these.
+ * Enumeration of timestamp types. Not all systems and interfaces will
+ * necessarily support all of these.
  *
- * A system that supports PCAP_TSTAMP_HOST is offering time stamps provided by
- * the host machine, rather than by the capture device, but not committing to
- * any characteristics of the time stamp.
+ * <p>
+ * A system that supports {@link #TSTAMP_TYPE_HOST} offers timestamps provided
+ * by the host machine, rather than by the capture device, but does not commit
+ * to any specific characteristics of the timestamp.
+ * </p>
  *
- * PCAP_TSTAMP_HOST_LOWPREC is a time stamp, provided by the host machine,
- * that's low-precision but relatively cheap to fetch; it's normally done using
- * the system clock, so it's normally synchronized with times you'd fetch from
- * system calls.
+ * <p>
+ * {@link #TSTAMP_TYPE_HOST_LOWPREC} is a timestamp provided by the host
+ * machine, characterized by low precision but relatively low overhead to fetch.
+ * It is typically obtained using the system clock, ensuring synchronization
+ * with times fetched via system calls.
+ * </p>
  *
- * PCAP_TSTAMP_HOST_HIPREC is a time stamp, provided by the host machine, that's
- * high-precision; it might be more expensive to fetch. It is synchronized with
- * the system clock.
+ * <p>
+ * {@link #TSTAMP_TYPE_HOST_HIPREC} is a high-precision timestamp provided by
+ * the host machine, which might incur higher overhead to fetch. It is
+ * synchronized with the system clock.
+ * </p>
  *
- * PCAP_TSTAMP_HOST_HIPREC_UNSYNCED is a time stamp, provided by the host
- * machine, that's high-precision; it might be more expensive to fetch. It is
- * not synchronized with the system clock, and might have problems with time
- * stamps for packets received on different CPUs, depending on the platform. It
- * might be more likely to be strictly monotonic than PCAP_TSTAMP_HOST_HIPREC.
+ * <p>
+ * {@link #TSTAMP_TYPE_HOST_HIPREC_UNSYNCED} is a high-precision timestamp
+ * provided by the host machine, not synchronized with the system clock. It
+ * might have issues with timestamps for packets received on different CPUs
+ * depending on the platform but may be more strictly monotonic than
+ * {@link #TSTAMP_TYPE_HOST_HIPREC}.
+ * </p>
  *
- * PCAP_TSTAMP_ADAPTER is a high-precision time stamp supplied by the capture
- * device; it's synchronized with the system clock.
+ * <p>
+ * {@link #TSTAMP_TYPE_ADAPTER} is a high-precision timestamp supplied by the
+ * capture device, synchronized with the system clock.
+ * </p>
  *
- * PCAP_TSTAMP_ADAPTER_UNSYNCED is a high-precision time stamp supplied by the
- * capture device; it's not synchronized with the system clock.
+ * <p>
+ * {@link #TSTAMP_TYPE_ADAPTER_UNSYNCED} is a high-precision timestamp supplied
+ * by the capture device, not synchronized with the system clock.
+ * </p>
  *
- * Note that time stamps synchronized with the system clock can go backwards, as
- * the system clock can go backwards. If a clock is not in sync with the system
- * clock, that could be because the system clock isn't keeping accurate time,
- * because the other clock isn't keeping accurate time, or both.
+ * <p>
+ * Note that timestamps synchronized with the system clock can go backwards, as
+ * the system clock itself can go backwards. If a clock is not synchronized with
+ * the system clock, the discrepancy might be due to inaccuracies in either the
+ * system clock or the other clock, or both.
+ * </p>
  *
- * Note that host-provided time stamps generally correspond to the time when the
- * time-stamping full sees the packet; this could be some unknown amount of time
- * after the first or last bit of the packet is received by the network adapter,
- * due to batching of interrupts for packet arrival, queueing delays, etc..
+ * <p>
+ * Host-provided timestamps typically correspond to the time when the
+ * timestamping facility sees the packet, which could be delayed due to factors
+ * like batching of interrupts for packet arrival or queueing delays.
+ * </p>
  * 
- * <pre>
- * <code>
-#define PCAP_TSTAMP_HOST			        0	// host-provided, unknown characteristics
-#define PCAP_TSTAMP_HOST_LOWPREC		    1	// host-provided, low precision, synced with the system clock
-#define PCAP_TSTAMP_HOST_HIPREC			    2	// host-provided, high precision, synced with the system clock
-#define PCAP_TSTAMP_ADAPTER			        3	// device-provided, synced with the system clock
-#define PCAP_TSTAMP_ADAPTER_UNSYNCED		4	// device-provided, not synced with the system clock
-#define PCAP_TSTAMP_HOST_HIPREC_UNSYNCED	5	// host-provided, high precision, not synced with the system clock 
- * </code>
- * </pre>
- * 
- * @author mark
- *
  */
 public enum PcapTstampType implements IntSupplier {
 
-	/** host-provided, unknown characteristics. */
+	/** Host-provided timestamp with unknown characteristics. */
 	TSTAMP_TYPE_HOST,
 
-	/** host-provided, low precision, synced with the system clock. */
+	/** Host-provided, low precision, synchronized with the system clock. */
 	TSTAMP_TYPE_HOST_LOWPREC,
 
-	/** host-provided, high precision, synced with the system clock. */
+	/** Host-provided, high precision, synchronized with the system clock. */
 	TSTAMP_TYPE_HOST_HIPREC,
 
-	/** device-provided, synced with the system clock. */
+	/** Device-provided, high precision, synchronized with the system clock. */
 	TSTAMP_TYPE_ADAPTER,
 
-	/** device-provided, not synced with the system clock. */
+	/** Device-provided, high precision, not synchronized with the system clock. */
 	TSTAMP_TYPE_ADAPTER_UNSYNCED,
 
-	/** host-provided, high precision, not synced with the system clock. */
+	/** Host-provided, high precision, not synchronized with the system clock. */
 	TSTAMP_TYPE_HOST_HIPREC_UNSYNCED;
 
-	/** host-provided, unknown characteristics. */
-	public static final int PCAP_TSTAMP_HOST = 0;
-
-	/** host-provided, low precision, synced with the system clock. */
-	public static final int PCAP_TSTAMP_HOST_LOWPREC = 1;
-
-	/** host-provided, high precision, synced with the system clock. */
-	public static final int PCAP_TSTAMP_HOST_HIPREC = 2;
-
-	/** device-provided, synced with the system clock. */
-	public static final int PCAP_TSTAMP_ADAPTER = 3;
-
-	/** device-provided, not synced with the system clock. */
-	public static final int PCAP_TSTAMP_ADAPTER_UNSYNCED = 4;
-
-	/** host-provided, high precision, not synced with the system clock. */
-	public static final int PCAP_TSTAMP_HOST_HIPREC_UNSYNCED = 5;
-
 	/**
-	 * Converts numerical TSTAMP_TYPE constant to an enum, if found.
+	 * Converts a numerical timestamp type constant to an enum, if found.
 	 *
-	 * @param tstampType the PCAP integer timestamp type constant
-	 * @return the optional enum constant
+	 * @param tstampType the integer timestamp type constant
+	 * @return an optional enum constant
 	 */
 	public static Optional<PcapTstampType> toEnum(int tstampType) {
-		if (tstampType < 0 || tstampType >= values().length)
-			Optional.empty();
-
+		if (tstampType < 0 || tstampType >= values().length) {
+			return Optional.empty();
+		}
 		return Optional.of(values()[tstampType]);
 	}
 
 	/**
-	 * Converts numerical TSTAMP_TYPE constant to an enum.
+	 * Converts a numerical timestamp type constant to an enum.
 	 *
-	 * @param tstampType the PCAP integer timestamp type constant
-	 * @return the PCAP timestamp type enum constant
-	 * @throws IllegalArgumentException thrown if not found
+	 * @param tstampType the integer timestamp type constant
+	 * @return the corresponding enum constant
+	 * @throws IllegalArgumentException if the constant is not found
 	 */
 	public static PcapTstampType valueOf(int tstampType) throws IllegalArgumentException {
-		if (tstampType < 0 || tstampType >= values().length)
+		if (tstampType < 0 || tstampType >= values().length) {
 			throw new IllegalArgumentException(Integer.toString(tstampType));
-
+		}
 		return values()[tstampType];
 	}
 
 	/**
-	 * Get TSTAMP_TYPE numerical constant.
+	 * Returns the numerical timestamp type constant.
 	 *
 	 * @return the timestamp type constant
 	 * @see java.util.function.IntSupplier#getAsInt()

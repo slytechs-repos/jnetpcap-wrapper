@@ -26,130 +26,146 @@ import org.jnetpcap.internal.NativeABI;
  * The socket address protocol family constants. Each protocol family has a
  * different layout for physical addresses in SockAddr structure and is
  * essential to decoding those addresses correctly.
+ * 
+ * <p>
+ * Example usage:
+ * </p>
+ * 
+ * <h2>Converting an integer family to a SockAddrFamily enum constant</h2>
+ * 
+ * <pre>
+ * int family = 2;
+ * SockAddrFamily sockAddrFamily = SockAddrFamily.lookup(family).orElse(null);
+ * System.out.println("Socket Address Family: " + (sockAddrFamily != null ? sockAddrFamily.name() : "Unknown"));
+ * </pre>
+ * 
+ * @see java.util.function.IntSupplier
+ * 
+ *      Author: Sly Technologies Inc repos@slytechs.com
  */
 public enum SockAddrFamily implements IntSupplier {
 
-	/** The unspec. */
+	/** Unspecified address family. */
 	UNSPEC(Posix.AF_UNSPEC, Bsd.AF_UNSPEC),
 
-	/** The local. */
+	/** Local to host (pipes, portals). */
 	LOCAL(Posix.AF_LOCAL, Bsd.AF_LOCAL, Sizeof.LOCAL),
 
-	/** The inet. */
+	/** Internet IP Protocol. */
 	INET(Posix.AF_INET, Bsd.AF_INET, Sizeof.INET),
 
-	/** The ax25. */
+	/** Amateur Radio AX.25. */
 	AX25(Posix.AF_AX25, Bsd.UNDEFINED),
 
-	/** The ipx. */
+	/** Novell IPX. */
 	IPX(Posix.AF_IPX, Bsd.AF_IPX, Sizeof.IPX),
 
-	/** The appletalk. */
+	/** AppleTalk DDP. */
 	APPLETALK(Posix.AF_APPLETALK, Bsd.AF_APPLETALK),
 
-	/** The netrom. */
+	/** Amateur Radio NET/ROM. */
 	NETROM(Posix.AF_NETROM, Bsd.UNDEFINED),
 
-	/** The bridge. */
+	/** Multiprotocol bridge. */
 	BRIDGE(Posix.AF_BRIDGE, Bsd.UNDEFINED),
 
-	/** The atmpvc. */
+	/** ATM PVCs. */
 	ATMPVC(Posix.AF_ATMPVC, Bsd.AF_NATM),
 
-	/** The x25. */
-	X25(Posix.AF_AX25, Bsd.UNDEFINED),
+	/** Reserved for X.25 project. */
+	X25(Posix.AF_X25, Bsd.UNDEFINED),
 
-	/** The inet6. */
+	/** IP version 6. */
 	INET6(Posix.AF_INET6, Bsd.AF_INET6, Sizeof.INET6),
 
-	/** The rose. */
+	/** Amateur Radio X.25 PLP. */
 	ROSE(Posix.AF_ROSE, Bsd.UNDEFINED),
 
-	/** The decnet. */
+	/** Reserved for DECnet project. */
 	DECNET(Posix.AF_DECnet, Bsd.AF_DECnet),
 
-	/** The netbeui. */
+	/** Reserved for 802.2LLC project. */
 	NETBEUI(Posix.AF_NETBEUI, Bsd.UNDEFINED),
 
-	/** The security. */
+	/** Security callback pseudo AF. */
 	SECURITY(Posix.AF_SECURITY, Bsd.UNDEFINED),
 
-	/** The key. */
+	/** PF_KEY key management API. */
 	KEY(Posix.AF_KEY, Bsd.pseudo_AF_KEY),
 
-	/** The netlink. */
+	/** Netlink. */
 	NETLINK(Posix.AF_NETLINK, Bsd.UNDEFINED),
 
-	/** The packet. */
+	/** Packet family. */
 	PACKET(Posix.AF_PACKET, Bsd.UNDEFINED, Sizeof.PACKET),
 
-	/** The ash. */
+	/** Ash. */
 	ASH(Posix.AF_ASH, Bsd.UNDEFINED),
 
-	/** The atmsvc. */
+	/** ATM SVCs. */
 	ATMSVC(Posix.AF_ATMSVC, Bsd.AF_NATM),
 
-	/** The rds. */
+	/** RDS sockets. */
 	RDS(Posix.AF_RDS, Bsd.UNDEFINED),
 
-	/** The sna. */
+	/** Linux SNA Project (nutters!). */
 	SNA(Posix.AF_SNA, Bsd.AF_SNA),
 
-	/** The irda. */
+	/** IRDA sockets. */
 	IRDA(Posix.AF_IRDA, Bsd.UNDEFINED),
 
-	/** The pppox. */
+	/** PPPoX sockets. */
 	PPPOX(Posix.AF_PPPOX, Bsd.UNDEFINED),
 
-	/** The wanpipe. */
+	/** Wanpipe API Sockets. */
 	WANPIPE(Posix.AF_WANPIPE, Bsd.UNDEFINED),
 
-	/** The llc. */
+	/** Linux LLC. */
 	LLC(Posix.AF_LLC, Bsd.UNDEFINED),
 
-	/** The mpls. */
+	/** MPLS. */
 	MPLS(Posix.AF_MPLS, Bsd.UNDEFINED),
 
-	/** The can. */
+	/** Controller Area Network. */
 	CAN(Posix.AF_CAN, Bsd.UNDEFINED),
 
-	/** The tipc. */
+	/** TIPC sockets. */
 	TIPC(Posix.AF_TIPC, Bsd.UNDEFINED),
 
-	/** The bluetooth. */
+	/** Bluetooth sockets. */
 	BLUETOOTH(Posix.AF_BLUETOOTH, Bsd.UNDEFINED),
 
-	/** The rxrpc. */
+	/** RxRPC sockets. */
 	RXRPC(Posix.AF_RXRPC, Bsd.UNDEFINED),
 
-	/** The isdn. */
+	/** mISDN sockets. */
 	ISDN(Posix.AF_ISDN, Bsd.AF_ISDN),
 
-	/** The phonet. */
+	/** Phonet sockets. */
 	PHONET(Posix.AF_PHONET, Bsd.UNDEFINED),
 
-	/** The ieee802154. */
+	/** IEEE802154 sockets. */
 	IEEE802154(Posix.AF_IEEE802154, Bsd.UNDEFINED),
 
-	/** The caif. */
+	/** CAIF sockets. */
 	CAIF(Posix.AF_CAIF, Bsd.UNDEFINED),
 
-	/** The alg. */
+	/** Algorithm sockets. */
 	ALG(Posix.AF_ALG, Bsd.UNDEFINED),
 
-	/** The nfc. */
+	/** NFC sockets. */
 	NFC(Posix.AF_NFC, Bsd.UNDEFINED),
 
-	/** The vsock. */
+	/** vSockets. */
 	VSOCK(Posix.AF_VSOCK, Bsd.UNDEFINED),
 
-	/** The kcm. */
+	/** Kernel Connection Multiplexor. */
 	KCM(Posix.AF_KCM, Bsd.UNDEFINED),
 
-	/** The qipcrtr. */
+	/** Qualcomm IPC Router. */
 	QIPCRTR(Posix.AF_QIPCRTR, Bsd.UNDEFINED),
 
-	/** The smc. */
+	/** SMC sockets. */
 	SMC(Posix.AF_SMC, Bsd.UNDEFINED),
 
 	/** Arpanet imp addresses. */
@@ -200,7 +216,7 @@ public enum SockAddrFamily implements IntSupplier {
 	/** eXpress Transfer Protocol (no AF). */
 	PSEUDO_XTP(Posix.UNDEFINED, Bsd.pseudo_AF_XTP),
 
-	/** connection-oriented IP, aka ST II. */
+	/** Connection-oriented IP, aka ST II. */
 	COIP(Posix.UNDEFINED, Bsd.AF_COIP),
 
 	/** Computer Network Technology. */
@@ -372,7 +388,7 @@ public enum SockAddrFamily implements IntSupplier {
 		public static final int AF_NETBIOS = 33;
 
 		/** PPP communication protocol. */
-		public static final int AF_PPP = 34;;
+		public static final int AF_PPP = 34;
 	}
 
 	/**

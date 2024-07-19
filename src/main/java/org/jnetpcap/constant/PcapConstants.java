@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,31 +72,31 @@ public final class PcapConstants {
 	/** interface is running. */
 	public static final int PCAP_IF_RUNNING = 0x00000004;
 
-	/** interface is wireless (*NOT* necessarily Wi-Fi!). */
+	/** interface is wireless (not necessarily Wi-Fi). */
 	public static final int PCAP_IF_WIRELESS = 0x00000008;
 
-	/** connection status:. */
+	/** connection status. */
 	public static final int PCAP_IF_CONNECTION_STATUS = 0x00000030;
 
-	/** unknown. */
+	/** unknown connection status. */
 	public static final int PCAP_IF_CONNECTION_STATUS_UNKNOWN = 0x00000000;
 
-	/** connected. */
+	/** connected status. */
 	public static final int PCAP_IF_CONNECTION_STATUS_CONNECTED = 0x00000010;
 
-	/** disconnected. */
+	/** disconnected status. */
 	public static final int PCAP_IF_CONNECTION_STATUS_DISCONNECTED = 0x00000020;
 
-	/** not applicable. */
+	/** not applicable connection status. */
 	public static final int PCAP_IF_CONNECTION_STATUS_NOT_APPLICABLE = 0x00000030;
 
-	/** The Constant PCAP_ERRBUF_SIZE. */
+	/** The size of the error buffer. */
 	public static final int PCAP_ERRBUF_SIZE = 256;
 
-	/** The Constant PCAP_BUF_SIZE. */
+	/** The size of the buffer used by pcap. */
 	public static final int PCAP_BUF_SIZE = 1024;
 
-	/** The Constant PCAP_STAT_SIZE. */
+	/** The size of the statistics buffer. */
 	public static final int PCAP_STAT_SIZE = 256;
 
 	/** pcap_next_ex() returns 1 if the packet was read without problems. */
@@ -112,5 +112,6 @@ public final class PcapConstants {
 	 * Instantiates a new pcap constants.
 	 */
 	private PcapConstants() {
+		// Prevent instantiation
 	}
 }

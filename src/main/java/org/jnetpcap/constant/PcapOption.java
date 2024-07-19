@@ -19,59 +19,84 @@ import java.util.Optional;
 import java.util.function.IntSupplier;
 
 /**
- * Options usable with {@code Pcap.init(PcapOption)} call.
+ * Enumeration of options usable with the {@code Pcap.init(PcapOption)} call.
+ * These options configure various aspects of the Pcap library.
+ * 
+ * <p>
+ * Example usage:
+ * </p>
+ * 
+ * <h2>Initializing pcap with a specific character encoding</h2>
+ * 
+ * <pre>
+ * Pcap.init(PcapOption.CHAR_ENC_UTF_8);
+ * </pre>
+ * 
+ * <p>
+ * Each enum constant corresponds to a specific configuration option.
+ * </p>
+ * 
+ * @see org.jnetpcap.Pcap#init(PcapOption)
+ * 
+ *      Author: Sly Technologies repos@slytechs.com
  */
 public enum PcapOption implements IntSupplier {
 
-	/** strings are in the local character encoding. */
+	/**
+	 * Strings are in the local character encoding. This option indicates that
+	 * strings passed to and from the Pcap library should be interpreted using the
+	 * local character encoding of the system.
+	 */
 	CHAR_ENC_LOCAL,
 
-	/** strings are in UTF-8. */
-	CHAR_ENC_UTF_8,
-	;
+	/**
+	 * Strings are in UTF-8. This option indicates that strings passed to and from
+	 * the Pcap library should be interpreted using the UTF-8 character encoding.
+	 */
+	CHAR_ENC_UTF_8;
 
-	/** strings are in the local character encoding. */
+	/** Constant for local character encoding. */
 	public static final int PCAP_CHAR_ENC_LOCAL = 0x00000000;
 
-	/** strings are in UTF-8. */
+	/** Constant for UTF-8 character encoding. */
 	public static final int PCAP_CHAR_ENC_UTF_8 = 0x00000001;
 
 	/**
-	 * Converts an integer value into a PCAP option constant.
+	 * Converts an integer value into a PcapOption constant.
 	 *
-	 * @param option the PCAP option numerical constant
-	 * @return the PCAP option enum constant
-	 * @throws IllegalArgumentException thrown if not found
+	 * @param option the Pcap option numerical constant
+	 * @return the corresponding PcapOption enum constant
+	 * @throws IllegalArgumentException if the option constant is not valid
 	 */
 	public static PcapOption valueOf(int option) throws IllegalArgumentException {
-		if (option < 0 || option > 1)
+		if (option < 0 || option >= values().length) {
 			throw new IllegalArgumentException(Integer.toString(option));
-
+		}
 		return values()[option];
 	}
 
 	/**
-	 * Converts an integer value into a PCAP option constant, if found.
+	 * Converts an integer value into an Optional PcapOption constant.
 	 *
-	 * @param option the PCAP option numerical constant
-	 * @return the PCAP option enum constant
+	 * @param option the Pcap option numerical constant
+	 * @return an Optional containing the corresponding PcapOption enum constant, or
+	 *         empty if the option constant is not valid
 	 */
 	public static Optional<PcapOption> toEnum(int option) {
-		if (option < 0 || option > 1)
+		if (option < 0 || option >= values().length) {
 			return Optional.empty();
-
+		}
 		return Optional.of(values()[option]);
 	}
 
 	/**
-	 * Pcap option integer value.
+	 * Returns the integer value of this PcapOption.
 	 *
-	 * @return the pcap option as integer
+	 * @return the integer value of this PcapOption
 	 * @see java.util.function.IntSupplier#getAsInt()
 	 */
 	@Override
 	public int getAsInt() {
 		return ordinal();
 	}
-
 }

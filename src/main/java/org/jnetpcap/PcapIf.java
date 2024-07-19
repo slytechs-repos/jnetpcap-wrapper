@@ -16,7 +16,6 @@
 package org.jnetpcap;
 
 import static org.jnetpcap.internal.ForeignUtils.*;
-import static org.jnetpcap.internal.FunctionThrowable.*;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;

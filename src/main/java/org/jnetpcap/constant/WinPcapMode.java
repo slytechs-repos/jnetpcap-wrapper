@@ -28,13 +28,28 @@ import java.util.function.IntSupplier;
  */
 public enum WinPcapMode implements IntSupplier {
 
-	/** The CAPTURE mode constant. */
+	/**
+	 * Capture mode, used for capturing packets. More information can be found at:
+	 * <a href=
+	 * "https://www.winpcap.org/docs/docs_412/html/group__wpcapfunc.html#ga3ed92b36d2d80576e297c8273b4291dc">WinPcap
+	 * Capture Mode</a>
+	 */
 	CAPT,
 
-	/** The STATISTICS mode constant. */
+	/**
+	 * Statistics mode, used for collecting statistics. More information can be
+	 * found at: <a href=
+	 * "https://www.winpcap.org/docs/docs_412/html/group__wpcapfunc.html#ga2a17e78e387f5a4773bc8cc87f8a72f4">WinPcap
+	 * Statistics Mode</a>
+	 */
 	STAT,
 
-	/** The MONITOR mode constant. */
+	/**
+	 * Monitor mode, used for monitoring packets without capturing. More information
+	 * can be found at: <a href=
+	 * "https://www.winpcap.org/docs/docs_412/html/group__wpcapfunc.html#ga13e3aaf9a0bb9a1e2b558df5d2c7b455">WinPcap
+	 * Monitor Mode</a>
+	 */
 	MON;
 
 	/** The Constant MODE_CAPT. */

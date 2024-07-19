@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.jnetpcap;
 
+import static org.jnetpcap.internal.ForeignUtils.*;
+
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
@@ -28,7 +30,6 @@ import org.jnetpcap.internal.NativeABI;
 import org.jnetpcap.util.PcapUtils;
 
 import static java.lang.foreign.ValueLayout.*;
-import static org.jnetpcap.internal.ForeignUtils.EMPTY_CLEANUP;
 
 /**
  * The low level <code>sockaddr</code> structure containing an address of
@@ -576,7 +577,7 @@ public class SockAddr {
 					+ "]";
 		}
 	}
-	
+
 	/**
 	 * The structure of <code>sockaddr_irda</code>, used with AF_IRDA sockets on
 	 * windows (winsock2.h) to access link-layer information.
@@ -588,7 +589,8 @@ public class SockAddr {
 		private final String irdaServiceName;
 
 		IrdaSockAddr(MemorySegment addr, Arena arena) {
-			super(addr.reinterpret(SOCK_ADDR_IRDA_LEN, arena,	EMPTY_CLEANUP), SockAddrFamily.IRDA,	OptionalInt.of(SOCK_ADDR_IRDA_LEN));
+			super(addr.reinterpret(SOCK_ADDR_IRDA_LEN, arena, EMPTY_CLEANUP), SockAddrFamily.IRDA, OptionalInt.of(
+					SOCK_ADDR_IRDA_LEN));
 
 			this.irdaDeviceID = saSegment.asSlice(2, 4).toArray(JAVA_BYTE);
 			this.irdaServiceName = saSegment.getString(6, java.nio.charset.StandardCharsets.UTF_8);
@@ -623,7 +625,8 @@ public class SockAddr {
 			return "AF_IRDA ["
 					+ "id=" + PcapUtils.toAddressString(irdaDeviceID)
 					+ (irdaServiceName.isBlank() ? "" : ", \"%s\"".formatted(irdaServiceName))
-					+ "]";		}
+					+ "]";
+		}
 	}
 
 	/** The Constant MIM_SOCKADDR_STRUCT_LEN. */
