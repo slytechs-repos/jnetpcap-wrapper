@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,64 +15,62 @@
  */
 package org.jnetpcap;
 
-import static java.lang.foreign.MemoryLayout.structLayout;
-import static java.lang.foreign.MemoryLayout.PathElement.groupElement;
-import static java.lang.foreign.MemoryLayout.PathElement.sequenceElement;
-import static java.lang.foreign.ValueLayout.JAVA_BYTE;
-import static java.lang.foreign.ValueLayout.JAVA_INT;
-import static java.lang.foreign.ValueLayout.JAVA_SHORT;
-
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.VarHandle;
 
+import static java.lang.foreign.MemoryLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 /**
- * BpFilter program instruction. Instructions are processed in binary mode but
- * for text formatting purposes or program analysis, this class decodes each
- * instruction.
+ * Represents a BPF (Berkeley Packet Filter) program instruction. Instructions
+ * are processed in binary mode, but for text formatting purposes or program
+ * analysis, this class decodes each instruction.
  *
  * <p>
- * Each 64-bit instruction is the long int representation of the following bpf
- * structure found in C header file "pcap/bpf.h":
- *
+ * Each 64-bit instruction is the long int representation of the following BPF
+ * structure found in the C header file "pcap/bpf.h":
+ * </p>
+ * 
  * <pre>
  * struct bpf_insn {
- *		u_short	full;
- *		u_char 	jt;
- *		u_char 	jf;
- *		bpf_u_int32 k;
+ *     u_short code;
+ *     u_char jt;
+ *     u_char jf;
+ *     bpf_u_int32 k;
  * };
  * </pre>
- * </p>
  */
 record BpFilterInstruction(int code, int jt, int jf, long k) {
 
-	/** The Constant LAYOUT. */
+	/** The Constant LAYOUT defining the memory layout of the BPF instruction. */
 	private static final MemoryLayout LAYOUT = MemoryLayout.sequenceLayout(-1,
 			structLayout(
-					JAVA_SHORT.withName("full"),
+					JAVA_SHORT.withName("code"),
 					JAVA_BYTE.withName("jt"),
 					JAVA_BYTE.withName("jf"),
 					JAVA_INT.withName("k")));
 
-	/** The Constant CODE. */
-	private static final VarHandle CODE = LAYOUT.varHandle(sequenceElement(), groupElement("full"));
+	/** The Constant CODE representing the opcode. */
+	private static final VarHandle CODE = LAYOUT.varHandle(sequenceElement(), groupElement("code"));
 
-	/** The Constant JT. */
+	/** The Constant JT representing the jump true offset. */
 	private static final VarHandle JT = LAYOUT.varHandle(sequenceElement(), groupElement("jt"));
 
-	/** The Constant JF. */
+	/** The Constant JF representing the jump false offset. */
 	private static final VarHandle JF = LAYOUT.varHandle(sequenceElement(), groupElement("jf"));
 
-	/** The Constant K. */
+	/** The Constant K representing the generic field k. */
 	private static final VarHandle K = LAYOUT.varHandle(sequenceElement(), groupElement("k"));
 
 	/**
-	 * Instruction at.
+	 * Returns the BpFilterInstruction at a given index within the provided memory
+	 * segment.
 	 *
-	 * @param seg   the seg
-	 * @param index the index
-	 * @return the bp filter instruction
+	 * @param seg   the memory segment containing the BPF instructions
+	 * @param index the index of the instruction within the segment
+	 * @return the BpFilterInstruction at the specified index
 	 */
 	static BpFilterInstruction instructionAt(MemorySegment seg, int index) {
 		return new BpFilterInstruction(
@@ -83,11 +81,13 @@ record BpFilterInstruction(int code, int jt, int jf, long k) {
 	}
 
 	/**
-	 * @see java.lang.Record#toString()
+	 * Returns a string representation of the BpFilterInstruction.
+	 *
+	 * @return the string representation of the BpFilterInstruction
 	 */
 	@Override
 	public String toString() {
-		return "ForeignBpfInstruction"
+		return "BpFilterInstruction"
 				+ " [opcode=%04x".formatted(code)
 				+ ", jt=" + jt
 				+ ", jf=" + jf

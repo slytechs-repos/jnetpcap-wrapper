@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,6 @@ import org.jnetpcap.internal.PcapHeaderABI;
  * instant when the packet was captured.
  * </p>
  * 
- * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @see LibraryPolicy#SYSTEM_PROPERTY_ABI
  */
 public final class PcapHeader {

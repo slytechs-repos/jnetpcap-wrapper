@@ -21,17 +21,37 @@ import java.util.function.IntSupplier;
 import org.jnetpcap.Pcap;
 
 /**
- * Libppcap error and warning status codes.
+ * Libpcap error and warning status codes.
  * 
- * @author Sly Technologies
- * @author repos@slytechs.com
+ * <p>
+ * This enum lists the various error and warning codes that can be returned by
+ * the libpcap library. Each code is associated with an integer value and a
+ * description message.
+ * </p>
+ * 
+ * <p>
+ * Example usage:
+ * </p>
+ * 
+ * <h2>Converting an integer code to a PcapCode enum constant</h2>
+ * 
+ * <pre>
+ * int code = -1;
+ * PcapCode pcapCode = PcapCode.toEnum(code).orElse(null);
+ * System.out.println("Pcap Code: " + (pcapCode != null ? pcapCode.getMessage() : "Unknown"));
+ * </pre>
+ * 
+ * @see java.util.function.IntSupplier
+ * @see org.jnetpcap.Pcap
+ * 
+ *      Author: Sly Technologies repos@slytechs.com
  */
 public enum PcapCode implements IntSupplier {
 
 	/** ok. */
 	OK(PcapCode.PCAP_OK, "Ok"),
 
-	/** generic error full. */
+	/** generic error. */
 	ERROR(PcapCode.PCAP_ERROR),
 
 	/** loop terminated by pcap_breakloop. */
@@ -82,7 +102,7 @@ public enum PcapCode implements IntSupplier {
 	/** ok. */
 	public final static int PCAP_OK = 0;
 
-	/** generic error full. */
+	/** generic error. */
 	public final static int PCAP_ERROR = -1;
 
 	/** loop terminated by pcap_breakloop. */
@@ -241,7 +261,7 @@ public enum PcapCode implements IntSupplier {
 	}
 
 	/**
-	 * Checks if this code is an pcap error. For example, {@code code < 0}
+	 * Checks if this code is an pcap error. For example, {@code code &lt; 0}
 	 *
 	 * @return true, if is error
 	 */
@@ -259,9 +279,9 @@ public enum PcapCode implements IntSupplier {
 	}
 
 	/**
-	 * Checks if this code is pcap status warning. For example, {@code code > 0}
+	 * Checks if this code is pcap status warning. For example, {@code code &gt; 0}
 	 *
-	 * @return true, if it is a wraning
+	 * @return true, if it is a warning
 	 */
 	public boolean isWarning() {
 		return (code > 0);

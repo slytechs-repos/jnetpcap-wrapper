@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,62 @@ import static java.lang.foreign.ValueLayout.*;
 /**
  * Entry point and base class for all Pcap API methods provided by jNetPcap
  * library.
+ * 
+ * <p>
+ * This class provides a Java interface to the native libpcap packet capture
+ * library. It allows for capturing packets from network interfaces, reading
+ * packets from saved capture files, and performing various operations on
+ * network packets.
+ * </p>
+ * 
+ * <p>
+ * The Pcap class offers methods for:
+ * </p>
+ * <ul>
+ * <li>Creating and opening capture handles</li>
+ * <li>Opening saved capture files</li>
+ * <li>Compiling and setting packet filters</li>
+ * <li>Capturing and processing packets</li>
+ * <li>Reading individual packets</li>
+ * <li>Setting various capture options</li>
+ * <li>Retrieving capture statistics</li>
+ * </ul>
+ * 
+ * <p>
+ * This class follows the versioning scheme of the underlying libpcap library.
+ * Different subclasses (e.g., Pcap0_4, Pcap1_0) represent different versions of
+ * the libpcap API, with each subclass providing methods specific to that API
+ * version.
+ * </p>
+ * 
+ * <p>
+ * Usage typically involves creating a Pcap instance, setting any necessary
+ * options, activating the capture handle, and then using methods like
+ * {@link #loop(int, org.jnetpcap.PcapHandler.OfMemorySegment, Object)} or
+ * {@link #nextEx()} to process captured packets.
+ * </p>
+ * 
+ * <p>
+ * Example usage:
+ * </p>
+ * 
+ * <pre>{@code
+ * try (Pcap pcap = Pcap.create("eth0")) {
+ * 	pcap.activate();
+ * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+ * 		// Process packet
+ * 	}, null);
+ * } catch (PcapException e) {
+ * 	// Handle exception
+ * }
+ * }</pre>
+ * 
+ * <p>
+ * Note: This class implements {@link AutoCloseable}, so it can be used with
+ * try-with-resources for automatic resource management.
+ * </p>
  *
- * @author Sly Technologies
+ * @author Sly Technologies Inc
  * @author repos@slytechs.com
  */
 public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, DeputyPcap {
@@ -85,7 +139,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * <p>
 	 * For more sophisticated library handling, you can install a new policy, that
 	 * does or does not rely on the {@link #getLogginOutput()} value. It may also
-	 * throw an {@code IllegalStateException} to stop further intialization process
+	 * throw an {@code IllegalStateException} to stop further initialization process
 	 * from continuing, or try to attempt a different native loading path or method.
 	 * By throwing an exception in the class static initializer, as this would do,
 	 * you are preventing the class from loading and initializing the first time an
@@ -96,46 +150,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * calls on the default library initializer, which is a private instance of
 	 * {@code ForeignInitializer} class.
 	 * </p>
-	 * <h3>Native Library Loading</h3>
-	 * <p>
-	 * You can define several system properties which control the behavior of how
-	 * the native pcap library, or one of its derivatives are loaded. These
-	 * properties, allow changing of the procedure how the library is located and
-	 * how is actually loaded. The defaults for the native library loading
-	 * procedure, define a list of possible pcap library undecorated names such as
-	 * 'wpcap,npcap,pcap' and utilize the relative
-	 * {@link System#loadLibrary(String)} to search for the shared object/native
-	 * library.
-	 * </p>
-	 * <p>
-	 * By specifying various system properties on the java command line, you can
-	 * redefine how, where and what to look for when loading the native library.
-	 * </p>
-	 * The following properties are used in a search, in the following order:
-	 * <dl>
-	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH}:</dt>
-	 * <dd>Defines directories where the native library will searched for.</dd>
-	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILE}:</dt>
-	 * <dd>Defines an absolute directory and decorated filename path to load the
-	 * native library using {@link System#load(String)} system call.</dd>
-	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILENAME}:</dt>
-	 * <dd>Defines a decorated filename only of the native library. The decorated
-	 * filename will be appended to the
-	 * {@value LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH} and an absolute
-	 * library load call will be attempted {@link System#load(String)}.</dd>
-	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_NAMES}:</dt>
-	 * <dd>A comma separated list of undecorated library names. Each of the
-	 * undecorated names in the list will be attempted to load using
-	 * {@link System#loadLibrary(String)} combined with the
-	 * {@value LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH} property value.</dd>
-	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_SO_EXTENSIONS}:</dt>
-	 * <dd>Lastly, as a long-shot attempt, a list of absolute files will be built by
-	 * combining all the property values given, with fully decorated filenames which
-	 * utilize the provided extensions, to try and locate the native library on the
-	 * platform. The default extension list are defined as "so,dylib". Each one will
-	 * be tried in turn.
-	 * </dl>
-	 *
+	 * 
 	 * @see LibraryPolicy#SYSTEM_PROPERTY_JAVA_LIBRARY_PATH
 	 * @see LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILE
 	 * @see LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILENAME
@@ -382,20 +397,22 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 		/**
 		 * Create a live capture handle.
 		 * 
-		 * {@code create} is used to create a packet capture handle to look at packets
-		 * on the network. source is a string that specifies the network device to open;
-		 * on Linux systems with 2.2 or later kernels, a source argument of "any" or
-		 * NULL can be used to capture packets from all interfaces. The returned handle
-		 * must be activated with pcap_activate() before pack' ets can be captured with
-		 * it; options for the capture, such as promiscu' ous mode, can be set on the
-		 * handle before activating it.
+		 * <p>
+		 * This method is used to create a packet capture handle to look at packets on
+		 * the network. The returned handle must be activated with {@link #activate()}
+		 * before packets can be captured with it; options for the capture, such as
+		 * promiscuous mode, can be set on the handle before activating it.
+		 * </p>
+		 * 
+		 * <p>
+		 * On Linux systems with 2.2 or later kernels, a device argument of "any" or
+		 * null can be used to capture packets from all interfaces.
+		 * </p>
 		 *
-		 * @param device a string that specifies the network device to open; on Linux
-		 *               systems with 2.2 or later kernels, a source argument of "any"
-		 *               or NULL can be used to capture packets from all interfaces.
+		 * @param device a string that specifies the network device to open
 		 * @return a new pcap object that needs to be activated using
-		 *         {@link #activate()} call
-		 * @throws PcapException the pcap exception
+		 *         {@link #activate()}
+		 * @throws PcapException if an error occurs during creation
 		 * @since libpcap 1.0
 		 */
 		public static Linux create(String device) throws PcapException {
@@ -511,21 +528,37 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 		 * Open a device for capturing.
 		 * 
 		 * <p>
-		 * {@code openLive} is used to obtain a packet capture handle to look at packets
-		 * on the network. device is a string that specifies the network device to open;
-		 * on Linux systems with 2.2 or later kernels, a device argument of "any" or
-		 * NULL can be used to capture packets from all interfaces.
+		 * This method is used to obtain a packet capture handle to look at packets on
+		 * the network. It opens the device and creates a packet capture handle for it.
 		 * </p>
+		 * 
+		 * <p>
+		 * The snaplen parameter specifies the snapshot length to be set on the handle.
+		 * The promisc parameter specifies whether the interface is to be put into
+		 * promiscuous mode. The timeout parameter specifies the packet buffer timeout.
+		 * </p>
+		 * 
+		 * <p>
+		 * Example usage:
+		 * </p>
+		 * 
+		 * <pre>{@code
+		 * try {
+		 * 	Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS);
+		 * 	// Use pcap for packet capture...
+		 * } catch (PcapException e) {
+		 * 	// Handle exception
+		 * }
+		 * }</pre>
 		 *
 		 * @param device  the device name
 		 * @param snaplen specifies the snapshot length to be set on the handle
 		 * @param promisc specifies whether the interface is to be put into promiscuous
-		 *                mode. If promisc is non-zero, promiscuous mode will be set,
-		 *                otherwise it will not be set
+		 *                mode
 		 * @param timeout the packet buffer timeout, as a non-negative value, in units
 		 * @param unit    time timeout unit
 		 * @return the pcap handle
-		 * @throws PcapException any errors
+		 * @throws PcapException if an error occurs during opening
 		 * @since libpcap 0.4
 		 */
 		public static Linux openLive(String device,
@@ -933,20 +966,19 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	/**
 	 * Create a live capture handle.
 	 * 
-	 * {@code create} is used to create a packet capture handle to look at packets
-	 * on the network. source is a string that specifies the network device to open;
-	 * on Linux systems with 2.2 or later kernels, a source argument of "any" or
-	 * NULL can be used to capture packets from all interfaces. The returned handle
-	 * must be activated with pcap_activate() before pack' ets can be captured with
-	 * it; options for the capture, such as promiscu' ous mode, can be set on the
-	 * handle before activating it.
+	 * <p>
+	 * This method is used to create a packet capture handle to look at packets on
+	 * the network. The returned handle must be activated with {@link #activate()}
+	 * before packets can be captured with it; options for the capture, such as
+	 * promiscuous mode, can be set on the handle before activating it.
+	 * </p>
 	 *
 	 * @param device a string that specifies the network device to open; on Linux
-	 *               systems with 2.2 or later kernels, a source argument of "any"
-	 *               or NULL can be used to capture packets from all interfaces.
+	 *               systems with 2.2 or later kernels, a device argument of "any"
+	 *               or null can be used to capture packets from all interfaces.
 	 * @return a new pcap object that needs to be activated using
-	 *         {@link #activate()} call
-	 * @throws PcapException the pcap exception
+	 *         {@link #activate()}
+	 * @throws PcapException if an error occurs during creation
 	 * @since libpcap 1.0
 	 */
 	public static Pcap create(String device) throws PcapException {
@@ -1534,24 +1566,22 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * Open a device for capturing.
 	 * 
 	 * <p>
-	 * {@code openLive} is used to obtain a packet capture handle to look at packets
-	 * on the network. device is a string that specifies the network device to open;
-	 * on Linux systems with 2.2 or later kernels, a device argument of "any" or
-	 * NULL can be used to capture packets from all interfaces.
+	 * This method is used to obtain a packet capture handle to look at packets on
+	 * the network. It opens the device and creates a packet capture handle for it.
 	 * </p>
 	 *
 	 * @param device  the device name
 	 * @param snaplen specifies the snapshot length to be set on the handle
 	 * @param promisc specifies whether the interface is to be put into promiscuous
-	 *                mode. If promisc is non-zero, promiscuous mode will be set,
+	 *                mode. If promisc is true, promiscuous mode will be set,
 	 *                otherwise it will not be set
 	 * @param timeout the packet buffer timeout, as a non-negative value, in units
 	 * @param unit    time timeout unit
 	 * @return the pcap handle
-	 * @throws PcapException any errors
+	 * @throws PcapException if an error occurs during opening
 	 * @since libpcap 0.4
 	 */
-	public static Pcap openLive(String device,
+	static Pcap openLive(String device,
 			int snaplen,
 			boolean promisc,
 			long timeout,
@@ -1847,7 +1877,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 1.0
 	 */
 	public boolean canSetRfmon() throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0")); //$NON-NLS-1$
 	}
 
 	/**
@@ -1861,36 +1891,44 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 */
 	@Override
 	public void close() {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
-	 * Compile a filter expression without a netmask.
+	 * Compile a filter expression.
+	 *
 	 * <p>
-	 * pcap_compile() is used to compile the string str into a filter program. See
-	 * pcap-filter(7) for the syntax of that string. fp is a pointer to a
-	 * bpf_program struct and is filled in by pcap_compile(). optimize controls
-	 * whether optimization on the resulting full is performed. The netmask of the
-	 * network on which packets are being captured isn't known to the program, or if
-	 * packets are being captured on the Linux "any" pseudo-interface that can
-	 * capture on more than one network, a value of PCAP_NETMASK_UNKNOWN can be
-	 * supplied; tests for IPv4 broadcast addresses will fail to compile, but all
-	 * other tests in the filter program will be OK.
+	 * This method is used to compile the string str into a filter program. See
+	 * pcap-filter(7) for the syntax of that string. The resulting program can be
+	 * applied to a packet capture handle using {@link #setFilter(BpFilter)}.
 	 * </p>
+	 * 
 	 * <p>
-	 * NOTE: in libpcap 1.8.0 and later, pcap_compile() can be used in multiple
-	 * threads within a single process. However, in earlier versions of libpcap, it
-	 * is not safe to use pcap_compile() in multiple threads in a single process
-	 * without some form of mutual exclusion allowing only one thread to call it at
-	 * any given time.
+	 * The optimize parameter controls whether optimization on the resulting program
+	 * is performed.
 	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS);
+	 * 	BpFilter filter = pcap.compile("port 80", true);
+	 * 	pcap.setFilter(filter);
+	 * 	// Continue with packet capture...
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
 	 *
 	 * @param str      filter expression to be compiled
-	 * @param optimize controls whether optimization on the resulting full is
+	 * @param optimize controls whether optimization on the resulting program is
 	 *                 performed
 	 * @return the compiled filter
-	 * @throws PcapException any errors
-	 * @since Pcap 0.4
+	 * @throws PcapException if an error occurs during compilation
+	 * @since libpcap 0.4
 	 */
 	public BpFilter compile(String str, boolean optimize) throws PcapException {
 		return compile(str, optimize, PcapConstants.PCAP_NETMASK_UNKNOWN);
@@ -1936,7 +1974,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since Pcap 0.4
 	 */
 	public BpFilter compile(String str, boolean optimize, int netmask) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -1952,11 +1990,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * </p>
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @return link-layer header type
@@ -1964,7 +2001,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.4
 	 */
 	public PcapDlt datalink() throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2029,11 +2066,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * 
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param <U>        the generic type
@@ -2051,7 +2087,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.4
 	 */
 	public <U> int dispatch(int count, PcapDumper pcapDumper) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2107,11 +2143,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * 
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param count   maximum number of packets to process before returning
@@ -2128,7 +2163,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.4
 	 */
 	public int dispatch(int count, PcapHandler.NativeCallback handler, MemorySegment user) {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2183,11 +2218,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * 
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param <U>     the generic type
@@ -2206,7 +2240,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.4
 	 */
 	public <U> int dispatch(int count, PcapHandler.OfArray<U> handler, U user) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2263,11 +2297,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * 
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param <U>     the generic type
@@ -2286,7 +2319,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.4
 	 */
 	public <U> int dispatch(int count, PcapHandler.OfMemorySegment<U> handler, U user) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2334,7 +2367,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.4
 	 */
 	public String geterr() {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2426,7 +2459,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 1.5
 	 */
 	public PcapTStampPrecision getTstampPrecision() throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap1_5", "1.5")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap1_5", "1.5")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2617,7 +2650,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.4
 	 */
 	public boolean isSwapped() throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2628,7 +2661,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.8
 	 */
 	public List<PcapDlt> listDataLinks() throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_8", "0.8")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_8", "0.8")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2643,7 +2676,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 1.2
 	 */
 	public List<PcapTstampType> listTstampTypes() throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap1_2", "1.2")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap1_2", "1.2")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2689,11 +2722,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * </p>
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param <U>        the generic user data type
@@ -2709,7 +2741,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.4
 	 */
 	public <U> int loop(int count, PcapDumper pcapDumper) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2757,11 +2789,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * </p>
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @param <U>     the generic user data type
@@ -2777,7 +2808,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.4
 	 */
 	public <U> int loop(int count, PcapHandler.NativeCallback handler, MemorySegment user) {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2824,11 +2855,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * </p>
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 * 
 	 * @param <U>     the generic user data type
@@ -2845,76 +2875,53 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.4
 	 */
 	public <U> int loop(int count, PcapHandler.OfArray<U> handler, U user) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
-	 * Process packets from a live capture or savefile and dispatch directly to
-	 * handler. The scope of each memory segment dispatched by this call is only
-	 * valid for the duration of the dispatch to handler. After that, the packet
-	 * memory is reused by libpcap and its contents no longer valid if retained.
+	 * Process packets from a live capture or savefile.
 	 * 
 	 * <p>
-	 * pcap_loop() processes packets from a live capture or ``savefile'' until cnt
-	 * packets are processed, the end of the ``savefile'' is reached when reading
-	 * from a ``savefile'', pcap_breakloop(3PCAP) is called, or an error occurs. It
-	 * does not return when live packet buffer timeouts occur. A value of -1 or 0
-	 * for cnt is equivalent to infinity, so that packets are processed until
-	 * another ending condition occurs.
+	 * This method processes packets from a live capture or "savefile" until count
+	 * packets are processed, the end of the "savefile" is reached when reading from
+	 * a "savefile", {@link #breakloop()} is called, or an error occurs.
 	 * </p>
+	 * 
 	 * <p>
-	 * Note that, when doing a live capture on some platforms, if the read timeout
-	 * expires when there are no packets available, pcap_dispatch() will return 0,
-	 * even when not in non-blocking mode, as there are no packets to process.
-	 * Applications should be prepared for this to happen, but must not rely on it
-	 * happening.
+	 * The handler specifies a method to be called for each packet. The user
+	 * parameter is an opaque pointer that will be passed to the callback function
+	 * each time it is called.
 	 * </p>
+	 * 
 	 * <p>
-	 * callback specifies a pcap_handler routine to be called with three arguments:
-	 * a u_char pointer which is passed in the user argument to pcap_loop() or
-	 * pcap_dispatch(), a const struct pcap_pkthdr pointer pointing to the packet
-	 * time stamp and lengths, and a const u_char pointer to the first caplen (as
-	 * given in the struct pcap_pkthdr a pointer to which is passed to the callback
-	 * routine) bytes of data from the packet. The struct pcap_pkthdr and the packet
-	 * data are not to be freed by the callback routine, and are not guaranteed to
-	 * be valid after the callback routine returns; if the full needs them to be
-	 * valid after the callback, it must make a copy of them.
+	 * Example usage:
 	 * </p>
-	 * <p>
-	 * The bytes of data from the packet begin with a link-layer header. The format
-	 * of the link-layer header is indicated by the return value of the
-	 * pcap_datalink(3PCAP) routine when handed the pcap_t value also passed to
-	 * pcap_loop() or pcap_dispatch(). https://www.tcpdump.org/linktypes.html lists
-	 * the values pcap_datalink() can return and describes the packet formats that
-	 * correspond to those values. The value it returns will be valid for all
-	 * packets received unless and until pcap_set_datalink(3PCAP) is called; after a
-	 * successful call to pcap_set_datalink(), all subsequent packets will have a
-	 * link-layer header of the type specified by the link-layer header type value
-	 * passed to pcap_set_datalink().
-	 * </p>
-	 * <p>
-	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
-	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS);
+	 * 	pcap.loop(10, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Packet captured. Length: " + header.captureLength());
+	 * 		// Process packet...
+	 * 	}, "User data");
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
 	 *
-	 * @param <U>     the generic type
-	 * @param count   A value of -1 or 0 for count is equivalent to infinity, so
-	 *                that packets are processed until another ending condition
-	 *                occurs
-	 * @param handler array handler which will receive packets
-	 * @param user    the user opaque java object
-	 * @return returns 0 if count is exhausted or if, when reading from a
-	 *         ``savefile'', no more packets are available. It returns
-	 *         PCAP_ERROR_BREAK if the loop terminated due to a call to
-	 *         pcap_breakloop() before any packets were processed
+	 * @param <U>     the generic user data type
+	 * @param count   maximum number of packets to process. A value of -1 or 0
+	 *                processes all packets until an error occurs or
+	 *                {@link #breakloop()} is called.
+	 * @param handler specifies a handler method to be called for each packet
+	 * @param user    user-specified object to be passed to the handler
+	 * @return 0 on success, PCAP_ERROR_BREAK if the loop terminated due to a call
+	 *         to {@link #breakloop()} before any packets were processed
+	 * @throws PcapException if an error occurs during packet processing
 	 * @since libpcap 0.4
 	 */
-	public <U> int loop(int count, PcapHandler.OfMemorySegment<U> handler, U user) {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+	public <U> int loop(int count, PcapHandler.OfMemorySegment<U> handler, U user) throws PcapException {
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2934,7 +2941,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @throws PcapException the pcap exception
 	 */
 	public int majorVersion() throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2954,7 +2961,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @throws PcapException the pcap exception
 	 */
 	public int minorVersion() throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
@@ -2984,11 +2991,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * 
 	 * <p>
 	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * any given link-layer header type, such as EN10MB for Ethernet. For example,
+	 * the "any" device on Linux will have a link-layer header type of LINUX_SLL or
+	 * LINUX_SLL2 even if all devices on the system at the time the "any" device is
+	 * opened have some other data link type, such as EN10MB for Ethernet.
 	 * </p>
 	 *
 	 * @return a pointer to the packet data on success, and returns NULL if no
@@ -3006,52 +3012,95 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.4
 	 */
 	public PcapPacketRef next() throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 
 	/**
 	 * Read the next packet from a pcap handle.
+	 * 
 	 * <p>
-	 * reads the next packet and returns a success/failure indication. If the packet
-	 * was read without problems, the pointer pointed to by the pktHeader argument
-	 * is set to point to the pcap_pkthdr struct for the packet, and the pointer
-	 * pointed to by the pktData argument is set to point to the data in the packet.
-	 * The struct pcap_pkthdr and the packet data are not to be freed by the caller,
-	 * and are not guaranteed to be valid after the next call to {@link #nextEx},
-	 * {@link #next}, {@link #loop}, or {@link #dispatch}; if the full needs them to
-	 * remain valid, it must make a copy of them. *
+	 * This method reads the next packet and returns it as a {@link PcapPacketRef}.
+	 * It's useful when you want to process packets one at a time.
 	 * </p>
+	 * 
 	 * <p>
-	 * The bytes of data from the packet begin with a link-layer header. The format
-	 * of the link-layer header is indicated by the return value of the
-	 * {@code datalink} routine when handed the pcap_t value also passed to
-	 * {@code loop} or {@code dispatch}. https://www.tcpdump.org/linktypes.html
-	 * lists the values {@code datalink} can return and describes the packet formats
-	 * that correspond to those values. The value it returns will be valid for all
-	 * packets received unless and until {@code setDatalink} is called; after a
-	 * successful call to {@code setDatalink}, all subsequent packets will have a
-	 * link-layer header of the type specified by the link-layer header type value
-	 * passed to {@code setDatalink}.
+	 * The returned {@link PcapPacketRef} contains both the packet header (with
+	 * timestamp, capture length, and actual packet length) and the packet data. The
+	 * packet data begins with a link-layer header, the format of which is indicated
+	 * by the {@link #datalink()} method.
 	 * </p>
+	 * 
 	 * <p>
-	 * Do NOT assume that the packets for a given capture or ``savefile`` will have
-	 * any given link-layer header type, such as DLT_EN10MB for Ethernet. For
-	 * example, the "any" device on Linux will have a link-layer header type of
-	 * DLT_LINUX_SLL or DLT_LINUX_SLL2 even if all devices on the system at the time
-	 * the "any" device is opened have some other data link type, such as DLT_EN10MB
-	 * for Ethernet.
+	 * The {@link PcapPacketRef} and its contents are not guaranteed to be valid
+	 * after the next call to {@code nextEx}, {@link #next}, {@link #loop}, or
+	 * {@link #dispatch}. If you need the packet data to remain valid, you must make
+	 * a copy of it.
+	 * </p>
+	 * 
+	 * 
+	 * <p>
+	 * This method reads the next packet and returns it as a {@link PcapPacketRef}.
+	 * It's useful when you want to process packets one at a time.
+	 * </p>
+	 * 
+	 * <p>
+	 * The returned {@link PcapPacketRef} contains both the packet header (with
+	 * timestamp, capture length, and actual packet length) and the packet data. The
+	 * packet data begins with a link-layer header, the format of which is indicated
+	 * by the {@link #datalink()} method.
+	 * </p>
+	 * 
+	 * <p>
+	 * When reading from a "savefile", this method will return null when there are
+	 * no more packets to read. When capturing live packets, it will block waiting
+	 * for packets to arrive if you're not in non-blocking mode.
+	 * The {@link PcapPacketRef} and its contents are not guaranteed to be valid
+	 * after the next call to {@code nextEx}, {@link #next}, {@link #loop}, or
+	 * {@link #dispatch}. If you need the packet data to remain valid, you must make
+	 * a copy of it.
+	 * </p>
+	 * 
+	 * <p>
+	 * When reading from a "savefile", this method will return null when there are
+	 * no more packets to read. When capturing live packets, it will block waiting
+	 * for packets to arrive if you're not in non-blocking mode.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try (Pcap pcap = Pcap.openOffline("capture.pcap")) {
+	 * 	PcapPacketRef packet;
+	 * 	while ((packet = pcap.nextEx()) != null) {
+	 * 		System.out.printf("Packet captured at %s, length: %d\n",
+	 * 				packet.getTimestamp(), packet.getCaptureLength());
+	 * 		// Process packet data...
+	 * 	}
+	 * } catch (PcapException | TimeoutException e) {
+	 * 	// Handle exceptions
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Note: Do NOT assume that the packets will have any given link-layer header
+	 * type, such as EN10MB for Ethernet. For example, the "any" device on Linux
+	 * will have a link-layer header type of LINUX_SLL or LINUX_SLL2 even if all
+	 * devices on the system at the time the "any" device is opened have some other
+	 * data link type. Always check the link-layer type with {@link #datalink()}
+	 * before interpreting the packet data.
 	 * </p>
 	 *
 	 * @return a native pcap packet reference or null if packets are being read from
-	 *         a ``savefile'' and there are no more packets to read from the
-	 *         savefile.
-	 * @throws PcapException    any pcap errors such as not activated, etc.
+	 *         a "savefile" and there are no more packets to read from the savefile.
+	 * @throws PcapException    if a general error occurs during packet capture
 	 * @throws TimeoutException if packets are being read from a live capture and
 	 *                          the packet buffer timeout expired
-	 * @since Pcap 0.8
+	 * @since libpcap 0.8
 	 */
 	public PcapPacketRef nextEx() throws PcapException, TimeoutException {
-		throw new UnsupportedOperationException(minApi("Pcap0_8", "0.8")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_8", "0.8"));
 	}
 
 	/**
@@ -3084,7 +3133,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @return this pcap handle
 	 */
 	public Pcap perror(String prefix) {
-		throw new UnsupportedOperationException(minApi("Pcap0_X", "0.X")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_X", "0.X")); //$NON-NLS-1$
 	}
 
 	/**
@@ -3118,7 +3167,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 0.8
 	 */
 	public void sendPacket(MemorySegment packet, int length) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_8", "0.8")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_8", "0.8")); //$NON-NLS-1$
 	}
 
 	/**
@@ -3237,55 +3286,360 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	}
 
 	/**
-	 * Sets the buffer size for a not-yet- activated capture handle.
+	 * Sets the buffer size for a not-yet-activated capture handle.
 	 * 
 	 * <p>
-	 * sets the buffer size that will be used on a capture handle when the handle is
-	 * activated to buffer_size, which is in units of bytes
+	 * This method sets the buffer size that will be used on a capture handle when
+	 * the handle is activated. The buffer size determines how much packet data the
+	 * kernel will buffer before it is copied to the application.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method must be called on a capture handle created by
+	 * {@link #create(String)} that has not yet been activated by
+	 * {@link #activate()}. Calling this method on an already activated handle will
+	 * result in a {@link PcapException}.
+	 * </p>
+	 * 
+	 * <p>
+	 * A larger buffer size can help reduce packet loss on busy networks, but it
+	 * will also increase the amount of memory used by the capture process.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.create("eth0");
+	 * 
+	 * 	// Set a 2MB buffer size
+	 * 	pcap.setBufferSize(2 * 1024 * 1024);
+	 * 	System.out.println("Buffer size set to 2MB");
+	 * 
+	 * 	pcap.activate();
+	 * 
+	 * 	// Now capture packets with the specified buffer size...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured packet with length: " + header.captureLength());
+	 * 		// Process packet...
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Important notes:
+	 * </p>
+	 * <ul>
+	 * <li>The effect of this call may vary depending on the platform and the
+	 * network interface.</li>
+	 * <li>Some platforms might have a maximum or minimum buffer size, or might
+	 * round the specified size up or down to a platform-dependent value.</li>
+	 * <li>A larger buffer size doesn't guarantee zero packet loss, especially on
+	 * very busy networks.</li>
+	 * <li>If you don't call this function, a default buffer size will be used. The
+	 * default size may vary depending on the platform.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: The optimal buffer size can depend on various factors such as network
+	 * speed, expected packet rate, and available system resources. You may need to
+	 * experiment to find the best value for your specific use case.
 	 * </p>
 	 *
-	 * @param bufferSize the buffer size in units of bytes
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
+	 * @param bufferSize the buffer size in bytes
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting the buffer size, such
+	 *                       as if the capture handle has already been activated
+	 * @see #create(String)
+	 * @see #activate()
 	 * @since libpcap 1.0
 	 */
 	public Pcap setBufferSize(int bufferSize) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0"));
 	}
 
 	/**
-	 * Set the link-layer header type to be used by a capture device .
+	 * Set the link-layer header type to be used by a capture device using a raw
+	 * integer value.
+	 * 
+	 * <p>
+	 * This method sets the link-layer header type for the capture device using the
+	 * raw integer value corresponding to the desired type. The link-layer header
+	 * type specifies the format of the link-layer headers in the packets that will
+	 * be captured or processed.
+	 * </p>
+	 * 
+	 * <p>
+	 * The link-layer header type is specified using integer constants, some common
+	 * ones include:
+	 * </p>
+	 * <ul>
+	 * <li>1 (EN10MB): Ethernet (10Mb, 100Mb, 1000Mb, and up)</li>
+	 * <li>105 (IEEE802_11): IEEE 802.11 wireless LAN</li>
+	 * <li>12 (RAW): Raw IP (no link-layer header)</li>
+	 * <li>113 (LINUX_SLL): Linux "cooked" capture encapsulation</li>
+	 * </ul>
+	 * It's recommended to use the {@link PcapDlt} enum and the
+	 * {@link #setDatalink(PcapDlt)} method instead of this raw integer method when
+	 * possible, for type safety.
+	 * 
+	 * <p>
+	 * Not all link-layer header types are supported by all capture devices. You can
+	 * use {@link #listDataLinks()} to get a list of the link-layer header types
+	 * supported by a given capture device.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try (Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS)) {
+	 * 	// Set datalink type to Ethernet (EN10MB)
+	 * 	pcap.setDatalink(1);
+	 * 	System.out.println("Set datalink type to Ethernet");
+	 * 
+	 * 	// Now capture packets with the specified datalink type...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured packet with length: " + header.captureLength());
+	 * 		// Process packet...
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Important notes:
+	 * </p>
+	 * <ul>
+	 * <li>Changing the link-layer header type affects how the captured packets are
+	 * interpreted.</li>
+	 * <li>This method can only be called on a capture handle that has been
+	 * activated.</li>
+	 * <li>For live captures, some systems might not allow you to change the
+	 * link-layer header type.</li>
+	 * <li>For "savefiles", changing the link-layer header type is allowed, but care
+	 * must be taken to ensure that the new type is compatible with the actual
+	 * format of the packets in the savefile.</li>
+	 * <li>Using an invalid integer value may result in undefined behavior or
+	 * exceptions.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: After changing the link-layer header type, you should re-check the
+	 * snapshot length and adjust your packet processing code accordingly, as the
+	 * minimum required snapshot length may have changed.
+	 * </p>
 	 *
-	 * @param dlt link-layer header type
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
+	 * @param dlt the desired link-layer header type, as an integer constant
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting the link-layer header
+	 *                       type, such as if the specified type is not supported by
+	 *                       the capture device, or if the capture handle has not
+	 *                       been activated
+	 * @see PcapDlt
+	 * @see #setDatalink(PcapDlt)
+	 * @see #listDataLinks()
+	 * @see #datalink()
 	 * @since libpcap 0.8
 	 */
 	public Pcap setDatalink(int dlt) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_8", "0.8")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_8", "0.8"));
 	}
 
 	/**
-	 * Set the link-layer header type to be used by a capture device .
+	 * Set or reset the link-layer header type to be used by a capture device.
+	 * 
+	 * <p>
+	 * This method sets or resets the link-layer header type for the capture device.
+	 * The link-layer header type specifies the format of the link-layer headers in
+	 * the packets that will be captured or processed. If an empty Optional is
+	 * provided, the method will not change the current link-layer header type.
+	 * </p>
+	 * 
+	 * <p>
+	 * The link-layer header type is specified using an Optional of the
+	 * {@link PcapDlt} enum, which includes values such as:
+	 * </p>
+	 * <ul>
+	 * <li>{@link PcapDlt#EN10MB}: Ethernet (10Mb, 100Mb, 1000Mb, and up)</li>
+	 * <li>{@link PcapDlt#IEEE802_11}: IEEE 802.11 wireless LAN</li>
+	 * <li>{@link PcapDlt#RAW}: Raw IP (no link-layer header)</li>
+	 * <li>{@link PcapDlt#LINUX_SLL}: Linux "cooked" capture encapsulation</li> <!-- Add
+	 * other relevant PcapDlt values as needed -->
+	 * </ul>
+	 * 
+	 * <p>
+	 * Not all link-layer header types are supported by all capture devices. You can
+	 * use {@link #listDataLinks()} to get a list of the link-layer header types
+	 * supported by a given capture device.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try (Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS)) {
+	 * 	// List supported datalink types
+	 * 	List<PcapDlt> supportedTypes = pcap.listDataLinks();
+	 * 	System.out.println("Supported datalink types: " + supportedTypes);
+	 * 
+	 * 	// Set datalink type to Ethernet if supported
+	 * 	if (supportedTypes.contains(PcapDlt.EN10MB)) {
+	 * 		pcap.setDatalink(Optional.of(PcapDlt.EN10MB));
+	 * 		System.out.println("Set datalink type to Ethernet");
+	 * 	} else {
+	 * 		// Keep the current datalink type
+	 * 		pcap.setDatalink(Optional.empty());
+	 * 		System.out.println("Kept the current datalink type");
+	 * 	}
+	 * 
+	 * 	// Now capture packets...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured packet with length: " + header.captureLength());
+	 * 		// Process packet...
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Important notes:
+	 * </p>
+	 * <ul>
+	 * <li>Changing the link-layer header type affects how the captured packets are
+	 * interpreted.</li>
+	 * <li>This method can only be called on a capture handle that has been
+	 * activated.</li>
+	 * <li>For live captures, some systems might not allow you to change the
+	 * link-layer header type.</li>
+	 * <li>For "savefiles", changing the link-layer header type is allowed, but care
+	 * must be taken to ensure that the new type is compatible with the actual
+	 * format of the packets in the savefile.</li>
+	 * <li>If an empty Optional is provided, the current link-layer header type will
+	 * be maintained.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: After changing the link-layer header type, you should re-check the
+	 * snapshot length and adjust your packet processing code accordingly, as the
+	 * minimum required snapshot length may have changed.
+	 * </p>
 	 *
-	 * @param dlt link-layer header type
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
-	 * @since libpcap 0.8
+	 * @param dlt an Optional containing the desired link-layer header type, as a
+	 *            {@link PcapDlt} enum value. If empty, the current link-layer
+	 *            header type will not be changed.
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting the link-layer header
+	 *                       type, such as if the specified type is not supported by
+	 *                       the capture device, or if the capture handle has not
+	 *                       been activated
+	 * @see PcapDlt
+	 * @see #listDataLinks()
+	 * @see #datalink()
+	 * @see #setDatalink(PcapDlt)
+	 * @since libpcap 0.8 (although the Optional wrapper is a Java-specific feature)
 	 */
 	public Pcap setDatalink(Optional<PcapDlt> dlt) throws PcapException {
 		if (dlt.isEmpty())
 			return this;
 
-		return setDatalink(dlt.get().getAsInt());
+		return setDatalink(dlt.get());
 	}
 
 	/**
-	 * Set the link-layer header type to be used by a capture device .
+	 * Set the link-layer header type to be used by a capture device.
+	 * 
+	 * <p>
+	 * This method sets the link-layer header type for the capture device. The
+	 * link-layer header type specifies the format of the link-layer headers in the
+	 * packets that will be captured or processed.
+	 * </p>
+	 * 
+	 * <p>
+	 * The link-layer header type is specified using the {@link PcapDlt} enum, which
+	 * includes values such as:
+	 * </p>
+	 * <ul>
+	 * <li>{@link PcapDlt#EN10MB}: Ethernet (10Mb, 100Mb, 1000Mb, and up)</li>
+	 * <li>{@link PcapDlt#IEEE802_11}: IEEE 802.11 wireless LAN</li>
+	 * <li>{@link PcapDlt#RAW}: Raw IP (no link-layer header)</li>
+	 * <li>{@link PcapDlt#LINUX_SLL}: Linux "cooked" capture encapsulation</li> <!--
+	 * Add other relevant PcapDlt values as needed -->
+	 * </ul>
+	 * 
+	 * <p>
+	 * Not all link-layer header types are supported by all capture devices. You can
+	 * use {@link #listDataLinks()} to get a list of the link-layer header types
+	 * supported by a given capture device.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try (Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS)) {
+	 * 	// List supported datalink types
+	 * 	List<PcapDlt> supportedTypes = pcap.listDataLinks();
+	 * 	System.out.println("Supported datalink types: " + supportedTypes);
+	 * 
+	 * 	// Set datalink type to Ethernet if supported
+	 * 	if (supportedTypes.contains(PcapDlt.EN10MB)) {
+	 * 		pcap.setDatalink(PcapDlt.EN10MB);
+	 * 		System.out.println("Set datalink type to Ethernet");
+	 * 	} else {
+	 * 		System.out.println("Ethernet datalink type not supported, using default");
+	 * 	}
+	 * 
+	 * 	// Now capture packets with the specified datalink type...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured packet with length: " + header.captureLength());
+	 * 		// Process packet...
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Important notes:
+	 * </p>
+	 * <ul>
+	 * <li>Changing the link-layer header type affects how the captured packets are
+	 * interpreted.</li>
+	 * <li>This method can only be called on a capture handle that has been
+	 * activated.</li>
+	 * <li>For live captures, some systems might not allow you to change the
+	 * link-layer header type.</li>
+	 * <li>For "savefiles", changing the link-layer header type is allowed, but care
+	 * must be taken to ensure that the new type is compatible with the actual
+	 * format of the packets in the savefile.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: After changing the link-layer header type, you should re-check the
+	 * snapshot length and adjust your packet processing code accordingly, as the
+	 * minimum required snapshot length may have changed.
+	 * </p>
 	 *
-	 * @param dlt link-layer header type
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
+	 * @param dlt the desired link-layer header type, as a {@link PcapDlt} enum
+	 *            value
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting the link-layer header
+	 *                       type, such as if the specified type is not supported by
+	 *                       the capture device, or if the capture handle has not
+	 *                       been activated
+	 * @see PcapDlt
+	 * @see #listDataLinks()
+	 * @see #datalink()
 	 * @since libpcap 0.8
 	 */
 	public Pcap setDatalink(PcapDlt dlt) throws PcapException {
@@ -3293,49 +3647,261 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	}
 
 	/**
+	 * Set the direction for which packets will be captured using a raw integer
+	 * value.
+	 * 
 	 * <p>
-	 * pcap_setdirection() is used to specify a direction that packets will be
-	 * captured. d is one of the constants PCAP_D_IN, PCAP_D_OUT or PCAP_D_INOUT.
-	 * PCAP_D_IN will only capture packets received by the device, PCAP_D_OUT will
-	 * only capture packets sent by the device and PCAP_D_INOUT will capture packets
-	 * received by or sent by the device. PCAP_D_INOUT is the default setting if
-	 * this function is not called. pcap_setdirection() isn't necessarily fully
-	 * supported on all platforms; some platforms might return an error for all
-	 * values, and some other platforms might not support PCAP_D_OUT.
-	 * </p>
-	 * <p>
-	 * This operation is not supported if a ``savefile'' is being read.
+	 * This method is used to specify a direction that packets will be captured,
+	 * using the raw integer values corresponding to the direction constants. It
+	 * allows you to control whether you want to capture incoming packets, outgoing
+	 * packets, or both.
 	 * </p>
 	 * 
-	 * @param dir one of the constants PCAP_D_IN, PCAP_D_OUT or PCAP_D_INOUT
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
+	 * Set the direction for which packets will be captured using a raw integer
+	 * value.
+	 * 
+	 * <p>
+	 * This method is used to specify a direction that packets will be captured,
+	 * using the raw integer values corresponding to the direction constants. It
+	 * allows you to control whether you want to capture incoming packets, outgoing
+	 * packets, or both.
+	 * </p>
+	 * 
+	 * <p>
+	 * The direction is specified using one of the following integer constants:
+	 * </p>
+	 * <ul>
+	 * <li>{@code PCAP_D_INOUT} (0): Capture both incoming and outgoing packets
+	 * (default)</li>
+	 * <li>{@code PCAP_D_IN} (1): Capture only packets received by the device</li>
+	 * <li>{@code PCAP_D_OUT} (2): Capture only packets sent by the device</li>
+	 * </ul>
+	 * <p>
+	 * It's recommended to use the {@link PcapDirection} enum and the
+	 * {@link #setDirection(PcapDirection)} method instead of this raw integer
+	 * method when possible, for type safety.
+	 * </p>
+	 * 
+	 * <p>
+	 * This operation is not supported if a "savefile" is being read. It only
+	 * applies to live captures.
+	 * </p>
+	 * 
+	 * <p>
+	 * The direction is specified using one of the following integer constants:
+	 * </p>
+	 * <ul>
+	 * <li>{@code PCAP_D_INOUT} (0): Capture both incoming and outgoing packets
+	 * (default)</li>
+	 * <li>{@code PCAP_D_IN} (1): Capture only packets received by the device</li>
+	 * <li>{@code PCAP_D_OUT} (2): Capture only packets sent by the device</li>
+	 * </ul>
+	 * <p>
+	 * It's recommended to use the {@link PcapDirection} enum and the
+	 * {@link #setDirection(PcapDirection)} method instead of this raw integer
+	 * method when possible, for type safety.
+	 * </p>
+	 * 
+	 * <p>
+	 * This operation is not supported if a "savefile" is being read. It only
+	 * applies to live captures.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try (Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS)) {
+	 * 	// Set direction to capture only incoming packets
+	 * 	pcap.setDirection(1); // PCAP_D_IN
+	 * 
+	 * 	// Now capture packets...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured an incoming packet");
+	 * 		// Process packet...
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Important notes:
+	 * </p>
+	 * <ul>
+	 * <li>This function is not necessarily fully supported on all platforms; some
+	 * platforms might return an error for all values.</li>
+	 * <li>Some platforms might not support {@code PCAP_D_OUT} (2).</li>
+	 * <li>If this function is not called, the default is to capture packets in both
+	 * directions.</li>
+	 * <li>On some platforms, setting the direction can improve capture efficiency
+	 * by reducing the number of packets that need to be processed.</li>
+	 * <li>Using an invalid integer value may result in undefined behavior.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: The effect of setting the direction can vary depending on the network
+	 * interface and the operating system. Always check the return value to ensure
+	 * the operation was successful.
+	 * </p>
+	 *
+	 * @param dir the direction for packet capture, as an integer constant (0 for
+	 *            PCAP_D_INOUT, 1 for PCAP_D_IN, 2 for PCAP_D_OUT)
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting the direction, such as
+	 *                       if the operation is not supported on the current
+	 *                       platform, or if called on a "savefile" capture
+	 * @see PcapDirection
+	 * @see #setDirection(PcapDirection)
 	 * @since libpcap 0.9
 	 */
 	public Pcap setDirection(int dir) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap090", "0.9")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap090", "0.9"));
 	}
 
 	/**
-	 * Set the direction for which packets will be captured.
+	 * Set or reset the direction for which packets will be captured.
+	 * 
 	 * <p>
-	 * pcap_setdirection() is used to specify a direction that packets will be
-	 * captured. d is one of the constants PCAP_D_IN, PCAP_D_OUT or PCAP_D_INOUT.
-	 * PCAP_D_IN will only capture packets received by the device, PCAP_D_OUT will
-	 * only capture packets sent by the device and PCAP_D_INOUT will capture packets
-	 * received by or sent by the device. PCAP_D_INOUT is the default setting if
-	 * this function is not called. pcap_setdirection() isn't necessarily fully
-	 * supported on all platforms; some platforms might return an error for all
-	 * values, and some other platforms might not support PCAP_D_OUT.
-	 * </p>
-	 * <p>
-	 * This operation is not supported if a ``savefile'' is being read.
+	 * This method is used to specify or reset the direction that packets will be
+	 * captured. It allows you to control whether you want to capture incoming
+	 * packets, outgoing packets, both, or reset to the default behavior.
 	 * </p>
 	 * 
-	 * @param dir one of the constants PCAP_D_IN, PCAP_D_OUT or PCAP_D_INOUT
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
-	 * @since libpcap 0.9
+	 * <p>
+	 * The direction is specified using an Optional of the {@link PcapDirection}
+	 * enum, which includes:
+	 * </p>
+	 * <ul>
+	 * <li>{@link PcapDirection#DIRECTION_INOUT}: Capture both incoming and outgoing
+	 * packets</li>
+	 * <li>{@link PcapDirection#DIRECTION_IN}: Capture only packets received by the
+	 * device</li>
+	 * <li>{@link PcapDirection#DIRECTION_OUT}: Capture only packets sent by the
+	 * device</li>
+	 * </ul>
+	 * <p>
+	 * If an empty Optional is provided, the direction is reset to the default
+	 * (DIRECTION_INOUT).
+	 * </p>
+	 * 
+	 * Set or reset the direction for which packets will be captured.
+	 * 
+	 * <p>
+	 * This method is used to specify or reset the direction that packets will be
+	 * captured. It allows you to control whether you want to capture incoming
+	 * packets, outgoing packets, both, or reset to the default behavior.
+	 * </p>
+	 * 
+	 * <p>
+	 * The direction is specified using an Optional of the {@link PcapDirection}
+	 * enum, which includes:
+	 * </p>
+	 * <ul>
+	 * <li>{@link PcapDirection#DIRECTION_INOUT}: Capture both incoming and outgoing
+	 * packets</li>
+	 * <li>{@link PcapDirection#DIRECTION_IN}: Capture only packets received by the
+	 * device</li>
+	 * <li>{@link PcapDirection#DIRECTION_OUT}: Capture only packets sent by the
+	 * device</li>
+	 * </ul>
+	 * <p>
+	 * If an empty Optional is provided, the direction is reset to the default
+	 * (DIRECTION_INOUT).
+	 * </p>
+	 * 
+	 * <p>
+	 * This operation is not supported if a "savefile" is being read. It only
+	 * applies to live captures.
+	 * </p>
+	 * 
+	 * <p>
+	 * This operation is not supported if a "savefile" is being read. It only
+	 * applies to live captures.
+	 * </p>
+	 * 
+	 * 
+	 * <pre>{@code
+	 * try (Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS)) {
+	 * 	// Set direction to capture only incoming packets
+	 * 	pcap.setDirection(Optional.of(PcapDirection.DIRECTION_IN));
+	 * 
+	 * 	// Capture incoming packets...
+	 * 	pcap.loop(100, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured an incoming packet");
+	 * 	}, null);
+	 * 
+	 * 	// Reset to default direction (both incoming and outgoing)
+	 * 	pcap.setDirection(Optional.empty());
+	 * 
+	 * 	// Now capture packets in both directions...
+	 * 	pcap.loop(100, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured a packet (direction unspecified)");
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try (Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS)) {
+	 * 	// Set direction to capture only incoming packets
+	 * 	pcap.setDirection(Optional.of(PcapDirection.DIRECTION_IN));
+	 * 
+	 * 	// Capture incoming packets...
+	 * 	pcap.loop(100, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured an incoming packet");
+	 * 	}, null);
+	 * 
+	 * 	// Reset to default direction (both incoming and outgoing)
+	 * 	pcap.setDirection(Optional.empty());
+	 * 
+	 * 	// Now capture packets in both directions...
+	 * 	pcap.loop(100, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured a packet (direction unspecified)");
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Important notes:
+	 * Important notes:
+	 * </p>
+	 * <ul>
+	 * <li>This function is not necessarily fully supported on all platforms; some
+	 * platforms might return an error for all values.</li>
+	 * <li>Some platforms might not support
+	 * {@link PcapDirection#DIRECTION_OUT}.</li>
+	 * <li>If this function is not called, or if an empty Optional is provided, the
+	 * default is to capture packets in both directions.</li>
+	 * <li>On some platforms, setting the direction can improve capture efficiency
+	 * by reducing the number of packets that need to be processed.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: The effect of setting the direction can vary depending on the network
+	 * interface and the operating system. Always check the return value to ensure
+	 * the operation was successful.
+	 * </p>
+	 *
+	 * @param dir an Optional containing the direction for packet capture, as a
+	 *            {@link PcapDirection} enum value. If empty, resets to the default
+	 *            direction (both incoming and outgoing).
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting the direction, such as
+	 *                       if the operation is not supported on the current
+	 *                       platform, or if called on a "savefile" capture
+	 * @see PcapDirection
+	 * @see #setDirection(PcapDirection)
+	 * @since libpcap 0.9 (although the Optional wrapper is a Java-specific feature)
 	 */
 	public Pcap setDirection(Optional<PcapDirection> dir) throws PcapException {
 		if (dir.isEmpty())
@@ -3346,23 +3912,103 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 
 	/**
 	 * Set the direction for which packets will be captured.
+	 * 
 	 * <p>
-	 * pcap_setdirection() is used to specify a direction that packets will be
-	 * captured. d is one of the constants PCAP_D_IN, PCAP_D_OUT or PCAP_D_INOUT.
-	 * PCAP_D_IN will only capture packets received by the device, PCAP_D_OUT will
-	 * only capture packets sent by the device and PCAP_D_INOUT will capture packets
-	 * received by or sent by the device. PCAP_D_INOUT is the default setting if
-	 * this function is not called. pcap_setdirection() isn't necessarily fully
-	 * supported on all platforms; some platforms might return an error for all
-	 * values, and some other platforms might not support PCAP_D_OUT.
-	 * </p>
-	 * <p>
-	 * This operation is not supported if a ``savefile'' is being read.
+	 * This method is used to specify a direction that packets will be captured. It
+	 * allows you to control whether you want to capture incoming packets, outgoing
+	 * packets, or both.
 	 * </p>
 	 * 
-	 * @param dir one of the constants PCAP_D_IN, PCAP_D_OUT or PCAP_D_INOUT
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
+	 * <p>
+	 * The direction is specified using the {@link PcapDirection} enum, which
+	 * includes:
+	 * </p>
+	 * <ul>
+	 * <li>{@link PcapDirection#DIRECTION_INOUT}: Capture both incoming and outgoing
+	 * packets (default)</li>
+	 * <li>{@link PcapDirection#DIRECTION_IN}: Capture only packets received by the
+	 * device</li>
+	 * <li>{@link PcapDirection#DIRECTION_OUT}: Capture only packets sent by the
+	 * device</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * This operation is not supported if a "savefile" is being read. It only
+	 * applies to live captures.
+	 * </p>
+	 * 
+	 * 
+	 * <p>
+	 * This method is used to specify a direction that packets will be captured. It
+	 * allows you to control whether you want to capture incoming packets, outgoing
+	 * packets, or both.
+	 * </p>
+	 * 
+	 * <p>
+	 * The direction is specified using the {@link PcapDirection} enum, which
+	 * includes:
+	 * </p>
+	 * <ul>
+	 * <li>{@link PcapDirection#DIRECTION_INOUT}: Capture both incoming and outgoing
+	 * packets (default)</li>
+	 * <li>{@link PcapDirection#DIRECTION_IN}: Capture only packets received by the
+	 * device</li>
+	 * <li>{@link PcapDirection#DIRECTION_OUT}: Capture only packets sent by the
+	 * device</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * This operation is not supported if a "savefile" is being read. It only
+	 * applies to live captures.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try (Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS)) {
+	 * 	// Set direction to capture only incoming packets
+	 * 	pcap.setDirection(PcapDirection.DIRECTION_IN);
+	 * 
+	 * 	// Now capture packets...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured an incoming packet");
+	 * 		// Process packet...
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Important notes:
+	 * </p>
+	 * <ul>
+	 * <li>This function is not necessarily fully supported on all platforms; some
+	 * platforms might return an error for all values.</li>
+	 * <li>Some platforms might not support
+	 * {@link PcapDirection#DIRECTION_OUT}.</li>
+	 * <li>If this function is not called, the default is to capture packets in both
+	 * directions.</li>
+	 * <li>On some platforms, setting the direction can improve capture efficiency
+	 * by reducing the number of packets that need to be processed.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: The effect of setting the direction can vary depending on the network
+	 * interface and the operating system. Always check the return value to ensure
+	 * the operation was successful.
+	 * </p>
+	 *
+	 * @param dir the direction for packet capture, as a {@link PcapDirection} enum
+	 *            value
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting the direction, such as
+	 *                       if the operation is not supported on the current
+	 *                       platform, or if called on a "savefile" capture
+	 * @see PcapDirection
 	 * @since libpcap 0.9
 	 */
 	public Pcap setDirection(PcapDirection dir) throws PcapException {
@@ -3370,126 +4016,649 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	}
 
 	/**
-	 * set the filter.
+	 * Set a filter for a capture.
+	 * 
 	 * <p>
-	 * is used to specify a filter program.
+	 * This method is used to specify a filter program. This filter will be applied
+	 * to all packets in the capture, determining which packets will be processed.
+	 * </p>
+	 * 
+	 * <p>
+	 * The filter program is typically created using the
+	 * {@link #compile(String, boolean, int)} method, which compiles a
+	 * human-readable filter expression into a BPF (Berkeley Packet Filter) program.
+	 * </p>
+	 * 
+	 * <p>
+	 * Once a filter is set, only packets that match the filter will be delivered in
+	 * calls to {@link #dispatch}, {@link #loop}, {@link #next}, or {@link #nextEx}.
+	 * </p>
+	 * 
+	 * <p>
+	 * Setting a new filter overwrites any previous filter set on the capture
+	 * handle. To remove a filter, you can set a filter that accepts all packets
+	 * (e.g., "").
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try (Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS)) {
+	 * 	// Compile a filter to capture only TCP packets on port 80
+	 * 	BpFilter filter = pcap.compile("tcp port 80", true, 0);
+	 * 
+	 * 	// Set the filter
+	 * 	pcap.setFilter(filter);
+	 * 
+	 * 	// Now capture packets...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured a TCP packet on port 80");
+	 * 		// Process packet...
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Important notes on packet filtering:
+	 * </p>
+	 * <ul>
+	 * <li>Filtering is performed in the kernel or hardware (if supported) for live
+	 * captures, which can significantly reduce the number of packets that need to
+	 * be copied to user space, improving performance.</li>
+	 * <li>For offline captures (reading from a savefile), filtering is done in user
+	 * space by libpcap.</li>
+	 * <li>The effectiveness and performance of filtering can vary depending on the
+	 * capture mechanism and the complexity of the filter.</li>
+	 * <li>In general, it's more efficient to use a filter than to capture all
+	 * packets and filter them in your application code.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: The BPF program passed to this method is not copied, so you should not
+	 * free the memory associated with it until you have closed the pcap handle or
+	 * set a different filter.
 	 * </p>
 	 *
-	 * @param bpfProgram bpf_program struct, usually the result of a call to
-	 *                   pcap_compile
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
+	 * @param bpfProgram BPF program struct, usually the result of a call to
+	 *                   {@link #compile}
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting the filter, such as if
+	 *                       the filter is invalid or if the capture handle is not
+	 *                       active
+	 * @see #compile(String, boolean, int)
+	 * @see #setFilter(Optional)
 	 * @since libpcap 0.4
 	 */
 	public Pcap setFilter(BpFilter bpfProgram) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4"));
 	}
 
 	/**
-	 * set the filter.
-	 * <p>
-	 * is used to specify a filter program.
-	 * </p>
-	 *
-	 * @param bpfProgram bpf_program struct, usually the result of a call to
-	 *                   pcap_compile
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
-	 * @since libpcap 0.4
-	 */
-	public Pcap setFilter(Optional<BpFilter> bpfProgram) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	/**
-	 * Set immediate mode for a not-yet- activated capture handle.
+	 * Set or remove a filter for a capture.
 	 * 
 	 * <p>
-	 * sets whether immediate mode should be set on a capture handle when the handle
-	 * is activated. In immediate mode, packets are always delivered as soon as they
-	 * arrive, with no buffering. If immediate_mode is non-zero, immediate mode will
-	 * be set, otherwise it will not be set.
+	 * This method is used to specify an optional filter program. If a filter is
+	 * present, it will be applied to all packets in the capture, determining which
+	 * packets will be processed. If no filter is present (i.e., an empty Optional),
+	 * any existing filter will be removed.
+	 * </p>
+	 * 
+	 * <p>
+	 * The filter program is typically created using the
+	 * {@link #compile(String, boolean, int)} method, which compiles a
+	 * human-readable filter expression into a BPF (Berkeley Packet Filter) program.
+	 * </p>
+	 * 
+	 * <p>
+	 * Once a filter is set, only packets that match the filter will be delivered in
+	 * calls to {@link #dispatch}, {@link #loop}, {@link #next}, or {@link #nextEx}.
+	 * If the filter is removed, all packets will be processed.
+	 * </p>
+	 * 
+	 * <p>
+	 * Setting a new filter overwrites any previous filter set on the capture
+	 * handle. Passing an empty Optional effectively removes any existing filter.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try (Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS)) {
+	 * 	// Compile a filter to capture only TCP packets on port 80
+	 * 	BpFilter filter = pcap.compile("tcp port 80", true, 0);
+	 * 
+	 * 	// Set the filter
+	 * 	pcap.setFilter(Optional.of(filter));
+	 * 
+	 * 	// Capture packets with the filter...
+	 * 	pcap.loop(10, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured a TCP packet on port 80");
+	 * 	}, null);
+	 * 
+	 * 	// Remove the filter
+	 * 	pcap.setFilter(Optional.empty());
+	 * 
+	 * 	// Now capture all packets...
+	 * 	pcap.loop(10, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Captured any packet");
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Important notes on packet filtering:
+	 * </p>
+	 * <ul>
+	 * <li>Filtering is performed in the kernel or hardware (if supported) for live
+	 * captures, which can significantly improve performance by reducing the number
+	 * of packets that need to be copied to user space.</li>
+	 * <li>For offline captures (reading from a savefile), filtering is done in user
+	 * space by libpcap.</li>
+	 * <li>The effectiveness and performance of filtering can vary depending on the
+	 * capture mechanism and the complexity of the filter.</li>
+	 * <li>In general, it's more efficient to use a filter than to capture all
+	 * packets and filter them in your application code.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: If you frequently switch between different filters, it may be more
+	 * efficient to compile all the filters you need in advance and then use this
+	 * method to switch between them, rather than compiling a new filter each time.
 	 * </p>
 	 *
-	 * @param enable if true, enable immediate mode, otherwise disable
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
+	 * @param bpfProgram An Optional containing the BPF program struct, usually the
+	 *                   result of a call to {@link #compile}. If empty, any
+	 *                   existing filter will be removed.
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting or removing the
+	 *                       filter, such as if the filter is invalid or if the
+	 *                       capture handle is not active
+	 * @see #compile(String, boolean, int)
+	 * @see #setFilter(BpFilter)
+	 * @since libpcap 0.4 (although the Optional wrapper is a Java-specific feature)
+	 */
+	public Pcap setFilter(Optional<BpFilter> bpfProgram) throws PcapException {
+		if (bpfProgram.isEmpty())
+			return this;
+
+		return setFilter(bpfProgram.get());
+	}
+
+	/**
+	 * Set immediate mode for a not-yet-activated capture handle.
+	 * 
+	 * <p>
+	 * This method sets whether immediate mode should be enabled on a capture handle
+	 * when the handle is activated. In immediate mode, packets are always delivered
+	 * as soon as they arrive, with no buffering.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method must be called on a pcap descriptor created by
+	 * {@link #create(String)} that has not yet been activated by
+	 * {@link #activate()}. Calling this method on an already activated handle will
+	 * result in a {@link PcapException}.
+	 * </p>
+	 * 
+	 * <p>
+	 * Immediate mode is useful when you need to see packets as quickly as possible,
+	 * but it can impact performance and increase CPU usage, especially on a busy
+	 * network.
+	 * </p>
+	 * 
+	 * <p>
+	 * The effect of immediate mode on different platforms:
+	 * </p>
+	 * <ul>
+	 * <li>On Linux, it calls {@code packet(7)} {@code PACKET_RX_RING}
+	 * {@code PACKET_TIMESTAMP} for immediate delivery.</li>
+	 * <li>On Windows, it calls {@code PacketSetMinToCopy()} to deliver packets as
+	 * soon as they arrive.</li>
+	 * <li>On other platforms, if supported, it delivers packets immediately.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.create("eth0");
+	 * 	pcap.setImmediateMode(true);
+	 * 	System.out.println("Immediate mode enabled");
+	 * 
+	 * 	pcap.activate();
+	 * 
+	 * 	// Now capture packets in immediate mode...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Packet received immediately: " + header.timestampInMillis());
+	 * 		// Process packet...
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Important notes on immediate mode:
+	 * </p>
+	 * <ul>
+	 * <li>When immediate mode is enabled, the {@link #setTimeout(int)} method has
+	 * no effect, as packets are delivered as soon as they are received, without any
+	 * buffering delay.</li>
+	 * <li>Immediate mode can lead to increased packet loss on busy networks, as the
+	 * application might not be able to keep up with the rate of incoming
+	 * packets.</li>
+	 * <li>It may increase CPU usage as the kernel has to wake up the application
+	 * more frequently to deliver packets.</li>
+	 * <li>The effectiveness of immediate mode can vary depending on the network
+	 * interface driver and the operating system.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note that even when immediate mode is enabled, a read from the descriptor may
+	 * still block if no packets are available. If you need non-blocking behavior,
+	 * consider using {@link #setNonBlock(boolean)} in conjunction with immediate
+	 * mode.
+	 * </p>
+	 *
+	 * @param enable if true, enable immediate mode; if false, disable it
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting immediate mode, such
+	 *                       as if the capture handle has already been activated
+	 * @see #create(String)
+	 * @see #activate()
+	 * @see #setTimeout(int)
+	 * @see #setNonBlock(boolean)
 	 * @since libpcap 1.5
 	 */
 	public Pcap setImmediateMode(boolean enable) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap1_5", "1.5")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap1_5", "1.5"));
 	}
 
 	/**
 	 * Sets the state of non-blocking mode on a capture device.
 	 * 
 	 * <p>
-	 * pcap_setnonblock() puts a capture handle into ``non-blocking'' mode, or takes
-	 * it out of ``non-blocking'' mode, depending on whether the nonblock argument
-	 * is non-zero or zero. It has no effect on ``savefiles''. If there is an error,
-	 * PCAP_ERROR is returned and errbuf is filled in with an appropriate error
-	 * message; otherwise, 0 is returned. In ``non-blocking'' mode, an attempt to
-	 * read from the capture descriptor with pcap_dispatch(3PCAP) and
-	 * pcap_next_ex(3PCAP) will, if no packets are currently available to be read,
-	 * return 0 immediately rather than blocking waiting for packets to arrive.
+	 * This method puts a capture handle into "non-blocking" mode, or takes it out
+	 * of "non-blocking" mode, depending on the value of the blockMode parameter. It
+	 * has no effect on "savefiles".
 	 * </p>
 	 * 
 	 * <p>
-	 * pcap_loop(3PCAP) will loop forever, consuming CPU time when no packets are
-	 * currently available; pcap_dispatch() should be used instead. pcap_next(3PCAP)
-	 * will return NULL if there are no packets currently available to read; this is
-	 * indistinguishable from an error, so pcap_next_ex() should be used instead.
+	 * In "non-blocking" mode, an attempt to read from the capture descriptor with
+	 * {@link #dispatch(int, PcapHandler.OfMemorySegment, Object)} or
+	 * {@link #nextEx()} will return immediately, even if no packets are currently
+	 * available, rather than blocking waiting for packets to arrive.
 	 * </p>
 	 * 
 	 * <p>
-	 * When first activated with pcap_activate(3PCAP) or opened with
-	 * pcap_open_live(3PCAP), a capture handle is not in ``non-blocking mode''; a
-	 * call to pcap_setnonblock() is required in order to put it into
-	 * ``non-blocking'' mode.
+	 * When first activated with {@link #activate()} or opened with
+	 * {@link #openLive(String, int, boolean, long, TimeUnit)}, a capture handle is
+	 * not in "non-blocking" mode; a call to this method is required in order to put
+	 * it into "non-blocking" mode.
+	 * This method puts a capture handle into "non-blocking" mode, or takes it out
+	 * of "non-blocking" mode, depending on the value of the blockMode parameter. It
+	 * has no effect on "savefiles".
+	 * </p>
+	 * 
+	 * <p>
+	 * In "non-blocking" mode, an attempt to read from the capture descriptor with
+	 * {@link #dispatch(int, PcapHandler.OfMemorySegment, Object)} or
+	 * {@link #nextEx()} will return immediately, even if no packets are currently
+	 * available, rather than blocking waiting for packets to arrive.
+	 * </p>
+	 * 
+	 * <p>
+	 * When first activated with {@link #activate()} or opened with
+	 * {@link #openLive(String, int, boolean, long, TimeUnit)}, a capture handle is
+	 * not in "non-blocking" mode; a call to this method is required in order to put
+	 * it into "non-blocking" mode.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS);
+	 * 	pcap.setNonBlock(true);
+	 * 	System.out.println("Non-blocking mode enabled");
+	 * 
+	 * 	while (true) {
+	 * 		try {
+	 * 			PcapPacketRef packet = pcap.nextEx();
+	 * 			if (packet == null) {
+	 * 				System.out.println("No packet available");
+	 * 				// Do some other work...
+	 * 				Thread.sleep(100);
+	 * 			} else {
+	 * 				System.out.println("Packet captured, length: " + packet.getHeader().captureLength());
+	 * 			}
+	 * 		} catch (TimeoutException e) {
+	 * 			// This shouldn't happen in non-blocking mode
+	 * 			System.out.println("Unexpected timeout");
+	 * 		}
+	 * 	}
+	 * } catch (PcapException | InterruptedException e) {
+	 * 	// Handle exceptions
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.openLive("eth0", 65536, true, 10, TimeUnit.MILLISECONDS);
+	 * 	pcap.setNonBlock(true);
+	 * 	System.out.println("Non-blocking mode enabled");
+	 * 
+	 * 	while (true) {
+	 * 		try {
+	 * 			PcapPacketRef packet = pcap.nextEx();
+	 * 			if (packet == null) {
+	 * 				System.out.println("No packet available");
+	 * 				// Do some other work...
+	 * 				Thread.sleep(100);
+	 * 			} else {
+	 * 				System.out.println("Packet captured, length: " + packet.getHeader().captureLength());
+	 * 			}
+	 * 		} catch (TimeoutException e) {
+	 * 			// This shouldn't happen in non-blocking mode
+	 * 			System.out.println("Unexpected timeout");
+	 * 		}
+	 * 	}
+	 * } catch (PcapException | InterruptedException e) {
+	 * 	// Handle exceptions
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Important notes on non-blocking mode behavior:
+	 * Important notes on non-blocking mode behavior:
+	 * </p>
+	 * <ul>
+	 * <li>{@link #dispatch(int, PcapHandler.OfMemorySegment, Object)} and
+	 * {@link #nextEx()} will return 0 or null respectively if no packets are
+	 * available to read.</li>
+	 * <li>{@link #next()} will return null if no packets are available to read, but
+	 * this is indistinguishable from an error, so {@link #nextEx()} should be used
+	 * instead.</li>
+	 * <li>{@link #loop(int, PcapHandler.OfMemorySegment, Object)} will still block,
+	 * consuming CPU time when no packets are available.
+	 * {@link #dispatch(int, PcapHandler.OfMemorySegment, Object)} should be used
+	 * instead in non-blocking mode.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Non-blocking mode is useful in applications that need to handle other tasks
+	 * while capturing packets, or in GUI applications to prevent the user interface
+	 * from freezing.
 	 * </p>
 	 *
-	 * @param blockMode if true enable non blocking mode, otherwise block
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
-	 * @since libpcap 10.7
+	 * @param blockMode if true, enable non-blocking mode; if false, disable it
+	 *                  (i.e., use blocking mode)
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting non-blocking mode
+	 * @see #getNonBlock()
+	 * @see #dispatch(int, PcapHandler.OfMemorySegment, Object)
+	 * @see #nextEx()
+	 * @see #activate()
+	 * @see #openLive(String, int, boolean, long, TimeUnit)
+	 * @since libpcap 0.7
 	 */
 	public Pcap setNonBlock(boolean blockMode) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_7", "0.7")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_7", "0.7"));
 	}
 
 	/**
 	 * Set promiscuous mode for a not-yet-activated capture handle.
+	 * 
+	 * 
 	 * <p>
-	 * pcap_set_promisc() sets whether promiscuous mode should be set on a capture
-	 * handle when the handle is activated. If promisc is non-zero, promiscuous mode
-	 * will be set, otherwise it will not be set.
+	 * This method sets whether promiscuous mode should be enabled on a capture
+	 * handle when the handle is activated. Promiscuous mode allows the capture of
+	 * all packets on the network, even those not destined for the capturing device.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method must be called on a pcap descriptor created by
+	 * {@link #create(String)} that has not yet been activated by
+	 * {@link #activate()}. Calling this method on an already activated handle will
+	 * result in a {@link PcapException}.
+	 * </p>
+	 * 
+	 * <p>
+	 * Promiscuous mode is particularly useful for network monitoring and analysis,
+	 * as it allows the capture of all traffic on the network segment. However, it
+	 * may have security implications and may require special privileges on some
+	 * systems.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.create("eth0");
+	 * 	pcap.setPromisc(true);
+	 * 	System.out.println("Promiscuous mode enabled");
+	 * 
+	 * 	pcap.activate();
+	 * 
+	 * 	// Now capture packets in promiscuous mode...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		// Process all packets on the network, including those not destined for this
+	 * 		// device
+	 * 		System.out.println("Captured packet, length: " + header.captureLength());
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * When promiscuous mode is enabled:
+	 * </p>
+	 * <ul>
+	 * <li>The device will capture all packets on the network segment, not just
+	 * those addressed to it.</li>
+	 * <li>This may significantly increase the number of packets captured,
+	 * especially on busy networks.</li>
+	 * <li>It may have performance implications due to the increased number of
+	 * packets being processed.</li>
+	 * <li>Some network switches may be configured to prevent promiscuous mode on
+	 * ports.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * This method sets whether promiscuous mode should be enabled on a capture
+	 * handle when the handle is activated. Promiscuous mode allows the capture of
+	 * all packets on the network, even those not destined for the capturing device.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method must be called on a pcap descriptor created by
+	 * {@link #create(String)} that has not yet been activated by
+	 * {@link #activate()}. Calling this method on an already activated handle will
+	 * result in a {@link PcapException}.
+	 * </p>
+	 * 
+	 * <p>
+	 * Promiscuous mode is particularly useful for network monitoring and analysis,
+	 * as it allows the capture of all traffic on the network segment. However, it
+	 * may have security implications and may require special privileges on some
+	 * systems.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.create("eth0");
+	 * 	pcap.setPromisc(true);
+	 * 	System.out.println("Promiscuous mode enabled");
+	 * 
+	 * 	pcap.activate();
+	 * 
+	 * 	// Now capture packets in promiscuous mode...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		// Process all packets on the network, including those not destined for this
+	 * 		// device
+	 * 		System.out.println("Captured packet, length: " + header.captureLength());
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * When promiscuous mode is enabled:
+	 * </p>
+	 * <ul>
+	 * <li>The device will capture all packets on the network segment, not just
+	 * those addressed to it.</li>
+	 * <li>This may significantly increase the number of packets captured,
+	 * especially on busy networks.</li>
+	 * <li>It may have performance implications due to the increased number of
+	 * packets being processed.</li>
+	 * <li>Some network switches may be configured to prevent promiscuous mode on
+	 * ports.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: Even if promiscuous mode is not explicitly set, some capture devices
+	 * might default to promiscuous mode when opened. If you specifically need
+	 * non-promiscuous mode, make sure to call this method with {@code false} before
+	 * activating the handle.
+	 * </p>
+	 * 
+	 * <p>
+	 * Be aware that enabling promiscuous mode may have legal and ethical
+	 * implications. Ensure you have the necessary permissions and authority to
+	 * capture all network traffic in your environment.
+	 * Note: Even if promiscuous mode is not explicitly set, some capture devices
+	 * might default to promiscuous mode when opened. If you specifically need
+	 * non-promiscuous mode, make sure to call this method with {@code false} before
+	 * activating the handle.
+	 * </p>
+	 * 
+	 * <p>
+	 * Be aware that enabling promiscuous mode may have legal and ethical
+	 * implications. Ensure you have the necessary permissions and authority to
+	 * capture all network traffic in your environment.
 	 * </p>
 	 *
-	 * @param promiscousMode if true enable promiscous mode, otherwise disable it
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
+	 * @param promiscousMode if true, enable promiscuous mode; if false, disable it
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting promiscuous mode, such
+	 *                       as if the capture handle has already been activated
+	 * @see #create(String)
+	 * @see #activate()
 	 * @since libpcap 1.0
 	 */
 	public Pcap setPromisc(boolean promiscousMode) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0"));
 	}
 
 	/**
 	 * Set monitor mode for a not-yet-activated capture handle.
 	 * 
 	 * <p>
-	 * Sets whether monitor mode should be set on a capture handle when the handle
-	 * is activated. If rfmon is {@code true}, monitor mode will be set, otherwise
-	 * it will not be set.
+	 * This method sets whether monitor mode (also known as "RFMON" mode) should be
+	 * enabled on a capture handle when the handle is activated. Monitor mode is
+	 * primarily used for capturing Wi-Fi traffic.
+	 * </p>
+	 * 
+	 * <p>
+	 * Monitor mode allows the capture of all Wi-Fi traffic on a channel, including
+	 * packets that are not destined for the capturing device. This is particularly
+	 * useful for network analysis and troubleshooting in wireless environments.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method must be called on a pcap descriptor created by
+	 * {@link #create(String)} that has not yet been activated by
+	 * {@link #activate()}. Calling this method on an already activated handle will
+	 * result in a {@link PcapException}.
+	 * </p>
+	 * 
+	 * <p>
+	 * Note that not all devices support monitor mode. You can use
+	 * {@link #canSetRfmon()} to check if a device supports monitor mode before
+	 * attempting to set it.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.create("wlan0");
+	 * 
+	 * 	if (pcap.canSetRfmon()) {
+	 * 		pcap.setRfmon(true);
+	 * 		System.out.println("Monitor mode enabled");
+	 * 	} else {
+	 * 		System.out.println("Monitor mode not supported on this device");
+	 * 	}
+	 * 
+	 * 	pcap.activate();
+	 * 
+	 * 	// Now capture packets in monitor mode...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		// Process Wi-Fi packets, including those not destined for this device
+	 * 		System.out.println("Captured Wi-Fi packet, length: " + header.captureLength());
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * When monitor mode is enabled:
+	 * </p>
+	 * <ul>
+	 * <li>The device may be able to capture packets from all Wi-Fi networks in
+	 * range on the current channel.</li>
+	 * <li>The device might not be able to transmit packets. Some adapters can't
+	 * transmit in monitor mode.</li>
+	 * <li>The device might not be able to perform regular network operations (like
+	 * connecting to a Wi-Fi network).</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: Enabling monitor mode may require special privileges on some systems.
+	 * Make sure your application has the necessary permissions to set monitor mode.
 	 * </p>
 	 *
-	 * @param rfMonitor the enable rfmon
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
+	 * @param rfMonitor if true, enable monitor mode; if false, disable it
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting monitor mode, such as
+	 *                       if the capture handle has already been activated or if
+	 *                       monitor mode is not supported by the capture device
+	 * @see #canSetRfmon()
+	 * @see #create(String)
+	 * @see #activate()
 	 * @since libpcap 1.0
 	 */
 	public Pcap setRfmon(boolean rfMonitor) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0"));
 	}
 
 	/**
@@ -3504,7 +4673,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @throws PcapException the pcap exception
 	 */
 	public Pcap setSnaplen(int snaplen) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0")); //$NON-NLS-1$
 	}
 
 	/**
@@ -3528,7 +4697,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 1.0
 	 */
 	public Pcap setTimeout(int timeoutInMillis) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap1_0", "1.0")); //$NON-NLS-1$
 	}
 
 	/**
@@ -3550,94 +4719,321 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @since libpcap 1.5
 	 */
 	public Pcap setTstampPrecision(PcapTStampPrecision precision) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap1_5", "1.5")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap1_5", "1.5")); //$NON-NLS-1$
 	}
 
 	/**
 	 * Set the time stamp type to be used by a capture device.
+	 * 
 	 * <p>
-	 * pcap_set_tstamp_type() sets the type of time stamp desired for packets
-	 * captured on the pcap descriptor to the type specified by tstamp_type. It must
-	 * be called on a pcap descriptor created by pcap_create(3PCAP) that has not yet
-	 * been activated by pcap_activate(3PCAP). pcap_list_tstamp_types(3PCAP) will
-	 * give a list of the time stamp types supported by a given capture device. See
-	 * pcap-tstamp(7) for a list of all the time stamp types.
+	 * This method sets the type of time stamp desired for packets captured on the
+	 * pcap descriptor. It must be called on a pcap descriptor created by
+	 * {@link #create(String)} that has not yet been activated by
+	 * {@link #activate()}.
+	 * </p>
+	 * 
+	 * 
+	 * <p>
+	 * This method sets the type of time stamp desired for packets captured on the
+	 * pcap descriptor. It must be called on a pcap descriptor created by
+	 * {@link #create(String)} that has not yet been activated by
+	 * {@link #activate()}.
+	 * </p>
+	 * 
+	 * <p>
+	 * Time stamp types are represented by the {@link PcapTstampType} enum, which
+	 * includes values such as:
+	 * </p>
+	 * 
+	 * <ul>
+	 * <li>{@link PcapTstampType#TSTAMP_TYPE_HOST}: Timestamps provided by the host
+	 * machine</li>
+	 * <li>{@link PcapTstampType#TSTAMP_TYPE_ADAPTER}: Timestamps provided by the
+	 * network adapter</li>
+	 * <li>{@link PcapTstampType#TSTAMP_TYPE_ADAPTER}: Timestamps provided by the
+	 * network adapter</li>
+	 * <li>{@link PcapTstampType#TSTAMP_TYPE_ADAPTER_UNSYNCED}: Timestamps provided
+	 * by the network adapter, not synced with the system clock</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Not all time stamp types are supported by all capture devices. You can use
+	 * {@link #listTstampTypes()} to get a list of the time stamp types supported by
+	 * a given capture device.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.create("eth0");
+	 * 
+	 * 	// List supported timestamp types
+	 * 	List<PcapTstampType> supportedTypes = pcap.listTstampTypes();
+	 * 	System.out.println("Supported timestamp types: " + supportedTypes);
+	 * 
+	 * 	// Set timestamp type if hardware timestamps are supported
+	 * 	if (supportedTypes.contains(PcapTstampType.HW)) {
+	 * 		pcap.setTstampType(PcapTstampType.HW);
+	 * 		System.out.println("Set hardware timestamp type");
+	 * 	} else {
+	 * 		System.out.println("Hardware timestamps not supported, using default");
+	 * 	}
+	 * 
+	 * 	pcap.activate();
+	 * 
+	 * 	// Now capture packets with the specified timestamp type...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Packet timestamp: " + header.timestampInMillis());
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * The accuracy and resolution of timestamps can vary depending on the timestamp
+	 * type and the capabilities of the capture device. Hardware timestamps (HW or
+	 * ADAPTER types) often provide higher precision than host-based timestamps, but
+	 * may not be available on all devices.
+	 * </p>
+	 * 
+	 * <p>
+	 * Time stamp types are represented by the {@link PcapTstampType} enum, which
+	 * includes values such as:
+	 * </p>
+	 * 
+	 * <ul>
+	 * <li>{@link PcapTstampType#TSTAMP_TYPE_HOST}: Timestamps provided by the host
+	 * machine</li>
+	 * <li>{@link PcapTstampType#TSTAMP_TYPE_ADAPTER}: Timestamps provided by the
+	 * network adapter</li>
+	 * <li>{@link PcapTstampType#TSTAMP_TYPE_ADAPTER}: Timestamps provided by the
+	 * network adapter</li>
+	 * <li>{@link PcapTstampType#TSTAMP_TYPE_ADAPTER_UNSYNCED}: Timestamps provided
+	 * by the network adapter, not synced with the system clock</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Not all time stamp types are supported by all capture devices. You can use
+	 * {@link #listTstampTypes()} to get a list of the time stamp types supported by
+	 * a given capture device.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.create("eth0");
+	 * 
+	 * 	// List supported timestamp types
+	 * 	List<PcapTstampType> supportedTypes = pcap.listTstampTypes();
+	 * 	System.out.println("Supported timestamp types: " + supportedTypes);
+	 * 
+	 * 	// Set timestamp type if hardware timestamps are supported
+	 * 	if (supportedTypes.contains(PcapTstampType.HW)) {
+	 * 		pcap.setTstampType(PcapTstampType.HW);
+	 * 		System.out.println("Set hardware timestamp type");
+	 * 	} else {
+	 * 		System.out.println("Hardware timestamps not supported, using default");
+	 * 	}
+	 * 
+	 * 	pcap.activate();
+	 * 
+	 * 	// Now capture packets with the specified timestamp type...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		System.out.println("Packet timestamp: " + header.timestampInMillis());
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * The accuracy and resolution of timestamps can vary depending on the timestamp
+	 * type and the capabilities of the capture device. Hardware timestamps (HW or
+	 * ADAPTER types) often provide higher precision than host-based timestamps, but
+	 * may not be available on all devices.
+	 * </p>
+	 * 
+	 * <p>
+	 * Note: Changing the timestamp type may affect the format or precision of the
+	 * timestamps in the captured packets. Make sure to handle timestamps
+	 * appropriately in your packet processing code.
+	 * Note: Changing the timestamp type may affect the format or precision of the
+	 * timestamps in the captured packets. Make sure to handle timestamps
+	 * appropriately in your packet processing code.
 	 * </p>
 	 *
-	 * @param type the type
-	 * @return this pcap handle
-	 * @throws PcapException the pcap exception
+	 * @param type the desired timestamp type, as a {@link PcapTstampType} enum
+	 *             value
+	 * @return this pcap handle, allowing for method chaining
+	 * @throws PcapException if an error occurs while setting the timestamp type,
+	 *                       such as if the capture handle has already been
+	 *                       activated or if the specified timestamp type is not
+	 *                       supported by the capture device
+	 * @see PcapTstampType
+	 * @see #listTstampTypes()
+	 * @see #create(String)
+	 * @see #activate()
 	 * @since libpcap 1.2
 	 */
 	public Pcap setTstampType(PcapTstampType type) throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap1_2", "1.2")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap1_2", "1.2"));
 	}
 
 	/**
-	 * Get the snapshot length.
+	 * Get the snapshot length for the capture.
 	 * 
 	 * <p>
-	 * {@code snapshot} returns the snapshot length specified when
+	 * This method returns the snapshot length specified when
 	 * {@link #setSnaplen(int)} or
 	 * {@link #openLive(String, int, boolean, long, TimeUnit)} was called, for a
-	 * live capture, or the snapshot length from the capture file, for a
-	 * ``savefile''.
+	 * live capture, or the snapshot length from the capture file, for a "savefile".
+	 * </p>
+	 * 
+	 * <p>
+	 * The snapshot length is the number of bytes that will be captured from each
+	 * packet. This value defines the maximum size of the packet that will be
+	 * captured and made available to the application. If a packet is larger than
+	 * the snapshot length, only the first 'snaplen' bytes of that packet will be
+	 * captured and provided to the application.
+	 * </p>
+	 * 
+	 * <p>
+	 * A snapshot length of 65535 should be sufficient for maximum-sized Ethernet
+	 * packets. If you're not interested in the entire packet contents, you can set
+	 * a smaller snapshot length to reduce the amount of packet data that needs to
+	 * be copied and processed.
+	 * </p>
+	 * 
+	 * <p>
+	 * For live captures, the snapshot length is applied to packets by the kernel
+	 * capture mechanism, so it can improve performance by reducing the amount of
+	 * data that needs to be copied from the kernel to the application.
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.openLive("eth0", 65535, true, 10, TimeUnit.MILLISECONDS);
+	 * 	int snaplen = pcap.snapshot();
+	 * 	System.out.println("Current snapshot length: " + snaplen + " bytes");
+	 * 
+	 * 	// Use the snapshot length in your packet processing...
+	 * 	pcap.loop(-1, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		if (header.captureLength() == snaplen) {
+	 * 			System.out.println("Packet was truncated to snapshot length");
+	 * 		}
+	 * 	}, null);
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * Note: The actual length of a captured packet can be less than the snapshot
+	 * length. To get the actual capture length of a specific packet, use
+	 * {@link PcapHeader#captureLength()} from the packet header provided to your
+	 * packet handler.
 	 * </p>
 	 *
-	 * @return the snapshot length
-	 * @throws PcapException the pcap exception
+	 * @return the snapshot length in bytes
+	 * @throws PcapException if an error occurs while getting the snapshot length
+	 * @see #setSnaplen(int)
+	 * @see #openLive(String, int, boolean, long, TimeUnit)
+	 * @since libpcap 0.4
 	 */
 	public int snapshot() throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4"));
 	}
 
 	/**
 	 * Get capture statistics.
+	 * 
 	 * <p>
-	 * pcap_stats() fills in the struct pcap_stat pointed to by its second argument.
-	 * The values represent packet statistics from the start of the run to the time
-	 * of the call.
-	 * </p>
-	 * <p>
-	 * pcap_stats() is supported only on live captures, not on ``savefiles''; no
-	 * statistics are stored in ``savefiles'', so no statistics are available when
-	 * reading from a ``savefile''.
-	 * </p>
-	 * <p>
-	 * A struct pcap_stat has the following members:
-	 * </p>
-	 * <dl>
-	 * <dt>ps_recv</dt>
-	 * <dd>number of packets received;</dd>
-	 * <dt>ps_drop</dt>
-	 * <dd>number of packets dropped because there was no room in the operating
-	 * system's buffer when they arrived, because packets weren't being read fast
-	 * enough;</dd>
-	 * <dt>ps_ifdrop</dt>
-	 * <dd>number of packets dropped by the network interface or its driver.</dd>
-	 * </dl>
-	 * <p>
-	 * The statistics do not behave the same way on all platforms. ps_recv might
-	 * count packets whether they passed any filter set with pcap_setfilter(3PCAP)
-	 * or not, or it might count only packets that pass the filter. It also might,
-	 * or might not, count packets dropped because there was no room in the
-	 * operating system's buffer when they arrived. ps_drop is not available on all
-	 * platforms; it is zero on platforms where it's not available. If packet
-	 * filtering is done in libpcap, rather than in the operating system, it would
-	 * count packets that don't pass the filter. Both ps_recv and ps_drop might, or
-	 * might not, count packets not yet read from the operating system and thus not
-	 * yet seen by the application. ps_ifdrop might, or might not, be implemented;
-	 * if it's zero, that might mean that no packets were dropped by the interface,
-	 * or it might mean that the statistic is unavailable, so it should not be
-	 * treated as an indication that the interface did not drop any packets.
+	 * This method retrieves statistics about the current capture. It fills in a
+	 * {@link PcapStat} object with packet statistics from the start of the run to
+	 * the time of the call.
 	 * </p>
 	 * 
-	 * @return the pcap stat
-	 * @throws PcapException the pcap exception
+	 * <p>
+	 * The {@link PcapStat} object contains the following information:
+	 * </p>
+	 * 
+	 * <ul>
+	 * <li>{@code ps_recv}: number of packets received</li>
+	 * <li>{@code ps_drop}: number of packets dropped because there was no room in
+	 * the operating system's buffer when they arrived, because packets weren't
+	 * being read fast enough</li>
+	 * <li>{@code ps_ifdrop}: number of packets dropped by the network interface or
+	 * its driver</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: The statistics do not behave the same way on all platforms:
+	 * </p>
+	 * 
+	 * <ul>
+	 * <li>{@code ps_recv} might count packets whether they passed any filter set
+	 * with {@link #setFilter(BpFilter)} or not, or it might count only packets that
+	 * pass the filter.</li>
+	 * <li>{@code ps_drop} is not available on all platforms; it is zero on
+	 * platforms where it's not available.</li>
+	 * <li>{@code ps_ifdrop} might not be implemented on some platforms.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * This method is supported only on live captures, not on "savefiles". No
+	 * statistics are stored in "savefiles", so no statistics are available when
+	 * reading from a "savefile".
+	 * </p>
+	 * 
+	 * <p>
+	 * Example usage:
+	 * </p>
+	 * 
+	 * <pre>{@code
+	 * try {
+	 * 	Pcap pcap = Pcap.openLive("eth0", 65535, true, 10, TimeUnit.MILLISECONDS);
+	 * 
+	 * 	// Capture some packets...
+	 * 	pcap.loop(1000, (String user, PcapHeader header, MemorySegment packet) -> {
+	 * 		// Process packets...
+	 * 	}, null);
+	 * 
+	 * 	// Get and print statistics
+	 * 	PcapStat stats = pcap.stats();
+	 * 	System.out.println("Packets received: " + stats.getReceived());
+	 * 	System.out.println("Packets dropped: " + stats.getDropped());
+	 * 	System.out.println("Packets dropped by interface: " + stats.getIfDropped());
+	 * } catch (PcapException e) {
+	 * 	// Handle exception
+	 * }
+	 * }</pre>
+	 * 
+	 * <p>
+	 * It's important to note that these statistics might not be 100% accurate,
+	 * especially on busy systems or with certain capture mechanisms. They should be
+	 * treated as approximate values.
+	 * </p>
+	 * 
+	 * @return a {@link PcapStat} object containing the capture statistics
+	 * @throws PcapException if an error occurs while retrieving the statistics, or
+	 *                       if called on a "savefile" capture
+	 * @see PcapStat
+	 * @see #setFilter(BpFilter)
 	 * @since libpcap 0.4
 	 */
 	public PcapStat stats() throws PcapException {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4"));
 	}
 
 	/**
@@ -3686,6 +5082,6 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @return this pcap
 	 */
 	public Pcap setUncaughtExceptionHandler(UncaughtExceptionHandler exceptionHandler) {
-		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new UnsupportedOperationException(minApi("Pcap0_4", "0.4")); //$NON-NLS-1$
 	}
 }

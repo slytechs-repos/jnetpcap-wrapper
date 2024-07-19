@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,55 +26,38 @@ import org.jnetpcap.internal.PcapForeignInitializer;
 /**
  * Dump packets to a capture file.
  * 
- * @author Sly Technologies Inc
- * @author repos@slytechs.com
- * @author mark
- *
+ * @see <a href=
+ *      "https://www.tcpdump.org/manpages/pcap_dump_open.3pcap.html">pcap_dump_open(3PCAP)</a>
+ * @see <a href=
+ *      "https://www.tcpdump.org/manpages/pcap_dump.3pcap.html">pcap_dump(3PCAP)</a>
+ * @see <a href=
+ *      "https://www.tcpdump.org/manpages/pcap_dump_flush.3pcap.html">pcap_dump_flush(3PCAP)</a>
+ * @see <a href=
+ *      "https://www.tcpdump.org/manpages/pcap_dump_close.3pcap.html">pcap_dump_close(3PCAP)</a>
+ * @since libpcap 0.4
  */
 public class PcapDumper implements AutoCloseable, Flushable {
 
-	/**
-	 * The Constant pcap_dump_close.
-	 *
-	 * @see {@code void	pcap_dump_close(pcap_dumper_t *p)}
-	 * @since libpcap 0.4
-	 */
+	/** The Constant pcap_dump_close. */
 	private static final PcapForeignDowncall pcap_dump_close;
 
-	/**
-	 * The Constant pcap_dump.
-	 *
-	 * @see {@code void	pcap_dump(u_char *, const struct pcap_pkthdr *, const u_char *)}
-	 * @since libpcap 0.4
-	 */
+	/** The Constant pcap_dump. */
 	private static final PcapForeignDowncall pcap_dump;
 
-	/**
-	 * The Constant pcap_dump_file.
-	 *
-	 * @see {@code FILE *pcap_dump_file(pcap_dumper_t *p)}
-	 * @since libpcap 0.8
-	 */
+	/** The Constant pcap_dump_file. */
 	private static final PcapForeignDowncall pcap_dump_file;
 
-	/**
-	 * The Constant pcap_dump_flush.
-	 *
-	 * @see {@code int pcap_dump_flush(pcap_dumper_t *p)}
-	 * @since libpcap 0.8
-	 */
+	/** The Constant pcap_dump_flush. */
 	private static final PcapForeignDowncall pcap_dump_flush;
 
 	static {
 		try (var foreign = new PcapForeignInitializer(Pcap0_5.class)) {
-			
-			// @formatter:off
-			pcap_dump_close    = foreign.downcall("pcap_dump_close(A)V"); //$NON-NLS-1$
-			pcap_dump          = foreign.downcall("pcap_dump(AAA)V"); //$NON-NLS-1$
-			pcap_dump_file     = foreign.downcall("pcap_dump_file(A)A");
-			pcap_dump_flush    = foreign.downcall("pcap_dump_flush(A)I");
-			// @formatter:on
-			
+
+			pcap_dump_close = foreign.downcall("pcap_dump_close(A)V"); //$NON-NLS-1$
+			pcap_dump = foreign.downcall("pcap_dump(AAA)V"); //$NON-NLS-1$
+			pcap_dump_file = foreign.downcall("pcap_dump_file(A)A");
+			pcap_dump_flush = foreign.downcall("pcap_dump_flush(A)I");
+
 		}
 	}
 
@@ -89,10 +72,10 @@ public class PcapDumper implements AutoCloseable, Flushable {
 
 	/** The pcap dumper ptr. */
 	private final MemorySegment pcap_dumper_ptr;
-	
+
 	/** The arena. */
 	private final Arena arena;
-	
+
 	/** The fname. */
 	private final String fname;
 
@@ -136,7 +119,6 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	 * </p>
 	 * 
 	 * @see java.lang.AutoCloseable#close()
-	 * @since libpcap 0.4
 	 */
 	@Override
 	public void close() {
@@ -144,7 +126,6 @@ public class PcapDumper implements AutoCloseable, Flushable {
 			throw alreadyClosedError();
 
 		pcap_dump_close.invokeVoid(pcap_dumper_ptr);
-
 		arena.close();
 	}
 
@@ -160,7 +141,6 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	 * @param header the header
 	 * @param packet the packet
 	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @since libpcap 0.4
 	 */
 	public void dump(MemorySegment header, MemorySegment packet) throws IOException {
 		pcap_dump.invokeVoid(header, packet, pcap_dumper_ptr);
@@ -173,7 +153,6 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	 * @see <a href=
 	 *      "https://www.tcpdump.org/manpages/pcap_dump_open.3pcap.html">FILE
 	 *      *pcap_dump_file(pcap_dumper_t *p)</a>
-	 * @since libpcap 0.8
 	 */
 	public MemorySegment dumpFile() {
 		return pcap_dump_file.invokeObj(pcap_dumper_ptr);
@@ -189,7 +168,6 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	 *
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 * @see java.io.Flushable#flush()
-	 * @since libpcap 0.8
 	 */
 	@Override
 	public void flush() throws IOException {

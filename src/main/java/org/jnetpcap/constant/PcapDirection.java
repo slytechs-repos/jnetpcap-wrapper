@@ -22,16 +22,46 @@ import java.util.function.IntSupplier;
  * Specifies the packet direction on a live capture, relative to the network
  * interface.
  * 
- * @author Sly Technologies
- * @author repos@slytechs.com
+ * <p>
+ * Example usage:
+ * </p>
+ * 
+ * <h2>Converting an integer direction to a PcapDirection enum constant</h2>
+ * 
+ * <pre>
+ * int direction = 1;
+ * PcapDirection pcapDirection = PcapDirection.toEnum(direction).orElse(null);
+ * System.out.println("Pcap Direction: " + (pcapDirection != null ? pcapDirection.name() : "Unknown"));
+ * </pre>
+ * 
+ * @see java.util.function.IntSupplier
+ * 
+ *      Author: Sly Technologies repos@slytechs.com
  */
 public enum PcapDirection implements IntSupplier {
 
-	/** Packet's direction is in either direction. */
+	/**
+	 * Packet's direction is in either direction.
+	 * 
+	 * @see <a href=
+	 *      "https://www.tcpdump.org/manpages/pcap.3pcap.html">PCAP_DIRECTION_INOUT</a>
+	 */
 	DIRECTION_INOUT,
-	/** Packet's direction is being received. */
+
+	/**
+	 * Packet's direction is being received.
+	 * 
+	 * @see <a href=
+	 *      "https://www.tcpdump.org/manpages/pcap.3pcap.html">PCAP_DIRECTION_IN</a>
+	 */
 	DIRECTION_IN,
-	/** Packet's direction is being transmitted. */
+
+	/**
+	 * Packet's direction is being transmitted.
+	 * 
+	 * @see <a href=
+	 *      "https://www.tcpdump.org/manpages/pcap.3pcap.html">PCAP_DIRECTION_OUT</a>
+	 */
 	DIRECTION_OUT,
 
 	;

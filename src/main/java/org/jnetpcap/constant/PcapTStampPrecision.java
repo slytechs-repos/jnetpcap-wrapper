@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,49 +18,50 @@ package org.jnetpcap.constant;
 import java.util.function.IntSupplier;
 
 /**
- * Time stamp resolution types. Not all systems and interfaces will necessarily
- * support all of these resolutions when doing live captures; all of them can be
- * requested when reading a savefile.
- *
- * <pre>
- * <code>
-#define PCAP_TSTAMP_PRECISION_MICRO	0	// use timestamps with microsecond precision, default
-#define PCAP_TSTAMP_PRECISION_NANO	1	// use timestamps with nanosecond precision
- * </code>
- * </pre>
+ * Enumeration of timestamp precision types. Not all systems and interfaces will
+ * necessarily support all of these resolutions when capturing live packets;
+ * however, all can be requested when reading from a savefile.
  * 
- * @author mark
- *
+ * <p>
+ * Timestamps can be either in microseconds or nanoseconds precision. The
+ * default precision is microseconds.
+ * </p>
+ * 
+ * <ul>
+ * <li>{@link #TSTAMP_PRECISION_MICRO}: Use timestamps with microsecond
+ * precision (default).</li>
+ * <li>{@link #TSTAMP_PRECISION_NANO}: Use timestamps with nanosecond
+ * precision.</li>
+ * </ul>
+ * 
+ * <p>
+ * Example usage:
+ * </p>
+ * 
+ * <pre>{@code
+ * PcapTStampPrecision precision = PcapTStampPrecision.TSTAMP_PRECISION_MICRO;
+ * }</pre>
+ * 
  */
 public enum PcapTStampPrecision implements IntSupplier {
 
-	/** use timestamps with microsecond precision, default. */
-	TSTAMP_PRECISION_MICRO(1000_000),
+	/** Use timestamps with microsecond precision (default). */
+	TSTAMP_PRECISION_MICRO(1_000_000),
 
-	/** use timestamps with nanosecond precision. */
-	TSTAMP_PRECISION_NANO(1000_000_000),;
+	/** Use timestamps with nanosecond precision. */
+	TSTAMP_PRECISION_NANO(1_000_000_000);
 
-	/** use timestamps with microsecond precision, default. */
+	/** Constant for microsecond precision. */
 	public static final int PCAP_TSTAMP_PRECISION_MICRO = 0;
 
-	/** use timestamps with nanosecond precision. */
+	/** Constant for nanosecond precision. */
 	public static final int PCAP_TSTAMP_PRECISION_NANO = 1;
 
-	/**
-	 * Value of.
-	 *
-	 * @param value the value
-	 * @return the pcap T stamp precision
-	 */
-	public static PcapTStampPrecision valueOf(int value) {
-		return values()[value];
-	}
-
-	/** The scale. */
+	/** Scale of the fractional unit. */
 	private final long scale;
 
 	/**
-	 * Instantiates a new pcap T stamp precision.
+	 * Instantiates a new PcapTStampPrecision with the specified scale.
 	 *
 	 * @param scale the scale of the fractional unit
 	 */
@@ -69,9 +70,19 @@ public enum PcapTStampPrecision implements IntSupplier {
 	}
 
 	/**
-	 * Gets the as int.
+	 * Converts a numerical value to the corresponding PcapTStampPrecision enum.
 	 *
-	 * @return the as int
+	 * @param value the numerical value
+	 * @return the corresponding PcapTStampPrecision enum
+	 */
+	public static PcapTStampPrecision valueOf(int value) {
+		return values()[value];
+	}
+
+	/**
+	 * Returns the numerical constant for this timestamp precision.
+	 *
+	 * @return the numerical constant
 	 * @see java.util.function.IntSupplier#getAsInt()
 	 */
 	@Override
@@ -80,50 +91,47 @@ public enum PcapTStampPrecision implements IntSupplier {
 	}
 
 	/**
-	 * Converts second and fraction components, as read from pcap header, to milli
-	 * seconds in epoch time suitable for use with java {@code Date} class.
+	 * Converts epoch seconds and fraction of a second to milliseconds since the
+	 * start of the epoch.
 	 *
 	 * @param epochSeconds     the epoch seconds
-	 * @param fractionOfSecond the fraction of second
-	 * @return number of millis since start of epoch time
+	 * @param fractionOfSecond the fraction of a second
+	 * @return the number of milliseconds since the start of the epoch
 	 */
 	public long toEpochMilli(long epochSeconds, long fractionOfSecond) {
 		long scaleToMillis = (scale / 1000);
-
 		return toEpochTime(epochSeconds, fractionOfSecond) / scaleToMillis;
 	}
 
 	/**
-	 * Computes number of seconds in epoch time by dropping the fractional part.
+	 * Converts the epoch time in this precision to epoch seconds.
 	 *
-	 * @param epochTime in this fractional precision, ie. nanos or micros since
-	 *                  start of epoch Jan 1st, 1970 12:00am
-	 * @return number of seconds in epoch time
+	 * @param epochTime the epoch time in this precision
+	 * @return the number of seconds since the start of the epoch
 	 */
 	public long toEpochSecond(long epochTime) {
 		return (epochTime / scale);
 	}
 
 	/**
-	 * To epoch time with this precision from supplied second and fraction
-	 * components, as read fro pcap header.
+	 * Converts epoch seconds and fraction of a second to epoch time in this
+	 * precision.
 	 *
 	 * @param epochSeconds     the epoch seconds
-	 * @param fractionOfSecond the fraction of second in this time unit
-	 * @return number of fractional units, in this precision, since start of epoch,
-	 *         Jan 1st, 1970 12:00am
+	 * @param fractionOfSecond the fraction of a second in this precision
+	 * @return the number of fractional units in this precision since the start of
+	 *         the epoch
 	 */
 	public long toEpochTime(long epochSeconds, long fractionOfSecond) {
-		long timestamp = ((epochSeconds * scale) + fractionOfSecond);
-
-		return timestamp;
+		return (epochSeconds * scale) + fractionOfSecond;
 	}
 
 	/**
-	 * Computes a fraction of a second from epoch time provided.
+	 * Extracts the fraction of a second from the given epoch time in this
+	 * precision.
 	 *
 	 * @param epochTime the epoch time
-	 * @return fraction of a second in this precision
+	 * @return the fraction of a second in this precision
 	 */
 	public long toFractionOfSecond(long epochTime) {
 		return (epochTime % scale);
