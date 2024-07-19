@@ -342,11 +342,12 @@ public non-sealed class DeputyPcap<T extends Pcap> extends Pcap {
 	 * @param handler
 	 * @param user
 	 * @return
+	 * @throws PcapException
 	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.OfMemorySegment,
 	 *      java.lang.Object)
 	 */
 	@Override
-	public <U> int loop(int count, OfMemorySegment<U> handler, U user) {
+	public <U> int loop(int count, OfMemorySegment<U> handler, U user) throws PcapException {
 		return delegatePcap.loop(count, handler, user);
 	}
 
@@ -673,14 +674,14 @@ public non-sealed class DeputyPcap<T extends Pcap> extends Pcap {
 	private T us() {
 		return (T) this;
 	}
-	
+
 	protected interface PcapConsumer<U> {
 		void accept(U arg) throws PcapException;
 	}
-	
+
 	protected <U> T delegate1(PcapConsumer<U> exec, U arg1) throws PcapException {
 		exec.accept(arg1);
-		
+
 		return us();
 	}
 }
