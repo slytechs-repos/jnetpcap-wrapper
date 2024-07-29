@@ -1581,7 +1581,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, Depu
 	 * @throws PcapException if an error occurs during opening
 	 * @since libpcap 0.4
 	 */
-	static Pcap openLive(String device,
+	public static Pcap openLive(String device,
 			int snaplen,
 			boolean promisc,
 			long timeout,
