@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.jnetpcap.util.PcapPacketRef;
  * @author repos@slytechs.com
  * @author Mark Bednarczyk
  */
-public non-sealed class DeputyPcap<T extends Pcap> extends Pcap {
+public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {
 
 	private final Pcap delegatePcap;
 
@@ -53,7 +53,7 @@ public non-sealed class DeputyPcap<T extends Pcap> extends Pcap {
 	 *
 	 * @param pcapHandle the pcap handle
 	 */
-	protected DeputyPcap(Pcap pcap) {
+	protected DelegatePcap(Pcap pcap) {
 		super(pcap);
 		this.delegatePcap = pcap;
 	}
