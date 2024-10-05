@@ -20,7 +20,6 @@ package org.jnetpcap.constant;
  * 'pcap.h'.
  * 
  * @author Sly Technologies
- * @author repos@slytechs.com
  */
 public final class PcapConstants {
 

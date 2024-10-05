@@ -24,7 +24,6 @@ import java.util.ResourceBundle;
  * Error message resource bundle factory.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  */
 public class Messages {
 

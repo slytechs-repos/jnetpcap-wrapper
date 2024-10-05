@@ -22,7 +22,6 @@ import org.jnetpcap.internal.PcapStatExRecord;
  * The Interface PcapStatEx.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  */
 public sealed interface PcapStatEx extends PcapStat permits PcapStatExRecord {

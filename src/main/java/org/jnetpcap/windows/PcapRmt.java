@@ -29,7 +29,6 @@ import static java.lang.foreign.ValueLayout.*;
  * Remote RPCAP authentication and source string marker interface.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

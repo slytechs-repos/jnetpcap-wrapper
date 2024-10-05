@@ -23,7 +23,6 @@ import org.jnetpcap.constant.PcapCode;
  * Checked Pcap errors, warnings and exceptions.
  * 
  * @author Sly Technologies
- * @author repos@slytechs.com
  */
 public class PcapException extends Exception {
 

@@ -30,7 +30,6 @@ import org.jnetpcap.PcapErrorHandler;
  * libary symbols and making of 'downcall' and 'upcall' function calls.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

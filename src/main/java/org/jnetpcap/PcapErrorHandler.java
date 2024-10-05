@@ -21,7 +21,6 @@ package org.jnetpcap;
  * A multi-mudule I8N error handler for all jNetPcap messages.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  */
 public class PcapErrorHandler {
 

@@ -33,7 +33,6 @@ import static java.lang.foreign.ValueLayout.*;
  * @param header raw pcap header in a memory segment
  * @param data   raw packet data in a memory segment
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  */
 public record PcapPacketRef(Object abi, MemorySegment header, MemorySegment data) {
 

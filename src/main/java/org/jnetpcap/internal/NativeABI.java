@@ -23,7 +23,6 @@ import static java.lang.foreign.ValueLayout.*;
  * Platforms native ABI (Application Binary Interface, CPU/Instruction set).
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

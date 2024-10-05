@@ -30,7 +30,6 @@ import org.jnetpcap.windows.WinPcap;
  * Provides Pcap API method calls for up to libpcap version 1.10
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

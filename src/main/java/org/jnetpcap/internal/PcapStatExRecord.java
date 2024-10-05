@@ -31,7 +31,6 @@ import org.jnetpcap.windows.PcapStatEx;
  * The PcapStatExRecord.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  */
 public record PcapStatExRecord(

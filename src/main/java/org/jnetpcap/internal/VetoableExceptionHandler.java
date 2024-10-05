@@ -23,7 +23,6 @@ import java.lang.Thread.UncaughtExceptionHandler;
  * veto or interruption of whatever service is running.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  */
 interface VetoableExceptionHandler extends UncaughtExceptionHandler {
 

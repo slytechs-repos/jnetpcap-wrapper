@@ -54,7 +54,6 @@ import static java.lang.foreign.ValueLayout.*;
  * resources, and bug reporting are no longer available. </blockquote>
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author http://winpcap.org
  * @author Mark Bednarczyk
  */

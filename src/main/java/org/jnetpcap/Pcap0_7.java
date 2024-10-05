@@ -35,7 +35,6 @@ import static java.lang.foreign.ValueLayout.*;
  * Provides Pcap API method calls for up to libpcap version 0.7
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

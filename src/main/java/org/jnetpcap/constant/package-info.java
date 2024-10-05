@@ -20,6 +20,5 @@
  * Various libpcap related constants
  * 
  * @author Sly Technologies
- * @author repos@slytechs.com
  */
 package org.jnetpcap.constant;

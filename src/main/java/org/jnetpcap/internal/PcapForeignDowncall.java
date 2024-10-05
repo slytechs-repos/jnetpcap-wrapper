@@ -24,7 +24,6 @@ import org.jnetpcap.PcapException;
  * The Class PcapForeignDowncall.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  */
 public class PcapForeignDowncall extends ForeignDowncall<PcapException> {

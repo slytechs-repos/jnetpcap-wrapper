@@ -32,7 +32,6 @@ package org.jnetpcap;
  * <em>pcap</em> handle.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  */
 public class PcapActivatedException extends PcapException {
 

@@ -28,7 +28,6 @@ import org.jnetpcap.constant.PcapDlt;
  * Non public unsafe Pcap handle mainly needed for jUnit testing.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

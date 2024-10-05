@@ -51,7 +51,6 @@ import org.junit.jupiter.api.TestInfo;
  * executed in tearnDown after each test and constants.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

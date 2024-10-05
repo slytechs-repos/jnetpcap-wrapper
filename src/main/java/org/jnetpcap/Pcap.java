@@ -108,7 +108,6 @@ import static java.lang.foreign.ValueLayout.*;
  * </p>
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  */
 public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4, DelegatePcap {
 

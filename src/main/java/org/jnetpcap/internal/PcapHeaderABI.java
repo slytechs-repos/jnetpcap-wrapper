@@ -45,7 +45,6 @@ import static java.lang.foreign.ValueLayout.*;
  * the values directly, plus its more efficient this way.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

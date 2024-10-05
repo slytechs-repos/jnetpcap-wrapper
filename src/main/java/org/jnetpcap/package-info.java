@@ -108,6 +108,5 @@ Packet [timestamp=2011-03-01T20:45:13.313Z, wirelen=74   caplen=74   {00:1d:60:b
  * </pre>
  * 
  * @author Sly Technologies
- * @author repos@slytechs.com
  */
 package org.jnetpcap;

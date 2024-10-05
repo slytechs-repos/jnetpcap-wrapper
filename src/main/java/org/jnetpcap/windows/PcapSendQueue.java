@@ -32,7 +32,6 @@ import org.jnetpcap.internal.PcapForeignInitializer;
  * on Microsoft Windows platforms.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  */
 public class PcapSendQueue implements AutoCloseable {

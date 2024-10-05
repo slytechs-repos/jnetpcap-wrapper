@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

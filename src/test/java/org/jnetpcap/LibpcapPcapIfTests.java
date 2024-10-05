@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
  * Main PcapIf, pcap interface structure specific unit tests.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  */
 @Tag("libpcap-api")
 class LibpcapPcapIfTests extends AbstractTestBase {

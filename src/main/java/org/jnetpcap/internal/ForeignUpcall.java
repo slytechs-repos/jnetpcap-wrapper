@@ -25,7 +25,6 @@ import java.lang.invoke.MethodHandle;
  * The Class ForeignUpcall.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  * @param <T> the generic type
  */

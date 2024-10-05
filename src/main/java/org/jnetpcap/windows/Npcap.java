@@ -39,7 +39,6 @@ import org.jnetpcap.internal.PcapHeaderABI;
  * </p>
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author Mark Bednarczyk
  * @author http://npcap.com
  */

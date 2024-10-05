@@ -41,7 +41,6 @@ import java.util.regex.Pattern;
  * The Class ForeignInitializer.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  * @param <T> the generic type
  * @param <E> the element type

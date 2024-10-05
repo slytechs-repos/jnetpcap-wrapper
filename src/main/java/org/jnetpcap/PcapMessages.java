@@ -24,7 +24,6 @@ import java.util.ResourceBundle;
  * Pcap message localizer. All messages are localized in pcap.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  */
 public class PcapMessages extends PropertyResourceBundle {
 	

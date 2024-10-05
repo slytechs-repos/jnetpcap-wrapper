@@ -28,7 +28,6 @@ import org.jnetpcap.internal.PcapHeaderABI;
  * offline and if integer byte are swapped or not in the offline file.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  */
 public class PcapHeaderException extends RuntimeException {
 

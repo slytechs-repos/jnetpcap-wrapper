@@ -24,7 +24,6 @@ import java.util.stream.IntStream;
  * Utility methods for jNetPcap library.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

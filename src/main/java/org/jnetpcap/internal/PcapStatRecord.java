@@ -60,7 +60,6 @@ import org.jnetpcap.windows.WinPcap;
  * </p>
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

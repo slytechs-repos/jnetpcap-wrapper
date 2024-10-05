@@ -41,7 +41,6 @@ import org.jnetpcap.util.PcapPacketRef;
  * The Class NonSealedPcap.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author Mark Bednarczyk
  */
 public non-sealed class DelegatePcap<T extends Pcap> extends Pcap {

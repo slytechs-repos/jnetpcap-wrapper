@@ -22,7 +22,6 @@ import java.util.function.IntSupplier;
  * WinPcap setmode values.
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  *
  */

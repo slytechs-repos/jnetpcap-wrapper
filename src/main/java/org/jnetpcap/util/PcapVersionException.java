@@ -39,7 +39,6 @@ import org.jnetpcap.PcapException;
  * For detailed specification please see http://semver.org
  * 
  * @author Sly Technologies
- * @author repos@slytechs.com
  */
 public final class PcapVersionException extends PcapException {
 

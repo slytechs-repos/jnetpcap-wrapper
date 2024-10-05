@@ -19,7 +19,6 @@ package org.jnetpcap.util;
  * A Network IPv4 Address with a netmask.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  * @param address the address
  * @param netmask the netmask

@@ -25,7 +25,6 @@ import java.util.stream.Stream;
  * The Class ForeignUtils.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  */
 public final class ForeignUtils {
 

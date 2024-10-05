@@ -234,7 +234,6 @@
  * </dl>
  * 
  * @author Sly Technologies Inc.
- * @author repos@slytechs.com
  */
 module org.jnetpcap {
 

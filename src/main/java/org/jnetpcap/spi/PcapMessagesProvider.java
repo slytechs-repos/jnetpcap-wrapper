@@ -33,7 +33,6 @@ import java.util.spi.ResourceBundleProvider;
  * The Interface PcapMessagesProvider.
  *
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  */
 public interface PcapMessagesProvider extends ResourceBundleProvider {
 

@@ -73,7 +73,6 @@ import org.junit.jupiter.api.TestInfo;
  * </p>
  * 
  * @author Sly Technologies Inc
- * @author repos@slytechs.com
  * @author mark
  */
 @Tag("libpcap-api")

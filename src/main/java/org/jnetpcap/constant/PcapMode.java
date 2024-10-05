@@ -49,7 +49,6 @@ import java.util.Optional;
  * </p>
  * 
  * @author Sly Technologies 
- * @author repos@slytechs.com
  */
 public enum PcapMode {
 	/**
