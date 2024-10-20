@@ -35,7 +35,60 @@ Unlock a Realm of Network Analysis Possibilities:
 ## See Also
 If you are looking for protocol enabled version of this library, please see the full [**jNetPcap SDK**][jnetpcap-sdk] or for advanced functionality the [**jNetWorks SDK**][jnetworks-sdk] library.
 
+##  API Diagram
+This diagram illustrates the architecture of jnetpcap-wrapper and how it interacts with various components of the system.
+
+```mermaid
+graph TD
+    A[Java Application] --> B[jnetpcap-wrapper]
+    B --> C[Panama/JEP-424 Foreign Function & Memory API]
+    C --> D[Libpcap / WinPcap / Npcap]
+    D --> E[Operating System]
+    E --> F[Network Drivers]
+    F --> G[Network Interface Cards]
+
+    subgraph "User Space"
+        A
+        B
+    end
+
+    subgraph "Foreign Function Interface"
+        C
+    end
+
+    subgraph "Native Library"
+        D
+    end
+
+    subgraph "Kernel Space"
+        E
+        F
+    end
+
+    subgraph "Hardware"
+        G
+    end
+
+    classDef userSpace fill:#e6f3ff,stroke:#0066cc,stroke-width:2px,color:#000000
+    classDef ffi fill:#fff2e6,stroke:#ff9933,stroke-width:2px,color:#000000
+    classDef nativeLib fill:#e6ffe6,stroke:#00cc66,stroke-width:2px,color:#000000
+    classDef kernelSpace fill:#ffe6e6,stroke:#cc0000,stroke-width:2px,color:#000000
+    classDef hardware fill:#f2e6ff,stroke:#6600cc,stroke-width:2px,color:#000000
+
+    class A,B userSpace
+    class C ffi
+    class D nativeLib
+    class E,F kernelSpace
+    class G hardware
+```
+*	User Space: Where the Java application and jnetpcap-wrapper operate.
+*	Foreign Function Interface: The interface between Java and native code.
+*	Native Library: Where libpcap/WinPcap operates.
+*	Kernel Space: The operating system and driver level.
+*	Hardware: The physical network interface cards.
+
 ## Documentation
+
 See [*Wiki pages*][wiki] for user guides and examples.
 
 See [*Javadocs*][javadocs] reference documentation.
