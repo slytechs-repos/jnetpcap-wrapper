@@ -16,7 +16,6 @@
 package org.jnetpcap;
 
 import static org.jnetpcap.internal.ForeignUtils.*;
-import static org.jnetpcap.internal.FunctionThrowable.*;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
@@ -152,19 +151,19 @@ public class PcapIf {
 		);
 
 		/** The Constant nextHandle. */
-		private static final VarHandle nextHandle = PCAP_ADDR_LAYOUT.varHandle(groupElement("next"));
+		private static final VarHandle nextHandle = PCAP_ADDR_LAYOUT.select(groupElement("next")).varHandle();
 
 		/** The Constant addrHandle. */
-		private static final VarHandle addrHandle = PCAP_ADDR_LAYOUT.varHandle(groupElement("addr"));
+		private static final VarHandle addrHandle = PCAP_ADDR_LAYOUT.select(groupElement("addr")).varHandle();
 
 		/** The Constant netmaskHandle. */
-		private static final VarHandle netmaskHandle = PCAP_ADDR_LAYOUT.varHandle(groupElement("netmask"));
+		private static final VarHandle netmaskHandle = PCAP_ADDR_LAYOUT.select(groupElement("netmask")).varHandle();
 
 		/** The Constant broadaddrHandle. */
-		private static final VarHandle broadaddrHandle = PCAP_ADDR_LAYOUT.varHandle(groupElement("broadaddr"));
+		private static final VarHandle broadaddrHandle = PCAP_ADDR_LAYOUT.select(groupElement("broadaddr")).varHandle();
 
 		/** The Constant dstaddrHandle. */
-		private static final VarHandle dstaddrHandle = PCAP_ADDR_LAYOUT.varHandle(groupElement("dstaddr"));
+		private static final VarHandle dstaddrHandle = PCAP_ADDR_LAYOUT.select(groupElement("dstaddr")).varHandle();
 
 		/**
 		 * List all addresses by iterating over the linked list.
@@ -289,19 +288,19 @@ public class PcapIf {
 	);
 
 	/** The Constant nextHandle. */
-	private static final VarHandle nextHandle = PCAP_IF_LAYOUT.varHandle(path("next"));
+	private static final VarHandle nextHandle = PCAP_IF_LAYOUT.select(path("next")).varHandle();
 
 	/** The Constant nameHandle. */
-	private static final VarHandle nameHandle = PCAP_IF_LAYOUT.varHandle(path("name"));
+	private static final VarHandle nameHandle = PCAP_IF_LAYOUT.select(path("name")).varHandle();
 
 	/** The Constant descHandle. */
-	private static final VarHandle descHandle = PCAP_IF_LAYOUT.varHandle(path("description"));
+	private static final VarHandle descHandle = PCAP_IF_LAYOUT.select(path("description")).varHandle();
 
 	/** The Constant addrsHandle. */
-	private static final VarHandle addrsHandle = PCAP_IF_LAYOUT.varHandle(path("addresses"));
+	private static final VarHandle addrsHandle = PCAP_IF_LAYOUT.select(path("addresses")).varHandle();
 
 	/** The Constant flagsHandle. */
-	private static final VarHandle flagsHandle = PCAP_IF_LAYOUT.varHandle(path("flags"));
+	private static final VarHandle flagsHandle = PCAP_IF_LAYOUT.select(path("flags")).varHandle();
 
 	/** interface is loopback. */
 	public final static int PCAP_IF_LOOPBACK = 0x00000001;

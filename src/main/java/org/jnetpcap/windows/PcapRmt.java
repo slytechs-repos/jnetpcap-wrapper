@@ -71,13 +71,13 @@ public sealed interface PcapRmt permits PcapRmt.Source, PcapRmt.Auth {
 				ADDRESS.withName("password").withByteAlignment(JAVA_INT.byteSize()));
 
 		/** The Constant rmtauth_type. */
-		private static final VarHandle rmtauth_type = LAYOUT.varHandle(PathElement.groupElement("type"));
+		private static final VarHandle rmtauth_type = LAYOUT.select(PathElement.groupElement("type")).varHandle();
 
 		/** The Constant rmtauth_username. */
-		private static final VarHandle rmtauth_username = LAYOUT.varHandle(PathElement.groupElement("username"));
+		private static final VarHandle rmtauth_username = LAYOUT.select(PathElement.groupElement("username")).varHandle();
 
 		/** The Constant rmtauth_password. */
-		private static final VarHandle rmtauth_password = LAYOUT.varHandle(PathElement.groupElement("password"));
+		private static final VarHandle rmtauth_password = LAYOUT.select(PathElement.groupElement("password")).varHandle();
 
 		/**
 		 * Instantiates a new RPCAP authentication record using PcapSrc constant.

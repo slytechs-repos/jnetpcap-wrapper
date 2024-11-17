@@ -15,17 +15,17 @@
  */
 package org.jnetpcap.internal;
 
-import static java.lang.Integer.toUnsignedLong;
-import static java.lang.foreign.MemoryLayout.structLayout;
-import static java.lang.foreign.MemoryLayout.PathElement.groupElement;
-import static java.lang.foreign.ValueLayout.JAVA_INT;
-import static java.lang.foreign.ValueLayout.JAVA_LONG;
+import static java.lang.Integer.*;
 
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.VarHandle;
 
 import org.jnetpcap.windows.PcapStatEx;
+
+import static java.lang.foreign.MemoryLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * The PcapStatExRecord.
@@ -107,85 +107,85 @@ public record PcapStatExRecord(
 	public static final int PCAP_STAT_EX_LENGTH = (int) LAYOUT.byteSize();
 
 	/** The Constant ps_recv. */
-	private static final VarHandle ps_recv = LAYOUT.varHandle(groupElement("ps_recv"));
+	private static final VarHandle ps_recv = LAYOUT.select(groupElement("ps_recv")).varHandle();
 
 	/** The Constant ps_drop. */
-	private static final VarHandle ps_drop = LAYOUT.varHandle(groupElement("ps_drop"));
+	private static final VarHandle ps_drop = LAYOUT.select(groupElement("ps_drop")).varHandle();
 
 	/** The Constant ps_ifdrop. */
-	private static final VarHandle ps_ifdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+	private static final VarHandle ps_ifdrop = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
 
 	/** The Constant ps_capt. */
-	private static final VarHandle ps_capt = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+	private static final VarHandle ps_capt = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
 
 	/** The Constant ps_sent. */
-	private static final VarHandle ps_sent = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+	private static final VarHandle ps_sent = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
 
 	/** The Constant ps_netdrop. */
-	private static final VarHandle ps_netdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+	private static final VarHandle ps_netdrop = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
 
 	/** The Constant rx_packets. */
-	private static final VarHandle rx_packets = LAYOUT.varHandle(groupElement("rx_packets"));
+	private static final VarHandle rx_packets = LAYOUT.select(groupElement("rx_packets")).varHandle();
 
 	/** The Constant tx_packets. */
-	private static final VarHandle tx_packets = LAYOUT.varHandle(groupElement("tx_packets"));
+	private static final VarHandle tx_packets = LAYOUT.select(groupElement("tx_packets")).varHandle();
 
 	/** The Constant rx_bytes. */
-	private static final VarHandle rx_bytes = LAYOUT.varHandle(groupElement("rx_bytes"));
+	private static final VarHandle rx_bytes = LAYOUT.select(groupElement("rx_bytes")).varHandle();
 
 	/** The Constant tx_bytes. */
-	private static final VarHandle tx_bytes = LAYOUT.varHandle(groupElement("tx_bytes"));
+	private static final VarHandle tx_bytes = LAYOUT.select(groupElement("tx_bytes")).varHandle();
 
 	/** The Constant rx_errors. */
-	private static final VarHandle rx_errors = LAYOUT.varHandle(groupElement("rx_errors"));
+	private static final VarHandle rx_errors = LAYOUT.select(groupElement("rx_errors")).varHandle();
 
 	/** The Constant tx_errors. */
-	private static final VarHandle tx_errors = LAYOUT.varHandle(groupElement("tx_errors"));
+	private static final VarHandle tx_errors = LAYOUT.select(groupElement("tx_errors")).varHandle();
 
 	/** The Constant rx_dropped. */
-	private static final VarHandle rx_dropped = LAYOUT.varHandle(groupElement("rx_dropped"));
+	private static final VarHandle rx_dropped = LAYOUT.select(groupElement("rx_dropped")).varHandle();
 
 	/** The Constant tx_dropped. */
-	private static final VarHandle tx_dropped = LAYOUT.varHandle(groupElement("tx_dropped"));
+	private static final VarHandle tx_dropped = LAYOUT.select(groupElement("tx_dropped")).varHandle();
 
 	/** The Constant multicast_cnt. */
-	private static final VarHandle multicast_cnt = LAYOUT.varHandle(groupElement("multicast_cnt"));
+	private static final VarHandle multicast_cnt = LAYOUT.select(groupElement("multicast_cnt")).varHandle();
 
 	/** The Constant collisions_cnt. */
-	private static final VarHandle collisions_cnt = LAYOUT.varHandle(groupElement("collisions_cnt"));
+	private static final VarHandle collisions_cnt = LAYOUT.select(groupElement("collisions_cnt")).varHandle();
 
 	/** The Constant rx_length_errors. */
-	private static final VarHandle rx_length_errors = LAYOUT.varHandle(groupElement("rx_length_errors"));
+	private static final VarHandle rx_length_errors = LAYOUT.select(groupElement("rx_length_errors")).varHandle();
 
 	/** The Constant rx_over_errors. */
-	private static final VarHandle rx_over_errors = LAYOUT.varHandle(groupElement("rx_over_errors"));
+	private static final VarHandle rx_over_errors = LAYOUT.select(groupElement("rx_over_errors")).varHandle();
 
 	/** The Constant rx_crc_errors. */
-	private static final VarHandle rx_crc_errors = LAYOUT.varHandle(groupElement("rx_crc_errors"));
+	private static final VarHandle rx_crc_errors = LAYOUT.select(groupElement("rx_crc_errors")).varHandle();
 
 	/** The Constant rx_frame_errors. */
-	private static final VarHandle rx_frame_errors = LAYOUT.varHandle(groupElement("rx_frame_errors"));
+	private static final VarHandle rx_frame_errors = LAYOUT.select(groupElement("rx_frame_errors")).varHandle();
 
 	/** The Constant rx_fifo_errors. */
-	private static final VarHandle rx_fifo_errors = LAYOUT.varHandle(groupElement("rx_fifo_errors"));
+	private static final VarHandle rx_fifo_errors = LAYOUT.select(groupElement("rx_fifo_errors")).varHandle();
 
 	/** The Constant rx_missed_errors. */
-	private static final VarHandle rx_missed_errors = LAYOUT.varHandle(groupElement("rx_missed_errors"));
+	private static final VarHandle rx_missed_errors = LAYOUT.select(groupElement("rx_missed_errors")).varHandle();
 
 	/** The Constant tx_aborted_errors. */
-	private static final VarHandle tx_aborted_errors = LAYOUT.varHandle(groupElement("tx_aborted_errors"));
+	private static final VarHandle tx_aborted_errors = LAYOUT.select(groupElement("tx_aborted_errors")).varHandle();
 
 	/** The Constant tx_carrier_errors. */
-	private static final VarHandle tx_carrier_errors = LAYOUT.varHandle(groupElement("tx_carrier_errors"));
+	private static final VarHandle tx_carrier_errors = LAYOUT.select(groupElement("tx_carrier_errors")).varHandle();
 
 	/** The Constant tx_fifo_errors. */
-	private static final VarHandle tx_fifo_errors = LAYOUT.varHandle(groupElement("tx_fifo_errors"));
+	private static final VarHandle tx_fifo_errors = LAYOUT.select(groupElement("tx_fifo_errors")).varHandle();
 
 	/** The Constant tx_heartbeat_errors. */
-	private static final VarHandle tx_heartbeat_errors = LAYOUT.varHandle(groupElement("tx_heartbeat_errors"));
+	private static final VarHandle tx_heartbeat_errors = LAYOUT.select(groupElement("tx_heartbeat_errors")).varHandle();
 
 	/** The Constant tx_window_errors. */
-	private static final VarHandle tx_window_errors = LAYOUT.varHandle(groupElement("tx_window_errors"));
+	private static final VarHandle tx_window_errors = LAYOUT.select(groupElement("tx_window_errors")).varHandle();
 
 	/**
 	 * Instantiates a new pcap stat ex record.

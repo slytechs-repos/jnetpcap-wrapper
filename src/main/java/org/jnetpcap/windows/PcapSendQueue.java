@@ -61,10 +61,10 @@ public class PcapSendQueue implements AutoCloseable {
 				ValueLayout.ADDRESS.withName("buffer")); /* Buffer containing the packets to be sent. */
 
 		/** The Constant MAXLEN. */
-		private static final VarHandle MAXLEN = LAYOUT.varHandle(PathElement.groupElement("maxlen"));
+		private static final VarHandle MAXLEN = LAYOUT.select(PathElement.groupElement("maxlen")).varHandle();
 
 		/** The Constant LEN. */
-		private static final VarHandle LEN = LAYOUT.varHandle(PathElement.groupElement("len"));
+		private static final VarHandle LEN = LAYOUT.select(PathElement.groupElement("len")).varHandle();
 	}
 
 	/**

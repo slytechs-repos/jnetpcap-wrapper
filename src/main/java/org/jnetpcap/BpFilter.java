@@ -18,7 +18,6 @@ package org.jnetpcap;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
 import java.util.Objects;
 
@@ -71,10 +70,10 @@ public final class BpFilter implements AutoCloseable {
 				).withByteAlignment(JAVA_LONG.byteSize());
 
 		/** The Constant BF_LEN. */
-		private static final VarHandle BF_LEN = LAYOUT.varHandle(groupElement("bf_len"));
+		private static final VarHandle BF_LEN = LAYOUT.select(groupElement("bf_len")).varHandle();
 
 		/** The Constant BF_INSNS. */
-		private static final VarHandle BF_INSNS = LAYOUT.varHandle(groupElement("bf_insns"));
+		private static final VarHandle BF_INSNS = LAYOUT.select(groupElement("bf_insns")).varHandle();
 
 		/** The mseg. */
 		private final MemorySegment mseg;

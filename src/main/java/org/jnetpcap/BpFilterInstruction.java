@@ -15,16 +15,13 @@
  */
 package org.jnetpcap;
 
-import static java.lang.foreign.MemoryLayout.structLayout;
-import static java.lang.foreign.MemoryLayout.PathElement.groupElement;
-import static java.lang.foreign.MemoryLayout.PathElement.sequenceElement;
-import static java.lang.foreign.ValueLayout.JAVA_BYTE;
-import static java.lang.foreign.ValueLayout.JAVA_INT;
-import static java.lang.foreign.ValueLayout.JAVA_SHORT;
-
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.VarHandle;
+
+import static java.lang.foreign.MemoryLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * BpFilter program instruction. Instructions are processed in binary mode but
@@ -56,16 +53,16 @@ record BpFilterInstruction(int code, int jt, int jf, long k) {
 					JAVA_INT.withName("k")));
 
 	/** The Constant CODE. */
-	private static final VarHandle CODE = LAYOUT.varHandle(sequenceElement(), groupElement("full"));
+	private static final VarHandle CODE = LAYOUT.select(sequenceElement(), groupElement("full")).varHandle();
 
 	/** The Constant JT. */
-	private static final VarHandle JT = LAYOUT.varHandle(sequenceElement(), groupElement("jt"));
+	private static final VarHandle JT = LAYOUT.select(sequenceElement(), groupElement("jt")).varHandle();
 
 	/** The Constant JF. */
-	private static final VarHandle JF = LAYOUT.varHandle(sequenceElement(), groupElement("jf"));
+	private static final VarHandle JF = LAYOUT.select(sequenceElement(), groupElement("jf")).varHandle();
 
 	/** The Constant K. */
-	private static final VarHandle K = LAYOUT.varHandle(sequenceElement(), groupElement("k"));
+	private static final VarHandle K = LAYOUT.select(sequenceElement(), groupElement("k")).varHandle();
 
 	/**
 	 * Instruction at.

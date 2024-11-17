@@ -15,10 +15,7 @@
  */
 package org.jnetpcap.internal;
 
-import static java.lang.Integer.toUnsignedLong;
-import static java.lang.foreign.MemoryLayout.structLayout;
-import static java.lang.foreign.MemoryLayout.PathElement.groupElement;
-import static java.lang.foreign.ValueLayout.JAVA_INT;
+import static java.lang.Integer.*;
 
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
@@ -26,6 +23,10 @@ import java.lang.invoke.VarHandle;
 
 import org.jnetpcap.PcapStat;
 import org.jnetpcap.windows.WinPcap;
+
+import static java.lang.foreign.MemoryLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * Packet statistics from the start of the pcap run to the time of the call.
@@ -78,22 +79,22 @@ public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long 
 	);
 
 	/** The Constant ps_recv. */
-	private static final VarHandle ps_recv = LAYOUT.varHandle(groupElement("ps_recv"));
+	private static final VarHandle ps_recv = LAYOUT.select(groupElement("ps_recv")).varHandle();
 
 	/** The Constant ps_drop. */
-	private static final VarHandle ps_drop = LAYOUT.varHandle(groupElement("ps_drop"));
+	private static final VarHandle ps_drop = LAYOUT.select(groupElement("ps_drop")).varHandle();
 
 	/** The Constant ps_ifdrop. */
-	private static final VarHandle ps_ifdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+	private static final VarHandle ps_ifdrop = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
 
 	/** The Constant ps_capt. */
-	private static final VarHandle ps_capt = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+	private static final VarHandle ps_capt = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
 
 	/** The Constant ps_sent. */
-	private static final VarHandle ps_sent = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+	private static final VarHandle ps_sent = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
 
 	/** The Constant ps_netdrop. */
-	private static final VarHandle ps_netdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+	private static final VarHandle ps_netdrop = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
 
 	/**
 	 * Of memory platform dependent.
