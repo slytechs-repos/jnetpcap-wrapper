@@ -248,15 +248,13 @@ enum SaLayout {
 	 * @param elements the elements
 	 */
 	SaLayout(String path, PathElement... elements) {
-		PathElement[] parsed = path(path);
 		fullPaths = Stream.concat(Stream.of(path(path)), Stream.of(elements))
 				.toArray(PathElement[]::new);
 
 		if (path.endsWith(".last"))
 			this.varHandle = null;
 		else
-			this.varHandle = Initializer.SOCK_ADDR_LAYOUT.varHandle(fullPaths);
-
+			this.varHandle = Initializer.SOCK_ADDR_LAYOUT.select(fullPaths).varHandle();
 	}
 
 	/**
