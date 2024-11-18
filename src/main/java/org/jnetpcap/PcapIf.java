@@ -34,7 +34,6 @@ import org.jnetpcap.SockAddr.InetSockAddr;
 import org.jnetpcap.constant.PcapIfFlag;
 import org.jnetpcap.constant.SockAddrFamily;
 import org.jnetpcap.internal.ForeignUtils;
-import org.jnetpcap.util.PcapUtils;
 
 import static java.lang.foreign.MemoryLayout.*;
 import static java.lang.foreign.MemoryLayout.PathElement.*;
@@ -385,8 +384,6 @@ public class PcapIf {
 					.map(PcapAddr::socketAddress)
 					.map(InetSockAddr::address)
 					.orElseThrow();
-
-			String str = PcapUtils.toAddressString(ip4);
 
 			return NetworkInterface.getByInetAddress(InetAddress.getByAddress(ip4)).getHardwareAddress();
 		} catch (Throwable e) {}
