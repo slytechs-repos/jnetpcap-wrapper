@@ -20,7 +20,6 @@ import static org.jnetpcap.constant.PcapConstants.*;
 import static org.jnetpcap.internal.UnsafePcapHandle.*;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.util.Objects;
@@ -150,7 +149,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	 * @see {@code const u_char *pcap_next(pcap_t *p, struct pcap_pkthdr *h)}
 	 * @since libpcap 0.4
 	 */
-	private static final PcapForeignDowncall pcap_next;
+	@SuppressWarnings("unused")
+	private static final PcapForeignDowncall pcap_next; // pcap_next is used from within the dispatcher now
 
 	/**
 	 * The Constant pcap_perror.
@@ -376,7 +376,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			throws PcapException {
 
 		try (var arena = newArena()) {
-			MemorySegment c_device = arena.allocateFrom(requireNonNull(device, "device"), java.nio.charset.StandardCharsets.UTF_8);
+			MemorySegment c_device = arena.allocateFrom(requireNonNull(device, "device"),
+					java.nio.charset.StandardCharsets.UTF_8);
 			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
 			int c_snaplen = snaplen;
@@ -387,7 +388,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 					errbuf);
 
 			if (ForeignUtils.isNullAddress(pcapPointer))
-				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
+				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getString(0,
+						java.nio.charset.StandardCharsets.UTF_8));
 
 			var abi = PcapHeaderABI.selectLiveAbi();
 
@@ -456,7 +458,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			MemorySegment pcapPointer = pcap_open_offline.invokeObj(c_fname, errbuf);
 
 			if (ForeignUtils.isNullAddress(pcapPointer))
-				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
+				throw new PcapException(PcapCode.PCAP_ERROR, errbuf.getString(0,
+						java.nio.charset.StandardCharsets.UTF_8));
 
 			boolean isSwapped = pcap_is_swapped
 					.invokeInt(pcapPointer) == 1;
@@ -499,13 +502,6 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 
 		return ForeignUtils.toJavaString(c_str);
 	}
-
-	/**
-	 * The pcap header buffer for use with next() call. Header and packet references
-	 * are valid only from call to call and then out of pcap arena.
-	 */
-	private final MemorySegment PCAP0_4_HEADER_BUFFER = Arena.ofAuto()
-			.allocate(PcapHeaderABI.nativeAbi().headerLength());
 
 	/**
 	 * Packet dispatcher implementation. The standard dispatcher just calls
@@ -647,8 +643,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			/* Only valid for duration of this callback */
 			try (var arena = newArena()) {
 
-				MemorySegment mHdr = h.reinterpret(hdrlen, arena, __ ->{});
-				MemorySegment mPkt = p.reinterpret(caplen, arena, __ ->{});
+				MemorySegment mHdr = h.reinterpret(hdrlen, arena, __ -> {});
+				MemorySegment mPkt = p.reinterpret(caplen, arena, __ -> {});
 
 				/*
 				 * If user value is address we forward the upcall user address.
@@ -686,7 +682,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
-	 * @see org.jnetpcap.Pcap#dispatch(int, org.jnetpcap.PcapHandler.NativeCallback, java.lang.foreign.MemorySegment)
+	 * @see org.jnetpcap.Pcap#dispatch(int, org.jnetpcap.PcapHandler.NativeCallback,
+	 *      java.lang.foreign.MemorySegment)
 	 */
 	@Override
 	public int dispatch(int count, PcapHandler.NativeCallback handler, MemorySegment user) {
@@ -830,7 +827,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
-	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.NativeCallback, java.lang.foreign.MemorySegment)
+	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.NativeCallback,
+	 *      java.lang.foreign.MemorySegment)
 	 */
 	@Override
 	public int loop(int count, PcapHandler.NativeCallback handler, MemorySegment user) {
@@ -868,7 +866,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	}
 
 	/**
-	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.OfMemorySegment, java.lang.Object)
+	 * @see org.jnetpcap.Pcap#loop(int, org.jnetpcap.PcapHandler.OfMemorySegment,
+	 *      java.lang.Object)
 	 */
 	@Override
 	public <U> int loop(int count, PcapHandler.OfMemorySegment<U> handler, U user) {
@@ -881,8 +880,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 			/* Only valid for duration of this callback */
 			try (var arena = newArena()) {
 
-				MemorySegment mHdr = h.reinterpret(hdrlen, arena, __ ->{});
-				MemorySegment mPkt = p.reinterpret(caplen, arena, __ ->{});
+				MemorySegment mHdr = h.reinterpret(hdrlen, arena, __ -> {});
+				MemorySegment mPkt = p.reinterpret(caplen, arena, __ -> {});
 
 				/*
 				 * If user value is address we forward the upcall user address.
@@ -945,7 +944,8 @@ public sealed class Pcap0_4 extends Pcap permits Pcap0_5 {
 	@Override
 	public final Pcap0_4 perror(String prefix) {
 		try (var arena = newArena()) {
-			pcap_perror.invokeVoid(getPcapHandle(), arena.allocateFrom(prefix), java.nio.charset.StandardCharsets.UTF_8);
+			pcap_perror.invokeVoid(getPcapHandle(), arena.allocateFrom(prefix),
+					java.nio.charset.StandardCharsets.UTF_8);
 
 			return this;
 		}

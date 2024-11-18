@@ -134,7 +134,8 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 *      const u_char **pkt_data)}
 	 * @since libpcap 0.8
 	 */
-	private static final PcapForeignDowncall pcap_next_ex;
+	@SuppressWarnings("unused")
+	private static final PcapForeignDowncall pcap_next_ex; // Used within the dispatcher now
 
 	/**
 	 * The Constant pcap_list_datalinks.

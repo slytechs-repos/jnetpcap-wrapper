@@ -297,6 +297,7 @@ public enum SockAddrFamily implements IntSupplier {
 	/**
 	 * MacOS socket.h AF constants.
 	 */
+	@SuppressWarnings("unused")
 	private final class Bsd {
 
 		/** Undefined AF. */
@@ -416,6 +417,7 @@ public enum SockAddrFamily implements IntSupplier {
 	/**
 	 * POSIX socket.h AF constants.
 	 */
+	@SuppressWarnings("unused")
 	private final class Posix {
 
 		/** Undefined AF. */

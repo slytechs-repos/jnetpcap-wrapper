@@ -673,6 +673,7 @@ public class SockAddr {
 	}
 
 	/** The Constant MIM_SOCKADDR_STRUCT_LEN. */
+	@SuppressWarnings("unused")
 	private final static int MIM_SOCKADDR_STRUCT_LEN = 16;
 
 	/**

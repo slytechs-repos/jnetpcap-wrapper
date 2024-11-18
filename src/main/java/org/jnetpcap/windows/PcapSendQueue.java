@@ -85,7 +85,6 @@ public class PcapSendQueue implements AutoCloseable {
 	};
 	 * </pre>
 	 */
-	@SuppressWarnings("unused")
 	private static class Struct {
 
 		/** The Constant LAYOUT. */
