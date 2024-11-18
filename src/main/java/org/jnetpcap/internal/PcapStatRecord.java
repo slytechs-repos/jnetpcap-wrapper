@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,22 +79,26 @@ public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long 
 	);
 
 	/** The Constant ps_recv. */
-	private static final VarHandle ps_recv = LAYOUT.select(groupElement("ps_recv")).varHandle();
+	private static final VarHandle ps_recv = LAYOUT.varHandle(groupElement("ps_recv"));
 
 	/** The Constant ps_drop. */
-	private static final VarHandle ps_drop = LAYOUT.select(groupElement("ps_drop")).varHandle();
+	private static final VarHandle ps_drop = LAYOUT.varHandle(groupElement("ps_drop"));
 
 	/** The Constant ps_ifdrop. */
-	private static final VarHandle ps_ifdrop = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
+	private static final VarHandle ps_ifdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
 
 	/** The Constant ps_capt. */
-	private static final VarHandle ps_capt = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
+	private static final VarHandle ps_capt = LAYOUT.varHandle(groupElement("ps_ifdrop"));
 
 	/** The Constant ps_sent. */
-	private static final VarHandle ps_sent = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
+	private static final VarHandle ps_sent = LAYOUT.varHandle(groupElement("ps_ifdrop"));
 
 	/** The Constant ps_netdrop. */
-	private static final VarHandle ps_netdrop = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
+	private static final VarHandle ps_netdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+
+	public static long sizeOf() {
+		return LAYOUT.byteSize();
+	}
 
 	/**
 	 * Of memory platform dependent.

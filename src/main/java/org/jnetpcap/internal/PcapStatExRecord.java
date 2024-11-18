@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,74 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
 import static java.lang.foreign.ValueLayout.*;
 
 /**
- * The PcapStatExRecord.
- *
- * @author Sly Technologies Inc
- * @author repos@slytechs.com
- * @author mark
+ * Represents extended statistics about network interface performance and error
+ * counts. This record encapsulates both standard pcap statistics and additional
+ * network interface statistics typically available on Linux and Windows
+ * systems.
+ * 
+ * <h2>Statistics Categories</h2> The statistics are grouped into several
+ * categories:
+ * 
+ * <h3>1. Basic Pcap Statistics</h3>
+ * <ul>
+ * <li>recv - Packets received by the interface</li>
+ * <li>drop - Packets dropped by the interface due to insufficient buffer
+ * space</li>
+ * <li>ifdrop - Packets dropped by the interface driver</li>
+ * <li>capt - Packets actually captured and processed</li>
+ * <li>sent - Packets sent by the interface</li>
+ * <li>netdrop - Packets dropped by the network</li>
+ * </ul>
+ * 
+ * <h3>2. General Interface Statistics</h3>
+ * <ul>
+ * <li>rxPackets/txPackets - Total packets received/transmitted</li>
+ * <li>rxBytes/txBytes - Total bytes received/transmitted</li>
+ * <li>rxErrors/txErrors - Total error counts for receive/transmit</li>
+ * <li>rxDropped/txDropped - Packets dropped during receive/transmit</li>
+ * <li>multicast - Multicast packets received</li>
+ * <li>collisions - Number of collisions detected</li>
+ * </ul>
+ * 
+ * <h3>3. Detailed Receive Errors</h3>
+ * <ul>
+ * <li>rxLengthErrors - Packets dropped due to incorrect length</li>
+ * <li>rxOverErrors - Receiver ring buffer overflow errors</li>
+ * <li>rxCrcErrors - Packets with CRC/FCS errors</li>
+ * <li>rxFrameErrors - Packets with frame alignment errors</li>
+ * <li>rxFifoErrors - FIFO buffer errors</li>
+ * <li>rxMissedErrors - Packets missed due to lack of resources</li>
+ * </ul>
+ * 
+ * <h3>4. Detailed Transmit Errors</h3>
+ * <ul>
+ * <li>txAbortedErrors - Transmission aborted errors</li>
+ * <li>txCarrierErrors - Carrier errors during transmission</li>
+ * <li>txFifoErrors - FIFO buffer errors during transmission</li>
+ * <li>txHeartbeatErrors - Heartbeat errors during transmission</li>
+ * <li>txWindowErrors - TCP window errors during transmission</li>
+ * </ul>
+ * 
+ * <h2>Usage Example</h2>
+ * 
+ * <pre>{@code 
+ * PcapStatExRecord stats = ...;
+ * 
+ * // Check basic packet statistics
+ * long packetsReceived = stats.recv();
+ * long packetsDropped = stats.drop();
+ * 
+ * // Analyze error rates
+ * double errorRate = (double) stats.rxErrors() / stats.rxPackets();
+ * 
+ * // Check specific error types
+ * if (stats.rxCrcErrors() > 0) {
+ *     // Handle CRC errors
+ * }
+ * }</pre>
+ * 
+ * @see org.jnetpcap.windows.PcapStatEx
+ * @author Mark Bednarczyk
  */
 public record PcapStatExRecord(
 		int size,
@@ -107,91 +170,106 @@ public record PcapStatExRecord(
 	public static final int PCAP_STAT_EX_LENGTH = (int) LAYOUT.byteSize();
 
 	/** The Constant ps_recv. */
-	private static final VarHandle ps_recv = LAYOUT.select(groupElement("ps_recv")).varHandle();
+	private static final VarHandle ps_recv = LAYOUT.varHandle(groupElement("ps_recv"));
 
 	/** The Constant ps_drop. */
-	private static final VarHandle ps_drop = LAYOUT.select(groupElement("ps_drop")).varHandle();
+	private static final VarHandle ps_drop = LAYOUT.varHandle(groupElement("ps_drop"));
 
 	/** The Constant ps_ifdrop. */
-	private static final VarHandle ps_ifdrop = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
+	private static final VarHandle ps_ifdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
 
 	/** The Constant ps_capt. */
-	private static final VarHandle ps_capt = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
+	private static final VarHandle ps_capt = LAYOUT.varHandle(groupElement("ps_ifdrop"));
 
 	/** The Constant ps_sent. */
-	private static final VarHandle ps_sent = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
+	private static final VarHandle ps_sent = LAYOUT.varHandle(groupElement("ps_ifdrop"));
 
 	/** The Constant ps_netdrop. */
-	private static final VarHandle ps_netdrop = LAYOUT.select(groupElement("ps_ifdrop")).varHandle();
+	private static final VarHandle ps_netdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
 
 	/** The Constant rx_packets. */
-	private static final VarHandle rx_packets = LAYOUT.select(groupElement("rx_packets")).varHandle();
+	private static final VarHandle rx_packets = LAYOUT.varHandle(groupElement("rx_packets"));
 
 	/** The Constant tx_packets. */
-	private static final VarHandle tx_packets = LAYOUT.select(groupElement("tx_packets")).varHandle();
+	private static final VarHandle tx_packets = LAYOUT.varHandle(groupElement("tx_packets"));
 
 	/** The Constant rx_bytes. */
-	private static final VarHandle rx_bytes = LAYOUT.select(groupElement("rx_bytes")).varHandle();
+	private static final VarHandle rx_bytes = LAYOUT.varHandle(groupElement("rx_bytes"));
 
 	/** The Constant tx_bytes. */
-	private static final VarHandle tx_bytes = LAYOUT.select(groupElement("tx_bytes")).varHandle();
+	private static final VarHandle tx_bytes = LAYOUT.varHandle(groupElement("tx_bytes"));
 
 	/** The Constant rx_errors. */
-	private static final VarHandle rx_errors = LAYOUT.select(groupElement("rx_errors")).varHandle();
+	private static final VarHandle rx_errors = LAYOUT.varHandle(groupElement("rx_errors"));
 
 	/** The Constant tx_errors. */
-	private static final VarHandle tx_errors = LAYOUT.select(groupElement("tx_errors")).varHandle();
+	private static final VarHandle tx_errors = LAYOUT.varHandle(groupElement("tx_errors"));
 
 	/** The Constant rx_dropped. */
-	private static final VarHandle rx_dropped = LAYOUT.select(groupElement("rx_dropped")).varHandle();
+	private static final VarHandle rx_dropped = LAYOUT.varHandle(groupElement("rx_dropped"));
 
 	/** The Constant tx_dropped. */
-	private static final VarHandle tx_dropped = LAYOUT.select(groupElement("tx_dropped")).varHandle();
+	private static final VarHandle tx_dropped = LAYOUT.varHandle(groupElement("tx_dropped"));
 
 	/** The Constant multicast_cnt. */
-	private static final VarHandle multicast_cnt = LAYOUT.select(groupElement("multicast_cnt")).varHandle();
+	private static final VarHandle multicast_cnt = LAYOUT.varHandle(groupElement("multicast_cnt"));
 
 	/** The Constant collisions_cnt. */
-	private static final VarHandle collisions_cnt = LAYOUT.select(groupElement("collisions_cnt")).varHandle();
+	private static final VarHandle collisions_cnt = LAYOUT.varHandle(groupElement("collisions_cnt"));
 
 	/** The Constant rx_length_errors. */
-	private static final VarHandle rx_length_errors = LAYOUT.select(groupElement("rx_length_errors")).varHandle();
+	private static final VarHandle rx_length_errors = LAYOUT.varHandle(groupElement("rx_length_errors"));
 
 	/** The Constant rx_over_errors. */
-	private static final VarHandle rx_over_errors = LAYOUT.select(groupElement("rx_over_errors")).varHandle();
+	private static final VarHandle rx_over_errors = LAYOUT.varHandle(groupElement("rx_over_errors"));
 
 	/** The Constant rx_crc_errors. */
-	private static final VarHandle rx_crc_errors = LAYOUT.select(groupElement("rx_crc_errors")).varHandle();
+	private static final VarHandle rx_crc_errors = LAYOUT.varHandle(groupElement("rx_crc_errors"));
 
 	/** The Constant rx_frame_errors. */
-	private static final VarHandle rx_frame_errors = LAYOUT.select(groupElement("rx_frame_errors")).varHandle();
+	private static final VarHandle rx_frame_errors = LAYOUT.varHandle(groupElement("rx_frame_errors"));
 
 	/** The Constant rx_fifo_errors. */
-	private static final VarHandle rx_fifo_errors = LAYOUT.select(groupElement("rx_fifo_errors")).varHandle();
+	private static final VarHandle rx_fifo_errors = LAYOUT.varHandle(groupElement("rx_fifo_errors"));
 
 	/** The Constant rx_missed_errors. */
-	private static final VarHandle rx_missed_errors = LAYOUT.select(groupElement("rx_missed_errors")).varHandle();
+	private static final VarHandle rx_missed_errors = LAYOUT.varHandle(groupElement("rx_missed_errors"));
 
 	/** The Constant tx_aborted_errors. */
-	private static final VarHandle tx_aborted_errors = LAYOUT.select(groupElement("tx_aborted_errors")).varHandle();
+	private static final VarHandle tx_aborted_errors = LAYOUT.varHandle(groupElement("tx_aborted_errors"));
 
 	/** The Constant tx_carrier_errors. */
-	private static final VarHandle tx_carrier_errors = LAYOUT.select(groupElement("tx_carrier_errors")).varHandle();
+	private static final VarHandle tx_carrier_errors = LAYOUT.varHandle(groupElement("tx_carrier_errors"));
 
 	/** The Constant tx_fifo_errors. */
-	private static final VarHandle tx_fifo_errors = LAYOUT.select(groupElement("tx_fifo_errors")).varHandle();
+	private static final VarHandle tx_fifo_errors = LAYOUT.varHandle(groupElement("tx_fifo_errors"));
 
 	/** The Constant tx_heartbeat_errors. */
-	private static final VarHandle tx_heartbeat_errors = LAYOUT.select(groupElement("tx_heartbeat_errors")).varHandle();
+	private static final VarHandle tx_heartbeat_errors = LAYOUT.varHandle(groupElement("tx_heartbeat_errors"));
 
 	/** The Constant tx_window_errors. */
-	private static final VarHandle tx_window_errors = LAYOUT.select(groupElement("tx_window_errors")).varHandle();
+	private static final VarHandle tx_window_errors = LAYOUT.varHandle(groupElement("tx_window_errors"));
 
 	/**
-	 * Instantiates a new pcap stat ex record.
+	 * Returns the size of the native pcap_stat_ex structure in bytes. This value is
+	 * platform-dependent and may vary based on the operating system and
+	 * architecture.
 	 *
-	 * @param size the size
-	 * @param mseg the mseg
+	 * @return The size of the native structure in bytes
+	 */
+	public static long sizeOf() {
+		return LAYOUT.byteSize();
+	}
+
+	/**
+	 * Creates a new PcapStatExRecord instance from a native memory segment. This
+	 * constructor reads all statistics fields from the native memory and converts
+	 * them to appropriate Java types.
+	 *
+	 * @param size The expected size of the native structure
+	 * @param mseg The memory segment containing the native pcap_stat_ex structure
+	 * @throws IllegalArgumentException if the memory segment size doesn't match the
+	 *                                  expected size
 	 */
 	public PcapStatExRecord(int size, MemorySegment mseg) {
 		this(
