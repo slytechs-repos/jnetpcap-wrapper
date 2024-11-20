@@ -447,12 +447,12 @@ public class PcapIf {
 	 */
 	@SuppressWarnings({ "unchecked"
 	})
-	public <T extends SockAddr> Optional<PcapAddr<T>> findAddressOfType(Class<T> faimlyClassType) {
+	public <T extends SockAddr> Optional<PcapAddr<T>> findAddressOfType(Class<T> familyClassType) {
 
 		var list = addresses();
 
 		return list.stream()
-				.filter(a -> faimlyClassType.isAssignableFrom(a.addr.getClass()))
+				.filter(a -> familyClassType.isAssignableFrom(a.addr.getClass()))
 				.map(a -> (PcapAddr<T>) a)
 				.findFirst();
 	}
