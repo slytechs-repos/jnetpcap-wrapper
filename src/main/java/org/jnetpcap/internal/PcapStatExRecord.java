@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,7 @@
  */
 package org.jnetpcap.internal;
 
-import static java.lang.Integer.toUnsignedLong;
-import static java.lang.foreign.MemoryLayout.structLayout;
-import static java.lang.foreign.MemoryLayout.PathElement.groupElement;
-import static java.lang.foreign.ValueLayout.JAVA_INT;
-import static java.lang.foreign.ValueLayout.JAVA_LONG;
+import static java.lang.Integer.*;
 
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
@@ -27,12 +23,79 @@ import java.lang.invoke.VarHandle;
 
 import org.jnetpcap.windows.PcapStatEx;
 
+import static java.lang.foreign.MemoryLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 /**
- * The PcapStatExRecord.
- *
- * @author Sly Technologies Inc
- * @author repos@slytechs.com
- * @author mark
+ * Represents extended statistics about network interface performance and error
+ * counts. This record encapsulates both standard pcap statistics and additional
+ * network interface statistics typically available on Linux and Windows
+ * systems.
+ * 
+ * <h2>Statistics Categories</h2> The statistics are grouped into several
+ * categories:
+ * 
+ * <h3>1. Basic Pcap Statistics</h3>
+ * <ul>
+ * <li>recv - Packets received by the interface</li>
+ * <li>drop - Packets dropped by the interface due to insufficient buffer
+ * space</li>
+ * <li>ifdrop - Packets dropped by the interface driver</li>
+ * <li>capt - Packets actually captured and processed</li>
+ * <li>sent - Packets sent by the interface</li>
+ * <li>netdrop - Packets dropped by the network</li>
+ * </ul>
+ * 
+ * <h3>2. General Interface Statistics</h3>
+ * <ul>
+ * <li>rxPackets/txPackets - Total packets received/transmitted</li>
+ * <li>rxBytes/txBytes - Total bytes received/transmitted</li>
+ * <li>rxErrors/txErrors - Total error counts for receive/transmit</li>
+ * <li>rxDropped/txDropped - Packets dropped during receive/transmit</li>
+ * <li>multicast - Multicast packets received</li>
+ * <li>collisions - Number of collisions detected</li>
+ * </ul>
+ * 
+ * <h3>3. Detailed Receive Errors</h3>
+ * <ul>
+ * <li>rxLengthErrors - Packets dropped due to incorrect length</li>
+ * <li>rxOverErrors - Receiver ring buffer overflow errors</li>
+ * <li>rxCrcErrors - Packets with CRC/FCS errors</li>
+ * <li>rxFrameErrors - Packets with frame alignment errors</li>
+ * <li>rxFifoErrors - FIFO buffer errors</li>
+ * <li>rxMissedErrors - Packets missed due to lack of resources</li>
+ * </ul>
+ * 
+ * <h3>4. Detailed Transmit Errors</h3>
+ * <ul>
+ * <li>txAbortedErrors - Transmission aborted errors</li>
+ * <li>txCarrierErrors - Carrier errors during transmission</li>
+ * <li>txFifoErrors - FIFO buffer errors during transmission</li>
+ * <li>txHeartbeatErrors - Heartbeat errors during transmission</li>
+ * <li>txWindowErrors - TCP window errors during transmission</li>
+ * </ul>
+ * 
+ * <h2>Usage Example</h2>
+ * 
+ * <pre>{@code 
+ * PcapStatExRecord stats = ...;
+ * 
+ * // Check basic packet statistics
+ * long packetsReceived = stats.recv();
+ * long packetsDropped = stats.drop();
+ * 
+ * // Analyze error rates
+ * double errorRate = (double) stats.rxErrors() / stats.rxPackets();
+ * 
+ * // Check specific error types
+ * if (stats.rxCrcErrors() > 0) {
+ *     // Handle CRC errors
+ * }
+ * }</pre>
+ * 
+ * @see org.jnetpcap.windows.PcapStatEx
+ * @author Mark Bednarczyk
  */
 public record PcapStatExRecord(
 		int size,
@@ -188,10 +251,25 @@ public record PcapStatExRecord(
 	private static final VarHandle tx_window_errors = LAYOUT.varHandle(groupElement("tx_window_errors"));
 
 	/**
-	 * Instantiates a new pcap stat ex record.
+	 * Returns the size of the native pcap_stat_ex structure in bytes. This value is
+	 * platform-dependent and may vary based on the operating system and
+	 * architecture.
 	 *
-	 * @param size the size
-	 * @param mseg the mseg
+	 * @return The size of the native structure in bytes
+	 */
+	public static long sizeOf() {
+		return LAYOUT.byteSize();
+	}
+
+	/**
+	 * Creates a new PcapStatExRecord instance from a native memory segment. This
+	 * constructor reads all statistics fields from the native memory and converts
+	 * them to appropriate Java types.
+	 *
+	 * @param size The expected size of the native structure
+	 * @param mseg The memory segment containing the native pcap_stat_ex structure
+	 * @throws IllegalArgumentException if the memory segment size doesn't match the
+	 *                                  expected size
 	 */
 	public PcapStatExRecord(int size, MemorySegment mseg) {
 		this(

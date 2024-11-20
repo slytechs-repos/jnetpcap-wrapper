@@ -28,12 +28,49 @@ import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 
 /**
- * A queue of raw packets that will be sent to the network with {@code transmit}
- * on Microsoft Windows platforms.
- *
- * @author Sly Technologies Inc
- * @author repos@slytechs.com
- * @author mark
+ * Represents a queue of raw packets for efficient batch transmission on
+ * Microsoft Windows platforms. This class provides functionality to queue
+ * multiple packets and transmit them either as quickly as possible or with
+ * precise timing synchronization.
+ * 
+ * <h2>Native Structure</h2> Maps to the native {@code pcap_send_queue}
+ * structure:
+ * 
+ * <pre>{@code
+ * struct pcap_send_queue {
+ *     u_int maxlen;  // Maximum size of the queue buffer in bytes
+ *     u_int len;     // Current size of the queue in bytes
+ *     char *buffer;  // Buffer containing queued packets
+ * };
+ * }</pre>
+ * 
+ * <h2>Usage Example</h2>
+ * 
+ * <pre>{@code
+ * try (PcapSendQueue queue = new PcapSendQueue(65536)) { // 64KB queue
+ * 	// Queue multiple packets
+ * 	queue.queue(header1, packet1);
+ * 	queue.queue(header2, packet2);
+ * 
+ * 	// Transmit all queued packets with timing synchronization
+ * 	int bytesSent = queue.transmit(pcapHandle, true);
+ * }
+ * }</pre>
+ * 
+ * <h2>Performance Considerations</h2>
+ * <ul>
+ * <li>Using a send queue is more efficient than multiple
+ * {@code pcap_sendpacket()} calls due to reduced context switching</li>
+ * <li>Synchronized transmission (sync=true) provides microsecond precision but
+ * requires more CPU resources</li>
+ * <li>The CRC is automatically calculated by the network interface</li>
+ * </ul>
+ * 
+ * <h2>Platform Support</h2> This functionality is only available on Microsoft
+ * Windows platforms through WinPcap/Npcap.
+ * 
+ * @see org.jnetpcap.PcapHeader
+ * @since WinPcap 1.0
  */
 public class PcapSendQueue implements AutoCloseable {
 
@@ -48,7 +85,6 @@ public class PcapSendQueue implements AutoCloseable {
 	};
 	 * </pre>
 	 */
-	@SuppressWarnings("unused")
 	private static class Struct {
 
 		/** The Constant LAYOUT. */
@@ -142,9 +178,11 @@ public class PcapSendQueue implements AutoCloseable {
 	private final Arena arena;
 
 	/**
-	 * Instantiates a new pcap send queue.
+	 * Creates a new send queue with specified capacity. The capacity determines the
+	 * maximum amount of packet data that can be queued.
 	 *
-	 * @param capacity Maximum size of the queue, in bytes
+	 * @param capacity Maximum size of the queue in bytes
+	 * @throws OutOfMemoryError if native memory allocation fails
 	 */
 	public PcapSendQueue(int capacity) {
 		this.arena = Arena.ofShared();
@@ -152,9 +190,10 @@ public class PcapSendQueue implements AutoCloseable {
 	}
 
 	/**
-	 * Close and destroy the send queue.
+	 * Closes and deallocates the send queue. This method must be called to prevent
+	 * memory leaks.
 	 *
-	 * @see java.lang.AutoCloseable#close()
+	 * @throws IllegalStateException if the queue has already been closed
 	 */
 	@Override
 	public void close() {
@@ -180,53 +219,26 @@ public class PcapSendQueue implements AutoCloseable {
 	}
 
 	/**
-	 * Add a packet to a send queue.
+	 * Adds a packet to the end of the send queue using native memory segments. Both
+	 * packet header and data must be properly formatted in native memory.
 	 *
-	 * <p>
-	 * pcap_sendqueue_queue() adds a packet at the end of the send queue pointed by
-	 * the queue parameter. pkt_header points to a pcap_pkthdr structure with the
-	 * timestamp and the length of the packet, pkt_data points to a buffer with the
-	 * data of the packet.
-	 * </p>
-	 * <p>
-	 * The pcap_pkthdr structure is the same used by WinPcap and libpcap to store
-	 * the packets in a file, therefore sending a capture file is straightforward.
-	 * 'Raw packet' means that the sending application will have to include the
-	 * protocol headers, since every packet is sent to the network 'as is'. The CRC
-	 * of the packets needs not to be calculated, because it will be transparently
-	 * added by the network interface.
-	 * </p>
-	 *
-	 * @param header the header
-	 * @param packet the packet
-	 * @return the int
+	 * @param header The pcap_pkthdr structure containing timestamp and length
+	 * @param packet The packet data buffer
+	 * @return 0 on success, -1 on failure (queue full)
 	 */
 	public int queue(MemorySegment header, MemorySegment packet) {
 		return pcap_sendqueue_queue.invokeInt(queue_ptr, header, packet);
 	}
 
 	/**
-	 * Add a packet to a send queue.
+	 * Adds a packet to the end of the send queue using Java byte array.
+	 * Automatically handles conversion to native memory format.
 	 *
-	 * <p>
-	 * pcap_sendqueue_queue() adds a packet at the end of the send queue pointed by
-	 * the queue parameter. pkt_header points to a pcap_pkthdr structure with the
-	 * timestamp and the length of the packet, pkt_data points to a buffer with the
-	 * data of the packet.
-	 * </p>
-	 * <p>
-	 * The pcap_pkthdr structure is the same used by WinPcap and libpcap to store
-	 * the packets in a file, therefore sending a capture file is straightforward.
-	 * 'Raw packet' means that the sending application will have to include the
-	 * protocol headers, since every packet is sent to the network 'as is'. The CRC
-	 * of the packets needs not to be calculated, because it will be transparently
-	 * added by the network interface.
-	 * </p>
-	 *
-	 * @param header the header
-	 * @param packet the packet
-	 * @param offset the offset
-	 * @return the int
+	 * @param header The pcap header containing timestamp and length
+	 * @param packet The packet data as byte array
+	 * @param offset Starting offset in the packet array
+	 * @return 0 on success, -1 on failure
+	 * @throws IllegalArgumentException if offset is outside packet array bounds
 	 */
 	public int queue(PcapHeader header, byte[] packet, int offset) {
 		if (offset < 0 || offset >= packet.length)
@@ -246,54 +258,31 @@ public class PcapSendQueue implements AutoCloseable {
 	}
 
 	/**
-	 * Transmit all packets in the send queue.
-	 * <p>
-	 * This function transmits the content of a queue to the wire. p is a pointer to
-	 * the adapter on which the packets will be sent, queue points to a
-	 * pcap_send_queue structure containing the packets to send (see
-	 * pcap_sendqueue_alloc() and pcap_sendqueue_queue()), sync determines if the
-	 * send operation must be synchronized: if it is non-zero, the packets are sent
-	 * respecting the timestamps, otherwise they are sent as fast as possible.
-	 * </p>
-	 * <p>
-	 * The return value is the amount of bytes actually sent. If it is smaller than
-	 * the size parameter, an error occurred during the send. The error can be
-	 * caused by a driver/adapter problem or by an inconsistent/bogus send queue.
-	 * </p>
-	 * <p>
-	 * Note: Using this function is more efficient than issuing a series of
-	 * pcap_sendpacket(), because the packets are buffered in the kernel driver, so
-	 * the number of context switches is reduced. Therefore, expect a better
-	 * throughput when using pcap_sendqueue_transmit. When Sync is set to TRUE, the
-	 * packets are synchronized in the kernel with a high precision timestamp. This
-	 * requires a non-negligible amount of CPU, but allows normally to send the
-	 * packets with a precision of some microseconds (depending on the accuracy of
-	 * the performance counter of the machine). Such a precision cannot be reached
-	 * sending the packets with pcap_sendpacket().
-	 * </p>
-	 *
-	 * @param pcap_t the pcap t
-	 * @param sync   if true, the packets are synchronized in the kernel with a high
-	 *               precision timestamp
-	 * @return number of packets transmitted
+	 * Internal method to transmit all queued packets.
+	 * 
+	 * @param pcap_t The pcap handle to transmit on
+	 * @param sync   If true, maintains packet timing specified in headers. If
+	 *               false, sends as fast as possible.
+	 * @return The number of bytes actually transmitted, or less than queue size on
+	 *         error
 	 */
 	int transmit(MemorySegment pcap_t, boolean sync) {
 		return pcap_sendqueue_transmit.invokeInt(pcap_t, queue_ptr, sync ? 1 : 0);
 	}
 
 	/**
-	 * The value of the {code pcap_sendqueue_t.maxlen} structure field.
+	 * Returns the maximum capacity of the send queue in bytes.
 	 *
-	 * @return the maxlen or capacity, in bytes, of this send queue
+	 * @return The maximum number of bytes that can be queued
 	 */
 	public int maxlen() {
 		return (int) Struct.MAXLEN.get(queue_ptr, 0L);
 	}
 
 	/**
-	 * The value of the {code pcap_sendqueue_t.len} structure field.
+	 * Returns the current size of the queue in bytes.
 	 *
-	 * @return the length or current size, in bytes, of this send queue
+	 * @return The number of bytes currently queued
 	 */
 	public int len() {
 		return (int) Struct.LEN.get(queue_ptr, 0L);

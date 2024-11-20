@@ -39,6 +39,7 @@ public class PcapMessages extends PropertyResourceBundle {
 	}
 
 	/** The Constant BUNDLE. */
+	@SuppressWarnings("unused")
 	private static final ResourceBundle BUNDLE = ResourceBundle.getBundle("org.jnetpcap.PcapMessages");
 
 }

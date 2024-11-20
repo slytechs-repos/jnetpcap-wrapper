@@ -18,7 +18,7 @@
 package org.jnetpcap;
 
 import static java.util.concurrent.TimeUnit.*;
-import static org.jnetpcap.AbstractTestBase.TestExec.discardErrors;
+import static org.jnetpcap.AbstractTestBase.TestExec.*;
 import static org.jnetpcap.AbstractTestBase.TestPacket.*;
 import static org.jnetpcap.constant.PcapConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +33,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
 
 import org.jnetpcap.Pcap.LibraryPolicy;
 import org.jnetpcap.SockAddr.InetSockAddr;
@@ -211,6 +210,7 @@ class LibpcapApiTest extends AbstractTestBase {
 		assertDoesNotThrow(pcap::close);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	@Tag("user-permission")
 	void testCompileNoPcap() throws PcapException {
@@ -1068,7 +1068,8 @@ class LibpcapApiTest extends AbstractTestBase {
 		 * Compile our filter string and close the filter when we're done (free filter
 		 * native memory managed by BpFilter class)
 		 */
-		try (BpFilter filter = Pcap.compileNoPcap(SNAPLEN, DLT, FILTER_STR, OPTIMIZE, NETMASK);
+		try (@SuppressWarnings("deprecation")
+		BpFilter filter = Pcap.compileNoPcap(SNAPLEN, DLT, FILTER_STR, OPTIMIZE, NETMASK);
 				var arena = Arena.ofShared()) {
 			var abi = PcapHeaderABI.selectDeadAbi();
 
@@ -1563,7 +1564,6 @@ class LibpcapApiTest extends AbstractTestBase {
 		try {
 			pcap.setDirection(DIRECTION);
 		} catch(PcapException e) {
-			int c = e.getCode();
 			if (e.getCode() == PcapCode.PCAP_ERROR && e.toString().contains("direction")) {
 				Assumptions.abort("interface does not support setting DIRECTION");
 				return;

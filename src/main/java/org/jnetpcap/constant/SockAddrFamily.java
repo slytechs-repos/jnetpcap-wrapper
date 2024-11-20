@@ -23,9 +23,47 @@ import org.jnetpcap.PcapIf;
 import org.jnetpcap.internal.NativeABI;
 
 /**
- * The socket address protocol family constants. Each protocol family has a
- * different layout for physical addresses in SockAddr structure and is
- * essential to decoding those addresses correctly.
+ * Enumerates socket address protocol families and their platform-specific
+ * constants. This enum provides mapping between protocol families and their
+ * numeric identifiers on different platforms (BSD vs POSIX), along with
+ * structure layout information needed for correct address interpretation.
+ * 
+ * <h2>Platform Differences</h2> Socket address families are represented
+ * differently across platforms:
+ * <ul>
+ * <li>POSIX/Linux systems use different numeric values than BSD systems</li>
+ * <li>BSD systems include an extra length field (sa_len) in their
+ * structures</li>
+ * <li>Some address families are platform-specific and not available
+ * everywhere</li>
+ * </ul>
+ * 
+ * <h2>Common Address Families</h2>
+ * <ul>
+ * <li>{@code UNSPEC} - Unspecified protocol family</li>
+ * <li>{@code INET} - IPv4 Internet protocols</li>
+ * <li>{@code INET6} - IPv6 Internet protocols</li>
+ * <li>{@code PACKET} - Low-level packet interface (Linux)</li>
+ * <li>{@code LINK} - Link layer interface (BSD)</li>
+ * <li>{@code LOCAL/UNIX} - Local communication</li>
+ * </ul>
+ * 
+ * <h2>Usage Example</h2>
+ * 
+ * <pre>{@code
+ * 
+ * // Get the correct family constant for the current platform
+ * int familyValue = SockAddrFamily.INET.getAsInt();
+ * 
+ * // Look up a family from a native value
+ * Optional<SockAddrFamily> family = SockAddrFamily.lookup(2); // AF_INET
+ * 
+ * // Check if a network interface has an IPv6 address
+ * boolean hasIPv6 = SockAddrFamily.INET6.checkIfContains(networkInterface);
+ * }</pre>
+ * 
+ * @see org.jnetpcap.SockAddr
+ * @see org.jnetpcap.PcapIf
  */
 public enum SockAddrFamily implements IntSupplier {
 
@@ -259,6 +297,7 @@ public enum SockAddrFamily implements IntSupplier {
 	/**
 	 * MacOS socket.h AF constants.
 	 */
+	@SuppressWarnings("unused")
 	private final class Bsd {
 
 		/** Undefined AF. */
@@ -378,6 +417,7 @@ public enum SockAddrFamily implements IntSupplier {
 	/**
 	 * POSIX socket.h AF constants.
 	 */
+	@SuppressWarnings("unused")
 	private final class Posix {
 
 		/** Undefined AF. */
@@ -524,10 +564,13 @@ public enum SockAddrFamily implements IntSupplier {
 	}
 
 	/**
-	 * Lookup a constant AF using numerical, platform dependent value.
+	 * Looks up a socket address family constant using a platform-specific numeric
+	 * value. The lookup considers the current platform (BSD vs POSIX) when matching
+	 * values.
 	 *
-	 * @param family the AF value
-	 * @return optional constant
+	 * @param family The platform-specific address family value
+	 * @return An Optional containing the matching SockAddrFamily constant, or empty
+	 *         if not found
 	 */
 	public static Optional<SockAddrFamily> lookup(int family) {
 		return mapUsingAbi(family, NativeABI.current());
@@ -594,20 +637,22 @@ public enum SockAddrFamily implements IntSupplier {
 	}
 
 	/**
-	 * Check if a PcapIf (pcap device) contains this specific socket AF type.
+	 * Checks if a network interface (PcapIf) has an address of this family type.
+	 * This is useful for determining what types of addresses are available on a
+	 * particular interface.
 	 *
-	 * @param dev the pcap dev
-	 * @return true, if successful
+	 * @param dev The network interface to check
+	 * @return true if the interface has an address of this family type
 	 */
 	public boolean checkIfContains(PcapIf dev) {
 		return dev.findAddressOfFamily(this).isPresent();
 	}
 
 	/**
-	 * Gets the as int.
+	 * Returns the platform-specific numeric value for this address family. The
+	 * value returned depends on the current platform (BSD vs POSIX).
 	 *
-	 * @return the as int
-	 * @see java.util.function.IntSupplier#getAsInt()
+	 * @return The numeric address family value for the current platform
 	 */
 	@Override
 	public int getAsInt() {
@@ -618,10 +663,11 @@ public enum SockAddrFamily implements IntSupplier {
 	}
 
 	/**
-	 * Checks if is match.
+	 * Checks if a given numeric family value matches this address family constant
+	 * for the current platform.
 	 *
-	 * @param family the family
-	 * @return true, if is match
+	 * @param family The numeric family value to check
+	 * @return true if the value matches this family on the current platform
 	 */
 	public boolean isMatch(int family) {
 		boolean isBsd = NativeABI.isBsdAbi();
@@ -640,11 +686,12 @@ public enum SockAddrFamily implements IntSupplier {
 	}
 
 	/**
-	 * The total length of the socket address structure in bytes. The value is only
-	 * returned on certain platforms (BSD style sockets)..
+	 * Returns the total length of the socket address structure for this family. The
+	 * length is platform-dependent and primarily relevant for BSD systems which
+	 * include it in their socket address structures.
 	 *
-	 * @return the length of the address structure if available on this particular
-	 *         platform
+	 * @return An OptionalInt containing the structure length if defined for this
+	 *         family and platform, empty otherwise
 	 */
 	public OptionalInt totalLength() {
 		return saLen;

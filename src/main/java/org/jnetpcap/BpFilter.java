@@ -18,7 +18,6 @@ package org.jnetpcap;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
 import java.util.Objects;
 
@@ -27,23 +26,41 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
 import static java.lang.foreign.ValueLayout.*;
 
 /**
- * A Berkley Packet Filter program. BpFilter is applied to captured packets and
- * only the packets that match the filter program are reported.
- *
- * <p>
- * Each 64-bit instruction is the long int representation of the following bpf
- * structure found in C header file "pcap/bpf.h":
- * </p>
- *
- * <pre>
+ * Berkeley Packet Filter (BPF) program implementation for packet filtering.
+ * This class encapsulates a compiled BPF program that can be applied to network
+ * packets to determine if they match specific criteria.
+ * 
+ * <h2>Native Structure</h2> Each filter instruction is represented as a 64-bit
+ * value that maps to the following C structure from pcap/bpf.h:
+ * 
+ * <pre>{@code
  * struct bpf_insn {
- *		u_short	full;
- *		u_char 	jt;
- *		u_char 	jf;
- *		bpf_u_int32 k;
+ *     u_short     code;     // Operation code
+ *     u_char      jt;       // Jump if true
+ *     u_char      jf;       // Jump if false
+ *     bpf_u_int32 k;       // Generic field
  * };
- * </pre>
- *
+ * }</pre>
+ * 
+ * <h2>Usage Example</h2>
+ * 
+ * <pre>{@code
+ * // Create and compile a filter for TCP packets on port 80
+ * try (BpFilter filter = new BpFilter("tcp port 80")) {
+ *     Pcap pcap = ...;
+ *     pcap.compile(filter, true, 0);
+ *     pcap.setFilter(filter);
+ * }
+ * }</pre>
+ * 
+ * <h2>Memory Management</h2> The class implements AutoCloseable to ensure
+ * proper deallocation of native resources. The filter must be explicitly closed
+ * when no longer needed to prevent memory leaks.
+ * 
+ * @see Pcap#compile(String, boolean, int)
+ * @see <a href=
+ *      "https://www.tcpdump.org/manpages/pcap-filter.7.html">PCap-Filter man
+ *      page</a>
  * @author Sly Technologies
  * @author repos@slytechs.com
  */
@@ -68,7 +85,7 @@ public final class BpFilter implements AutoCloseable {
 				JAVA_INT, // Padded on 64-bit ABIs
 				ADDRESS.withName("bf_insns")
 
-				).withByteAlignment(JAVA_LONG.byteSize());
+		).withByteAlignment(JAVA_LONG.byteSize());
 
 		/** The Constant BF_LEN. */
 		private static final VarHandle BF_LEN = LAYOUT.varHandle(groupElement("bf_len"));
@@ -135,6 +152,21 @@ public final class BpFilter implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Deallocates a native BPF program. This is a convenience method equivalent to
+	 * calling {@link #close()} on the filter.
+	 *
+	 * @param bpFilter The filter to deallocate
+	 * @throws IllegalStateException if the filter has already been closed
+	 * @see Pcap#compile(String, boolean, int)
+	 * @see <a href=
+	 *      "https://man7.org/linux/man-pages/man3/pcap_freecode.3pcap.html">pcap_freecode</a>
+	 * @since libpcap 0.6
+	 */
+	public static void freeCode(BpFilter bpFilter) {
+		bpFilter.close();
+	}
+
 	/** The filter string. */
 	private final String filterString;
 
@@ -145,9 +177,11 @@ public final class BpFilter implements AutoCloseable {
 	private final Arena arena;
 
 	/**
-	 * Instantiates a new Berkley Packet filter with the given filter string.
+	 * Creates a new Berkeley Packet Filter with the specified filter expression.
+	 * The filter is not compiled until used with {@link Pcap#compile}.
 	 *
-	 * @param filterString the filter string that makes up this BP filter program
+	 * @param filterString The filter expression in pcap-filter syntax
+	 * @throws NullPointerException if filterString is null
 	 */
 	BpFilter(String filterString) {
 		this.filterString = Objects.requireNonNull(filterString, "filterString");
@@ -156,9 +190,12 @@ public final class BpFilter implements AutoCloseable {
 	}
 
 	/**
-	 * Address.
+	 * Returns the native memory address of the BPF program structure. This method
+	 * is intended for internal use by the JNetPcap library.
 	 *
-	 * @return the memory segment
+	 * @return A MemorySegment containing the native bpf_program structure
+	 * @throws IllegalStateException if the filter has been closed or not properly
+	 *                               allocated
 	 */
 	MemorySegment address() {
 		if (!arena.scope().isAlive())
@@ -168,9 +205,10 @@ public final class BpFilter implements AutoCloseable {
 	}
 
 	/**
-	 * Close and deallocate native BPF program.
+	 * Deallocates the native BPF program and associated resources. After calling
+	 * this method, the filter can no longer be used.
 	 *
-	 * @throws IllegalStateException thrown if already closed
+	 * @throws IllegalStateException if the filter has already been closed
 	 * @see java.lang.AutoCloseable#close()
 	 */
 	@Override
@@ -184,32 +222,22 @@ public final class BpFilter implements AutoCloseable {
 	}
 
 	/**
-	 * number of 64-bit long instructions.
+	 * Returns the number of instructions in this BPF program. Each instruction is a
+	 * 64-bit value containing operation code and parameters.
 	 *
-	 * @return number count of instructions
+	 * @return The number of BPF instructions in this filter
 	 */
 	public int length() {
 		return program.bf_len();
 	}
 
 	/**
-	 * @see java.lang.Object#toString()
+	 * Returns the original filter expression string used to create this filter.
+	 *
+	 * @return The filter expression string
 	 */
 	@Override
 	public String toString() {
 		return filterString;
-	}
-
-	/**
-	 * Deallocates a native BPF program.
-	 *
-	 * @param bpFilter the bpf
-	 * @see Pcap#compile(String, boolean, int)
-	 * @see <a href=
-	 *      "https://man7.org/linux/man-pages/man3/pcap_freecode.3pcap.html">pcap_freecode</a>
-	 * @since libpcap 0.6
-	 */
-	public static void freeCode(BpFilter bpFilter) {
-		bpFilter.close();
 	}
 }
