@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,36 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
 import static java.lang.foreign.ValueLayout.*;
 
 /**
- * MemoryLayout for SockAddr structures, including various AF_FAMILY struct
- * types.
+ * Defines the memory layouts for various socket address (sockaddr) structures
+ * used in network programming. This enum provides access to the internal
+ * structure and fields of different address family types supported by the
+ * operating system.
+ * 
+ * <h2>Supported Address Families</h2> The layout supports several socket
+ * address types:
+ * <ul>
+ * <li>AF_INET - IPv4 addresses (sockaddr_in)</li>
+ * <li>AF_INET6 - IPv6 addresses (sockaddr_in6)</li>
+ * <li>AF_IPX - IPX/SPX protocol addresses</li>
+ * <li>AF_PACKET - Low-level packet interface (Linux)</li>
+ * <li>AF_LINK - Link layer interface (BSD systems)</li>
+ * <li>AF_IRDA - Infrared Data Association (Windows)</li>
+ * </ul>
+ * 
+ * <h2>Structure Layout</h2> Each socket address structure begins with a common
+ * header:
+ * <ul>
+ * <li>BSD style: uint8_t sa_len + uint8_t sa_family</li>
+ * <li>POSIX style: uint16_t sa_family</li>
+ * </ul>
+ * 
+ * <p>
+ * Following the header is address family-specific data organized in a union
+ * structure.
+ * </p>
+ * 
+ * @see java.lang.foreign.MemoryLayout
+ * @see java.lang.foreign.MemorySegment
  */
 enum SaLayout {
 
@@ -47,7 +75,7 @@ enum SaLayout {
 	ADDR_LEN("u1.s1.addr_len"),
 
 	/** The data. */
-	DATA("u2.data", sequenceElement()),
+	DATA("u2.data", sequenceElement(0)),
 
 	/* AF_FAMILY type specific data */
 
@@ -58,7 +86,7 @@ enum SaLayout {
 	AF_INET_PORT("u2.af_inet.port"),
 
 	/** The af inet addr. */
-	AF_INET_ADDR("u2.af_inet.addr", sequenceElement()),
+	AF_INET_ADDR("u2.af_inet.addr", sequenceElement(0)),
 
 	/** The af inet6. */
 	AF_INET6("u2.af_inet6.last"),
@@ -73,7 +101,7 @@ enum SaLayout {
 	AF_INET6_SCOPEID("u2.af_inet6.scope_id"),
 
 	/** The af inet6 addr. */
-	AF_INET6_ADDR("u2.af_inet6.addr", sequenceElement()),
+	AF_INET6_ADDR("u2.af_inet6.addr", sequenceElement(0)),
 
 	/** The af ipx. */
 	AF_IPX("u2.af_ipx.last"),
@@ -82,7 +110,7 @@ enum SaLayout {
 	AF_IPX_NETNUM("u2.af_ipx.netnum"),
 
 	/** The af ipx nodenum. */
-	AF_IPX_NODENUM("u2.af_ipx.nodenum", sequenceElement()),
+	AF_IPX_NODENUM("u2.af_ipx.nodenum", sequenceElement(0)),
 
 	/** The af ipx socket. */
 	AF_IPX_SOCKET("u2.af_ipx.socket"),
@@ -106,7 +134,7 @@ enum SaLayout {
 	AF_PACKET_HALEN("u2.af_packet.halen"),
 
 	/** The af packet addr. */
-	AF_PACKET_ADDR("u2.af_packet.addr", sequenceElement()),
+	AF_PACKET_ADDR("u2.af_packet.addr", sequenceElement(0)),
 
 	/**
 	 * The sockaddr_dl structure, used with AF_LINK sockets on macOS to access
@@ -130,7 +158,7 @@ enum SaLayout {
 	AF_LINK_SLEN("u2.af_link.sdl_slen"),
 
 	/** The AF_LINK Interface name, link-layer address, and selector. */
-	AF_LINK_DATA("u2.af_link.sdl_data", sequenceElement()),
+	AF_LINK_DATA("u2.af_link.sdl_data", sequenceElement(0)),
 
 	/**
 	 * AF_IRDA definition (winsock2.h)
@@ -138,10 +166,10 @@ enum SaLayout {
 	AF_IRDA("u2.af_irda.last"),
 
 	/** 4-byte device identifier for the IrDA device */
-	AF_IRDA_DEVICE_ID("u2.af_irda.irdaDeviceID", sequenceElement()),
+	AF_IRDA_DEVICE_ID("u2.af_irda.irdaDeviceID", sequenceElement(0)),
 
 	/** null-terminated string specifying the service name */
-	AF_IRDA_SERVICE_NAME("u2.af_irda.irdaServiceName", sequenceElement()),
+	AF_IRDA_SERVICE_NAME("u2.af_irda.irdaServiceName", sequenceElement(0)),
 	;
 
 	/**
@@ -227,9 +255,11 @@ enum SaLayout {
 	private final static int MIM_SOCKADDR_ADDRESS_LEN = 14;
 
 	/**
-	 * Size of.
+	 * Returns the total size in bytes of the sockaddr structure layout. This size
+	 * accommodates the largest possible socket address structure among all
+	 * supported address families.
 	 *
-	 * @return the long
+	 * @return The size in bytes of the complete sockaddr structure
 	 */
 	public static long sizeOf() {
 		return Initializer.SOCK_ADDR_LAYOUT.byteSize();
@@ -248,7 +278,6 @@ enum SaLayout {
 	 * @param elements the elements
 	 */
 	SaLayout(String path, PathElement... elements) {
-		PathElement[] parsed = path(path);
 		fullPaths = Stream.concat(Stream.of(path(path)), Stream.of(elements))
 				.toArray(PathElement[]::new);
 
@@ -256,23 +285,26 @@ enum SaLayout {
 			this.varHandle = null;
 		else
 			this.varHandle = Initializer.SOCK_ADDR_LAYOUT.varHandle(fullPaths);
-
 	}
 
 	/**
-	 * Byte offset.
+	 * Returns the byte offset of this field within the sockaddr structure. Useful
+	 * for direct memory access to specific fields.
 	 *
-	 * @return the long
+	 * @return The byte offset of this field
 	 */
 	public long byteOffset() {
 		return Initializer.SOCK_ADDR_LAYOUT.byteOffset(fullPaths);
 	}
 
 	/**
-	 * Gets the.
+	 * Retrieves the value of this field from the given memory segment. The return
+	 * type depends on the field's data type in the native structure.
 	 *
-	 * @param mseg the mseg
-	 * @return the object
+	 * @param mseg The memory segment containing the sockaddr structure
+	 * @return The value of this field
+	 * @throws IllegalStateException if this enum constant represents a structure
+	 *                               rather than a field
 	 */
 	public Object get(MemorySegment mseg) {
 		if (varHandle == null)
@@ -282,15 +314,48 @@ enum SaLayout {
 	}
 
 	/**
-	 * Reinterpret.
+	 * Retrieves the numeric value of this field from the given memory segment. This
+	 * method should only be used for numeric fields (e.g., ports, lengths).
 	 *
-	 * @param address the address
-	 * @param arena   the arena
-	 * @return the memory segment
+	 * @param mseg The memory segment containing the sockaddr structure
+	 * @return The numeric value of this field
+	 * @throws ClassCastException if the field is not numeric
+	 */
+	public Number getNumber(MemorySegment mseg) {
+		return (Number) get(mseg);
+	}
+
+	/**
+	 * Gets the value of this field as an unsigned short. Useful for fields like
+	 * ports that are naturally unsigned 16-bit values.
+	 *
+	 * @param mseg The memory segment containing the sockaddr structure
+	 * @return The unsigned short value (as an integer between 0 and 65535)
+	 */
+	public Number getUnsignedShort(MemorySegment mseg) {
+		return Short.toUnsignedInt(getNumber(mseg).shortValue());
+	}
+
+	/**
+	 * Gets the value of this field as an unsigned byte. Useful for fields like
+	 * address lengths that are naturally unsigned 8-bit values.
+	 *
+	 * @param mseg The memory segment containing the sockaddr structure
+	 * @return The unsigned byte value (as an integer between 0 and 255)
+	 */
+	public Number getUnsignedByte(MemorySegment mseg) {
+		return Byte.toUnsignedInt(getNumber(mseg).byteValue());
+	}
+
+	/**
+	 * Reinterprets a memory segment as a sockaddr structure. This method ensures
+	 * proper alignment and size constraints are maintained.
+	 *
+	 * @param address The memory segment to reinterpret
+	 * @param arena   The arena managing the lifetime of the memory
+	 * @return A memory segment representing the sockaddr structure
 	 */
 	public MemorySegment reinterpret(MemorySegment address, Arena arena) {
-		long offset = Initializer.SOCK_ADDR_LAYOUT.byteOffset(fullPaths);
-
-		return address.reinterpret(offset, arena, __ -> {});
+		return address.reinterpret(sizeOf(), arena, __ -> {});
 	}
 }

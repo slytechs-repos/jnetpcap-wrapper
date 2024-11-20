@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sly Technologies Inc
+ * Copyright 2023-2024 Sly Technologies Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,7 @@
  */
 package org.jnetpcap.internal;
 
-import static java.lang.Integer.toUnsignedLong;
-import static java.lang.foreign.MemoryLayout.structLayout;
-import static java.lang.foreign.MemoryLayout.PathElement.groupElement;
-import static java.lang.foreign.ValueLayout.JAVA_INT;
+import static java.lang.Integer.*;
 
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
@@ -26,6 +23,10 @@ import java.lang.invoke.VarHandle;
 
 import org.jnetpcap.PcapStat;
 import org.jnetpcap.windows.WinPcap;
+
+import static java.lang.foreign.MemoryLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
 
 /**
  * Packet statistics from the start of the pcap run to the time of the call.
@@ -94,6 +95,10 @@ public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long 
 
 	/** The Constant ps_netdrop. */
 	private static final VarHandle ps_netdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
+
+	public static long sizeOf() {
+		return LAYOUT.byteSize();
+	}
 
 	/**
 	 * Of memory platform dependent.

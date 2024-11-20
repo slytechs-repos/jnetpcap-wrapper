@@ -18,12 +18,10 @@ package org.jnetpcap;
 import static org.jnetpcap.constant.SockAddrFamily.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.stream.Stream;
 
 import org.jnetpcap.PcapIf.PcapAddr;
 import org.jnetpcap.SockAddr.Inet6SockAddr;
@@ -132,7 +130,7 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 		Optional<PcapIf> device = list.stream()
 				.filter(INET6::checkIfContains)
 				.findAny();
-		
+
 		if (device.isEmpty()) {
 			Assumptions.abort("No IPv6 interfaces found");
 			return;
@@ -157,7 +155,7 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 		Optional<PcapIf> device = list.stream()
 				.filter(INET6::checkIfContains)
 				.findAny();
-		
+
 		if (device.isEmpty()) {
 			Assumptions.abort("No IPv6 interfaces found");
 			return;
@@ -183,7 +181,7 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 		Optional<PcapIf> device = list.stream()
 				.filter(INET6::checkIfContains)
 				.findAny();
-		
+
 		if (device.isEmpty()) {
 			Assumptions.abort("No IPv6 interfaces found");
 			return;
@@ -202,20 +200,21 @@ class LibpcapPcapIfTests extends AbstractTestBase {
 	 * Test PcapIf has a hardware/Mac address and if the address is of valid length
 	 * (6 bytes).
 	 *
-	 * @throws PcapException the pcap exception
-	 * @throws SocketException 
+	 * @throws PcapException   the pcap exception
+	 * @throws SocketException
 	 */
 	@Test
 	@Tag("sudo-permission")
 	void PcapIfInet4GetHardwareAddress() throws PcapException, SocketException {
 		List<PcapIf> list = Pcap.findAllDevs();
-		
+
 		PcapIf device = list.stream()
 				.filter(dev -> dev.hardwareAddress().isPresent())
 				.findAny()
 				.orElseThrow();
 
-		assertTrue(device.hardwareAddress().isPresent(), "expected a MAC address for pcap interface [%s - %s]".formatted(device.name(), device.description()));
+		assertTrue(device.hardwareAddress().isPresent(), "expected a MAC address for pcap interface [%s - %s]"
+				.formatted(device.name(), device.description()));
 		assertEquals(MAC_ADDR_LEN, device.hardwareAddress().get().length, "invalid MAC address length");
 	}
 }

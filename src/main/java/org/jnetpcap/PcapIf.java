@@ -16,7 +16,6 @@
 package org.jnetpcap;
 
 import static org.jnetpcap.internal.ForeignUtils.*;
-import static org.jnetpcap.internal.FunctionThrowable.*;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
@@ -35,100 +34,92 @@ import org.jnetpcap.SockAddr.InetSockAddr;
 import org.jnetpcap.constant.PcapIfFlag;
 import org.jnetpcap.constant.SockAddrFamily;
 import org.jnetpcap.internal.ForeignUtils;
-import org.jnetpcap.util.PcapUtils;
 
 import static java.lang.foreign.MemoryLayout.*;
 import static java.lang.foreign.MemoryLayout.PathElement.*;
 import static java.lang.foreign.ValueLayout.*;
 
 /**
- * Native Type pcap_if_t has the following members.
- *
- * <dl>
- * <dt>next</dt>
- * <dd>if not NULL, a pointer to the next element in the list; NULL for the last
- * element of the list</dd>
- * <dt>name</dt>
- * <dd>a pointer to a string giving a name for the device to pass to
- * pcap_open_live()</dd>
- * <dt>description</dt>
- * <dd>if not NULL, a pointer to a string giving a human-readable description of
- * the device</dd>
- * <dt>addresses</dt>
- * <dd>a pointer to the first element of a list of network addresses for the
- * device, or NULL if the device has no addresses</dd>
- * </dl>
- *
- * <dl>
- * <dt>flags</dt>
- * <dd>device flags:
- * <dt>PCAP_IF_LOOPBACK</dt>
- * <dd>set if the device is a loopback interface</dd>
- * <dt>PCAP_IF_UP</dt>
- * <dd>set if the device is up</dd>
- * <dt>PCAP_IF_RUNNING</dt>
- * <dd>set if the device is running</dd>
- * <dt>PCAP_IF_WIRELESS</dt>
- * <dd>set if the device is a wireless interface; this includes IrDA as well as
- * radio-based networks such as IEEE 802.15.4 and IEEE 802.11, so it doesn't
- * just mean Wi-Fi</dd>
- * </dl>
- *
- * <dl>
- * <dt>PCAP_IF_CONNECTION_STATUS</dt>
- * <dd>a bitmask for an indication of whether the adapter is connected or not;
- * for wireless interfaces, "connected" means "associated with a network"
- * <dt>PCAP_IF_CONNECTION_STATUS_UNKNOWN</dt>
- * <dd>it's unknown whether the adapter is connected or not</dd>
- * <dt>PCAP_IF_CONNECTION_STATUS_CONNECTED</dt>
- * <dd>the adapter is connected</dd>
- * <dt>PCAP_IF_CONNECTION_STATUS_DISCONNECTED</dt>
- * <dd>the adapter is disconnected</dd>
- * <dt>PCAP_IF_CONNECTION_STATUS_NOT_APPLICABLE</dt>
- * <dd>the notion of "connected" and "disconnected" don't apply to this
- * interface; for example, it doesn't apply to a loopback device</dd>
- * </dl>
- *
- * <p>
- * Each element of the list of addresses is of type pcap_addr_t, and has the
+ * A Java representation of the native {@code pcap_if_t} structure which
+ * contains information about a network interface. This class provides access to
+ * interface properties such as name, addresses, flags, and hardware
+ * information.
+ * 
+ * <h2>Structure Members</h2> The native pcap_if_t structure contains the
  * following members:
- * </p>
- *
- * <dl>
- * <dt>next</dt>
- * <dd>if not NULL, a pointer to the next element in the list; NULL for the last
- * element of the list</dd>
- * <dt>addr</dt>
- * <dd>a pointer to a struct sockaddr containing an address</dd>
- * <dt>netmask</dt>
- * <dd>if not NULL, a pointer to a struct sockaddr that contains the netmask
- * corresponding to the address pointed to by addr</dd>
- * <dt>broadaddr</dt>
- * <dd>if not NULL, a pointer to a struct sockaddr that contains the broadcast
- * address corresponding to the address pointed to by addr; may be null if the
- * device doesn't support broadcasts</dd>
- * <dt>dstaddr</dt>
- * <dd>if not NULL, a pointer to a struct sockaddr that contains the destination
- * address corresponding to the address pointed to by addr; may be null if the
- * device isn't a point-to-point interface</dd>
- * </dl>
- *
- * <p>
- * Note that the addresses in the list of addresses might be IPv4 addresses,
- * IPv6 addresses, or some other type of addresses, so you must check the
- * sa_family member of the struct sockaddr before interpreting the contents of
- * the address; do not assume that the addresses are all IPv4 addresses, or even
- * all IPv4 or IPv6 addresses. IPv4 addresses have the value AF_INET, IPv6
- * addresses have the value AF_INET6 (which older operating systems that don't
- * support IPv6 might not define), and other addresses have other values.
- * Whether other addresses are returned, and what types they might have is
- * platform-dependent. For IPv4 addresses, the struct sockaddr pointer can be
- * interpreted as if it pointed to a struct sockaddr_in; for IPv6 addresses, it
- * can be interpreted as if it pointed to a struct sockaddr_in6.
- * </p>
- *
- * @author Sly Technologies
- * @author repos@slytechs.com since libpcap 0.7
+ * <ul>
+ * <li>{@code next} - Points to the next interface in the list, or NULL if this
+ * is the last interface</li>
+ * <li>{@code name} - A string containing the name of the interface (e.g.,
+ * "eth0", "en0")</li>
+ * <li>{@code description} - A human-readable string describing the interface,
+ * may be NULL</li>
+ * <li>{@code addresses} - A pointer to the first element in a linked list of
+ * addresses for the interface</li>
+ * <li>{@code flags} - Interface flags indicating various interface properties
+ * and states</li>
+ * </ul>
+ * 
+ * <h2>Interface Flags</h2> The {@code flags} field can include the following
+ * values:
+ * <ul>
+ * <li>{@code PCAP_IF_LOOPBACK} - Set if the interface is a loopback
+ * interface</li>
+ * <li>{@code PCAP_IF_UP} - Set if the interface is up (active)</li>
+ * <li>{@code PCAP_IF_RUNNING} - Set if the interface is running</li>
+ * <li>{@code PCAP_IF_WIRELESS} - Set if the interface is wireless (includes
+ * IrDA, IEEE 802.15.4, IEEE 802.11)</li>
+ * </ul>
+ * 
+ * <h2>Connection Status</h2> The flags field also includes connection status
+ * information through {@code PCAP_IF_CONNECTION_STATUS}:
+ * <ul>
+ * <li>{@code PCAP_IF_CONNECTION_STATUS_UNKNOWN} - Connection status is
+ * unknown</li>
+ * <li>{@code PCAP_IF_CONNECTION_STATUS_CONNECTED} - Interface is connected</li>
+ * <li>{@code PCAP_IF_CONNECTION_STATUS_DISCONNECTED} - Interface is
+ * disconnected</li>
+ * <li>{@code PCAP_IF_CONNECTION_STATUS_NOT_APPLICABLE} - Connection status
+ * doesn't apply (e.g., loopback)</li>
+ * </ul>
+ * 
+ * <h2>Network Addresses</h2> The interface may have multiple network addresses,
+ * accessible through the {@link #addresses()} method. Each address is
+ * represented by a {@link PcapAddr} object which may contain:
+ * <ul>
+ * <li>Network address (IPv4, IPv6, or other)</li>
+ * <li>Netmask (if applicable)</li>
+ * <li>Broadcast address (if the interface supports broadcasts)</li>
+ * <li>Destination address (for point-to-point interfaces)</li>
+ * </ul>
+ * 
+ * <h2>Address Types</h2> The addresses can be of different types, determined by
+ * the {@code sa_family} field:
+ * <ul>
+ * <li>{@code AF_INET} - IPv4 addresses (struct sockaddr_in)</li>
+ * <li>{@code AF_INET6} - IPv6 addresses (struct sockaddr_in6)</li>
+ * <li>Other address types may be present depending on the platform</li>
+ * </ul>
+ * 
+ * <h2>Usage Example</h2>
+ * 
+ * <pre>{@code 
+ * PcapIf iface = ...;
+ * 
+ * // Get interface name
+ * String name = iface.name();
+ * 
+ * // Check if interface is up and running
+ * Set<PcapIfFlag> flags = iface.flagsAsEnumSet();
+ * boolean isUp = flags.contains(PcapIfFlag.UP);
+ * 
+ * // Get IPv4 address if available
+ * Optional<PcapAddr<InetSockAddr>> ipv4Addr = iface.findAddressOfType(InetSockAddr.class);
+ * }</pre>
+ * 
+ * @see PcapAddr For detailed information about network addresses
+ * @see org.jnetpcap.constant.PcapIfFlag For interface flag constants
+ * @since libpcap 0.7
  */
 public class PcapIf {
 
@@ -313,11 +304,15 @@ public class PcapIf {
 	public final static int PCAP_IF_RUNNING = 0x00000004;
 
 	/**
-	 * List all.
+	 * Creates a list of PcapIf instances by traversing a linked list of native
+	 * pcap_if_t structures. This method is used internally by libpcap functions
+	 * that return lists of interfaces, such as pcap_findalldevs().
 	 *
-	 * @param next  the next
-	 * @param arena the scope
-	 * @return the list
+	 * @param next  The memory segment pointing to the first pcap_if_t structure in
+	 *              the linked list
+	 * @param arena The memory arena that manages the lifetime of the native memory
+	 * @return A list of PcapIf instances representing all network interfaces in the
+	 *         linked list
 	 */
 	static List<PcapIf> listAll(MemorySegment next, Arena arena) {
 		List<PcapIf> list = new ArrayList<>();
@@ -348,10 +343,10 @@ public class PcapIf {
 	private final Optional<byte[]> hardwareAddress;
 
 	/**
-	 * New instanceof PcapIf structure class.
+	 * Creates a new PcapIf instance from a native pcap_if_t structure.
 	 *
-	 * @param mseg  the memory segment containing off heap pcap_if structure
-	 * @param arena the memory scope
+	 * @param mseg  The memory segment containing the native pcap_if_t structure
+	 * @param arena The memory arena that manages the lifetime of the native memory
 	 */
 	PcapIf(MemorySegment mseg, Arena arena) {
 		MemorySegment addrs = (MemorySegment) addrsHandle.get(mseg, 0L);
@@ -364,12 +359,24 @@ public class PcapIf {
 		hardwareAddress = Optional.ofNullable(selectJavaNetInterface());
 	}
 
+	/**
+	 * Attempts to find the corresponding Java NetworkInterface for this pcap
+	 * interface. This private method is used by the constructor to initialize the
+	 * hardware address. It tries multiple strategies:
+	 * <ol>
+	 * <li>Look up by interface name</li>
+	 * <li>Look up by IPv4 address</li>
+	 * <li>Look up by IPv6 address</li>
+	 * </ol>
+	 *
+	 * @return The hardware address as a byte array, or null if not found/accessible
+	 */
 	private byte[] selectJavaNetInterface() {
 
 		/* 1 - select by name */
 		try {
 			return NetworkInterface.getByName(name()).getHardwareAddress();
-		} catch(Throwable e) {}
+		} catch (Throwable e) {}
 
 		/* 2 - select by IPv4/INET address */
 		try {
@@ -378,10 +385,8 @@ public class PcapIf {
 					.map(InetSockAddr::address)
 					.orElseThrow();
 
-			String str = PcapUtils.toAddressString(ip4);
-
 			return NetworkInterface.getByInetAddress(InetAddress.getByAddress(ip4)).getHardwareAddress();
-		} catch(Throwable e) {}
+		} catch (Throwable e) {}
 
 		/* 3 - select by IPv6/INET6 address */
 		try {
@@ -391,26 +396,31 @@ public class PcapIf {
 					.orElseThrow();
 
 			return NetworkInterface.getByInetAddress(InetAddress.getByAddress(ip6)).getHardwareAddress();
-		} catch(Throwable e) {}
+		} catch (Throwable e) {}
 
 		return null;
 	}
 
 	/**
-	 * Gets a list of all the addresses (PcapAddr) associated with this pcap
-	 * interface.
+	 * Returns all network addresses associated with this interface. The returned
+	 * list may contain IPv4, IPv6, and other types of addresses. Each PcapAddr
+	 * object contains the network address and optional netmask, broadcast, and
+	 * destination addresses.
 	 *
-	 * @return the list of addresses
+	 * @return An unmodifiable list of all addresses associated with this interface
 	 */
 	public List<PcapAddr<?>> addresses() {
 		return addresses;
 	}
 
 	/**
-	 * Search for a PCAP address of a specific socket address family type.
+	 * Searches for a network address of a specific address family (e.g., AF_INET,
+	 * AF_INET6).
 	 *
-	 * @param family the socket address family type
-	 * @return the optional PCAP address if found
+	 * @param family The address family to search for, as defined in SockAddrFamily
+	 * @return An Optional containing the first matching address, or empty if no
+	 *         address of the specified family exists on this interface
+	 * @see SockAddrFamily
 	 */
 	public Optional<PcapAddr<? extends SockAddr>> findAddressOfFamily(SockAddrFamily family) {
 
@@ -426,76 +436,92 @@ public class PcapIf {
 	}
 
 	/**
-	 * Finds the first address in the list of PcapAddr addresses, which is of AF
-	 * (Address Family) type represented but the supplied family subclass type.
+	 * Searches for the first network address of a specific type. This method allows
+	 * finding addresses of a particular class, such as IPv4 (InetSockAddr) or IPv6
+	 * (Inet6SockAddr) addresses.
 	 *
-	 * @param <T>             the generic AF subclass type
-	 * @param faimlyClassType the actual AF subclass type
-	 * @return an optional if address represented by the family subclass if found
+	 * @param <T>             The type of socket address to find
+	 * @param familyClassType The Class object representing the desired address type
+	 * @return An Optional containing the first matching address, or empty if no
+	 *         address of the specified type exists on this interface
 	 */
-	@SuppressWarnings({ "unchecked" })
-	public <T extends SockAddr> Optional<PcapAddr<T>> findAddressOfType(Class<T> faimlyClassType) {
+	@SuppressWarnings({ "unchecked"
+	})
+	public <T extends SockAddr> Optional<PcapAddr<T>> findAddressOfType(Class<T> familyClassType) {
 
 		var list = addresses();
 
 		return list.stream()
-				.filter(a -> faimlyClassType.isAssignableFrom(a.addr.getClass()))
+				.filter(a -> familyClassType.isAssignableFrom(a.addr.getClass()))
 				.map(a -> (PcapAddr<T>) a)
 				.findFirst();
 	}
 
 	/**
-	 * Optional textual description of the interface.
+	 * Returns the human-readable description of this interface. The description is
+	 * typically more detailed than the interface name and may include information
+	 * about the interface type, manufacturer, or other details.
 	 *
-	 * @return the interface description if available
+	 * @return An Optional containing the interface description, or empty if no
+	 *         description is available
 	 */
 	public Optional<String> description() {
 		return description;
 	}
 
 	/**
-	 * Interface flags (e.g., PCAP_IF_LOOPBACK for loopback interfaces).
+	 * Returns the interface flags as a raw integer value. The returned value is a
+	 * bitmask containing various interface state flags such as PCAP_IF_LOOPBACK,
+	 * PCAP_IF_UP, PCAP_IF_RUNNING, etc.
 	 *
-	 * @return the interface bitmask of flags
+	 * @return The raw interface flags as an integer bitmask
+	 * @see PcapIfFlag for individual flag definitions
 	 */
 	public int flags() {
 		return flags;
 	}
 
 	/**
-	 * Interface flags (e.g., PCAP_IF_LOOPBACK for loopback interfaces), as an enum
-	 * set.
+	 * Returns the interface flags as an EnumSet of PcapIfFlag values. This method
+	 * provides a more type-safe way to check interface flags compared to using raw
+	 * integer values.
 	 *
-	 * @return the set containing enum flag constants for each flag bit
+	 * @return An EnumSet containing the active flags for this interface
+	 * @see PcapIfFlag
 	 */
 	public Set<PcapIfFlag> flagsAsEnumSet() {
 		return PcapIfFlag.toEnumSet(flags);
 	}
 
 	/**
-	 * Returns the hardware address (usually MAC) of the interface if it has one and
-	 * if it can be accessed given the current privileges.
+	 * Returns the hardware (MAC) address of this interface. This method attempts to
+	 * retrieve the hardware address using the Java NetworkInterface API, which may
+	 * require appropriate system permissions.
 	 *
-	 * @return an optional byte array containing the address
+	 * @return An Optional containing the hardware address as a byte array, or empty
+	 *         if the address is not available or accessible
 	 */
 	public Optional<byte[]> hardwareAddress() {
 		return hardwareAddress;
 	}
 
 	/**
-	 * Name of the interface (e.g., "eth0") .
+	 * Returns the name of this interface. The interface name is system-dependent
+	 * (e.g., "eth0" on Linux, "en0" on macOS, "\\Device\\NPF_{GUID}" on Windows)
+	 * and can be used with pcap_open_live() to open this interface for packet
+	 * capture.
 	 *
-	 * @return the string
+	 * @return The system-dependent name of this interface
 	 */
 	public String name() {
 		return name;
 	}
 
 	/**
-	 * String representation of the structure field values.
+	 * Returns a string representation of this interface, including its name, flags,
+	 * description (if available), and addresses (if any).
 	 *
-	 * @return the string
-	 * @see java.lang.Object#toString()
+	 * @return A string representation of the interface
 	 */
 	@Override
 	public String toString() {
