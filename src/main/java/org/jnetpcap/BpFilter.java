@@ -182,18 +182,9 @@ public final class BpFilter implements AutoCloseable {
 	}
 
 	/**
-<<<<<<< HEAD
 	 * Closes and deallocates the native BPF program.
-=======
-	 * Deallocates the native BPF program and associated resources. After calling
-	 * this method, the filter can no longer be used.
->>>>>>> refs/remotes/origin/develop
 	 *
-<<<<<<< HEAD
 	 * @throws IllegalStateException if already closed
-=======
-	 * @throws IllegalStateException if the filter has already been closed
->>>>>>> refs/remotes/origin/develop
 	 * @see java.lang.AutoCloseable#close()
 	 */
 	@Override
