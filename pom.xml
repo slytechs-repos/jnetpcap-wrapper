@@ -5,7 +5,7 @@
 	<groupId>com.slytechs.jnet.jnetpcap</groupId>
 	<artifactId>jnetpcap-wrapper</artifactId>
 	<!--  mvn versions:set -DnewVersion=_new_version_  -->
-	<version>2.3.0</version>
+	<version>2.3.0+jdk21.preview</version>
 	<name>jNetPcap Wrapper</name>
 	<description>A java wrapper for native LIBPCAP library and PCAP API</description>
 	<url>https://www.jnetpcap.org</url>
