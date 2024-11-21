@@ -169,13 +169,13 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 			MemorySegment c_errbuf = arena.allocate(PcapConstants.PCAP_ERRBUF_SIZE);
 			MemorySegment c_device = arena.allocate(device.length() + 1);
 
-			c_device.setString(0, device, java.nio.charset.StandardCharsets.UTF_8);
+			c_device.getUtf8String(0);
 
 			MemorySegment pcapPointer = (MemorySegment) pcap_create.handle().invokeExact(c_device,
 					c_errbuf);
 
 			if (ForeignUtils.isNullAddress(pcapPointer))
-				throw new PcapException(PcapCode.PCAP_ERROR, c_errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
+				throw new PcapException(PcapCode.PCAP_ERROR, c_errbuf.getUtf8String(0));
 
 			var abi = PcapHeaderABI.selectLiveAbi();
 
@@ -258,7 +258,7 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 
 			int result = pcap_init.invokeInt(opts, errbuf);
 			if (result != PcapCode.PCAP_OK)
-				PcapException.throwIfNotOk(opts, () -> errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
+				PcapException.throwIfNotOk(opts, () -> errbuf.getUtf8String(0));
 		}
 	}
 

@@ -216,7 +216,7 @@ public sealed class Pcap0_8 extends Pcap0_7 permits Pcap0_9 {
 	 */
 	public static PcapDlt datalinkNameToVal(String name) {
 		try (var arena = newArena()) {
-			MemorySegment mseg = arena.allocateFrom(name, java.nio.charset.StandardCharsets.UTF_8);
+			MemorySegment mseg = arena.allocateUtf8String(name);
 
 			return PcapDlt.valueOf(pcap_datalink_name_to_val.invokeInt(mseg));
 		}

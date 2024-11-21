@@ -276,7 +276,7 @@ public class PcapSendQueue implements AutoCloseable {
 	 * @return The maximum number of bytes that can be queued
 	 */
 	public int maxlen() {
-		return (int) Struct.MAXLEN.get(queue_ptr, 0L);
+		return (int) Struct.MAXLEN.get(queue_ptr);
 	}
 
 	/**
@@ -285,6 +285,6 @@ public class PcapSendQueue implements AutoCloseable {
 	 * @return The number of bytes currently queued
 	 */
 	public int len() {
-		return (int) Struct.LEN.get(queue_ptr, 0L);
+		return (int) Struct.LEN.get(queue_ptr);
 	}
 }

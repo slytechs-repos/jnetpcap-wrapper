@@ -171,7 +171,7 @@ public class PcapIf {
 				MemorySegment mseg = next.reinterpret(PCAP_ADDR_LAYOUT.byteSize());
 				list.add(new PcapAddr<SockAddr>(mseg, arena));
 
-				next = (MemorySegment) nextHandle.get(mseg, 0L);
+				next = (MemorySegment) nextHandle.get(mseg);
 			}
 			return list;
 		}
@@ -321,7 +321,7 @@ public class PcapIf {
 			MemorySegment mseg = next.reinterpret(PCAP_IF_LAYOUT.byteSize(), arena, __ -> {});
 			list.add(new PcapIf(mseg, arena));
 
-			next = (MemorySegment) nextHandle.get(mseg, 0L);
+			next = (MemorySegment) nextHandle.get(mseg);
 		}
 
 		return list;
@@ -349,11 +349,11 @@ public class PcapIf {
 	 * @param arena The memory arena that manages the lifetime of the native memory
 	 */
 	PcapIf(MemorySegment mseg, Arena arena) {
-		MemorySegment addrs = (MemorySegment) addrsHandle.get(mseg, 0L);
+		MemorySegment addrs = (MemorySegment) addrsHandle.get(mseg);
 
-		name = toJavaString(nameHandle.get(mseg, 0L));
-		description = Optional.ofNullable(toJavaString(descHandle.get(mseg, 0L)));
-		flags = (int) flagsHandle.get(mseg, 0L);
+		name = toJavaString(nameHandle.get(mseg));
+		description = Optional.ofNullable(toJavaString(descHandle.get(mseg)));
+		flags = (int) flagsHandle.get(mseg);
 
 		addresses = PcapAddr.listAll(addrs, arena);
 		hardwareAddress = Optional.ofNullable(selectJavaNetInterface());

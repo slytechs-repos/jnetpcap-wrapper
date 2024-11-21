@@ -105,7 +105,7 @@ public sealed class Pcap0_5 extends Pcap0_4 permits Pcap0_6 {
 		try (var arena = newArena()) {
 			BpFilter bpFilter = new BpFilter(str);
 
-			MemorySegment c_filter = arena.allocateFrom(str, java.nio.charset.StandardCharsets.UTF_8);
+			MemorySegment c_filter = arena.allocateUtf8String(str);
 
 			int code = pcap_compile_nopcap.invokeInt(snaplen, pcapDlt.getAsInt(), bpFilter.address(), c_filter, opt,
 					netmask);

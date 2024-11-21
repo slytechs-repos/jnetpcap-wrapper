@@ -99,8 +99,8 @@ public sealed interface PcapRmt permits PcapRmt.Source, PcapRmt.Auth {
 		MemorySegment allocateNative(Arena arena) {
 			MemorySegment mseg = arena.allocate(LAYOUT.byteSize());
 
-			MemorySegment c_username = arena.allocateFrom(username, java.nio.charset.StandardCharsets.UTF_8);
-			MemorySegment c_password = arena.allocateFrom(password, java.nio.charset.StandardCharsets.UTF_8);
+			MemorySegment c_username = arena.allocateUtf8String(username);
+			MemorySegment c_password = arena.allocateUtf8String(password);
 
 			rmtauth_type.set(mseg, 0L, type);
 			rmtauth_username.set(mseg, 0L, c_username);

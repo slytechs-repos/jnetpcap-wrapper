@@ -339,7 +339,7 @@ public class SockAddr {
 					SOCK_ADDR_IRDA_LEN));
 
 			this.irdaDeviceID = saSegment.asSlice(2, 4).toArray(JAVA_BYTE);
-			this.irdaServiceName = saSegment.getString(6, java.nio.charset.StandardCharsets.UTF_8);
+			this.irdaServiceName = saSegment.getUtf8String(6);
 		}
 
 		/**

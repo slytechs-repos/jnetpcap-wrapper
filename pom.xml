@@ -12,11 +12,11 @@
 	<properties>
 		<parent.project>${project.artifactId}</parent.project>
 
-		<jdk.version>22</jdk.version>
+		<jdk.version>21</jdk.version>
 		<project.build.sourceEncoding>${java.encoding}</project.build.sourceEncoding>
 		<maven.compiler.source>${jdk.version}</maven.compiler.source>
 		<maven.compiler.target>${jdk.version}</maven.compiler.target>
-		<java.preview />
+		<java.preview>--enable-preview</java.preview>
 		<java.encoding>UTF-8</java.encoding>
 		<java.native>--enable-native-access=ALL-UNNAMED</java.native>
 		<groups>user-permission</groups>
@@ -85,7 +85,9 @@
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>
 					<release>${jdk.version}</release>
-					<enablePreview>false</enablePreview>
+					<compilerArgs>
+						<arg>--enable-preview</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>

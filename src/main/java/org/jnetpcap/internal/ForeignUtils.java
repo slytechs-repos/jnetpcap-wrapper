@@ -72,7 +72,7 @@ public final class ForeignUtils {
 		if (addr.byteSize() == 0)
 			addr = addr.reinterpret(DEFAULT_MAX_STRING_LEN);
 
-		String str = addr.getString(0, java.nio.charset.StandardCharsets.UTF_8);
+		String str = addr.getUtf8String(0);
 		return str;
 	}
 
@@ -84,7 +84,7 @@ public final class ForeignUtils {
 	 * @return the memory segment
 	 */
 	public static MemorySegment readAddress(VarHandle handle, MemorySegment addressAt) {
-		var read = (MemorySegment) handle.get(addressAt, 0L);
+		var read = (MemorySegment) handle.get(addressAt);
 		return read;
 	}
 

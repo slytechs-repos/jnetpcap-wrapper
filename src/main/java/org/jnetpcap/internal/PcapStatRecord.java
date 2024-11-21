@@ -111,9 +111,9 @@ public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long 
 			return ofMemoryOnWin32(mseg);
 
 		return new PcapStatRecord(
-				toUnsignedLong((int) ps_recv.get(mseg, 0L)),
-				toUnsignedLong((int) ps_drop.get(mseg, 0L)),
-				toUnsignedLong((int) ps_ifdrop.get(mseg, 0L)),
+				toUnsignedLong((int) ps_recv.get(mseg)),
+				toUnsignedLong((int) ps_drop.get(mseg)),
+				toUnsignedLong((int) ps_ifdrop.get(mseg)),
 				0, 0, 0);
 	}
 
@@ -125,12 +125,12 @@ public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long 
 	 */
 	private static PcapStat ofMemoryOnWin32(MemorySegment mseg) {
 		return new PcapStatRecord(
-				toUnsignedLong((int) ps_recv.get(mseg, 0L)),
-				toUnsignedLong((int) ps_drop.get(mseg, 0L)),
-				toUnsignedLong((int) ps_ifdrop.get(mseg, 0L)),
-				toUnsignedLong((int) ps_capt.get(mseg, 0L)),
-				toUnsignedLong((int) ps_sent.get(mseg, 0L)),
-				toUnsignedLong((int) ps_netdrop.get(mseg, 0L)));
+				toUnsignedLong((int) ps_recv.get(mseg)),
+				toUnsignedLong((int) ps_drop.get(mseg)),
+				toUnsignedLong((int) ps_ifdrop.get(mseg)),
+				toUnsignedLong((int) ps_capt.get(mseg)),
+				toUnsignedLong((int) ps_sent.get(mseg)),
+				toUnsignedLong((int) ps_netdrop.get(mseg)));
 	}
 
 }

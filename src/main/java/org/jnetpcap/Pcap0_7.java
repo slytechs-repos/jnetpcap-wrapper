@@ -197,7 +197,7 @@ public sealed class Pcap0_7 extends Pcap0_6 permits Pcap0_8 {
 
 			/* int pcap_findalldevs(pcap_if_t **alldevsp, char *errbuf) */
 			if (pcap_findalldevs.invokeInt(alldevsp, errbuf) == PcapCode.PCAP_ERROR)
-				throw new PcapException(errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
+				throw new PcapException(errbuf.getUtf8String(0));
 
 			MemorySegment alldev = alldevsp.get(ValueLayout.ADDRESS, 0);
 
