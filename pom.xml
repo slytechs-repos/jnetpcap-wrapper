@@ -59,7 +59,11 @@
 			<version>5.9.1</version>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.maven.doxia</groupId>
+			<artifactId>doxia-sink-api</artifactId>
+			<version>1.11.1</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>
@@ -91,7 +95,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.7.1</version>
+				<version>3.12.1</version>
 			</plugin>
 			<!--  Unit test the API  -->
 			<plugin>
@@ -211,6 +215,11 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>3.4.5</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>3.0.0-M7</version>
 			</plugin>
@@ -223,44 +232,25 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.4.1</version>
-				<configuration>
-					<doctitle>Public API for ${project.name} ${project.version}</doctitle>
-					<windowtitle>Public API for ${project.name}
-						${project.version}</windowtitle>
-					<testDoctitle>Test API for ${project.name}
-						${project.version}</testDoctitle>
-					<testWindowtitle>Test API for ${project.name}
-						${project.version}</testWindowtitle>
-					<encoding>${java.encoding}</encoding>
-					<source>${jdk.version}</source>
-					<overview>${basedir}/Overview.html</overview>
-					<additionalOptions> ${java.preview} </additionalOptions>
-					<excludePackageNames>*.internal</excludePackageNames>
-				</configuration>
 				<reportSets>
 					<reportSet>
-						<id>aggregate-no-fork</id>
-						<configuration>
-							<goal>aggregate-no-fork</goal>
-							<show>public</show>
-							<skip>false</skip>
-						</configuration>
+						<id>default</id>
 						<reports>
 							<report>javadoc</report>
 						</reports>
 					</reportSet>
-					<reportSet>
-						<id>test-aggregate-no-fork</id>
-						<configuration>
-							<goal>test-aggregate-no-fork</goal>
-							<show>private</show>
-							<skip>true</skip>
-						</configuration>
-						<reports>
-							<report>test-javadoc</report>
-						</reports>
-					</reportSet>
 				</reportSets>
+				<configuration>
+					<destDir>docs</destDir>
+					<doclint>none</doclint>
+					<failOnError>false</failOnError>
+					<quiet>true</quiet>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>3.4.5</version>
 			</plugin>
 		</plugins>
 	</reporting>
