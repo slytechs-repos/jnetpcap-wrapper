@@ -30,7 +30,6 @@ Unlock Network Packet Analysis in Java with **jNetPcap Wrapper**
 8. [Contact](#contact)
 9. [Compatibility with jNetPcap version 1](#compatibility-with-jnetpcap-version-1)
 10. [Git Branches](#git-branches)
-11. [Java Javadocs in the gh-pages Repository](#java-javadocs-in-the-gh-pages-repository)
 
 ---
 
@@ -174,42 +173,6 @@ Follows a standard [branching model][git-branch-model].
 
 ## Java Javadocs in the gh-pages Repository
 Javadocs are automatically generated and deployed to the `gh-pages` branch using Maven SCM.
-
-To publish Javadocs:
-
-1. Add the following Maven plugin to your `pom.xml`:
-   ```xml
-   <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-javadoc-plugin</artifactId>
-       <version>3.4.1</version>
-       <executions>
-           <execution>
-               <id>attach-javadocs</id>
-               <phase>package</phase>
-               <goals>
-                   <goal>jar</goal>
-               </goals>
-           </execution>
-       </executions>
-   </plugin>
-   ```
-2. Use the `maven-scm-publish-plugin` to upload the Javadocs:
-   ```xml
-   <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-scm-publish-plugin</artifactId>
-       <version>3.0.0</version>
-       <configuration>
-           <scmBranch>gh-pages</scmBranch>
-       </configuration>
-   </plugin>
-   ```
-3. Run:
-   ```bash
-   mvn clean package site:site scm-publish:publish-scm
-   ```
-   This will publish the generated site, including Javadocs, to the `gh-pages` branch.
 
 [Javadocs][javadocs] are available online for easy reference.
 
