@@ -30,6 +30,7 @@ Unlock Network Packet Analysis in Java with **jNetPcap Wrapper**
 8. [Contact](#contact)
 9. [Compatibility with jNetPcap version 1](#compatibility-with-jnetpcap-version-1)
 10. [Git Branches](#git-branches)
+11. [Javadocs API documentation](#java-javadocs)
 
 ---
 
@@ -171,7 +172,7 @@ Follows a standard [branching model][git-branch-model].
 
 ---
 
-## Java Javadocs in the gh-pages Repository
+## Java Javadocs
 Javadocs are automatically generated and deployed to the `gh-pages` branch using Maven SCM.
 
 [Javadocs][javadocs] are available online for easy reference.
@@ -179,9 +180,8 @@ Javadocs are automatically generated and deployed to the `gh-pages` branch using
 ---
 
 [wiki]: https://github.com/slytechs-repos/jnetpcap/wiki
-[javadocs]: https://slytechs-repos.github.io/jnetpcap/apidocs/org.jnetpcap/org/jnetpcap/package-summary.html
+[javadocs]: https://slytechs-repos.github.io/jnetpcap-wrapper/org.jnetpcap/module-summary.html
 [libpcap]: https://www.tcpdump.org/
 [jnetpcap-sdk]: https://github.com/slytechs-repos/jnetpcap-sdk
 [release]: https://github.com/slytechs-repos/jnetpcap/releases
 [git-branch-model]: https://nvie.com/posts/a-successful-git-branching-model/
-```
