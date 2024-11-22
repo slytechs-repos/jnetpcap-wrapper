@@ -80,11 +80,13 @@
  * <h3>Buffer Timeout</h3>
  * <p>
  * Controls packet delivery timing through {@link org.jnetpcap.Pcap#setTimeout}:
+ * </p>
  * <ul>
  * <li>Zero: Wait indefinitely for buffer to fill</li>
  * <li>Positive value: Maximum wait time for buffering packets</li>
  * <li>Negative values are invalid</li>
  * </ul>
+ * <p>
  * Note: Not supported on all platforms and should not be used for polling.
  * </p>
  * 
