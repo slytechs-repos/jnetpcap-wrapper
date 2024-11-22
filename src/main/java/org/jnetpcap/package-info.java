@@ -20,94 +20,89 @@
  * The Packet Capture library provides a high level interface to packet capture
  * systems. All packets on the network, even those destined for other hosts, are
  * accessible through this mechanism. It also supports saving captured packets
- * to a ``savefile'', and reading packets from a ``savefile''.
+ * to a savefile, and reading packets from a savefile.
  * 
  * <h2>Opening a capture handle for reading</h2>
  * <p>
  * To open a handle for a live capture, given the name of the network or other
- * interface on which the capture should be done, call pcap_create(), set the
- * appropriate options on the handle, and then activate it with
- * {@link org.jnetpcap.Pcap#activate()}. If pcap_activate() fails, the handle
- * should be closed with {@link org.jnetpcap.Pcap#close()}.
+ * interface on which the capture should be done, call
+ * {@link Pcap#create(String)}, set the appropriate options on the handle, and
+ * then activate it with {@link Pcap#activate()}. If activate() fails, the
+ * handle should be closed with {@link Pcap#close()}.
  * </p>
  * 
  * <p>
  * To obtain a list of devices that can be opened for a live capture, call
- * {@link org.jnetpcap.Pcap#findAllDevs}; the list is automatically freed by
- * <em>jNePcap</em>. {@link org.jnetpcap.Pcap#lookupDev()} will return the first
- * device on that list that is not a ``loopback`` network interface.
+ * {@link Pcap#findAllDevs()}; the returned list contains {@link PcapIf} objects
+ * representing each interface. {@link Pcap#lookupDev()} will return the first
+ * device on that list that is not a loopback network interface.
  * </p>
  * 
  * <p>
- * To open a handle for a ``savefile'' from which to read packets, given the
- * pathname of the ``savefile'', call pcap_open_offline(); to set up a handle
- * for a ``savefile'', given a FILE * referring to a file already opened for
- * reading, call {@link org.jnetpcap.Pcap#openOffline}.
+ * To open a handle for a savefile from which to read packets, given the
+ * pathname of the savefile, call {@link Pcap#openOffline(String)}. To set up a
+ * handle for writing to a savefile, use {@link Pcap#dumpOpen(String)}.
  * </p>
  * 
  * <p>
- * In order to get a ``fake'' pcap_t for use in routines that require a pcap_t
- * as an argument, such as routines to open a ``savefile'' for writing and to
- * compile a filter expression, call {@link org.jnetpcap.Pcap#openDead}.
+ * To create a "fake" handle for use in routines that require a Pcap instance as
+ * an argument, such as routines to compile a filter expression, call
+ * {@link Pcap#openDead(PcapDlt, int)}.
  * </p>
  * 
  * <p>
- * {@link org.jnetpcap.Pcap#create}, {@link org.jnetpcap.Pcap#openOffline},
- * pcap_fopen_offline(), and {@link org.jnetpcap.Pcap#openDead} return a pointer
- * to a pcap_t, which is the handle used for reading packets from the capture
- * stream or the ``savefile'', and for finding out information about the capture
- * stream or ``savefile''. To close a handle, use pcap_close().
+ * All Pcap instances implement {@link AutoCloseable}, so they can be used with
+ * try-with-resources statements to ensure proper cleanup. When you're done with
+ * a handle, it will be automatically closed when exiting the try block.
  * </p>
  * 
- * <p>
- * Here is an example which uses PcapReceiver and several of its functional
- * packet handler interfaces.
- * </p>
+ * <h2>Example Usage</h2> Here is an example which demonstrates capturing
+ * packets using different handler types:
  * 
- * <pre>
- * <code>
-try (Pcap pcap = Pcap.openOffline(PCAP_FILE)) {
-
-	BpFilter filter = pcap.compile("tcp", true);
-
-	pcap.setFilter(filter);
-
-	pcap.loop(1, PcapExample1::nextDefault, "Hello, this is a copy to byte[] dispatch");
-	pcap.loop(1, PcapExample1::nextByteBuffer, "Hello, this is a no-copy to ByteBuffer dispatch");
-}
-...
-private static void nextByteBuffer(String message, PcapHeader header, ByteBuffer packet) {
-
-	System.out.println(message);
-	System.out.printf("Packet [timestamp=%s, wirelen=%-4d caplen=%-4d %s]%n",
-			Instant.ofEpochMilli(header.toEpochMillis()),
-			header.wireLength(),
-			header.captureLength(),
-			PcapUtils.toHexCurleyString(packet.limit(6)));
-}
-
-private static void nextDefault(String message, PcapHeader header, byte[] packet) {
-
-	System.out.println(message);
-	System.out.printf("Packet [timestamp=%s, wirelen=%-4d caplen=%-4d %s]%n",
-			Instant.ofEpochMilli(header.toEpochMillis()),
-			header.wireLength(),
-			header.captureLength(),
-			PcapUtils.toHexCurleyString(packet, 0, 6));
-}
- * </code>
- * </pre>
+ * <pre>{@code
+ * try (Pcap pcap = Pcap.openOffline("capture.pcap")) {
+ * 	// Create and apply a filter
+ * 	BpFilter filter = pcap.compile("tcp", true);
+ * 	pcap.setFilter(filter);
  * 
- * Output:
+ * 	// Capture packets using byte array handler
+ * 	pcap.loop(1, (String msg, PcapHeader header, byte[] packet) -> {
+ * 		System.out.printf("Packet [timestamp=%s, wirelen=%d caplen=%d]%n",
+ * 				Instant.ofEpochMilli(header.toEpochMillis()),
+ * 				header.wireLength(),
+ * 				header.captureLength());
+ * 	}, "Example message");
  * 
- * <pre>
-Hello, this is a copy to byte[] dispatch
-Packet [timestamp=2011-03-01T20:45:13.266Z, wirelen=74   caplen=74   {00:26:62:2f:47:87}]
-Hello, this is a no-copy to ByteBuffer dispatch
-Packet [timestamp=2011-03-01T20:45:13.313Z, wirelen=74   caplen=74   {00:1d:60:b3:01:84}]
- * </pre>
+ * 	// Capture packets using ByteBuffer handler for zero-copy
+ * 	pcap.loop(1, (String msg, PcapHeader header, ByteBuffer packet) -> {
+ * 		System.out.printf("Packet [timestamp=%s, wirelen=%d caplen=%d]%n",
+ * 				Instant.ofEpochMilli(header.toEpochMillis()),
+ * 				header.wireLength(),
+ * 				header.captureLength());
+ * 	}, "Example message");
+ * }
+ * }</pre>
  * 
- * @author Sly Technologies
- * @author repos@slytechs.com
+ * <h2>Packet Handlers</h2> The library provides several types of packet
+ * handlers through the {@link PcapHandler} interface:
+ * <ul>
+ * <li>{@link PcapHandler.OfArray} - Receives packets as byte arrays (with
+ * copy)</li>
+ * <li>{@link PcapHandler.OfByteBuffer} - Receives packets as ByteBuffers</li>
+ * <li>{@link PcapHandler.OfMemorySegment} - Direct access to native memory
+ * segments (advanced usage)</li>
+ * </ul>
+ * 
+ * <h2>Network Interfaces</h2> Network interfaces are represented by the
+ * {@link PcapIf} class, which provides information about:
+ * <ul>
+ * <li>Interface name and description</li>
+ * <li>Network addresses (IPv4, IPv6)</li>
+ * <li>Interface flags and capabilities</li>
+ * <li>Hardware (MAC) addresses</li>
+ * </ul>
+ * 
+ * @author Mark Bednarczyk [mark@slytechs.com]
+ * @author Sly Technologies Inc.
  */
 package org.jnetpcap;
