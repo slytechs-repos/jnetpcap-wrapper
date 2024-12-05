@@ -192,7 +192,38 @@ Details in the [Wiki][wiki].
 
 ## Git Branches
 
-Follows a standard [branching model][git-branch-model].
+The project follows a structured branching strategy:
+
+### Main Branches
+- `main`: Stable production branch for JDK 22+
+- `develop`: Active development branch for JDK 22+
+- `jdk21/main`: Stable production branch for JDK 21 with preview features
+
+### Feature Branches
+- `feature/gh-XX-description`: New features branched from `develop`
+  - Example: `feature/gh-58-add-packet-filtering`
+
+### Bug Fix Branches
+- `bugfix/gh-XX-description`: Regular bug fixes branched from `develop`
+  - Example: `bugfix/gh-59-fix-memory-leak`
+
+### Hot Fix Branches
+- `hotfix/gh-XX-description`: Critical fixes branched from `main`
+  - Example: `hotfix/gh-61-pcapfindalldevs-macos-crash`
+  - Used for urgent production fixes
+  - Merged to both `main` and `develop`
+
+### Backport Branches
+- `backport/gh-XX+jdk21`: Temporary branches for JDK 21 backports
+  - Example: `backport/gh-61+jdk21`
+  - Used to adapt fixes/features for JDK 21's preview API
+  - Branched from and merged back to `jdk21/main`
+
+### Release Versioning
+- JDK 22+ releases: `2.3.0`, `2.3.1`, etc.
+- JDK 21 releases: `2.3.0+jdk21`, `2.3.1+jdk21`, etc.
+
+All development primarily occurs in JDK 22+ branches, with critical changes backported to JDK 21 branches as needed.
 
 ---
 
