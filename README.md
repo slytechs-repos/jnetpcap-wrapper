@@ -192,40 +192,13 @@ Details in the [Wiki][wiki].
 
 ## Git Branches
 
-The project follows a structured branching strategy:
+The project follows a structured branching strategy with support for multiple JDK versions:
 
-### Main Branches
-- `main`: Stable production branch for JDK 22+
-- `develop`: Active development branch for JDK 22+
-- `jdk21/main`: Stable production branch for JDK 21 with preview features
+- JDK 22+ development in `main` and `develop` branches
+- JDK 21 LTS support in `jdk21/main` branch
+- Feature, bugfix, hotfix, and backport branch prefixes for specific changes
 
-### Feature Branches
-- `feature/gh-XX-description`: New features branched from `develop`
-  - Example: `feature/gh-58-add-packet-filtering`
-
-### Bug Fix Branches
-- `bugfix/gh-XX-description`: Regular bug fixes branched from `develop`
-  - Example: `bugfix/gh-59-fix-memory-leak`
-
-### Hot Fix Branches
-- `hotfix/gh-XX-description`: Critical fixes branched from `main`
-  - Example: `hotfix/gh-61-pcapfindalldevs-macos-crash`
-  - Used for urgent production fixes
-  - Merged to both `main` and `develop`
-
-### Backport Branches
-- `backport/gh-XX+jdk21`: Temporary branches for JDK 21 backports
-  - Example: `backport/gh-61+jdk21`
-  - Used to adapt fixes/features for JDK 21's preview API
-  - Branched from and merged back to `jdk21/main`
-
-### Release Versioning
-- JDK 22+ releases: `2.3.0`, `2.3.1`, etc.
-- JDK 21 releases: `2.3.0+jdk21`, `2.3.1+jdk21`, etc.
-
-All development primarily occurs in JDK 22+ branches, with critical changes backported to JDK 21 branches as needed.
-
----
+For detailed information about our JDK version support strategy and LTS maintenance policy, please see our [Version Strategy Discussion](https://github.com/slytechs-repos/jnetpcap-wrapper/discussions/62).
 
 ## Javadocs API Documentation
 
