@@ -169,7 +169,7 @@ public sealed class Pcap1_0 extends Pcap0_9 permits Pcap1_2 {
 			MemorySegment c_errbuf = arena.allocate(PcapConstants.PCAP_ERRBUF_SIZE);
 			MemorySegment c_device = arena.allocate(device.length() + 1);
 
-			c_device.getUtf8String(0);
+			c_device.setUtf8String(0, device);
 
 			MemorySegment pcapPointer = (MemorySegment) pcap_create.handle().invokeExact(c_device,
 					c_errbuf);
