@@ -700,8 +700,7 @@ public class SockAddr {
 		MemorySegment first2BytesSeg = addr.reinterpret(SaLayout.sizeOf()); // Enough to read family field
 
 		int af = readFamilyField(first2BytesSeg);
-		OptionalInt totalLength = readTotalLengthField(first2BytesSeg);
-		int structLength = totalLength.orElse((int) SaLayout.sizeOf());
+		int structSize = (int) SaLayout.sizeOf();
 		SockAddrFamily familyConst = SockAddrFamily.lookup(af).orElse(null);
 
 		return (T) switch (familyConst) {
@@ -710,10 +709,10 @@ public class SockAddr {
 		case INET6 -> new Inet6SockAddr(addr, arena);
 		case IPX -> new IpxSockAddr(addr, arena);
 		case PACKET -> new PacketSockAddr(addr, arena);
-		case LINK -> new LinkSockAddr(addr, arena, totalLength.getAsInt()); // BSD platforms only
+		case LINK -> new LinkSockAddr(addr, arena, structSize); // BSD platforms only
 		case IRDA -> new IrdaSockAddr(addr, arena);
 
-		default -> new SockAddr(addr.reinterpret(structLength, arena, __ -> {}), af, totalLength);
+		default -> new SockAddr(addr.reinterpret(structSize, arena, __ -> {}), af, OptionalInt.of(structSize));
 		};
 	}
 
@@ -737,6 +736,7 @@ public class SockAddr {
 	 * @param mseg the mseg
 	 * @return the optional int
 	 */
+	@SuppressWarnings("unused")
 	private static OptionalInt readTotalLengthField(MemorySegment mseg) {
 
 		if (!NativeABI.isBsdAbi())
