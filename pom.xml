@@ -21,6 +21,7 @@
 		<java.native>--enable-native-access=ALL-UNNAMED</java.native>
 		<groups>user-permission</groups>
 		<excludeGroups>windows-api|unix-api|linux-api</excludeGroups>
+	    <log.dir>${user.home}/logs/maven-builds</log.dir>
 		<gpg.keyname>0xD6D487A5</gpg.keyname>
 	</properties>
 	<licenses>
@@ -37,16 +38,20 @@
 			<organizationUrl>http://slytechs.com</organizationUrl>
 		</developer>
 	</developers>
+	
+	<!-- Project dependencies -->
 	<dependencies>
-		<!--
-		https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin  -->
+	
+		<!-- Required for compiling Java code -->
+		<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin  -->
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-compiler-plugin</artifactId>
 			<version>3.11.0</version>
 		</dependency>
-		<!--
-		https://mvnrepository.com/artifact/org.junit.platform/junit-platform-suite-api  -->
+		
+		<!-- JUnit test framework dependencies -->
+		<!-- https://mvnrepository.com/artifact/org.junit.platform/junit-platform-suite-api  -->
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-suite-api</artifactId>
@@ -59,13 +64,19 @@
 			<version>5.9.1</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- Maven site documentation -->
 		<dependency>
 			<groupId>org.apache.maven.doxia</groupId>
 			<artifactId>doxia-sink-api</artifactId>
 			<version>1.11.1</version>
 		</dependency>
+		
 	</dependencies>
+	
 	<build>
+	
+		<!-- Copy non-Java resources -->
 		<resources>
 			<resource>
 				<directory>src/main/java</directory>
@@ -74,6 +85,8 @@
 				</excludes>
 			</resource>
 		</resources>
+		
+		<!-- OS-specific build configurations -->
 		<extensions>
 			<extension>
 				<groupId>kr.motd.maven</groupId>
@@ -81,10 +94,13 @@
 				<version>1.7.0</version>
 			</extension>
 		</extensions>
+		
 		<plugins>
+		
+			<!-- Java compiler configuration -->
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
+				<version>3.12.1</version>
 				<configuration>
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>
@@ -92,11 +108,14 @@
 					<enablePreview>false</enablePreview>
 				</configuration>
 			</plugin>
+			
+			<!-- Project documentation site generation -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
 				<version>3.12.1</version>
 			</plugin>
+			
 			<!--  Unit test the API  -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -113,6 +132,8 @@
 						${java.native} </argLine>
 				</configuration>
 			</plugin>
+			
+			<!-- Generate Javadoc documentation -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -138,6 +159,7 @@
 				</executions>
 			</plugin>
 			
+			<!-- Publish documentation to GitHub Pages -->
 			<!-- mvn clean site site:stage scm-publish:publish-scm -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -147,6 +169,8 @@
 					<scmBranch>gh-pages</scmBranch>
 				</configuration>
 			</plugin>
+			
+			<!-- Package source code -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -161,6 +185,7 @@
 				</executions>
 			</plugin>
 
+			<!-- Deploy to Maven Central via OSSRH -->
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
@@ -170,9 +195,13 @@
 					<serverId>ossrh</serverId>
 					<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
 					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+			      	<consoleLogOutput>true</consoleLogOutput>
+			      	<outputLogFile>${log.dir}/${project.artifactId}.staging.log</outputLogFile>
+
 				</configuration>
 			</plugin>
 
+			<!-- Sign artifacts with GPG -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
@@ -195,8 +224,20 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<!-- Maven deploy configuration and logging -->
+			<plugin>
+			    <artifactId>maven-deploy-plugin</artifactId>
+			    <version>3.1.1</version>
+			    <configuration>
+			        <logfile>${log.dir}/${project.artifactId}.deploy.log</logfile>
+			    </configuration>
+			</plugin>
+			
 		</plugins>
 	</build>
+	
+	<!-- Repository publishing configuration -->
 	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>
@@ -213,6 +254,8 @@
 			<url>scm:git:git@github.com:slytechs-repos/${parent.project}.git</url>
 		</site>
 	</distributionManagement>
+	
+	<!-- Documentation reports configuration -->
 	<reporting>
 		<plugins>
 			<plugin>
@@ -256,10 +299,8 @@
 			</plugin>
 		</plugins>
 	</reporting>
-	<organization>
-		<name>Sly Technologies Inc</name>
-		<url>http://slytechs.com</url>
-	</organization>
+
+	<!-- OS-specific build profiles -->
 	<profiles>
 		<profile>
 			<id>osx-homebrew</id>
@@ -374,10 +415,19 @@
 			</properties>
 		</profile>
 	</profiles>
+	
+	<!-- Project metadata -->
+		
+	<organization>
+		<name>Sly Technologies Inc</name>
+		<url>http://slytechs.com</url><!-- Project metadata -->
+	</organization>
+	
 	<issueManagement>
 		<system>Github Issue Tracking</system>
 		<url>https://github.com/slytechs-repos/${parent.project}/issues</url>
 	</issueManagement>
+	
 	<scm>
 		<connection>
 			scm:git:git://github.com/slytechs-repos/${parent.project}.git</connection>
@@ -386,4 +436,5 @@
 		<url>https://github.com/slytechs-repos/${parent.project}</url>
 		<tag>jnetpcap-wrapper-${project.version}</tag>
 	</scm>
+	
 </project>
