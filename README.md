@@ -32,7 +32,7 @@ Unlock Network Packet Analysis in Java with **jNetPcap Wrapper**.
 8. [Contact](#contact)
 9. [Compatibility with jNetPcap Version 1](#compatibility-with-jnetpcap-version-1)
 10. [Git Branches](#git-branches)
-11. [Javadocs API Documentation](#java-javadocs)
+11. [Javadocs API Documentation](#javadocs-api-documentation)
 
 ---
 
@@ -198,12 +198,12 @@ Follows a standard [branching model][git-branch-model].
 
 ## Javadocs API Documentation
 
-The Javadocs are automatically generated and deployed to the `gh-pages` branch for easy reference. Access the [Javadocs here](https://slytechs-repos.github.io/jnetpcap-wrapper/docs/).
+The Javadocs are automatically generated and deployed to the `gh-pages` branch for easy reference. Access the [Javadocs here][javadocs]
 
 ---
 
 [wiki]: https://github.com/slytechs-repos/jnetpcap/wiki
-[javadocs]: https://slytechs-repos.github.io/jnetpcap-wrapper/docs/
+[javadocs]: https://slytechs-repos.github.io/jnetpcap-wrapper/org.jnetpcap/module-summary.html
 [libpcap]: https://www.tcpdump.org/
 [jnetpcap-sdk]: https://github.com/slytechs-repos/jnetpcap-sdk
 [release]: https://github.com/slytechs-repos/jnetpcap/releases
