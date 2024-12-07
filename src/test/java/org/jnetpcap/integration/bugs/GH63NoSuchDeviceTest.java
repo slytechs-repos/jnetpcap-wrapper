@@ -25,6 +25,7 @@ import org.jnetpcap.PcapException;
 import org.jnetpcap.PcapIf;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
@@ -137,10 +138,24 @@ public class GH63NoSuchDeviceTest {
 	 * </ul>
 	 * </p>
 	 * 
-	 * @throws PcapException
+	 * <p>
+	 * Note: This test is disabled by default as it's designed to run only in
+	 * environments where packet capture permissions are intentionally not set. Most
+	 * production environments should have proper permissions configured as per
+	 * project recommendations:
+	 * <ul>
+	 * <li>Linux: Add user to 'pcap' group or configure capabilities</li>
+	 * <li>macOS: Run 'sudo chmod 644 /dev/bpf*'</li>
+	 * <li>Windows: Run with administrative privileges</li>
+	 * </ul>
+	 * To enable this test, set system property 'test.permissions=true'.
+	 * </p>
+	 * 
+	 * @throws PcapException if there is an error accessing network devices
 	 */
 	@Test
 	@EnabledOnOs(OS.MAC)
+	@EnabledIfSystemProperty(named = "test.permissions", matches = "true")
 	void testDevicePermissions() throws PcapException {
 		List<PcapIf> devices = Pcap.findAllDevs();
 		assumeFalse(devices.isEmpty(), "Skip test if no devices available");
