@@ -230,7 +230,7 @@
 			    <artifactId>maven-deploy-plugin</artifactId>
 			    <version>3.1.1</version>
 			    <configuration>
-			        <logfile>${log.dir}/${project.artifactId}.deploy.log</logfile>
+			        <logfile>/home/mark/logs/maven-builds/${project.artifactId}.deploy.log</logfile>
 			    </configuration>
 			</plugin>
 			
