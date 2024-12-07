@@ -249,9 +249,12 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 			MemorySegment c_source = arena.allocate(PCAP_BUF_SIZE);
 			MemorySegment errbuf = arena.allocate(PCAP_ERRBUF_SIZE);
 
-			MemorySegment c_host = (host != null) ? arena.allocateFrom(host, java.nio.charset.StandardCharsets.UTF_8) : NULL;
-			MemorySegment c_port = (port != null) ? arena.allocateFrom(port, java.nio.charset.StandardCharsets.UTF_8) : NULL;
-			MemorySegment c_name = (name != null) ? arena.allocateFrom(name, java.nio.charset.StandardCharsets.UTF_8) : NULL;
+			MemorySegment c_host = (host != null) ? arena.allocateFrom(host, java.nio.charset.StandardCharsets.UTF_8)
+					: NULL;
+			MemorySegment c_port = (port != null) ? arena.allocateFrom(port, java.nio.charset.StandardCharsets.UTF_8)
+					: NULL;
+			MemorySegment c_name = (name != null) ? arena.allocateFrom(name, java.nio.charset.StandardCharsets.UTF_8)
+					: NULL;
 
 			int result = pcap_createsrcstr.invokeInt(c_source, type.getAsInt(), c_host, c_port, c_name, errbuf);
 			PcapException.throwIfNotOk(result, () -> errbuf.getString(0, java.nio.charset.StandardCharsets.UTF_8));
@@ -370,7 +373,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	protected static Arena newArena() {
 		return Pcap.newArena();
 	}
-	
+
 	/**
 	 * Open a device for capturing.
 	 * 
@@ -434,6 +437,58 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	}
 
 	/**
+	 * Create a live capture handle for Windows platforms using WinPcap/NPcap.
+	 *
+	 * <p>
+	 * {@code create} is used to create a packet capture handle to look at packets
+	 * on a Windows network adapter. The returned handle must be activated with
+	 * {@link #activate()} before packets can be captured with it. Various options
+	 * for the capture, such as promiscuous mode and buffer sizes, can be set on the
+	 * handle before activating it.
+	 * </p>
+	 *
+	 * <p>
+	 * Example usage:
+	 * 
+	 * <pre>
+	 * PcapIf dev = Pcap.findAllDevs().get(0);
+	 * WinPcap pcap = WinPcap.create(dev);
+	 * pcap.setSnaplen(65535);
+	 * pcap.setPromisc(true);
+	 * pcap.setTimeout(1000);
+	 * pcap.activate();
+	 * </pre>
+	 * </p>
+	 *
+	 * <p>
+	 * Windows-specific features available through this implementation include:
+	 * <ul>
+	 * <li>Kernel-level packet filtering</li>
+	 * <li>Buffer size optimization</li>
+	 * <li>Packet statistics</li>
+	 * <li>Extended capture modes</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param device pcap network interface object that specifies the Windows
+	 *               network adapter to open. Use {@link Pcap#findAllDevs()} to
+	 *               obtain a list of available network interfaces.
+	 * @return a new WinPcap handle object that needs to be activated using
+	 *         {@link #activate()} before capturing packets
+	 * @throws PcapException if the handle creation fails, typically due to
+	 *                       insufficient permissions or if the specified device is
+	 *                       not found
+	 * @see #activate()
+	 * @see #setMode(Mode)
+	 * @see #setBufferSize(int)
+	 * @see #statsEx()
+	 * @since libpcap 1.0 (WinPcap 4.0)
+	 */
+	public static WinPcap create(PcapIf device) throws PcapException {
+		return Pcap1_0.create(WinPcap::new, device.name());
+	}
+
+	/**
 	 * Open a saved capture file for reading.
 	 * 
 	 * <p>
@@ -489,7 +544,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 
 			MemorySegment c_source = arena.allocateFrom(source, java.nio.charset.StandardCharsets.UTF_8);
 			MemorySegment c_type = arena.allocate(JAVA_INT);
-			MemorySegment c_host = arena.allocate( PCAP_BUF_SIZE);
+			MemorySegment c_host = arena.allocate(PCAP_BUF_SIZE);
 			MemorySegment c_port = arena.allocate(PCAP_BUF_SIZE);
 			MemorySegment c_name = arena.allocate(PCAP_BUF_SIZE);
 
@@ -587,7 +642,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	public void liveDump(String filename, int maxsize, int maxpacks) throws PcapException {
 		try (var arena = newArena()) {
 			MemorySegment c_filename = arena.allocateFrom(filename, java.nio.charset.StandardCharsets.UTF_8);
-			pcap_live_dump.invokeInt(this::geterr,  getPcapHandle(), c_filename, maxsize, maxpacks);
+			pcap_live_dump.invokeInt(this::geterr, getPcapHandle(), c_filename, maxsize, maxpacks);
 		}
 	}
 
@@ -752,7 +807,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 			MemorySegment sizeIntPtr = arena.allocate(JAVA_INT);
 			MemorySegment pcap_stat_ex_ptr = pcap_stat_ex.invokeObj(this::geterr, getPcapHandle(), sizeIntPtr);
 
-			MemorySegment mseg = pcap_stat_ex_ptr.reinterpret(PCAP_STAT_EX_LENGTH, arena, __ ->{});
+			MemorySegment mseg = pcap_stat_ex_ptr.reinterpret(PCAP_STAT_EX_LENGTH, arena, __ -> {});
 			int statStructSize = sizeIntPtr.get(JAVA_INT, 0);
 
 			return new PcapStatExRecord(statStructSize, mseg);
