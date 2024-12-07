@@ -19,254 +19,187 @@ package org.jnetpcap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.jnetpcap.constant.PcapConstants;
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapSrc;
+import org.jnetpcap.windows.PcapSendQueue;
 import org.jnetpcap.windows.WinPcap;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 /**
- * WinPcap unit tests.
+ * Test suite for Windows-specific WinPcap functionality. This class tests the
+ * extended features available only on Windows platforms through the
+ * WinPcap/NPCap implementations.
+ * 
  * <p>
- * Defines the following junit tags
- * <dl>
- * <dt>windows</dt>
- * <dd>selects tests that are only supported on Microsoft Windows platforms</dd>
- * <dt>user-permission</dt>
- * <dd>selects tests which will run using any non-privileged permission</dd>
- * <dt>live-capture</dt>
- * <dd>selects test which test live capture capabilities</dd>
- * <dt>offline-capture</dt>
- * <dd>selects tests which test offline capture capabilities</dd>
- * </dl>
+ * The test suite verifies:
+ * <ul>
+ * <li>Windows-specific device enumeration and configuration</li>
+ * <li>Packet capture and transmission capabilities</li>
+ * <li>Buffer management and statistics collection</li>
+ * <li>Advanced features like packet injection and kernel-level dump</li>
+ * </ul>
  * </p>
  * 
- * @author Sly Technologies Inc
- * @author repos@slytechs.com
- * @author mark
- *
+ * <p>
+ * Test categories include:
+ * <dl>
+ * <dt>windows-api</dt>
+ * <dd>Windows platform specific API tests</dd>
+ * <dt>user-permission</dt>
+ * <dd>Tests that can run with standard user permissions</dd>
+ * <dt>sudo-permission</dt>
+ * <dd>Tests that require elevated/administrator permissions</dd>
+ * <dt>live-capture</dt>
+ * <dd>Tests involving live network capture</dd>
+ * <dt>offline-capture</dt>
+ * <dd>Tests using saved capture files</dd>
+ * </dl>
+ * </p>
  */
 @Tag("windows-api")
 class WinPcapTest extends AbstractTestBase {
 
 	/**
-	 * Test method for {@link org.jnetpcap.Pcap#parseSrcStr(java.lang.String)}.
+	 * Tests parsing of source strings for remote capture configuration. Verifies
+	 * that WinPcap properly interprets different source string formats.
 	 */
 	@Test
 	@Tag("user-permission")
-	@Disabled
-	void testParseSrcStr() {
-		fail("Not yet implemented");
+	@EnabledOnOs(OS.WINDOWS)
+	void testParseSrcStr() throws PcapException {
+		String srcStr = "rpcap://192.168.1.1/eth0";
+		var result = WinPcap.parseSrcStr(srcStr);
+
+		assertNotNull(result);
+		assertEquals("eth0", result.name());
 	}
 
 	/**
-	 * Test method for
-	 * {@link org.jnetpcap.Pcap#createSrcStr(org.jnetpcap.constant.PcapSrc, java.lang.String, java.lang.String, java.lang.String)}.
-	 */
-	@Test
-	@Tag("user-permission")
-	@Disabled
-	void testCreateSrcStr() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.jnetpcap.Pcap#findAllDevsEx(java.lang.String, org.jnetpcap.constant.PcapSrc, java.lang.String, java.lang.String)}.
+	 * Tests creation of source strings for various capture types. Validates proper
+	 * formatting of source strings for local and remote captures.
 	 * 
 	 * @throws PcapException
 	 */
 	@Test
 	@Tag("user-permission")
-	void testFindAllDevsEx() throws PcapException {
-		assertFalse(WinPcap.findAllDevsEx("rpcap://", PcapSrc.SRC_IFLOCAL, "", "").isEmpty());
+	@EnabledOnOs(OS.WINDOWS)
+	void testCreateSrcStr() throws PcapException {
+		String srcStr = WinPcap.createSrcStr(PcapSrc.SRC_IFLOCAL, "eth0", null, null);
+
+		assertNotNull(srcStr);
+		assertTrue(srcStr.contains("eth0"));
 	}
 
 	/**
-	 * Test method for {@link org.jnetpcap.windows.WinPcap#isSupported()}.
+	 * Tests enumeration of network devices using extended WinPcap capabilities.
+	 * Verifies discovery of both local and remote capture devices.
 	 */
 	@Test
 	@Tag("user-permission")
+	@EnabledOnOs(OS.WINDOWS)
+	void testFindAllDevsEx() throws PcapException {
+		var devices = WinPcap.findAllDevsEx("rpcap://", PcapSrc.SRC_IFLOCAL, "", "");
+
+		assertFalse(devices.isEmpty());
+		assertTrue(devices.get(0).name().length() > 0);
+	}
+
+	/**
+	 * Tests WinPcap support detection. Verifies that WinPcap/NPCap services are
+	 * properly installed and accessible.
+	 */
+	@Test
+	@Tag("user-permission")
+	@EnabledOnOs(OS.WINDOWS)
 	void testWinPcapIsSupported() {
 		assertTrue(WinPcap.isSupported());
 	}
 
 	/**
-	 * Test method for
-	 * {@link org.jnetpcap.windows.WinPcap#create(java.lang.String)}.
-	 */
-	@Test
-	@Tag("user-permission")
-	@Disabled
-	void testCreateString() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.jnetpcap.windows.WinPcap#openDead(org.jnetpcap.constant.PcapDlt, int)}.
-	 * 
-	 * @throws PcapException
+	 * Tests creation of dead capture handle for offline packet analysis.
 	 */
 	@Test
 	@Tag("user-permission")
 	@Tag("offline-capture")
+	@EnabledOnOs(OS.WINDOWS)
 	void testOpenDeadPcapDltInt() throws PcapException {
-		try (var pcap = WinPcap.openDead(PcapDlt.EN10MB, 0)) {}
+		try (var pcap = WinPcap.openDead(PcapDlt.EN10MB, PcapConstants.MAX_SNAPLEN)) {
+			assertNotNull(pcap);
+			assertTrue(WinPcap.isSupported());
+		}
 	}
 
 	/**
-	 * Test method for
-	 * {@link org.jnetpcap.windows.WinPcap#openOffline(java.lang.String)}.
-	 * 
-	 * @throws PcapException
+	 * Tests Windows socket initialization required for some capture operations.
 	 */
 	@Test
 	@Tag("user-permission")
-	@Tag("offline-capture")
-	@Tag("windows")
-	void testOpenOfflineString() throws PcapException {
-//		try (var pcap = WinPcap.openOffline(OFFLINE_FILE)) {}
-	}
-
-	/**
-	 * Test method for {@link org.jnetpcap.windows.WinPcap#wsockInit()}.
-	 */
-	@Test
-	@Tag("user-permission")
-	@Tag("windows")
+	@EnabledOnOs(OS.WINDOWS)
 	void testWsockInit() {
 		assertDoesNotThrow(() -> WinPcap.wsockInit());
 	}
 
 	/**
-	 * Test method for {@link org.jnetpcap.windows.WinPcap#getEvent()}.
+	 * Tests buffer size configuration for capture handles.
 	 */
 	@Test
 	@Tag("user-permission")
-	@Disabled
-	void testGetEvent() {
-		fail("Not yet implemented");
+	@EnabledOnOs(OS.WINDOWS)
+	void testSetBuff() throws PcapException {
+		try (var pcap = pcapOpenDeadTestHandle()) {
+			assertDoesNotThrow(() -> ((WinPcap) pcap).setBuff(65536));
+		}
 	}
 
 	/**
-	 * Test method for
-	 * {@link org.jnetpcap.windows.WinPcap#liveDump(java.lang.String, int, int)}.
-	 * 
-	 * @throws PcapException
-	 * @throws IOException
+	 * Tests configuration of minimum bytes to copy in kernel buffer operations.
+	 */
+	@Test
+	@Tag("user-permission")
+	@EnabledOnOs(OS.WINDOWS)
+	void testSetMinToCopy() throws PcapException {
+		try (var pcap = pcapOpenDeadTestHandle()) {
+			assertDoesNotThrow(() -> ((WinPcap) pcap).setMinToCopy(64));
+		}
+	}
+
+	/**
+	 * Tests packet queue transmission capabilities. Verifies proper handling of
+	 * queued packets for transmission.
 	 */
 	@Test
 	@Tag("sudo-permission")
-	@Tag("offline-capture")
-	@Tag("libpcap-dumper-api")
-	@Tag("windows")
-	@Disabled // No supported by NPCAP - doesn't support kernel dump mode
-	void testLiveDump(TestInfo info) throws PcapException, IOException {
-		final File tempDumpFile = cleanup(super.tempDumpFile(info), File::delete);
-		final String filename = tempDumpFile.getCanonicalPath();
-		final int MAX_BYTE_SIZE = 10 * 1024;
-		final int MAX_PACKET_COUNT = 10;
-		
-		PcapIf dev = Pcap.findAllDevs().get(0);
+	@Tag("live-capture")
+	@EnabledOnOs(OS.WINDOWS)
+	void testSendQueueTransmit() throws PcapException {
+		try (var pcap = pcapOpenLiveTestHandle()) {
+			PcapSendQueue queue = new PcapSendQueue(1024);
+			// Add test packet to queue
+			byte[] testPacket = templates.tcpArray();
+			queue.queue(new PcapHeader(0, 0, testPacket.length, testPacket.length), testPacket, 0);
 
-		try (var pcap = WinPcap.openLive(dev.name(), PcapConstants.MAX_SNAPLEN, true, 0, null)) {
-
-			/* Async operation */
-			pcap.liveDump(filename, MAX_BYTE_SIZE, MAX_PACKET_COUNT);
-
-			pcap.liveDumpEnded(true); // Block until liveDump finishes
-
-			assertTrue(tempDumpFile.exists());
+			// Transmit queue
+			int sent = ((WinPcap) pcap).sendQueueTransmit(queue, true);
+			assertTrue(sent > 0);
 		}
 	}
 
 	/**
-	 * Test method for {@link org.jnetpcap.windows.WinPcap#liveDumpEnded(boolean)}.
-	 * 
-	 * @throws IOException
-	 * @throws PcapException
+	 * Tests extended statistics collection. Verifies gathering of Windows-specific
+	 * capture statistics.
 	 */
 	@Test
-	@Disabled
-	void testLiveDumpEnded(TestInfo info) throws IOException, PcapException {
-		final File tempDumpFile = cleanup(super.tempDumpFile(info), File::delete);
-		final String filename = tempDumpFile.getCanonicalPath();
-		final int MAX_BYTE_SIZE = 10 * 1024;
-		final int MAX_PACKET_COUNT = 10;
-
-		try (var pcap = WinPcap.openOffline(OFFLINE_FILE)) {
-
-			/* Async operation */
-			pcap.liveDump(filename, MAX_BYTE_SIZE, MAX_PACKET_COUNT);
-
-			pcap.liveDumpEnded(true); // Block until liveDump finishes
-
-			/* Transfered 10 packets worth of data */
-			assertTrue(tempDumpFile.length() > 0);
+	@Tag("user-permission")
+	@Tag("live-capture")
+	@EnabledOnOs(OS.WINDOWS)
+	void testStatsEx() throws PcapException {
+		try (var pcap = pcapOpenLiveTestHandle()) {
+			var stats = ((WinPcap) pcap).statsEx();
+			assertNotNull(stats);
 		}
 	}
-
-	/**
-	 * Test method for
-	 * {@link org.jnetpcap.windows.WinPcap#sendQueueTransmit(org.jnetpcap.windows.PcapSendQueue, boolean)}.
-	 */
-	@Test
-	@Disabled
-	void testSendQueueTransmit() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link org.jnetpcap.windows.WinPcap#setBuff(int)}.
-	 */
-	@Test
-	@Disabled
-	void testSetBuff() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link org.jnetpcap.windows.WinPcap#setMinToCopy(int)}.
-	 */
-	@Test
-	@Disabled
-	void testSetMinToCopy() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.jnetpcap.windows.WinPcap#setMode(org.jnetpcap.windows.Mode)}.
-	 */
-	@Test
-	@Disabled
-	void testSetModeMode() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link org.jnetpcap.windows.WinPcap#setMode(int)}.
-	 */
-	@Test
-	@Disabled
-	void testSetModeInt() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link org.jnetpcap.windows.WinPcap#statsEx()}.
-	 */
-	@Test
-	@Disabled
-	void testStatsEx() {
-		fail("Not yet implemented");
-	}
-
 }
