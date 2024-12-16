@@ -452,6 +452,10 @@ public final class PcapHeader {
 		return MemorySegment.ofBuffer(buffer);
 	}
 
+	public ByteBuffer asByteBuffer() {
+		return buffer;
+	}
+
 	/**
 	 * Capture length.
 	 *
