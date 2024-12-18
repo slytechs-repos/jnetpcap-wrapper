@@ -85,7 +85,7 @@ public interface PcapHandler {
 		 * @param header the header
 		 * @param Packet the packet
 		 */
-		void handleSegment(U user, MemorySegment header, MemorySegment Packet);
+		void handleSegment(U user, MemorySegment header, MemorySegment packet);
 	}
 
 	/**
