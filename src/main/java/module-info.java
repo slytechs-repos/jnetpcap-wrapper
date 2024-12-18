@@ -132,6 +132,5 @@ module org.jnetpcap {
 	uses org.jnetpcap.spi.PcapMessagesProvider;
 
 	/* Private API */
-	exports org.jnetpcap.internal to
-			com.slytechs.jnet.jnetpcap;
+	exports org.jnetpcap.internal;
 }
