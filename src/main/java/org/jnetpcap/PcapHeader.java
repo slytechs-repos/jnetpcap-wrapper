@@ -452,6 +452,11 @@ public final class PcapHeader {
 		return MemorySegment.ofBuffer(buffer);
 	}
 
+	/**
+	 * As byte buffer.
+	 *
+	 * @return the byte buffer
+	 */
 	public ByteBuffer asByteBuffer() {
 		return buffer;
 	}

@@ -449,6 +449,7 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 *
 	 * <p>
 	 * Example usage:
+	 * </p>
 	 * 
 	 * <pre>
 	 * PcapIf dev = Pcap.findAllDevs().get(0);
@@ -458,17 +459,17 @@ public sealed class WinPcap extends Pcap1_10 permits Npcap {
 	 * pcap.setTimeout(1000);
 	 * pcap.activate();
 	 * </pre>
-	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * Windows-specific features available through this implementation include:
+	 * </p>
+	 * 
 	 * <ul>
 	 * <li>Kernel-level packet filtering</li>
 	 * <li>Buffer size optimization</li>
 	 * <li>Packet statistics</li>
 	 * <li>Extended capture modes</li>
 	 * </ul>
-	 * </p>
 	 *
 	 * @param device pcap network interface object that specifies the Windows
 	 *               network adapter to open. Use {@link Pcap#findAllDevs()} to

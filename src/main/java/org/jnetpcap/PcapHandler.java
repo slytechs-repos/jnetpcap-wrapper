@@ -83,7 +83,7 @@ public interface PcapHandler {
 		 *
 		 * @param user   the user
 		 * @param header the header
-		 * @param Packet the packet
+		 * @param packet the packet
 		 */
 		void handleSegment(U user, MemorySegment header, MemorySegment packet);
 	}
