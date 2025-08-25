@@ -1,7 +1,7 @@
 /*
  * Sly Technologies Free License
  * 
- * Copyright 2023 Sly Technologies Inc.
+ * Copyright 2024 Sly Technologies Inc.
  *
  * Licensed under the Sly Technologies Free License (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,7 +26,7 @@ import java.util.function.Function;
  * @param <R> the generic return type
  */
 public interface FunctionThrowable<T, R> {
-	
+
 	/**
 	 * Converts a checked function lambda to an unchecked/runtime function
 	 * equivalent.
@@ -49,9 +49,10 @@ public interface FunctionThrowable<T, R> {
 	/**
 	 * Applies an input value to a checked function and returns the function result.
 	 *
-	 * @param <T>  the generic input type
-	 * @param <R>  the generic return type
-	 * @param func the func
+	 * @param <T>   the generic input type
+	 * @param <R>   the generic return type
+	 * @param input the input
+	 * @param func  the func
 	 * @return output of the function
 	 */
 	static <T, R> R applyUnchecked(T input, FunctionThrowable<T, R> func) {

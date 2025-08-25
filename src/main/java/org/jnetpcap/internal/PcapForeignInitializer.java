@@ -22,8 +22,8 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.jnetpcap.Pcap.LibraryPolicy;
-import org.jnetpcap.PcapException;
 import org.jnetpcap.PcapErrorHandler;
+import org.jnetpcap.PcapException;
 
 /**
  * Pcap specific {@code ForeignInitializer} used to facilitate loading native
@@ -108,7 +108,7 @@ public class PcapForeignInitializer extends ForeignInitializer<PcapForeignDownca
 	 * <dd>Defines directories where the native library will searched for.</dd>
 	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILE}:</dt>
 	 * <dd>Defines an absolute directory and decorated filename path to load the
-	 * native library using {@link System.#load(String)} system call.</dd>
+	 * native library using {@link System#load(String)} system call.</dd>
 	 * <dt>{@value LibraryPolicy#SYSTEM_PROPERTY_LIBPCAP_FILENAME}:</dt>
 	 * <dd>Defines a decorated filename only of the native library. The decorated
 	 * filename will be appended to the

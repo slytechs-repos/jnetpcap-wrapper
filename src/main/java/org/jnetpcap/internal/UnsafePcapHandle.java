@@ -33,7 +33,7 @@ import org.jnetpcap.constant.PcapDlt;
  *
  */
 public non-sealed class UnsafePcapHandle extends Pcap1_10 {
-	
+
 	/**
 	 * Make dead handle name.
 	 *
@@ -96,7 +96,6 @@ public non-sealed class UnsafePcapHandle extends Pcap1_10 {
 	 * it; options for the capture, such as promiscu' ous mode, can be set on the
 	 * handle before activating it.
 	 *
-	 * @author Sly Technologies, Inc.
 	 * @param device a string that specifies the network device to open; on Linux
 	 *               systems with 2.2 or later kernels, a source argument of "any"
 	 *               or NULL can be used to capture packets from all interfaces.

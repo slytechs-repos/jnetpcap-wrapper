@@ -1,17 +1,19 @@
 /*
- * Copyright 2023-2024 Sly Technologies Inc
+ * Sly Technologies Free License
+ * 
+ * Copyright 2024 Sly Technologies Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * Licensed under the Sly Technologies Free License (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.slytechs.com/free-license-text
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.jnetpcap.internal;
 
@@ -30,9 +32,10 @@ import static java.lang.foreign.ValueLayout.*;
 
 /**
  * Packet statistics from the start of the pcap run to the time of the call.
- *
+ * 
  * <p>
  * A struct pcap_stat has the following members:
+ * </p>
  * <dl>
  * <dt>ps_recv</dt>
  * <dd>number of packets received;</dd>
@@ -43,7 +46,7 @@ import static java.lang.foreign.ValueLayout.*;
  * <dt>ps_ifdrop</dt>
  * <dd>number of packets dropped by the network interface or its driver.</dd>
  * </dl>
- * </p>
+ * 
  * <p>
  * The statistics do not behave the same way on all platforms. ps_recv might
  * count packets whether they passed any filter set with pcap_setfilter(3PCAP)
@@ -60,10 +63,15 @@ import static java.lang.foreign.ValueLayout.*;
  * treated as an indication that the interface did not drop any packets.
  * </p>
  *
+ * @param recv    the recv
+ * @param drop    the drop
+ * @param ifdrop  the ifdrop
+ * @param capt    the capt
+ * @param sent    the sent
+ * @param netdrop the netdrop
  * @author Sly Technologies Inc
  * @author repos@slytechs.com
  * @author mark
- *
  */
 public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long sent, long netdrop) implements
 		PcapStat {
@@ -96,6 +104,11 @@ public record PcapStatRecord(long recv, long drop, long ifdrop, long capt, long 
 	/** The Constant ps_netdrop. */
 	private static final VarHandle ps_netdrop = LAYOUT.varHandle(groupElement("ps_ifdrop"));
 
+	/**
+	 * Size of.
+	 *
+	 * @return the long
+	 */
 	public static long sizeOf() {
 		return LAYOUT.byteSize();
 	}
