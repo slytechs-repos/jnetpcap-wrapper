@@ -57,6 +57,53 @@ import static java.lang.foreign.ValueLayout.*;
  */
 public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 
+	private static final String LICENSE_PRODUCT_NAME = "jnetpcap";
+	private static final String LICENSE_PRODUCT_ID = "019a99d8-73fc-7921-ad68-d1b446253220";
+	private static final String LICENSE_PRODUCT_DATA = "MzRCOTU4RjdBNEMzOUE4MTAyODY0QTYyMDI3MjAzQTM=.GX6/K+PTVYi/IAAfiUQbMibbEt0byq2RXGOjl43FPrY6ccjRzW/Zn8s0tPYu99EMA/NW98U0qlzKdNCDOmYcUNQW46gRKecUjiE0/K10llgAxWluDzNlOoeDP8zz/c/HiFoOdAQUysfKJBb79Fs/QZec4DpFUqZoutwb2fnuO+6YxMtEPoQqyRNrFEE2T4JmK1xiXTwhPL9U38Q7bP/EtMn/IDoumcLTfdMxfW2jOjZDPWNBYi/SYeu1kaJdYBNA/sZ7IVDvha6fIOz7vs4tdNxilnX02T458RU8d482BYtrYrWh6sp0m1Y8wYn5ieZvIZ+ME/F3aCgh9Ff5CRj3oj8Y+e7ysagtK5KebT0yGkQg6iHSwbl/GQpebkAGGsWySU3RXqIrdOeGbuvWbb2EooG0hB43HISRfdm3KyTbj/3Ia/St7TSxV8DEbQGzN62vsVjZ6Ka54iDMXFfy4SPTeZ5khZDIa88Bj0TcPNsTv7ddMeaikPvF+shIba+PAb4U7OlYRWqhOvBTJvVj3jkc1Ae1exCQVH3z+fcJwDi27hOAfIFJXg6X/HKXkDZx4FSNvd3y9AiU92s3WThmFJv2IYumMGrK+ZvLi7XzAaH4KglQeEu1YgZk1Ddj5UB6pZlu0QsyzW69u6b97xMrm42aIsBezmmM8ONDr79Svn3/QxHV5myDGzR11OTsrJQKUwMtddJVNdXuXKQUKaMUx6Lzg5n88OOoD7eiy7YEa7MFs0rjYrKid/G1OFYgo+9VSRPjOf6OSzky9hy2ZXeF1tD3V36DQ1Dv8caGNOS2fYt2LjWcbuG7xTusOjb55qjlkOus";
+	private static final String LICENSE_NON_COMMERCIAL_KEY = "4EA214-2858D5-41D389-DED990-F96F95-94BCF4";
+
+//	private enum Features implements FeatureFlag {
+//		LIBPCAP_WRAPPER();
+//
+//		@Override
+//		public String id() {
+//			return name().toLowerCase();
+//		}
+//
+//	}
+//
+//	public static boolean activateLicense() throws LicenseException {
+//		KeyResolver resolver = new KeyResolver();
+//		ProductConfig product = LicenseManager.buildProduct(LICENSE_PRODUCT_NAME, Pcap.VERSION)
+//				.productId(LICENSE_PRODUCT_ID)
+//				.productData(LICENSE_PRODUCT_DATA)
+//				.fsName(LICENSE_PRODUCT_NAME)
+//				.envPrefix(LICENSE_PRODUCT_NAME.toUpperCase())
+//				.homeDir("." + LICENSE_PRODUCT_NAME)
+//				.build();
+//
+//		String key = resolver.findLicenseKey(product);
+//		if (key != null)
+//			return LicenseManager.activate(product, key);
+//
+//		return LicenseManager.activate(product, LICENSE_NON_COMMERCIAL_KEY);
+//	}
+
+//	public static void main(String[] args) throws LicenseException {
+//		activateLicense();
+//
+//		System.out.println("-- 1st license activation");
+//		LicenseManager.printStatus(System.out, Features.values());
+//		
+//		System.out.println("-- release license");
+//		LicenseManager.release();
+//		LicenseManager.printStatus(System.out, Features.values());
+//	
+//		System.out.println("-- 2nd license activation");
+//		activateLicense();
+//		LicenseManager.printStatus(System.out, Features.values());
+//	}
+
 	/**
 	 * An interface which provides a hook into Pcap initialization process. Any
 	 * missing native library symbols during the low level initialization/static

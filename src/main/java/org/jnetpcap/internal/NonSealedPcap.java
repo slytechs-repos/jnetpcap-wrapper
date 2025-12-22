@@ -26,7 +26,7 @@ import org.jnetpcap.Pcap1_10;
  * @author repos@slytechs.com
  * @author Mark Bednarczyk
  */
-public non-sealed class NonSealedPcap extends Pcap1_10 {
+public class NonSealedPcap extends Pcap1_10 {
 
 	/**
 	 * Instantiates a new non sealed pcap.

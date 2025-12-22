@@ -20,12 +20,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.jnetpcap.constant.PcapDlt;
 import org.jnetpcap.constant.PcapTStampPrecision;
-import org.jnetpcap.internal.NonSealedPcap;
 import org.jnetpcap.internal.PcapForeignDowncall;
 import org.jnetpcap.internal.PcapForeignInitializer;
 import org.jnetpcap.internal.PcapHeaderABI;
-import org.jnetpcap.internal.UnsafePcapHandle;
-import org.jnetpcap.windows.WinPcap;
 
 /**
  * Provides Pcap API method calls for up to libpcap version 1.10
@@ -35,7 +32,7 @@ import org.jnetpcap.windows.WinPcap;
  * @author mark
  *
  */
-public sealed class Pcap1_10 extends Pcap1_9 permits Pcap.Unix, WinPcap, UnsafePcapHandle, NonSealedPcap { 
+public non-sealed class Pcap1_10 extends Pcap1_9  { 
 
 	/**
 	 * The Constant pcap_datalink_val_to_description_or_dlt.

@@ -32,7 +32,7 @@ import org.jnetpcap.constant.PcapDlt;
  * @author mark
  *
  */
-public non-sealed class UnsafePcapHandle extends Pcap1_10 {
+public class UnsafePcapHandle extends Pcap1_10 {
 
 	/**
 	 * Make dead handle name.

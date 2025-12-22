@@ -133,4 +133,8 @@ module org.jnetpcap {
 
 	/* Private API */
 	exports org.jnetpcap.internal;
+	
+//	requires com.slytechs.jnet.core.license;
+	
+//	requires lexactivator;
 }
