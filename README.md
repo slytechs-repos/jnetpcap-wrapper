@@ -247,7 +247,7 @@ dependencies {
 | Java version       | 8-11                         | 22+                          |
 | Maven groupId      | `com.slytechs.jnet.jnetpcap` | `com.slytechs.sdk`           |
 | Maven artifactId   | `jnetpcap-wrapper`           | `jnetpcap-bindings`          |
-| Module name        | `org.jnetpcap`               | `com.slytechs.jnet.jnetpcap` |
+| Module name        | `com.slytechs.sdk.jnetpcap`               | `com.slytechs.jnet.jnetpcap` |
 
 ### Protocol Support
 
