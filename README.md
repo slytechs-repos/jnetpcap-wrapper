@@ -1,81 +1,105 @@
-![Maven Central](https://img.shields.io/maven-central/v/com.slytechs.jnet.jnetpcap/jnetpcap-wrapper?link=https%3A%2F%2Fmvnrepository.com%2Fartifact%2Fcom.slytechs.jnet.jnetpcap%2Fjnetpcap-wrapper)
-![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.slytechs.jnet.jnetpcap/jnetpcap-wrapper?server=https%3A%2F%2Fs01.oss.sonatype.org%2F)
+# jNetPcap Bindings
 
-# jNetPcap Wrapper
+[![Java](https://img.shields.io/badge/Java-22%2B-orange.svg)](https://openjdk.java.net/projects/jdk/22/) [![Panama FFM](https://img.shields.io/badge/Panama-Foreign%20Memory-blue.svg)](https://openjdk.java.net/projects/panama/) [![Maven Central](https://img.shields.io/badge/Maven-Central-blue.svg)](https://search.maven.org/artifact/com.slytechs.sdk/jnetpcap-bindings) [![License](https://img.shields.io/badge/License-Apache%20v2-green.svg)](https://claude.ai/chat/LICENSE)
 
-Unlock Network Packet Analysis in Java with **jNetPcap Wrapper**.
+Low-level libpcap bindings for Java using Panama Foreign Function & Memory API.
 
-**jNetPcap Wrapper** is a [*libpcap*][libpcap] Java library. This is the **version 2** release of the popular **jNetPcap** library, originally hosted on [*SourceForge.net*][sf.net].
+**jNetPcap Bindings** provides direct access to [libpcap](https://www.tcpdump.org/) from Java via the Panama FFM API. This is the **version 3** release of the popular **jNetPcap** library, originally hosted on [SourceForge.net](https://sourceforge.net/projects/jnetpcap/).
 
----
+> **Note**: Version 3 uses Panama FFM (not JNI). Requires JDK 22+.
+
+------
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [API Diagram](#api-diagram)
-3. [Documentation](#documentation)
-4. [Where are the protocols found in v1?](#where-are-the-protocols-found-in-v1)
-5. [Examples](#examples)
-   - [Capture a Live Packet](#capture-a-live-packet)
-   - [Transmit a Packet With Data-Link Header](#transmit-a-packet-with-data-link-header)
-   - [Statistics Snapshots](#statistics-snapshots)
-   - [How To Run The Examples](#how-to-run-the-examples)
-   - [For More Examples](#for-more-examples)
-6. [Dependencies](#dependencies)
-   - [Java Dependencies](#java-dependencies)
-   - [Native Library Dependencies](#native-library-dependencies)
-7. [Installation](#installation)
-   - [Maven Artifact Config](#maven-artifact-config)
-   - [Using Latest SNAPSHOT Releases](#using-latest-snapshot-releases)
-   - [Download Release Package](#download-release-package)
-   - [Compile From Source](#compile-from-source)
-8. [Contact](#contact)
-9. [Compatibility with jNetPcap Version 1](#compatibility-with-jnetpcap-version-1)
-10. [Git Branches](#git-branches)
-11. [Javadocs API Documentation](#javadocs-api-documentation)
+1. [Overview](https://claude.ai/chat/2b3c34b0-d15b-43e9-95df-1d214208b87d#overview)
+2. [Architecture](https://claude.ai/chat/2b3c34b0-d15b-43e9-95df-1d214208b87d#architecture)
+3. [Quick Start](https://claude.ai/chat/2b3c34b0-d15b-43e9-95df-1d214208b87d#quick-start)
+4. [Examples](https://claude.ai/chat/2b3c34b0-d15b-43e9-95df-1d214208b87d#examples)
+5. [Dependencies](https://claude.ai/chat/2b3c34b0-d15b-43e9-95df-1d214208b87d#dependencies)
+6. [Installation](https://claude.ai/chat/2b3c34b0-d15b-43e9-95df-1d214208b87d#installation)
+7. [Documentation](https://claude.ai/chat/2b3c34b0-d15b-43e9-95df-1d214208b87d#documentation)
+8. [Contact](https://claude.ai/chat/2b3c34b0-d15b-43e9-95df-1d214208b87d#contact)
+9. [Migration from v1/v2](https://claude.ai/chat/2b3c34b0-d15b-43e9-95df-1d214208b87d#migration-from-v1v2)
 
----
+------
 
 ## Overview
 
-Harness the power of libpcap within your Java applications using jNetPcap Wrapper, a bridge granting seamless access to low-level network monitoring capabilities.
+Direct libpcap access from Java using Panama Foreign Function & Memory API for zero-overhead native calls.
 
-Key Features:
+**Key Features:**
 
-- **Capture and Analyze Network Traffic:** Real-time packet interception for detailed analysis.
-- **Streamlined Integration:** Easily incorporate the library via Maven or manual classpath addition.
-- **Intuitive Java API:** User-friendly Java interface for network data handling.
-- **Packet Capture and Handling:** Utilize the `Pcap` class for interface monitoring and `PcapPacketHandler` for efficient packet processing.
-- **Precise Packet Filtering:** Apply filters for targeted packet capture.
+- **Zero-Overhead Native Calls** - Panama FFM provides near-native performance
+- **Type-Safe Bindings** - Java-friendly API wrapping libpcap functions
+- **Memory Safety** - Automatic resource management via Arena scopes
+- **Cross-Platform** - Linux, Windows (Npcap/WinPcap), macOS
 
----
+------
 
-## API Diagram
+## Architecture
 
-```mermaid
-graph TD
-    A[Java Application] --> B[jnetpcap-wrapper]
-    B --> C[Panama/JEP-424 Foreign Function & Memory API]
-    C --> D[Libpcap / WinPcap / Npcap]
-    D --> E[Operating System]
-    E --> F[Network Drivers]
-    F --> G[Network Interface Cards]
+```
+┌─────────────────────────┐
+│    Java Application     │
+└───────────┬─────────────┘
+            │
+┌───────────▼─────────────┐
+│   jnetpcap-bindings     │  ◄── This module
+│   (Panama FFM API)      │
+└───────────┬─────────────┘
+            │
+┌───────────▼─────────────┐
+│  libpcap / Npcap        │
+└───────────┬─────────────┘
+            │
+┌───────────▼─────────────┐
+│   Operating System      │
+└───────────┬─────────────┘
+            │
+┌───────────▼─────────────┐
+│  Network Interface      │
+└─────────────────────────┘
 ```
 
----
+For higher-level packet capture and protocol analysis, see [jnetpcap-api](https://github.com/slytechs-repos/jnetpcap-api) and [jnetpcap-sdk](https://github.com/slytechs-repos/jnetpcap-sdk).
 
-## Documentation
+------
 
-- [Wiki pages][wiki]: Comprehensive user guides and examples.
-- [Javadocs][javadocs]: Detailed API documentation.
+## Quick Start
 
----
+### Using SDK BOM (Recommended)
 
-## Where are the protocols found in v1?
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>com.slytechs.sdk</groupId>
+            <artifactId>sdk-bom</artifactId>
+            <version>3.0.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
 
-Protocol support from version 1 is now part of [**jnetpcap-sdk**][jnetpcap-sdk], extending the basic wrapper's functionality.
+<dependencies>
+    <dependency>
+        <groupId>com.slytechs.sdk</groupId>
+        <artifactId>jnetpcap-bindings</artifactId>
+    </dependency>
+</dependencies>
+```
 
----
+### Module Declaration
+
+```java
+module your.module {
+    requires com.slytechs.jnet.jnetpcap;
+}
+```
+
+------
 
 ## Examples
 
@@ -84,23 +108,25 @@ Protocol support from version 1 is now part of [**jnetpcap-sdk**][jnetpcap-sdk],
 ```java
 void main() throws PcapException {
     List<PcapIf> devices = Pcap.findAllDevs();
-    try (Pcap pcap = Pcap.create(devices.get(0))) {
+    
+    try (Pcap pcap = Pcap.create(devices.getFirst())) {
         pcap.activate();
+        
         pcap.loop(1, (String msg, PcapHeader header, byte[] packet) -> {
-            System.out.println(msg);
+            System.out.printf("Captured %d bytes%n", header.captureLength());
         }, "Capture Example");
     }
 }
 ```
 
-### Transmit a Packet With Data-Link Header
+### Transmit a Packet
 
 ```java
 void main() throws PcapException {
-    String rawPacket = "0026622f4787...";
-    byte[] packetBytes = PcapUtils.parseHexString(rawPacket);
+    byte[] packetBytes = HexStrings.parseHexString("0026622f4787...");
     List<PcapIf> devices = Pcap.findAllDevs();
-    try (Pcap pcap = Pcap.create(devices.get(0))) {
+    
+    try (Pcap pcap = Pcap.create(devices.getFirst())) {
         pcap.activate();
         pcap.sendPacket(packetBytes);
     }
@@ -112,8 +138,10 @@ void main() throws PcapException {
 ```java
 void main() throws PcapException, InterruptedException {
     List<PcapIf> devices = Pcap.findAllDevs();
-    try (Pcap pcap = Pcap.create(devices.get(0))) {
+    
+    try (Pcap pcap = Pcap.create(devices.getFirst())) {
         pcap.activate();
+        
         for (int i = 0; i < 5; i++) {
             System.out.println(pcap.stats());
             Thread.sleep(1000);
@@ -122,94 +150,129 @@ void main() throws PcapException, InterruptedException {
 }
 ```
 
-### How To Run The Examples
+### JVM Arguments
 
-#### Command-line Arguments:
+```bash
+java --enable-native-access=com.slytechs.jnet.jnetpcap \
+     -Djava.library.path=/usr/lib \
+     -jar your-app.jar
+```
 
-- **Linux:** `-Djava.library.path=/usr/lib/... --enable-native-access=org.jnetpcap --enable-preview`
-- **Windows:** `-Djava.library.path=C:\Windows\... --enable-native-access=org.jnetpcap --enable-preview`
-
----
+------
 
 ## Dependencies
 
-### Java Dependencies
+### Java Requirements
 
-No external dependencies apart from standard Java modules.
+- **JDK 22+** - Required for Panama FFM API
 
-### Native Library Dependencies
+### Native Library Requirements
 
-Requires [*libpcap*][libpcap], [*Npcap*][npcap], or [*WinPcap*][winpcap].
+One of:
 
----
+- [libpcap](https://www.tcpdump.org/) (Linux/macOS)
+- [Npcap](https://npcap.com/) (Windows, recommended)
+- [WinPcap](https://www.winpcap.org/) (Windows, legacy)
+
+------
 
 ## Installation
 
-### Maven Artifact Config
-
-Use the latest version variable in your `pom.xml` for easy updates:
+### Maven (with BOM)
 
 ```xml
-<properties>
-    <jnetpcap.version>LATEST</jnetpcap.version>
-</properties>
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>com.slytechs.sdk</groupId>
+            <artifactId>sdk-bom</artifactId>
+            <version>3.0.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
 
+<dependencies>
+    <dependency>
+        <groupId>com.slytechs.sdk</groupId>
+        <artifactId>jnetpcap-bindings</artifactId>
+    </dependency>
+</dependencies>
+```
+
+### Maven (standalone)
+
+```xml
 <dependency>
-    <groupId>com.slytechs.jnet.jnetpcap</groupId>
-    <artifactId>jnetpcap-wrapper</artifactId>
-    <version>${jnetpcap.version}</version>
+    <groupId>com.slytechs.sdk</groupId>
+    <artifactId>jnetpcap-bindings</artifactId>
+    <version>3.0.0</version>
 </dependency>
 ```
 
-### Using Latest SNAPSHOT Releases
+### Gradle
 
-Add this repository:
-
-```xml
-<repository>
-    <id>sonatype-snapshots</id>
-    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-</repository>
+```groovy
+dependencies {
+    implementation platform('com.slytechs.sdk:sdk-bom:3.0.0')
+    implementation 'com.slytechs.sdk:jnetpcap-bindings'
+}
 ```
 
-### Download Release Package
+------
 
-Latest release: [download link][release]
+## Documentation
 
----
+- [GitHub Wiki](https://github.com/slytechs-repos/jnetpcap-bindings/wiki) - User guides and examples
+- [Javadocs](https://slytechs-repos.github.io/jnetpcap-bindings/) - API documentation
+- [SDK BOM](https://github.com/slytechs-repos/sdk-bom) - Version management
+
+------
 
 ## Contact
 
-- Email: `sales@slytechs.com`
+- **Email:** sales@slytechs.com
+- **Website:** [www.slytechs.com](https://www.slytechs.com/)
 
----
+------
 
-## Compatibility with jNetPcap Version 1
+## Migration from v1/v2
 
-Details in the [Wiki][wiki].
+### Key Changes in v3
 
----
+| Aspect             | v1/v2                        | v3                           |
+| ------------------ | ---------------------------- | ---------------------------- |
+| Native integration | JNI                          | Panama FFM                   |
+| Java version       | 8-11                         | 22+                          |
+| Maven groupId      | `com.slytechs.jnet.jnetpcap` | `com.slytechs.sdk`           |
+| Maven artifactId   | `jnetpcap-wrapper`           | `jnetpcap-bindings`          |
+| Module name        | `org.jnetpcap`               | `com.slytechs.jnet.jnetpcap` |
 
-## Git Branches
+### Protocol Support
 
-The project follows a structured branching strategy with support for multiple JDK versions:
+Protocol dissection (Ethernet, IP, TCP, etc.) is available via separate modules:
 
-- JDK 22+ development in `main` and `develop` branches
-- JDK 21 LTS support in `jdk21/main` branch
-- Feature, bugfix, hotfix, and backport branch prefixes for specific changes
+- [sdk-protocol-tcpip](https://github.com/slytechs-repos/sdk-protocol-tcpip) - TCP/IP stack
+- [sdk-protocol-web](https://github.com/slytechs-repos/sdk-protocol-web) - Web protocols
+- [jnetpcap-api](https://github.com/slytechs-repos/jnetpcap-api) - High-level capture API
+- [jnetpcap-sdk](https://github.com/slytechs-repos/jnetpcap-sdk) - Complete SDK starter
 
-For detailed information about our JDK version support strategy and LTS maintenance policy, please see our [Version Strategy Discussion](https://github.com/slytechs-repos/jnetpcap-wrapper/discussions/62).
+For detailed migration instructions, see the [Wiki](https://github.com/slytechs-repos/jnetpcap-bindings/wiki).
 
-## Javadocs API Documentation
+------
 
-The Javadocs are automatically generated and deployed to the `gh-pages` branch for easy reference. Access the [Javadocs here][javadocs]
+## Related Projects
 
----
+- [jnetpcap-api](https://github.com/slytechs-repos/jnetpcap-api) - High-level packet capture API
+- [jnetpcap-sdk](https://github.com/slytechs-repos/jnetpcap-sdk) - Complete SDK starter (recommended)
+- [sdk-protocol-tcpip](https://github.com/slytechs-repos/sdk-protocol-tcpip) - TCP/IP protocol pack
+- [sdk-common](https://github.com/slytechs-repos/sdk-common) - Core utilities
 
-[wiki]: https://github.com/slytechs-repos/jnetpcap/wiki
-[javadocs]: https://slytechs-repos.github.io/jnetpcap-wrapper/org.jnetpcap/module-summary.html
-[libpcap]: https://www.tcpdump.org/
-[jnetpcap-sdk]: https://github.com/slytechs-repos/jnetpcap-sdk
-[release]: https://github.com/slytechs-repos/jnetpcap/releases
-[git-branch-model]: https://nvie.com/posts/a-successful-git-branching-model/
+------
 
+**Sly Technologies Inc.** - High-performance network analysis solutions
+
+Website: [www.slytechs.com](https://www.slytechs.com/)
+
+------
