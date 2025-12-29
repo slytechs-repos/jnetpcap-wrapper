@@ -118,7 +118,8 @@ import static java.lang.foreign.ValueLayout.*;
  * }</pre>
  * 
  * @see PcapAddr For detailed information about network addresses
- * @see com.slytechs.sdk.jnetpcap.constant.PcapIfFlag For interface flag constants
+ * @see com.slytechs.sdk.jnetpcap.constant.PcapIfFlag For interface flag
+ *      constants
  * @since libpcap 0.7
  */
 public class PcapIf {
@@ -360,48 +361,6 @@ public class PcapIf {
 	}
 
 	/**
-	 * Attempts to find the corresponding Java NetworkInterface for this pcap
-	 * interface. This private method is used by the constructor to initialize the
-	 * hardware address. It tries multiple strategies:
-	 * <ol>
-	 * <li>Look up by interface name</li>
-	 * <li>Look up by IPv4 address</li>
-	 * <li>Look up by IPv6 address</li>
-	 * </ol>
-	 *
-	 * @return The hardware address as a byte array, or null if not found/accessible
-	 */
-	private byte[] selectJavaNetInterface() {
-
-		/* 1 - select by name */
-		try {
-			return NetworkInterface.getByName(name()).getHardwareAddress();
-		} catch (Throwable e) {}
-
-		/* 2 - select by IPv4/INET address */
-		try {
-			var ip4 = findAddressOfType(InetSockAddr.class)
-					.map(PcapAddr::socketAddress)
-					.map(InetSockAddr::address)
-					.orElseThrow();
-
-			return NetworkInterface.getByInetAddress(InetAddress.getByAddress(ip4)).getHardwareAddress();
-		} catch (Throwable e) {}
-
-		/* 3 - select by IPv6/INET6 address */
-		try {
-			var ip6 = findAddressOfType(Inet6SockAddr.class)
-					.map(PcapAddr::socketAddress)
-					.map(Inet6SockAddr::address)
-					.orElseThrow();
-
-			return NetworkInterface.getByInetAddress(InetAddress.getByAddress(ip6)).getHardwareAddress();
-		} catch (Throwable e) {}
-
-		return null;
-	}
-
-	/**
 	 * Returns all network addresses associated with this interface. The returned
 	 * list may contain IPv4, IPv6, and other types of addresses. Each PcapAddr
 	 * object contains the network address and optional netmask, broadcast, and
@@ -411,6 +370,18 @@ public class PcapIf {
 	 */
 	public List<PcapAddr<?>> addresses() {
 		return addresses;
+	}
+
+	/**
+	 * Returns the human-readable description of this interface. The description is
+	 * typically more detailed than the interface name and may include information
+	 * about the interface type, manufacturer, or other details.
+	 *
+	 * @return An Optional containing the interface description, or empty if no
+	 *         description is available
+	 */
+	public Optional<String> description() {
+		return description;
 	}
 
 	/**
@@ -445,7 +416,8 @@ public class PcapIf {
 	 * @return An Optional containing the first matching address, or empty if no
 	 *         address of the specified type exists on this interface
 	 */
-	@SuppressWarnings({ "unchecked"
+	@SuppressWarnings({
+			"unchecked"
 	})
 	public <T extends SockAddr> Optional<PcapAddr<T>> findAddressOfType(Class<T> familyClassType) {
 
@@ -455,18 +427,6 @@ public class PcapIf {
 				.filter(a -> familyClassType.isAssignableFrom(a.addr.getClass()))
 				.map(a -> (PcapAddr<T>) a)
 				.findFirst();
-	}
-
-	/**
-	 * Returns the human-readable description of this interface. The description is
-	 * typically more detailed than the interface name and may include information
-	 * about the interface type, manufacturer, or other details.
-	 *
-	 * @return An Optional containing the interface description, or empty if no
-	 *         description is available
-	 */
-	public Optional<String> description() {
-		return description;
 	}
 
 	/**
@@ -506,6 +466,36 @@ public class PcapIf {
 	}
 
 	/**
+	 * Checks if the interface is a loopback interface.
+	 *
+	 * @return true if the interface is loopback, false otherwise
+	 * @see #flags()
+	 */
+	public boolean isLoopback() {
+		return (flags() & PCAP_IF_LOOPBACK) != 0;
+	}
+
+	/**
+	 * Checks if the interface is currently running.
+	 *
+	 * @return true if the interface is running, false otherwise
+	 * @see #flags()
+	 */
+	public boolean isRunning() {
+		return (flags() & PCAP_IF_RUNNING) != 0;
+	}
+
+	/**
+	 * Checks if the interface is currently up and running.
+	 *
+	 * @return true if the interface is up, false otherwise
+	 * @see #flags()
+	 */
+	public boolean isUp() {
+		return (flags() & PCAP_IF_UP) != 0;
+	}
+
+	/**
 	 * Returns the name of this interface. The interface name is system-dependent
 	 * (e.g., "eth0" on Linux, "en0" on macOS, "\\Device\\NPF_{GUID}" on Windows)
 	 * and can be used with pcap_open_live() to open this interface for packet
@@ -515,6 +505,48 @@ public class PcapIf {
 	 */
 	public String name() {
 		return name;
+	}
+
+	/**
+	 * Attempts to find the corresponding Java NetworkInterface for this pcap
+	 * interface. This private method is used by the constructor to initialize the
+	 * hardware address. It tries multiple strategies:
+	 * <ol>
+	 * <li>Look up by interface name</li>
+	 * <li>Look up by IPv4 address</li>
+	 * <li>Look up by IPv6 address</li>
+	 * </ol>
+	 *
+	 * @return The hardware address as a byte array, or null if not found/accessible
+	 */
+	private byte[] selectJavaNetInterface() {
+
+		/* 1 - select by name */
+		try {
+			return NetworkInterface.getByName(name()).getHardwareAddress();
+		} catch (Throwable e) {}
+
+		/* 2 - select by IPv4/INET address */
+		try {
+			var ip4 = findAddressOfType(InetSockAddr.class)
+					.map(PcapAddr::socketAddress)
+					.map(InetSockAddr::address)
+					.orElseThrow();
+
+			return NetworkInterface.getByInetAddress(InetAddress.getByAddress(ip4)).getHardwareAddress();
+		} catch (Throwable e) {}
+
+		/* 3 - select by IPv6/INET6 address */
+		try {
+			var ip6 = findAddressOfType(Inet6SockAddr.class)
+					.map(PcapAddr::socketAddress)
+					.map(Inet6SockAddr::address)
+					.orElseThrow();
+
+			return NetworkInterface.getByInetAddress(InetAddress.getByAddress(ip6)).getHardwareAddress();
+		} catch (Throwable e) {}
+
+		return null;
 	}
 
 	/**
