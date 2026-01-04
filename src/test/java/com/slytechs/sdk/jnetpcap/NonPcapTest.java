@@ -24,7 +24,6 @@ import java.io.Writer;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import com.slytechs.sdk.jnetpcap.Pcap;
 import com.slytechs.sdk.jnetpcap.Pcap.LibraryPolicy;
 import com.slytechs.sdk.jnetpcap.util.PcapVersionException;
 
@@ -42,8 +41,8 @@ class NonPcapTest extends AbstractTestBase {
 	 * Test property for {@link com.slytechs.sdk.jnetpcap.Pcap#VERSION}.
 	 */
 	@Test
-	void testPcapVersionProperty_startsWith_2() {
-		assertTrue(Pcap.VERSION.startsWith("2"));
+	void testPcapVersionProperty_startsWith_3() {
+		assertTrue(Pcap.VERSION.startsWith("3"));
 	}
 
 	/**

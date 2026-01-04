@@ -36,17 +36,12 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.slytechs.sdk.jnetpcap.BpFilter;
-import com.slytechs.sdk.jnetpcap.Pcap;
-import com.slytechs.sdk.jnetpcap.PcapDumper;
-import com.slytechs.sdk.jnetpcap.PcapException;
-import com.slytechs.sdk.jnetpcap.PcapHandler;
-import com.slytechs.sdk.jnetpcap.PcapIf;
 import com.slytechs.sdk.jnetpcap.Pcap.LibraryPolicy;
 import com.slytechs.sdk.jnetpcap.SockAddr.InetSockAddr;
 import com.slytechs.sdk.jnetpcap.constant.PcapCode;
@@ -86,6 +81,11 @@ import com.slytechs.sdk.jnetpcap.util.PcapPacketRef;
  */
 @Tag("libpcap-api")
 class LibpcapApiTest extends AbstractTestBase {
+	
+	@BeforeAll
+	static void activateLicense() {
+		Pcap.activateLicense();
+	}
 
 	/**
 	 * Test method for {@link com.slytechs.sdk.jnetpcap.Pcap#activate()}.
@@ -1119,7 +1119,7 @@ class LibpcapApiTest extends AbstractTestBase {
 	void testOpenDeadWithTstampPrecision() throws PcapException {
 		final PcapDlt DTL = PcapDlt.EN10MB;
 		final int SNAPLEN = MAX_SNAPLEN;
-		final PcapTStampPrecision TSTAMP_PRECISION = PcapTStampPrecision.TSTAMP_PRECISION_MICRO;
+		final PcapTStampPrecision TSTAMP_PRECISION = PcapTStampPrecision.MICRO;
 
 		try (Pcap pcap = Pcap.openDeadWithTstampPrecision(DTL, SNAPLEN, TSTAMP_PRECISION)) {
 			assertNotNull(pcap);
@@ -1707,7 +1707,7 @@ class LibpcapApiTest extends AbstractTestBase {
 	void testSetTstampPrecision() throws PcapException {
 		var pcap = super.pcapCreateTestHandle();
 
-		final PcapTStampPrecision TSTAMP_PRECISION = PcapTStampPrecision.TSTAMP_PRECISION_MICRO;
+		final PcapTStampPrecision TSTAMP_PRECISION = PcapTStampPrecision.MICRO;
 
 		assertDoesNotThrow(() -> pcap.setTstampPrecision(TSTAMP_PRECISION));
 	}

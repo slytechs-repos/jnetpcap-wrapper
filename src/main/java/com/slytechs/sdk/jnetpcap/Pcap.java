@@ -31,6 +31,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
+import com.cryptlex.lexactivator.LexActivator;
+import com.cryptlex.lexactivator.LexActivatorException;
+import com.slytechs.sdk.common.license.KeyResolver;
+import com.slytechs.sdk.common.license.License;
+import com.slytechs.sdk.common.license.LicenseException;
+import com.slytechs.sdk.common.license.ProductConfig;
 import com.slytechs.sdk.jnetpcap.Pcap0_4.PcapSupplier;
 import com.slytechs.sdk.jnetpcap.constant.PcapCode;
 import com.slytechs.sdk.jnetpcap.constant.PcapConstants;
@@ -57,52 +63,124 @@ import static java.lang.foreign.ValueLayout.*;
  */
 public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 
-	private static final String LICENSE_PRODUCT_NAME = "jnetpcap";
-	private static final String LICENSE_PRODUCT_ID = "019a99d8-73fc-7921-ad68-d1b446253220";
-	private static final String LICENSE_PRODUCT_DATA = "MzRCOTU4RjdBNEMzOUE4MTAyODY0QTYyMDI3MjAzQTM=.GX6/K+PTVYi/IAAfiUQbMibbEt0byq2RXGOjl43FPrY6ccjRzW/Zn8s0tPYu99EMA/NW98U0qlzKdNCDOmYcUNQW46gRKecUjiE0/K10llgAxWluDzNlOoeDP8zz/c/HiFoOdAQUysfKJBb79Fs/QZec4DpFUqZoutwb2fnuO+6YxMtEPoQqyRNrFEE2T4JmK1xiXTwhPL9U38Q7bP/EtMn/IDoumcLTfdMxfW2jOjZDPWNBYi/SYeu1kaJdYBNA/sZ7IVDvha6fIOz7vs4tdNxilnX02T458RU8d482BYtrYrWh6sp0m1Y8wYn5ieZvIZ+ME/F3aCgh9Ff5CRj3oj8Y+e7ysagtK5KebT0yGkQg6iHSwbl/GQpebkAGGsWySU3RXqIrdOeGbuvWbb2EooG0hB43HISRfdm3KyTbj/3Ia/St7TSxV8DEbQGzN62vsVjZ6Ka54iDMXFfy4SPTeZ5khZDIa88Bj0TcPNsTv7ddMeaikPvF+shIba+PAb4U7OlYRWqhOvBTJvVj3jkc1Ae1exCQVH3z+fcJwDi27hOAfIFJXg6X/HKXkDZx4FSNvd3y9AiU92s3WThmFJv2IYumMGrK+ZvLi7XzAaH4KglQeEu1YgZk1Ddj5UB6pZlu0QsyzW69u6b97xMrm42aIsBezmmM8ONDr79Svn3/QxHV5myDGzR11OTsrJQKUwMtddJVNdXuXKQUKaMUx6Lzg5n88OOoD7eiy7YEa7MFs0rjYrKid/G1OFYgo+9VSRPjOf6OSzky9hy2ZXeF1tD3V36DQ1Dv8caGNOS2fYt2LjWcbuG7xTusOjb55qjlkOus";
-	private static final String LICENSE_NON_COMMERCIAL_KEY = "4EA214-2858D5-41D389-DED990-F96F95-94BCF4";
+	private static final String PRODUCT_ID = "019a99d8-73fc-7921-ad68-d1b446253220";
+	private static final String PRODUCT_DATA = "MzRCOTU4RjdBNEMzOUE4MTAyODY0QTYyMDI3MjAzQTM=.GX6/K+PTVYi/IAAfiUQbMibbEt0byq2RXGOjl43FPrY6ccjRzW/Zn8s0tPYu99EMA/NW98U0qlzKdNCDOmYcUNQW46gRKecUjiE0/K10llgAxWluDzNlOoeDP8zz/c/HiFoOdAQUysfKJBb79Fs/QZec4DpFUqZoutwb2fnuO+6YxMtEPoQqyRNrFEE2T4JmK1xiXTwhPL9U38Q7bP/EtMn/IDoumcLTfdMxfW2jOjZDPWNBYi/SYeu1kaJdYBNA/sZ7IVDvha6fIOz7vs4tdNxilnX02T458RU8d482BYtrYrWh6sp0m1Y8wYn5ieZvIZ+ME/F3aCgh9Ff5CRj3oj8Y+e7ysagtK5KebT0yGkQg6iHSwbl/GQpebkAGGsWySU3RXqIrdOeGbuvWbb2EooG0hB43HISRfdm3KyTbj/3Ia/St7TSxV8DEbQGzN62vsVjZ6Ka54iDMXFfy4SPTeZ5khZDIa88Bj0TcPNsTv7ddMeaikPvF+shIba+PAb4U7OlYRWqhOvBTJvVj3jkc1Ae1exCQVH3z+fcJwDi27hOAfIFJXg6X/HKXkDZx4FSNvd3y9AiU92s3WThmFJv2IYumMGrK+ZvLi7XzAaH4KglQeEu1YgZk1Ddj5UB6pZlu0QsyzW69u6b97xMrm42aIsBezmmM8ONDr79Svn3/QxHV5myDGzR11OTsrJQKUwMtddJVNdXuXKQUKaMUx6Lzg5n88OOoD7eiy7YEa7MFs0rjYrKid/G1OFYgo+9VSRPjOf6OSzky9hy2ZXeF1tD3V36DQ1Dv8caGNOS2fYt2LjWcbuG7xTusOjb55qjlkOus";
+	private static final String COMMUNITY_KEY = "4EA214-2858D5-41D389-DED990-F96F95-94BCF4";
 
-//	private enum Features implements FeatureFlag {
-//		LIBPCAP_WRAPPER();
-//
-//		@Override
-//		public String id() {
-//			return name().toLowerCase();
-//		}
-//
-//	}
-//
-//	public static boolean activateLicense() throws LicenseException {
-//		KeyResolver resolver = new KeyResolver();
-//		ProductConfig product = LicenseManager.buildProduct(LICENSE_PRODUCT_NAME, Pcap.VERSION)
-//				.productId(LICENSE_PRODUCT_ID)
-//				.productData(LICENSE_PRODUCT_DATA)
-//				.fsName(LICENSE_PRODUCT_NAME)
-//				.envPrefix(LICENSE_PRODUCT_NAME.toUpperCase())
-//				.homeDir("." + LICENSE_PRODUCT_NAME)
-//				.build();
-//
-//		String key = resolver.findLicenseKey(product);
-//		if (key != null)
-//			return LicenseManager.activate(product, key);
-//
-//		return LicenseManager.activate(product, LICENSE_NON_COMMERCIAL_KEY);
-//	}
+	/**
+	 * Activates the product license using automatic key resolution.
+	 * 
+	 * <p>
+	 * The license key is resolved from the following sources in order:
+	 * 
+	 * <ol>
+	 * <li>Environment variable {@code JNETPCAP_LICENSE_KEY}</li>
+	 * <li>Environment variable {@code JNETPCAP_LICENSE_DIR} → jnetpcap.lic</li>
+	 * <li>System property {@code jnetpcap.license.key}</li>
+	 * <li>System property {@code jnetpcap.license.dir} → jnetpcap.lic</li>
+	 * <li>Environment variable {@code LICENSE_KEY}</li>
+	 * <li>Environment variable {@code LICENSE_DIR} → jnetpcap.lic</li>
+	 * <li>System property {@code license.key}</li>
+	 * <li>System property {@code license.dir} → jnetpcap.lic</li>
+	 * <li>Container secrets: {@code /run/secrets/jnetpcap.lic}</li>
+	 * <li>User home: {@code ~/.jnetpcap/jnetpcap.lic}</li>
+	 * <li>System path: {@code /etc/jnetpcap/jnetpcap.lic} (Linux) or
+	 * {@code %PROGRAMFILES%\jnetpcap\jnetpcap.lic} (Windows)</li>
+	 * <li>Universal home: {@code ~/.license/jnetpcap.lic}</li>
+	 * <li>Universal system: {@code /etc/license/jnetpcap.lic}</li>
+	 * <li>Classpath: {@code /license/jnetpcap.lic} (embedded community key)</li>
+	 * </ol>
+	 * 
+	 * <p>
+	 * The embedded community key provides unlimited activations with feature
+	 * restrictions. To unlock all features, install a commercial key in any of the
+	 * above locations.
+	 * 
+	 * @throws LicenseException if no valid license key is found or activation fails
+	 * @see #activateLicense(String)
+	 */
+	public static void activateLicense() throws LicenseException {
+		ProductConfig cfg = new ProductConfig();
+		cfg.envPrefix = "JNETPCAP";
+		cfg.fsName = "jnetpcap.lic";
+		cfg.homeDir = System.getProperty("user.home");
+		cfg.productName = "jNetPcap SDK";
+		cfg.version = VERSION;
 
-//	public static void main(String[] args) throws LicenseException {
-//		activateLicense();
-//
-//		System.out.println("-- 1st license activation");
-//		LicenseManager.printStatus(System.out, Features.values());
-//		
-//		System.out.println("-- release license");
-//		LicenseManager.release();
-//		LicenseManager.printStatus(System.out, Features.values());
-//	
-//		System.out.println("-- 2nd license activation");
-//		activateLicense();
-//		LicenseManager.printStatus(System.out, Features.values());
-//	}
+		String key = new KeyResolver()
+				.findLicenseKey(cfg);
+
+		if (key == null)
+			key = COMMUNITY_KEY;
+
+		activateLicense(key);
+	}
+
+	/**
+	 * Activates the product license using the specified key.
+	 * 
+	 * <p>
+	 * Use this method when the license key is obtained programmatically or stored
+	 * in a custom location not covered by automatic resolution.
+	 * 
+	 * <p>
+	 * Example:
+	 * 
+	 * <pre>{@code
+	 * // From custom configuration
+	 * String key = config.getLicenseKey();
+	 * Pcap.activateLicense(key);
+	 * 
+	 * // Normal usage after activation
+	 * try (Pcap pcap = Pcap.openOffline(FILE)) {
+	 * 	// ...
+	 * }
+	 * }</pre>
+	 * 
+	 * @param key the license key string (must be at least 20 characters)
+	 * @throws LicenseException         if the key is invalid or activation fails
+	 * @throws IllegalArgumentException if key is null or too short
+	 * @see #activateLicense()
+	 */
+	public static void activateLicense(String key) throws LicenseException, IllegalArgumentException {
+		try {
+			LexActivator.SetProductData(PRODUCT_DATA);
+			LexActivator.SetProductId(PRODUCT_ID, LexActivator.LA_USER);
+			LexActivator.SetLicenseKey(key);
+			LexActivator.SetReleaseVersion(VERSION);
+
+			// Silent first-time activation for telemetry
+			int status = LexActivator.ActivateLicense();
+			if (status != LexActivator.LA_OK && status != LexActivator.LA_EXPIRED
+					&& status != LexActivator.LA_SUSPENDED) {
+				LexActivator.IsLicenseGenuine(); // fallback if offline
+			}
+
+			status = LexActivator.IsLicenseGenuine();
+			if (status != LexActivator.LA_OK) {
+				System.out.println("jnetpcap Community Edition – running offline/community mode");
+				return;
+			}
+
+			// === SAFE: feature may not exist on community key ===
+			boolean isCommercial = License.isFeatureEnabled("commercial-use");
+			if (isCommercial) {
+				boolean isUnlimited = License.isFeatureEnabled("unlimited-activations");
+				if (isUnlimited) {
+					System.out.println("jnetpcap Commercial Edition – Unlimited activations");
+				} else {
+					long allowed = LexActivator.GetLicenseAllowedActivations();
+					System.out.println("jnetpcap Commercial Edition – " + allowed + " seats");
+				}
+			} else {
+				System.out.println("jnetpcap Community Edition (Apache 2.0 + telemetry)");
+			}
+
+		} catch (LexActivatorException e) {
+			throw new LicenseException(e);
+		}
+
+	}
 
 	/**
 	 * An interface which provides a hook into Pcap initialization process. Any
@@ -220,9 +298,9 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		/**
 		 * Platform dependent list of shared-object extensions to use while attempting
 		 * to load the native library. This property, combined with the
-		 * 'com.slytechs.sdk.jnetpcap.libpcap.names' property and 'java.library.path' propeties are
-		 * used to try and load native library by building absolute file path to each
-		 * named library. The default is <code>so,dylib</code> extensions.
+		 * 'com.slytechs.sdk.jnetpcap.libpcap.names' property and 'java.library.path'
+		 * propeties are used to try and load native library by building absolute file
+		 * path to each named library. The default is <code>so,dylib</code> extensions.
 		 */
 		String SYSTEM_PROPERTY_SO_EXTENSIONS = "com.slytechs.sdk.jnetpcap.so.extensions";
 
@@ -1719,7 +1797,7 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	protected final MemorySegment POINTER_TO_POINTER3 = Arena.ofAuto().allocate(ADDRESS);
 
 	/** The pcap handle or pcap_t * address. */
-	private final MemorySegment pcapHandle;
+	protected final MemorySegment pcapHandle;
 
 	/**
 	 * flag which indicates open/closed status, if true, the pcap address is not
@@ -1744,6 +1822,14 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		this.name = name;
 		this.pcapHeaderABI = abi;
 		this.pcapHandle = requireNonNull(pcapHandle, "pcapHandle"); //$NON-NLS-1$
+
+		if (!License.isActivated())
+			throw new LicenseException(
+					"License not activated. Call Pcap.activateLicense() before opening captures.");
+	}
+
+	public MemorySegment handle() {
+		return pcapHandle;
 	}
 
 	/**

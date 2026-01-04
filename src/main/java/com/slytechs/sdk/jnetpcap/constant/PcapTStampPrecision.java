@@ -35,10 +35,10 @@ import java.util.function.IntSupplier;
 public enum PcapTStampPrecision implements IntSupplier {
 
 	/** use timestamps with microsecond precision, default. */
-	TSTAMP_PRECISION_MICRO(1000_000),
+	MICRO(1000_000),
 
 	/** use timestamps with nanosecond precision. */
-	TSTAMP_PRECISION_NANO(1000_000_000),;
+	NANO(1000_000_000),;
 
 	/** use timestamps with microsecond precision, default. */
 	public static final int PCAP_TSTAMP_PRECISION_MICRO = 0;

@@ -142,6 +142,9 @@ public enum PcapDlt implements IntSupplier {
 	SYMANTEC_FIREWALL(99),
 
 	/** The C_ hdlc. */
+	RAW_ALT(101),
+
+	/** The C_ hdlc. */
 	C_HDLC(104),
 
 	/** The IEE e802_11. */
@@ -350,6 +353,9 @@ public enum PcapDlt implements IntSupplier {
 
 	/** The LINU x_ lapd. */
 	LINUX_LAPD(177),
+
+	/** Linux cooked-mode capture v2. */
+	LINUX_SLL2(276),
 
 	/** Event Tracing for Windows messages. */
 	ETW(290),
@@ -686,6 +692,9 @@ public enum PcapDlt implements IntSupplier {
 
 	/** The Constant DLT_LINUX_LAPD. */
 	public final static int DLT_LINUX_LAPD = 177;
+
+	/** Linux cooked-mode capture v2. */
+	public final static int DLT_SLL2 = 276;
 
 	/** Event Tracing for Windows messages. */
 	public final static int DLT_ETW = 290;

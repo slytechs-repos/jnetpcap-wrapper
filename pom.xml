@@ -29,6 +29,10 @@
     </dependencyManagement>
     
     <dependencies>
+       <dependency>
+		    <groupId>com.slytechs.sdk</groupId>
+		    <artifactId>sdk-common</artifactId>
+		</dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -39,6 +43,10 @@
 	        <artifactId>junit-platform-suite</artifactId>
 	        <scope>test</scope>
 	    </dependency>
+        <dependency>
+		    <groupId>com.cryptlex.lexactivator</groupId>
+		    <artifactId>lexactivator</artifactId>
+		</dependency>
     </dependencies>
 
     <build>
