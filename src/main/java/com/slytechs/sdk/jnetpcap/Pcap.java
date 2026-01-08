@@ -26,10 +26,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cryptlex.lexactivator.LexActivator;
 import com.cryptlex.lexactivator.LexActivatorException;
@@ -62,6 +66,7 @@ import static java.lang.foreign.ValueLayout.*;
  * @author repos@slytechs.com
  */
 public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
+	private static final Logger logger = LoggerFactory.getLogger(Pcap.class);
 
 	private static final String PRODUCT_ID = "019a99d8-73fc-7921-ad68-d1b446253220";
 	private static final String PRODUCT_DATA = "MzRCOTU4RjdBNEMzOUE4MTAyODY0QTYyMDI3MjAzQTM=.GX6/K+PTVYi/IAAfiUQbMibbEt0byq2RXGOjl43FPrY6ccjRzW/Zn8s0tPYu99EMA/NW98U0qlzKdNCDOmYcUNQW46gRKecUjiE0/K10llgAxWluDzNlOoeDP8zz/c/HiFoOdAQUysfKJBb79Fs/QZec4DpFUqZoutwb2fnuO+6YxMtEPoQqyRNrFEE2T4JmK1xiXTwhPL9U38Q7bP/EtMn/IDoumcLTfdMxfW2jOjZDPWNBYi/SYeu1kaJdYBNA/sZ7IVDvha6fIOz7vs4tdNxilnX02T458RU8d482BYtrYrWh6sp0m1Y8wYn5ieZvIZ+ME/F3aCgh9Ff5CRj3oj8Y+e7ysagtK5KebT0yGkQg6iHSwbl/GQpebkAGGsWySU3RXqIrdOeGbuvWbb2EooG0hB43HISRfdm3KyTbj/3Ia/St7TSxV8DEbQGzN62vsVjZ6Ka54iDMXFfy4SPTeZ5khZDIa88Bj0TcPNsTv7ddMeaikPvF+shIba+PAb4U7OlYRWqhOvBTJvVj3jkc1Ae1exCQVH3z+fcJwDi27hOAfIFJXg6X/HKXkDZx4FSNvd3y9AiU92s3WThmFJv2IYumMGrK+ZvLi7XzAaH4KglQeEu1YgZk1Ddj5UB6pZlu0QsyzW69u6b97xMrm42aIsBezmmM8ONDr79Svn3/QxHV5myDGzR11OTsrJQKUwMtddJVNdXuXKQUKaMUx6Lzg5n88OOoD7eiy7YEa7MFs0rjYrKid/G1OFYgo+9VSRPjOf6OSzky9hy2ZXeF1tD3V36DQ1Dv8caGNOS2fYt2LjWcbuG7xTusOjb55qjlkOus";
@@ -107,11 +112,14 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		cfg.productName = "jNetPcap SDK";
 		cfg.version = VERSION;
 
-		String key = new KeyResolver()
-				.findLicenseKey(cfg);
+		String key = new KeyResolver().findLicenseKey(cfg);
 
-		if (key == null)
+		if (key == null) {
+			logger.warn("No commercial license key found – falling back to Community Edition");
 			key = COMMUNITY_KEY;
+		} else {
+			logger.debug("License key successfully resolved");
+		}
 
 		activateLicense(key);
 	}
@@ -143,6 +151,11 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @see #activateLicense()
 	 */
 	public static void activateLicense(String key) throws LicenseException, IllegalArgumentException {
+		Objects.requireNonNull(key, "license key");
+		if (key.length() < 20) {
+			throw new IllegalArgumentException("License key is too short (minimum 20 characters)");
+		}
+
 		try {
 			LexActivator.SetProductData(PRODUCT_DATA);
 			LexActivator.SetProductId(PRODUCT_ID, LexActivator.LA_USER);
@@ -158,28 +171,29 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 
 			status = LexActivator.IsLicenseGenuine();
 			if (status != LexActivator.LA_OK) {
-				System.out.println("jnetpcap Community Edition – running offline/community mode");
+				logger.warn("License activation failed (status: {}) – running in community mode", status);
+				logger.info("jnetpcap Community Edition (Apache 2.0 + telemetry) activated");
 				return;
 			}
 
-			// === SAFE: feature may not exist on community key ===
+			// === Commercial license detected ===
 			boolean isCommercial = License.isFeatureEnabled("commercial-use");
 			if (isCommercial) {
 				boolean isUnlimited = License.isFeatureEnabled("unlimited-activations");
 				if (isUnlimited) {
-					System.out.println("jnetpcap Commercial Edition – Unlimited activations");
+					logger.info("jnetpcap Commercial Edition activated – Unlimited activations");
 				} else {
 					long allowed = LexActivator.GetLicenseAllowedActivations();
-					System.out.println("jnetpcap Commercial Edition – " + allowed + " seats");
+					logger.info("jnetpcap Commercial Edition activated – {} seats", allowed);
 				}
 			} else {
-				System.out.println("jnetpcap Community Edition (Apache 2.0 + telemetry)");
+				logger.info("jnetpcap Community Edition (Apache 2.0 + telemetry) activated");
 			}
 
 		} catch (LexActivatorException e) {
+			logger.error("License activation failed: {}", e.getMessage(), e);
 			throw new LicenseException(e);
 		}
-
 	}
 
 	/**

@@ -47,6 +47,12 @@
 		    <groupId>com.cryptlex.lexactivator</groupId>
 		    <artifactId>lexactivator</artifactId>
 		</dependency>
+        <!-- Logging facade dependencies -->
+        <dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+            <version>2.0.17</version>  <!-- Latest stable as of early 2026 -->
+		</dependency>
     </dependencies>
 
     <build>

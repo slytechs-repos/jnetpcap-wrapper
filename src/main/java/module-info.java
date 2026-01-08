@@ -143,6 +143,7 @@ module com.slytechs.sdk.jnetpcap {
 	exports com.slytechs.sdk.jnetpcap.internal;
 	
 	requires com.slytechs.sdk.common;
+	requires org.slf4j;
 
 	requires lexactivator;
 }
