@@ -133,4 +133,13 @@ public enum NativeABI {
 
 		return bsdOverride || (NativeABI.current() == NativeABI.MACOS64);
 	}
+	
+	/**
+	 * Checks if is Windows ABI.
+	 *
+	 * @return true, if is Windows ABI
+	 */
+	public static boolean isWindowsAbi() {
+	    return NativeABI.current() == NativeABI.WIN64;
+	}
 }

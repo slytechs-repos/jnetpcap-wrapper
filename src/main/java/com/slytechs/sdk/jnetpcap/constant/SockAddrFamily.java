@@ -80,10 +80,10 @@ public enum SockAddrFamily implements IntSupplier {
 	AX25(Posix.AF_AX25, Bsd.UNDEFINED),
 
 	/** The ipx. */
-	IPX(Posix.AF_IPX, Bsd.AF_IPX, Sizeof.IPX),
+	IPX(Posix.AF_IPX, Bsd.AF_IPX, Windows.AF_IPX, Sizeof.IPX),
 
 	/** The appletalk. */
-	APPLETALK(Posix.AF_APPLETALK, Bsd.AF_APPLETALK),
+	APPLETALK(Posix.AF_APPLETALK, Bsd.AF_APPLETALK, Windows.AF_APPLETALK),
 
 	/** The netrom. */
 	NETROM(Posix.AF_NETROM, Bsd.UNDEFINED),
@@ -98,7 +98,7 @@ public enum SockAddrFamily implements IntSupplier {
 	X25(Posix.AF_AX25, Bsd.UNDEFINED),
 
 	/** The inet6. */
-	INET6(Posix.AF_INET6, Bsd.AF_INET6, Sizeof.INET6),
+	INET6(Posix.AF_INET6, Bsd.AF_INET6, Windows.AF_INET6, Sizeof.INET6),
 
 	/** The rose. */
 	ROSE(Posix.AF_ROSE, Bsd.UNDEFINED),
@@ -134,7 +134,7 @@ public enum SockAddrFamily implements IntSupplier {
 	SNA(Posix.AF_SNA, Bsd.AF_SNA),
 
 	/** The irda. */
-	IRDA(Posix.AF_IRDA, Bsd.UNDEFINED),
+	IRDA(Posix.AF_IRDA, Bsd.UNDEFINED, Windows.AF_IRDA),
 
 	/** The pppox. */
 	PPPOX(Posix.AF_PPPOX, Bsd.UNDEFINED),
@@ -564,6 +564,140 @@ public enum SockAddrFamily implements IntSupplier {
 	}
 
 	/**
+     * Windows winsock2.h AF_ constants.
+     * <p>
+     * Windows uses a completely different numbering scheme from POSIX/Linux for
+     * several address families. The most impactful differences for network
+     * interface address parsing are:
+     * <ul>
+     *   <li>{@code AF_INET6} = 23 on Windows vs 10 on Linux</li>
+     *   <li>{@code AF_IPX}   =  6 on Windows vs  4 on Linux</li>
+     *   <li>{@code AF_IRDA}  = 26 on Windows vs 23 on Linux</li>
+     * </ul>
+     * Values not listed here are either identical to POSIX or irrelevant
+     * to pcap address family parsing.
+     * </p>
+     *
+     * @see <a href="https://learn.microsoft.com/en-us/windows/win32/api/winsock2/ns-winsock2-sockaddr">
+     *      winsock2.h sockaddr</a>
+     */
+    @SuppressWarnings("unused")
+    private final class Windows {
+
+        /** Undefined - not a valid Windows AF constant. */
+        public static final int UNDEFINED = -1;
+
+        /** Unspecified. */
+        public static final int AF_UNSPEC = 0;
+
+        /** Local to host (Unix domain sockets). Same as POSIX. */
+        public static final int AF_UNIX = 1;
+
+        /** Internet IP Protocol (IPv4). Same as POSIX. */
+        public static final int AF_INET = 2;
+
+        /** Arpanet IMP addresses. */
+        public static final int AF_IMPLINK = 3;
+
+        /** PUP protocols (e.g. BSP). */
+        public static final int AF_PUP = 4;
+
+        /** MIT CHAOS protocols. */
+        public static final int AF_CHAOS = 5;
+
+        /** XEROX NS protocols / Novell IPX - note: differs from POSIX AF_IPX (4). */
+        public static final int AF_NS = 6;
+
+        /** Novell IPX - same value as AF_NS on Windows. */
+        public static final int AF_IPX = 6;
+
+        /** ISO protocols. */
+        public static final int AF_ISO = 7;
+
+        /** OSI (alias for AF_ISO). */
+        public static final int AF_OSI = 7;
+
+        /** European Computer Manufacturers. */
+        public static final int AF_ECMA = 8;
+
+        /** Datakit protocols. */
+        public static final int AF_DATAKIT = 9;
+
+        /** CCITT protocols (X.25 etc). */
+        public static final int AF_CCITT = 10;
+
+        /** IBM SNA - note: differs from POSIX AF_SNA (22). */
+        public static final int AF_SNA = 11;
+
+        /** DECnet. */
+        public static final int AF_DECnet = 12;
+
+        /** DEC Direct data link interface. */
+        public static final int AF_DLI = 13;
+
+        /** LAT. */
+        public static final int AF_LAT = 14;
+
+        /** NSC Hyperchannel. */
+        public static final int AF_HYLINK = 15;
+
+        /** AppleTalk DDP - note: differs from POSIX AF_APPLETALK (5). */
+        public static final int AF_APPLETALK = 16;
+
+        /** NetBIOS-style address. */
+        public static final int AF_NETBIOS = 17;
+
+        /** VoiceView. */
+        public static final int AF_VOICEVIEW = 18;
+
+        /** Firefox protocols. */
+        public static final int AF_FIREFOX = 19;
+
+        /** Somebody is using this! */
+        public static final int AF_UNKNOWN1 = 20;
+
+        /** Banyan. */
+        public static final int AF_BAN = 21;
+
+        /** Native ATM services. */
+        public static final int AF_ATM = 22;
+
+        /**
+         * IPv6 - note: differs from POSIX AF_INET6 (10).
+         * This mismatch causes Windows AF_INET6 addresses to be
+         * misidentified as AF_IRDA (23) when using Linux constants.
+         */
+        public static final int AF_INET6 = 23;
+
+        /** Microsoft Wolfpack (cluster). */
+        public static final int AF_CLUSTER = 24;
+
+        /** IEEE 1284.4 WG AF. */
+        public static final int AF_12844 = 25;
+
+        /** IrDA - note: differs from POSIX AF_IRDA (23). */
+        public static final int AF_IRDA = 26;
+
+        /** Network Designers OSI and gateway. */
+        public static final int AF_NETDES = 28;
+
+        /** TCN process. */
+        public static final int AF_TCNPROCESS = 29;
+
+        /** TCN message. */
+        public static final int AF_TCNMESSAGE = 30;
+
+        /** ICLFXBM. */
+        public static final int AF_ICLFXBM = 31;
+
+        /** Bluetooth RFCOMM / L2CAP protocols. */
+        public static final int AF_BTH = 32;
+
+        /** Link layer interface. */
+        public static final int AF_LINK = 33;
+    }
+	
+	/**
 	 * Looks up a socket address family constant using a platform-specific numeric
 	 * value. The lookup considers the current platform (BSD vs POSIX) when matching
 	 * values.
@@ -584,20 +718,32 @@ public enum SockAddrFamily implements IntSupplier {
 	 * @return the optional
 	 */
 	private static Optional<SockAddrFamily> mapUsingAbi(int family, NativeABI abi) {
-		boolean isBsd = NativeABI.isBsdAbi();
+	    if (NativeABI.isBsdAbi()) {
+	        for (SockAddrFamily s : values())
+	            if (s.bsdId == family)
+	                return Optional.of(s);
 
-		for (SockAddrFamily s : values()) {
-			if (isBsd && (s.bsdId == family)) {
-				return Optional.of(s);
+	    } else if (NativeABI.isWindowsAbi()) {
+	        for (SockAddrFamily s : values()) {
+	            int winId = (s.windowsId != UNDEFINED_WINDOWS_ID) ? s.windowsId : s.posixId;
+	            if (winId == family)
+	                return Optional.of(s);
+	        }
 
-			} else if (!isBsd && (s.posixId == family)) {
-				return Optional.of(s);
-			}
+	    } else {
+	        for (SockAddrFamily s : values())
+	            if (s.posixId == family)
+	                return Optional.of(s);
+	    }
 
-		}
-
-		return Optional.empty();
+	    return Optional.empty();
 	}
+	
+	/** Sentinel value meaning: fall back to posixId on Windows. */
+	private static final int UNDEFINED_WINDOWS_ID = -1;
+
+	/** The Windows/winsock2.h AF value. */
+	private final int windowsId;
 
 	/** The linux AF value. */
 	private final int posixId;
@@ -618,9 +764,10 @@ public enum SockAddrFamily implements IntSupplier {
 	 * @param bsdFamilyId   the AF constant assigned for BSD style sockets
 	 */
 	SockAddrFamily(int posixFamilyId, int bsdFamilyId) {
-		this.posixId = posixFamilyId;
-		this.bsdId = bsdFamilyId;
-		this.saLen = OptionalInt.empty();
+	    this.posixId = posixFamilyId;
+	    this.bsdId = bsdFamilyId;
+	    this.windowsId = UNDEFINED_WINDOWS_ID;
+	    this.saLen = OptionalInt.empty();
 	}
 
 	/**
@@ -631,10 +778,19 @@ public enum SockAddrFamily implements IntSupplier {
 	 * @param saLen         the sa len
 	 */
 	SockAddrFamily(int posixFamilyId, int bsdFamilyId, int saLen) {
-		this.posixId = posixFamilyId;
-		this.bsdId = bsdFamilyId;
-		this.saLen = OptionalInt.of(saLen);
+	    this.posixId = posixFamilyId;
+	    this.bsdId = bsdFamilyId;
+	    this.windowsId = UNDEFINED_WINDOWS_ID;
+	    this.saLen = OptionalInt.of(saLen);
 	}
+	
+	SockAddrFamily(int posixFamilyId, int bsdFamilyId, int windowsId, int saLen) {
+	    this.posixId = posixFamilyId;
+	    this.bsdId = bsdFamilyId;
+	    this.windowsId = windowsId;
+	    this.saLen = OptionalInt.of(saLen);
+	}
+
 
 	/**
 	 * Checks if a network interface (PcapIf) has an address of this family type.
@@ -656,10 +812,11 @@ public enum SockAddrFamily implements IntSupplier {
 	 */
 	@Override
 	public int getAsInt() {
-		boolean isBsd = NativeABI.isBsdAbi();
-		return isBsd
-				? bsdId
-				: posixId;
+	    if (NativeABI.isBsdAbi())
+	        return bsdId;
+	    if (NativeABI.isWindowsAbi())
+	        return (windowsId != UNDEFINED_WINDOWS_ID) ? windowsId : posixId;
+	    return posixId;
 	}
 
 	/**
@@ -670,21 +827,15 @@ public enum SockAddrFamily implements IntSupplier {
 	 * @return true if the value matches this family on the current platform
 	 */
 	public boolean isMatch(int family) {
-		boolean isBsd = NativeABI.isBsdAbi();
-
-		for (SockAddrFamily s : values()) {
-			if (isBsd && (s.bsdId == family)) {
-				return true;
-
-			} else if (!isBsd && (s.posixId == family)) {
-				return true;
-			}
-
-		}
-
-		return false;
+	    if (NativeABI.isBsdAbi())
+	        return bsdId == family;
+	    if (NativeABI.isWindowsAbi()) {
+	        int winId = (windowsId != UNDEFINED_WINDOWS_ID) ? windowsId : posixId;
+	        return winId == family;
+	    }
+	    return posixId == family;
 	}
-
+	
 	/**
 	 * Returns the total length of the socket address structure for this family. The
 	 * length is platform-dependent and primarily relevant for BSD systems which
