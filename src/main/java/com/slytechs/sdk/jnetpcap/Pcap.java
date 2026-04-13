@@ -114,12 +114,10 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 
 		String key = new KeyResolver().findLicenseKey(cfg);
 
-		if (key == null) {
-			logger.warn("No commercial license key found – falling back to Community Edition");
-			key = COMMUNITY_KEY;
-		} else {
-			logger.debug("License key successfully resolved");
-		}
+		if (key == null)
+			key = COMMUNITY_KEY; // embedded community key — silent, this is the expected default
+		else
+			logger.debug("License key resolved");
 
 		activateLicense(key);
 	}
@@ -150,51 +148,46 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 	 * @throws IllegalArgumentException if key is null or too short
 	 * @see #activateLicense()
 	 */
-	public static void activateLicense(String key) throws LicenseException, IllegalArgumentException {
-		Objects.requireNonNull(key, "license key");
-		if (key.length() < 20) {
-			throw new IllegalArgumentException("License key is too short (minimum 20 characters)");
-		}
-
-		try {
-			LexActivator.SetProductData(PRODUCT_DATA);
-			LexActivator.SetProductId(PRODUCT_ID, LexActivator.LA_USER);
-			LexActivator.SetLicenseKey(key);
-			LexActivator.SetReleaseVersion(VERSION);
-
-			// Silent first-time activation for telemetry
-			int status = LexActivator.ActivateLicense();
-			if (status != LexActivator.LA_OK && status != LexActivator.LA_EXPIRED
-					&& status != LexActivator.LA_SUSPENDED) {
-				LexActivator.IsLicenseGenuine(); // fallback if offline
-			}
-
-			status = LexActivator.IsLicenseGenuine();
-			if (status != LexActivator.LA_OK) {
-				logger.warn("License activation failed (status: {}) – running in community mode", status);
-				logger.info("jnetpcap Community Edition (Apache 2.0 + telemetry) activated");
-				return;
-			}
-
-			// === Commercial license detected ===
-			boolean isCommercial = License.isFeatureEnabled("commercial-use");
-			if (isCommercial) {
-				boolean isUnlimited = License.isFeatureEnabled("unlimited-activations");
-				if (isUnlimited) {
-					logger.info("jnetpcap Commercial Edition activated – Unlimited activations");
-				} else {
-					long allowed = LexActivator.GetLicenseAllowedActivations();
-					logger.info("jnetpcap Commercial Edition activated – {} seats", allowed);
-				}
-			} else {
-				logger.info("jnetpcap Community Edition (Apache 2.0 + telemetry) activated");
-			}
-
-		} catch (LexActivatorException e) {
-			logger.error("License activation failed: {}", e.getMessage(), e);
-			throw new LicenseException(e);
-		}
-	}
+    public static void activateLicense(String key) throws LicenseException, IllegalArgumentException {
+        Objects.requireNonNull(key, "license key");
+        if (key.length() < 20)
+            throw new IllegalArgumentException("License key is too short (minimum 20 characters)");
+ 
+        try {
+            LexActivator.SetProductData(PRODUCT_DATA);
+            LexActivator.SetProductId(PRODUCT_ID, LexActivator.LA_USER);
+            LexActivator.SetLicenseKey(key);
+            LexActivator.SetReleaseVersion(VERSION);
+ 
+            int status = LexActivator.ActivateLicense();
+            if (status != LexActivator.LA_OK && status != LexActivator.LA_EXPIRED
+                    && status != LexActivator.LA_SUSPENDED)
+                LexActivator.IsLicenseGenuine(); // fallback if offline
+ 
+            status = LexActivator.IsLicenseGenuine();
+            if (status != LexActivator.LA_OK) {
+                logger.warn("License activation failed (status: {}) - running Community Edition", status);
+                return;
+            }
+ 
+            if (License.isCommercial()) {
+                String licensee = License.getLicensee();
+                boolean isUnlimited = License.isFeatureEnabled("unlimited-activations");
+                if (isUnlimited)
+                    logger.info("jNetPcap Commercial Edition activated [{}]", licensee);
+                else {
+                    long seats = LexActivator.GetLicenseAllowedActivations();
+                    logger.info("jNetPcap Commercial Edition activated [{}, {} seats]", licensee, seats);
+                }
+            } else {
+                logger.info("jNetPcap Community Edition activated");
+            }
+ 
+        } catch (LexActivatorException e) {
+            logger.error("License activation failed: {}", e.getMessage(), e);
+            throw new LicenseException(e);
+        }
+    }
 
 	/**
 	 * An interface which provides a hook into Pcap initialization process. Any
@@ -1837,9 +1830,12 @@ public abstract sealed class Pcap implements AutoCloseable permits Pcap0_4 {
 		this.pcapHeaderABI = abi;
 		this.pcapHandle = requireNonNull(pcapHandle, "pcapHandle"); //$NON-NLS-1$
 
+		// Step 1: ensure activation has been attempted
+		License.ensureActivated(Pcap::activateLicense, logger);
+
+		// Step 2: verify directly with Cryptlex — no local state trusted
 		if (!License.isActivated())
-			throw new LicenseException(
-					"License not activated. Call Pcap.activateLicense() before opening captures.");
+			throw new LicenseException("License not activated.");
 	}
 
 	public MemorySegment handle() {
