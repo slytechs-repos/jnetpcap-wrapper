@@ -1,397 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2005-2026 Sly Technologies Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.slytechs.jnet.jnetpcap</groupId>
-	<artifactId>jnetpcap-wrapper</artifactId>
-	<!--  mvn versions:set -DnewVersion=_new_version_  -->
-	<version>2.3.1</version>
-	<name>jNetPcap Wrapper</name>
-	<description>A java wrapper for native LIBPCAP library and PCAP API</description>
-	<url>https://www.jnetpcap.org</url>
-	<properties>
-		<parent.project>${project.artifactId}</parent.project>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-		<jdk.version>22</jdk.version>
-		<project.build.sourceEncoding>${java.encoding}</project.build.sourceEncoding>
-		<maven.compiler.source>${jdk.version}</maven.compiler.source>
-		<maven.compiler.target>${jdk.version}</maven.compiler.target>
-		<java.preview />
-		<java.encoding>UTF-8</java.encoding>
-		<java.native>--enable-native-access=ALL-UNNAMED</java.native>
-		<groups>user-permission</groups>
-		<excludeGroups>windows-api|unix-api|linux-api</excludeGroups>
-		<gpg.keyname>0xD6D487A5</gpg.keyname>
-	</properties>
-	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-		</license>
-	</licenses>
-	<developers>
-		<developer>
-			<name>Mark Bednarczyk</name>
-			<email>mark@slytechs.com</email>
-			<organization>Sly Technlogies Inc</organization>
-			<organizationUrl>http://slytechs.com</organizationUrl>
-		</developer>
-	</developers>
-	<dependencies>
-		<!--
-		https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin  -->
-		<dependency>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-compiler-plugin</artifactId>
-			<version>3.11.0</version>
-		</dependency>
-		<!--
-		https://mvnrepository.com/artifact/org.junit.platform/junit-platform-suite-api  -->
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-suite-api</artifactId>
-			<version>1.9.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.9.1</version>
-			<scope>test</scope>
-		</dependency>
+    <parent>
+        <groupId>com.slytechs.sdk</groupId>
+        <artifactId>sdk-parent</artifactId>
+        <version>3.0.0</version>
+        <relativePath>../sdk-parent/pom.xml</relativePath>
+    </parent>
 
-	</dependencies>
-	<build>
-		<resources>
-			<resource>
-				<directory>src/main/java</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-		</resources>
-		<extensions>
-			<extension>
-				<groupId>kr.motd.maven</groupId>
-				<artifactId>os-maven-plugin</artifactId>
-				<version>1.7.0</version>
-			</extension>
-		</extensions>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
-				<configuration>
-					<source>${jdk.version}</source>
-					<target>${jdk.version}</target>
-					<release>${jdk.version}</release>
-					<enablePreview>false</enablePreview>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.7.1</version>
-			</plugin>
-			<!--  Unit test the API  -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M7</version>
-				<configuration>
-					<trimStackTrace>true</trimStackTrace>
-					<encoding>${java.encoding}</encoding>
-					<skipAfterFailureCount>1</skipAfterFailureCount>
-					<reuseForks>true</reuseForks>
-					<groups>${groups}</groups>
-					<excludedGroups>${excludeGroups}</excludedGroups>
-					<argLine> ${java.library.path.libpcap} ${java.preview}
-						${java.native} </argLine>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.4.1 </version>
-				<configuration>
-					<doctitle>Public API for ${project.name} ${project.version}</doctitle>
-					<windowtitle>Public API for ${project.name}
-						${project.version}</windowtitle>
-					<encoding>${java.encoding}</encoding>
-					<source>${jdk.version}</source>
-					<overview>${basedir}/Overview.html</overview>
-					<additionalOptions> ${java.preview} </additionalOptions>
-					<show>public</show>
-					<excludePackageNames>*.internal</excludePackageNames>
-				</configuration>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-scm-publish-plugin</artifactId>
-				<version>3.0.0</version>
-				<configuration>
-					<scmBranch>gh-pages</scmBranch>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+    <artifactId>jnetpcap-bindings</artifactId>
+    <packaging>jar</packaging>
 
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.7.0</version>
-				<extensions>true</extensions>
-				<configuration>
-					<serverId>ossrh</serverId>
-					<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-					<autoReleaseAfterClose>true</autoReleaseAfterClose>
-				</configuration>
-			</plugin>
+    <name>jNetPcap Bindings</name>
+    <description>Low-level FFM (Foreign Function and Memory) bindings for libpcap</description>
+    <url>https://github.com/slytechs-repos/jnetpcap-bindings</url>
 
+    <scm>
+        <connection>scm:git:git://github.com/slytechs-repos/jnetpcap-bindings.git</connection>
+        <developerConnection>scm:git:ssh://github.com:slytechs-repos/jnetpcap-bindings.git</developerConnection>
+        <url>https://github.com/slytechs-repos/jnetpcap-bindings</url>
+    </scm>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.slytechs.sdk</groupId>
+                <artifactId>sdk-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.slytechs.sdk</groupId>
+            <artifactId>sdk-common</artifactId>
+        </dependency>
+
+        <!-- License management -->
+        <dependency>
+            <groupId>com.cryptlex.lexactivator</groupId>
+            <artifactId>lexactivator</artifactId>
+        </dependency>
+
+        <!-- Logging facade - implementation provided by consumer -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-						<configuration>
-							<keyname>${gpg.keyname}</keyname>
-							<passphraseServerId>${gpg.keyname}</passphraseServerId>
-							<gpgArguments>
-								<arg>--pinentry-mode</arg>
-								<arg>loopback</arg>
-							</gpgArguments>
-						</configuration>
-					</execution>
-				</executions>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-surefire-plugin</artifactId>
+			    <configuration>
+			        <excludedGroups>sudo-permission</excludedGroups>
+			    </configuration>
 			</plugin>
-		</plugins>
-	</build>
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>
-				https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-		<!--  mvn clean site site:stage scm-publish:publish-scm  -->
-		<site>
-			<id>github</id>
-			<url>scm:git:git@github.com:slytechs-repos/${parent.project}.git</url>
-		</site>
-	</distributionManagement>
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>3.0.0-M7</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>2.22.0</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.4.1</version>
-				<configuration>
-					<doctitle>Public API for ${project.name} ${project.version}</doctitle>
-					<windowtitle>Public API for ${project.name}
-						${project.version}</windowtitle>
-					<testDoctitle>Test API for ${project.name}
-						${project.version}</testDoctitle>
-					<testWindowtitle>Test API for ${project.name}
-						${project.version}</testWindowtitle>
-					<encoding>${java.encoding}</encoding>
-					<source>${jdk.version}</source>
-					<overview>${basedir}/Overview.html</overview>
-					<additionalOptions> ${java.preview} </additionalOptions>
-					<excludePackageNames>*.internal</excludePackageNames>
-				</configuration>
-				<reportSets>
-					<reportSet>
-						<id>aggregate-no-fork</id>
-						<configuration>
-							<goal>aggregate-no-fork</goal>
-							<show>public</show>
-							<skip>false</skip>
-						</configuration>
-						<reports>
-							<report>javadoc</report>
-						</reports>
-					</reportSet>
-					<reportSet>
-						<id>test-aggregate-no-fork</id>
-						<configuration>
-							<goal>test-aggregate-no-fork</goal>
-							<show>private</show>
-							<skip>true</skip>
-						</configuration>
-						<reports>
-							<report>test-javadoc</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-		</plugins>
-	</reporting>
-	<organization>
-		<name>Sly Technologies Inc</name>
-		<url>http://slytechs.com</url>
-	</organization>
-	<profiles>
-		<profile>
-			<id>osx-homebrew</id>
-			<activation>
-				<os>
-					<family>mac</family>
-				</os>
-				<file>
-					<exists>/usr/local/Cellar/libpcap/${libpcap.version}</exists>
-				</file>
-			</activation>
-			<build />
-			<properties>
-				<java.library.path.libpcap.osx>
-					-Djava.library.path=/usr/local/Cellar/libpcap/${libpcap.version}/lib</java.library.path.libpcap.osx>
-				<java.library.path.libpcap>${java.library.path.libpcap.osx}</java.library.path.libpcap>
-				<excludeGroups>windows-api|linux-api</excludeGroups>
-			</properties>
-		</profile>
-		<profile>
-			<id>osx-macports</id>
-			<activation>
-				<os>
-					<family>mac</family>
-				</os>
-				<file>
-					<exists>/opt/local/lib/libpcap.dylib</exists>
-					<missing>/usr/local/Cellar/libpcap/${libpcap.version}/lib</missing>
-				</file>
-			</activation>
-			<properties>
-				<java.library.path.libpcap.osx>
-					-Djava.library.path=/opt/local/lib</java.library.path.libpcap.osx>
-				<java.library.path.libpcap>${java.library.path.libpcap.osx}</java.library.path.libpcap>
-				<excludeGroups>windows-api|linux-api</excludeGroups>
-			</properties>
-		</profile>
-		<profile>
-			<id>linux-x86</id>
-			<activation>
-				<os>
-					<name>Linux</name>
-					<arch>x86</arch>
-				</os>
-			</activation>
-			<properties>
-				<java.library.path.libpcap.linux>
-					-Djava.library.path=/usr/lib/x86-linux-gnu</java.library.path.libpcap.linux>
-				<java.library.path.libpcap>${java.library.path.libpcap.linux}</java.library.path.libpcap>
-				<excludeGroups>windows-api</excludeGroups>
-			</properties>
-		</profile>
-		<profile>
-			<id>linux-amd64</id>
-			<activation>
-				<os>
-					<name>Linux</name>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<properties>
-				<java.library.path.libpcap.linux64>
-					-Djava.library.path=/usr/lib/x86_64-linux-gnu</java.library.path.libpcap.linux64>
-				<java.library.path.libpcap>${java.library.path.libpcap.linux64}</java.library.path.libpcap>
-				<excludeGroups>windows-api</excludeGroups>
-			</properties>
-		</profile>
-		<profile>
-			<id>linux-x86_64</id>
-			<activation>
-				<os>
-					<name>Linux</name>
-					<arch>x86_64</arch>
-				</os>
-			</activation>
-			<properties>
-				<java.library.path.libpcap.linux64>
-					-Djava.library.path=/usr/lib/x86_64-linux-gnu</java.library.path.libpcap.linux64>
-				<java.library.path.libpcap>${java.library.path.libpcap.linux64}</java.library.path.libpcap>
-				<excludeGroups>windows-api</excludeGroups>
-			</properties>
-		</profile>
-		<profile>
-			<id>windows-x86_64</id>
-			<activation>
-				<os>
-					<family>Windows</family>
-					<arch>x86_64</arch>
-				</os>
-			</activation>
-			<properties>
-				<java.library.path.libpcap.windows64>
-					-Djava.library.path="C:\\Windows\\SysWOW64"</java.library.path.libpcap.windows64>
-				<java.library.path.libpcap>
-					${java.library.path.libpcap.windows64}</java.library.path.libpcap>
-				<excludeGroups>unix-api|linux-api</excludeGroups>
-			</properties>
-		</profile>
-		<profile>
-			<id>windows-x86</id>
-			<activation>
-				<os>
-					<family>Windows</family>
-					<arch>x86</arch>
-				</os>
-			</activation>
-			<properties>
-				<java.library.path.libpcap.windows>-Djava.library.path="C:\\Windows\\Program
-					Files"</java.library.path.libpcap.windows>
-				<java.library.path.libpcap>${java.library.path.libpcap.windows}</java.library.path.libpcap>
-				<excludeGroups>unix-api|linux-api</excludeGroups>
-			</properties>
-		</profile>
-	</profiles>
-	<issueManagement>
-		<system>Github Issue Tracking</system>
-		<url>https://github.com/slytechs-repos/${parent.project}/issues</url>
-	</issueManagement>
-	<scm>
-		<connection>
-			scm:git:git://github.com/slytechs-repos/${parent.project}.git</connection>
-		<developerConnection>
-			scm:git:ssh:git://github.com/slytechs-repos/${parent.project}.git</developerConnection>
-		<url>https://github.com/slytechs-repos/${parent.project}</url>
-		<tag>jnetpcap-wrapper-${project.version}</tag>
-	</scm>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
