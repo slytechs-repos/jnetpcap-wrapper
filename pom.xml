@@ -22,7 +22,7 @@
     <parent>
         <groupId>com.slytechs.sdk</groupId>
         <artifactId>sdk-parent</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0</version>
         <relativePath>../sdk-parent/pom.xml</relativePath>
     </parent>
 
