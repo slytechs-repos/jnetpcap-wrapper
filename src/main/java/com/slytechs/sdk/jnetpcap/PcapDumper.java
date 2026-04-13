@@ -163,7 +163,7 @@ public class PcapDumper implements AutoCloseable, Flushable {
 	 * @since libpcap 0.4
 	 */
 	public void dump(MemorySegment header, MemorySegment packet) throws IOException {
-		pcap_dump.invokeVoid(header, packet, pcap_dumper_ptr);
+		pcap_dump.invokeVoid(pcap_dumper_ptr, header, packet);
 	}
 
 	/**
