@@ -1,58 +1,90 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2005-2026 Sly Technologies Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
-    <groupId>com.slytechs.sdk</groupId>
+
+    <parent>
+        <groupId>com.slytechs.sdk</groupId>
+        <artifactId>sdk-parent</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../sdk-parent/pom.xml</relativePath>
+    </parent>
+
     <artifactId>jnetpcap-bindings</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
     <name>jNetPcap Bindings</name>
-    <description>libpcap FFM bindings for Java</description>
-    
-    <properties>
-        <maven.compiler.source>22</maven.compiler.source>
-        <maven.compiler.target>22</maven.compiler.target>
-        <maven.compiler.release>22</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <description>Low-level FFM (Foreign Function and Memory) bindings for libpcap</description>
+    <url>https://github.com/slytechs-repos/jnetpcap-bindings</url>
+
+    <scm>
+        <connection>scm:git:git://github.com/slytechs-repos/jnetpcap-bindings.git</connection>
+        <developerConnection>scm:git:ssh://github.com:slytechs-repos/jnetpcap-bindings.git</developerConnection>
+        <url>https://github.com/slytechs-repos/jnetpcap-bindings</url>
+    </scm>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.slytechs.sdk</groupId>
                 <artifactId>sdk-bom</artifactId>
-                <version>3.0.0-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <dependencies>
-       <dependency>
-		    <groupId>com.slytechs.sdk</groupId>
-		    <artifactId>sdk-common</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.slytechs.sdk</groupId>
+            <artifactId>sdk-common</artifactId>
+        </dependency>
+
+        <!-- License management -->
+        <dependency>
+            <groupId>com.cryptlex.lexactivator</groupId>
+            <artifactId>lexactivator</artifactId>
+        </dependency>
+
+        <!-- Logging facade - implementation provided by consumer -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-	        <groupId>org.junit.platform</groupId>
-	        <artifactId>junit-platform-suite</artifactId>
-	        <scope>test</scope>
-	    </dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
-		    <groupId>com.cryptlex.lexactivator</groupId>
-		    <artifactId>lexactivator</artifactId>
-		</dependency>
-        <!-- Logging facade dependencies -->
-        <dependency>
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>slf4j-api</artifactId>
-            <version>2.0.17</version>  <!-- Latest stable as of early 2026 -->
-		</dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -66,14 +98,14 @@
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
-				<groupId>org.sonatype.central</groupId>
-				<artifactId>central-publishing-maven-plugin</artifactId>
-				<version>0.9.0</version>  <!-- Latest as of early 2026 -->
-				<extensions>true</extensions>
-				<configuration>
-					<publishingServerId>central</publishingServerId>
-				</configuration>
-			</plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
+
 </project>
